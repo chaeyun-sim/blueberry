@@ -3,14 +3,15 @@ import { PageHeader } from "@/components/PageHeader";
 import { StatusBadge, CommissionStatus } from "@/components/StatusBadge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ClipboardList, Clock, Truck, CheckCircle2, AlertTriangle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ClipboardList, Clock, Truck, CheckCircle2, AlertTriangle, PlusCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const statusCards: { status: CommissionStatus; icon: typeof ClipboardList; count: number; label: string; description: string }[] = [
-  { status: "received", icon: ClipboardList, count: 3, label: "대기", description: "새로 접수된 의뢰" },
-  { status: "working", icon: Clock, count: 5, label: "작업중", description: "진행 중인 작업" },
-  { status: "complete", icon: CheckCircle2, count: 12, label: "완료", description: "완료된 의뢰" },
-  { status: "delivered", icon: Truck, count: 2, label: "납품", description: "납품 완료된 의뢰" },
+const statusCards: { status: CommissionStatus; icon: typeof ClipboardList; count: number; label: string }[] = [
+  { status: "received", icon: ClipboardList, count: 3, label: "대기" },
+  { status: "working", icon: Clock, count: 5, label: "작업중" },
+  { status: "complete", icon: CheckCircle2, count: 12, label: "완료" },
+  { status: "delivered", icon: Truck, count: 2, label: "납품" },
 ];
 
 const urgentCommissions = [
@@ -31,7 +32,12 @@ const Dashboard = () => {
 
   return (
     <AppLayout>
-      <PageHeader title="대시보드" description="의뢰 현황을 한눈에 확인하세요" />
+      <PageHeader title="대시보드" description="의뢰 현황을 한눈에 확인하세요">
+        <Button onClick={() => navigate("/commissions/new")} className="gap-2">
+          <PlusCircle className="h-4 w-4" />
+          새 의뢰
+        </Button>
+      </PageHeader>
 
       {/* Status Count Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -43,7 +49,6 @@ const Dashboard = () => {
                 <StatusBadge status={item.status} />
               </div>
               <p className="text-3xl font-display font-bold animate-count-up">{item.count}</p>
-              <p className="text-sm text-muted-foreground mt-1">{item.description}</p>
             </CardContent>
           </Card>
         ))}

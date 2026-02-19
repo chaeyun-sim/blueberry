@@ -1,4 +1,4 @@
-import { LayoutDashboard, ClipboardList, PlusCircle, Music, Settings } from "lucide-react";
+import { LayoutDashboard, ClipboardList, Music, Settings } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import {
@@ -17,7 +17,6 @@ import {
 const mainNav = [
   { title: "대시보드", url: "/", icon: LayoutDashboard },
   { title: "의뢰 목록", url: "/commissions", icon: ClipboardList },
-  { title: "의뢰 등록", url: "/commissions/new", icon: PlusCircle },
   { title: "악보 관리", url: "/scores", icon: Music },
 ];
 
