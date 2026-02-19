@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Upload, Sparkles, ImageIcon, X, Plus } from "lucide-react";
+import { Upload, Sparkles, ImageIcon, X, Plus, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const INSTRUMENT_OPTIONS = [
@@ -74,6 +74,11 @@ const CommissionRegister = () => {
 
   return (
     <AppLayout>
+      <div className="mb-6">
+        <Button variant="ghost" className="gap-2 text-muted-foreground hover:bg-foreground/5" onClick={() => navigate(-1)}>
+          <ArrowLeft className="h-4 w-4" /> 뒤로
+        </Button>
+      </div>
       <PageHeader title="의뢰 등록" description="카톡 캡처를 업로드하면 AI가 자동으로 분석합니다" />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -102,10 +107,7 @@ const CommissionRegister = () => {
                     <p className="font-medium">이미지를 드래그하거나 클릭하여 업로드</p>
                     <p className="text-sm text-muted-foreground mt-1">카카오톡 캡처 이미지를 붙여넣을 수도 있습니다</p>
                   </div>
-                  <Button variant="outline" className="gap-2">
-                    <Upload className="h-4 w-4" />
-                    파일 선택
-                  </Button>
+                  <p className="text-sm text-muted-foreground underline underline-offset-2 cursor-pointer hover:text-foreground transition-colors">파일 선택</p>
                 </>
               )}
             </div>
@@ -113,7 +115,8 @@ const CommissionRegister = () => {
               <Button
                 onClick={handleAnalyze}
                 disabled={isAnalyzing}
-                className="gap-2 bg-gradient-to-r from-primary to-accent text-primary-foreground hover:opacity-90"
+                className="gap-2 text-white border-0 hover:opacity-90"
+                style={{ background: "linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888, #8a3ab9, #4c68d7, #6b5ce7)" }}
               >
                 <Sparkles className="h-4 w-4" />
                 {isAnalyzing ? "AI 분석 중..." : "AI로 분석하기"}
@@ -209,7 +212,6 @@ const CommissionRegister = () => {
               </div>
               <div className="flex gap-3 pt-2">
                 <Button className="flex-1">의뢰 등록</Button>
-                <Button variant="outline" onClick={() => navigate(-1)}>취소</Button>
               </div>
             </div>
           </CardContent>

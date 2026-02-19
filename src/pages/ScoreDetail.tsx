@@ -64,11 +64,11 @@ const ScoreDetail = () => {
 
       <Card className="border-border/50">
         <CardContent className="p-5">
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {scorePages.map((page) => (
               <div
                 key={page}
-                className="min-h-[500px] border border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-3 bg-muted/30"
+                className="aspect-[3/4] border border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-3 bg-muted/30"
               >
                 <FileImage className="h-12 w-12 text-muted-foreground" />
                 <p className="text-sm text-muted-foreground">악보 {page}페이지</p>
