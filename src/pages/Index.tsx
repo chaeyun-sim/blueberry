@@ -18,10 +18,10 @@ import todaySunsetImg from "@/assets/today-sunset.jpg";
 import todayNightImg from "@/assets/today-night.png";
 
 function getTodayBg(hour: number) {
-  if (hour >= 5 && hour < 11) return todayDawnImg;    // 새벽~아침
-  if (hour >= 11 && hour < 17) return todayDayImg;    // 한낮
-  if (hour >= 17 && hour < 20) return todaySunsetImg;  // 선셋
-  return todayNightImg;                                 // 밤
+  if (hour >= 4 && hour < 11) return todayDawnImg;
+  if (hour >= 11 && hour < 15) return todayDayImg;
+  if (hour >= 15 && hour < 19) return todaySunsetImg;
+  return todayNightImg;
 }
 
 // ── Data ──
