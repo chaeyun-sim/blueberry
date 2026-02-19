@@ -8,7 +8,7 @@ import CommissionList from "./pages/CommissionList";
 import CommissionRegister from "./pages/CommissionRegister";
 import CommissionDetail from "./pages/CommissionDetail";
 import ScoreList from "./pages/ScoreList";
-import Settings from "./pages/Settings";
+import ScoreDetail from "./pages/ScoreDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,10 +22,10 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/commissions" element={<CommissionList />} />
-          <Route path="/commissions/new" element={<CommissionRegister />} />
+          <Route path="/new" element={<CommissionRegister />} />
           <Route path="/commissions/:id" element={<CommissionDetail />} />
           <Route path="/scores" element={<ScoreList />} />
-          <Route path="/settings" element={<Settings />} />
+          <Route path="/scores/:scoreId/arrangements/:arrangementId" element={<ScoreDetail />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

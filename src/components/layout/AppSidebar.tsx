@@ -1,4 +1,4 @@
-import { LayoutDashboard, ClipboardList, Music, Settings } from "lucide-react";
+import { LayoutDashboard, ClipboardList, Music, PlusCircle } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import {
@@ -69,10 +69,10 @@ export function AppSidebar() {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild tooltip="설정">
-              <NavLink to="/settings">
-                <Settings className="h-4 w-4" />
-                <span>설정</span>
+            <SidebarMenuButton asChild tooltip="새 의뢰">
+              <NavLink to="/new">
+                <PlusCircle className="h-4 w-4" />
+                <span>새 의뢰</span>
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>

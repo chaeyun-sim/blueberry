@@ -48,7 +48,7 @@ const CommissionList = () => {
   return (
     <AppLayout>
       <PageHeader title="의뢰 목록" description="모든 악보 의뢰를 관리합니다">
-        <Button onClick={() => navigate("/commissions/new")} className="gap-2">
+        <Button onClick={() => navigate("/new")} className="gap-2">
           <PlusCircle className="h-4 w-4" />
           새 의뢰
         </Button>

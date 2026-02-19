@@ -1,9 +1,10 @@
+import { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/PageHeader";
-import { StatusBadge, CommissionStatus } from "@/components/StatusBadge";
+import { CommissionStatus } from "@/components/StatusBadge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, FileImage, Link2 } from "lucide-react";
+import { ArrowLeft, FileImage, Link2, ChevronRight, Check, X, Mail } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -31,8 +32,19 @@ const mockDetail = {
 const CommissionDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const detail = mockDetail; // Would fetch by id
+  const [detail, setDetail] = useState(mockDetail);
   const currentStepIndex = steps.findIndex((s) => s.status === detail.status);
+
+  const handleNextStatus = () => {
+    if (currentStepIndex < steps.length - 1) {
+      setDetail((prev) => ({ ...prev, status: steps[currentStepIndex + 1].status }));
+    }
+  };
+
+  const handleReject = () => {
+    // Would handle rejection logic
+    navigate(-1);
+  };
 
   return (
     <AppLayout>
@@ -42,9 +54,7 @@ const CommissionDetail = () => {
         </Button>
       </div>
 
-      <PageHeader title={detail.title}>
-        <StatusBadge status={detail.status} />
-      </PageHeader>
+      <PageHeader title={detail.title} />
 
       {/* Status Progress */}
       <Card className="mb-8 border-border/50">
@@ -113,6 +123,38 @@ const CommissionDetail = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Status Action */}
+      <Card className="mb-8 border-border/50">
+        <CardContent className="p-5">
+          <h2 className="font-display font-semibold mb-4">작업 현황 관리</h2>
+          <div className="flex items-center gap-3">
+            {detail.status === "received" && (
+              <>
+                <Button onClick={handleNextStatus} className="gap-2">
+                  <Check className="h-4 w-4" /> 의뢰 승낙
+                </Button>
+                <Button variant="destructive" onClick={handleReject} className="gap-2">
+                  <X className="h-4 w-4" /> 의뢰 거절
+                </Button>
+              </>
+            )}
+            {detail.status === "working" && (
+              <Button onClick={handleNextStatus} className="gap-2">
+                <ChevronRight className="h-4 w-4" /> 완료로 변경
+              </Button>
+            )}
+            {detail.status === "complete" && (
+              <Button onClick={handleNextStatus} className="gap-2">
+                <Mail className="h-4 w-4" /> 메일 전송 및 납품
+              </Button>
+            )}
+            {detail.status === "delivered" && (
+              <p className="text-sm text-muted-foreground">납품이 완료된 의뢰입니다.</p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Linked Scores */}
       <Card className="border-border/50">
