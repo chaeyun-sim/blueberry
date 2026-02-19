@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { SongAutocomplete } from "@/components/SongAutocomplete";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,6 +21,7 @@ const CommissionRegister = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [instruments, setInstruments] = useState<string[]>([]);
+  const [songTitle, setSongTitle] = useState("");
   const [instrumentInput, setInstrumentInput] = useState("");
   const [showInstrumentDropdown, setShowInstrumentDropdown] = useState(false);
   const navigate = useNavigate();
@@ -131,8 +133,8 @@ const CommissionRegister = () => {
             <h2 className="font-display font-semibold mb-4">의뢰 정보</h2>
             <div className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="title">곡명</Label>
-                <Input id="title" placeholder="곡 제목을 입력하세요" />
+                <Label>곡명</Label>
+                <SongAutocomplete value={songTitle} onChange={setSongTitle} />
               </div>
 
               {/* Instrument Chips */}

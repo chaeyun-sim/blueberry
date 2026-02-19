@@ -49,8 +49,14 @@ const ScoreDetail = () => {
     );
   }
 
-  // Mock multiple score pages
-  const scorePages = [1, 2, 3];
+  // Mock multiple score pages (individual part sheets)
+  const scorePages = [
+    { id: 1, label: "Score (총보)" },
+    { id: 2, label: "Violin I" },
+    { id: 3, label: "Violin II" },
+    { id: 4, label: "Viola" },
+    { id: 5, label: "Cello" },
+  ];
 
   return (
     <AppLayout>
@@ -66,19 +72,16 @@ const ScoreDetail = () => {
         <CardContent className="p-5">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {scorePages.map((page) => (
-              <div
-                key={page}
-                className="aspect-[3/4] border border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-3 bg-muted/30"
-              >
-                <FileImage className="h-12 w-12 text-muted-foreground" />
-                <p className="text-sm text-muted-foreground">악보 {page}페이지</p>
+              <div key={page.id} className="flex flex-col">
+                <div className="aspect-[3/4] border border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-3 bg-muted/30">
+                  <FileImage className="h-12 w-12 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">{page.label}</p>
+                </div>
+                <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:bg-foreground/5 mt-2 self-center text-xs">
+                  <Download className="h-3.5 w-3.5" /> 다운로드
+                </Button>
               </div>
             ))}
-          </div>
-          <div className="flex justify-center mt-4">
-            <Button variant="ghost" className="gap-2 text-muted-foreground hover:bg-foreground/5">
-              <Download className="h-4 w-4" /> 다운로드
-            </Button>
           </div>
         </CardContent>
       </Card>
