@@ -207,7 +207,7 @@ const Dashboard = () => {
             alt=""
             className="absolute inset-0 w-full h-full object-cover pointer-events-none"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-background/70 to-transparent" />
+          
           <CardContent className="p-6 relative z-10">
             <div className="flex items-center justify-between mb-1">
               <p className="text-sm text-muted-foreground">{getFormattedDate()}</p>
