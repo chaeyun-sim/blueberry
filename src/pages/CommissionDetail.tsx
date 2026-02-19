@@ -147,31 +147,29 @@ const CommissionDetail = () => {
 
       {/* Bottom Status Action Bar */}
       <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-background/95 backdrop-blur-sm z-50">
-        <div className="max-w-screen-xl mx-auto px-6 py-4">
+        <div className="max-w-screen-xl mx-auto px-6 py-4 flex justify-end">
           {detail.status === "received" && (
             <div className="flex items-center gap-3">
-              <Button onClick={handleNextStatus} size="lg" className="flex-1 gap-2 h-12 text-base">
-                <Check className="h-5 w-5" /> 의뢰 승낙
+              <Button onClick={handleNextStatus} className="gap-2 px-6 py-5">
+                <Check className="h-4 w-4" /> 의뢰 승낙
               </Button>
-              <Button variant="destructive" onClick={handleReject} size="lg" className="flex-1 gap-2 h-12 text-base">
-                <X className="h-5 w-5" /> 의뢰 거절
+              <Button variant="destructive" onClick={handleReject} className="gap-2 px-6 py-5">
+                <X className="h-4 w-4" /> 의뢰 거절
               </Button>
             </div>
           )}
           {detail.status === "working" && (
-            <Button onClick={handleNextStatus} size="lg" className="w-full gap-2 h-12 text-base">
-              <ChevronRight className="h-5 w-5" /> 완료로 변경
+            <Button onClick={handleNextStatus} className="gap-2 px-6 py-5">
+              <ChevronRight className="h-4 w-4" /> 완료로 변경
             </Button>
           )}
           {detail.status === "complete" && (
-            <Button onClick={handleNextStatus} size="lg" className="w-full gap-2 h-12 text-base">
-              <Mail className="h-5 w-5" /> 메일 전송 및 납품
+            <Button onClick={handleNextStatus} className="gap-2 px-6 py-5">
+              <Mail className="h-4 w-4" /> 메일 전송 및 납품
             </Button>
           )}
           {detail.status === "delivered" && (
-            <div className="text-center py-1">
-              <p className="text-sm text-muted-foreground">납품이 완료된 의뢰입니다.</p>
-            </div>
+            <p className="text-sm text-muted-foreground py-2">납품이 완료된 의뢰입니다.</p>
           )}
         </div>
       </div>
