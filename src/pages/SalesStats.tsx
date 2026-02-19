@@ -33,18 +33,18 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, PieChart, Pie, Cell } from 
 
 // Mock data
 const monthlySalesData = [
-  { month: "1월", revenue: 1250000, count: 102 },
-  { month: "2월", revenue: 980000, count: 87 },
-  { month: "3월", revenue: 1540000, count: 118 },
-  { month: "4월", revenue: 1120000, count: 95 },
-  { month: "5월", revenue: 1780000, count: 134 },
-  { month: "6월", revenue: 1340000, count: 108 },
-  { month: "7월", revenue: 1650000, count: 125 },
-  { month: "8월", revenue: 1420000, count: 110 },
-  { month: "9월", revenue: 1890000, count: 142 },
-  { month: "10월", revenue: 2100000, count: 156 },
-  { month: "11월", revenue: 1760000, count: 98 },
-  { month: "12월", revenue: 2340000, count: 109 },
+  { month: "1월", revenue: 1250000, count: 102, prevRevenue: 1100000, prevCount: 90 },
+  { month: "2월", revenue: 980000, count: 87, prevRevenue: 1050000, prevCount: 92 },
+  { month: "3월", revenue: 1540000, count: 118, prevRevenue: 1320000, prevCount: 105 },
+  { month: "4월", revenue: 1120000, count: 95, prevRevenue: 1080000, prevCount: 88 },
+  { month: "5월", revenue: 1780000, count: 134, prevRevenue: 1500000, prevCount: 120 },
+  { month: "6월", revenue: 1340000, count: 108, prevRevenue: 1200000, prevCount: 96 },
+  { month: "7월", revenue: 1650000, count: 125, prevRevenue: 1400000, prevCount: 110 },
+  { month: "8월", revenue: 1420000, count: 110, prevRevenue: 1350000, prevCount: 102 },
+  { month: "9월", revenue: 1890000, count: 142, prevRevenue: 1600000, prevCount: 125 },
+  { month: "10월", revenue: 2100000, count: 156, prevRevenue: 1850000, prevCount: 140 },
+  { month: "11월", revenue: 1760000, count: 98, prevRevenue: 1700000, prevCount: 130 },
+  { month: "12월", revenue: 2340000, count: 109, prevRevenue: 2000000, prevCount: 150 },
 ];
 
 const categoryData = [
@@ -60,6 +60,15 @@ const topSongs = [
   { rank: 3, title: "Kiss the Rain", category: "CLASSIC", sales: 98, revenue: 1470000 },
   { rank: 4, title: "君をのせて (천공의 성 라퓨타)", category: "ANI", sales: 87, revenue: 1305000 },
   { rank: 5, title: "Merry Go Round of Life", category: "ANI", sales: 76, revenue: 1140000 },
+];
+
+// 월별 베스트셀러 - 특정 달에 유독 많이 팔린 곡
+const monthlyBestSellers = [
+  { rank: 1, title: "Canon in D", month: "12월", sales: 42, category: "CLASSIC" },
+  { rank: 2, title: "River Flows in You", month: "10월", sales: 38, category: "CLASSIC" },
+  { rank: 3, title: "Merry Go Round of Life", month: "5월", sales: 31, category: "ANI" },
+  { rank: 4, title: "A Thousand Years", month: "2월", sales: 28, category: "OST" },
+  { rank: 5, title: "君をのせて", month: "9월", sales: 25, category: "ANI" },
 ];
 
 const topArrangements = [
@@ -91,6 +100,7 @@ const rawExcelData = [
 
 const barChartConfig: ChartConfig = {
   revenue: { label: "매출", color: "hsl(var(--primary))" },
+  prevRevenue: { label: "전년 매출", color: "hsl(var(--warning))" },
 };
 
 const formatCurrency = (value: number) =>
@@ -242,7 +252,7 @@ const SalesStats = () => {
           </TabsTrigger>
           <TabsTrigger value="yearly" className="gap-1.5">
             <CalendarDays className="h-3.5 w-3.5" />
-            연별 분석
+            월별 분석
           </TabsTrigger>
           <TabsTrigger value="raw" className="gap-1.5">
             <List className="h-3.5 w-3.5" />
@@ -400,6 +410,7 @@ const SalesStats = () => {
                       />
                     }
                   />
+                  <Bar dataKey="prevRevenue" fill="var(--color-prevRevenue)" radius={[4, 4, 0, 0]} />
                   <Bar dataKey="revenue" fill="var(--color-revenue)" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ChartContainer>
@@ -409,18 +420,18 @@ const SalesStats = () => {
           <div className="grid lg:grid-cols-2 gap-6">
             <Card className="border-border/50">
               <CardHeader className="pb-2">
-                <CardTitle className="text-base font-display">연간 베스트셀러 곡</CardTitle>
+                <CardTitle className="text-base font-display">월별 베스트셀러 곡</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {topSongs.slice(0, 3).map((song) => (
+                  {monthlyBestSellers.map((song) => (
                     <div key={song.rank} className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
                       <span className="text-lg font-display font-bold text-foreground w-8">{song.rank}</span>
                       <div className="flex-1 min-w-0">
                         <p className="font-medium truncate">{song.title}</p>
-                        <p className="text-xs text-muted-foreground">{song.category} · {song.sales}건</p>
+                        <p className="text-xs text-muted-foreground">{song.category} · {song.month} · {song.sales}건</p>
                       </div>
-                      <span className="text-sm font-medium tabular-nums">{formatCurrency(song.revenue)}</span>
+                      <span className="text-xs font-medium px-2 py-1 rounded-full bg-primary/10 text-primary">{song.month}</span>
                     </div>
                   ))}
                 </div>
@@ -432,7 +443,7 @@ const SalesStats = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {topArrangements.slice(0, 3).map((arr) => (
+                  {topArrangements.slice(0, 5).map((arr) => (
                     <div key={arr.rank} className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
                       <span className="text-lg font-display font-bold text-foreground w-8">{arr.rank}</span>
                       <div className="flex-1 min-w-0">
