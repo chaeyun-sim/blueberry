@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { SongAutocomplete } from "@/components/SongAutocomplete";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
@@ -41,6 +42,7 @@ const ScoreRegister = () => {
   const [instrumentInput, setInstrumentInput] = useState("");
   const [showInstrumentDropdown, setShowInstrumentDropdown] = useState(false);
   const [zipUploaded, setZipUploaded] = useState(false);
+  const [songTitle, setSongTitle] = useState("");
   const navigate = useNavigate();
 
   const addInstrument = (name: string) => {
@@ -178,8 +180,8 @@ const ScoreRegister = () => {
             <h2 className="font-display font-semibold mb-4">악보 정보</h2>
             <div className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="title">곡명</Label>
-                <Input id="title" placeholder="곡 제목을 입력하세요" />
+                <Label>곡명</Label>
+                <SongAutocomplete value={songTitle} onChange={setSongTitle} />
               </div>
 
               <div className="space-y-2">
