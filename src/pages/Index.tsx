@@ -3,13 +3,14 @@ import { PageHeader } from "@/components/PageHeader";
 import { StatusBadge, CommissionStatus } from "@/components/StatusBadge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ClipboardList, Clock, CheckCircle2, AlertTriangle } from "lucide-react";
+import { ClipboardList, Clock, Truck, CheckCircle2, AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const statusCards: { status: CommissionStatus; icon: typeof ClipboardList; count: number; label: string; description: string }[] = [
   { status: "received", icon: ClipboardList, count: 3, label: "대기", description: "새로 접수된 의뢰" },
   { status: "working", icon: Clock, count: 5, label: "작업중", description: "진행 중인 작업" },
   { status: "complete", icon: CheckCircle2, count: 12, label: "완료", description: "완료된 의뢰" },
+  { status: "delivered", icon: Truck, count: 2, label: "납품", description: "납품 완료된 의뢰" },
 ];
 
 const urgentCommissions = [
@@ -33,7 +34,7 @@ const Dashboard = () => {
       <PageHeader title="대시보드" description="의뢰 현황을 한눈에 확인하세요" />
 
       {/* Status Count Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {statusCards.map((item) => (
           <Card key={item.status} className="hover-lift cursor-pointer border-border/50" onClick={() => navigate("/commissions")}>
             <CardContent className="p-5">

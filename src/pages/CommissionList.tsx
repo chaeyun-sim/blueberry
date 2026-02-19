@@ -16,6 +16,7 @@ const tabs: { label: string; value: CommissionStatus | "all" }[] = [
   { label: "대기", value: "received" },
   { label: "작업중", value: "working" },
   { label: "완료", value: "complete" },
+  { label: "납품", value: "delivered" },
 ];
 
 const mockData = [
