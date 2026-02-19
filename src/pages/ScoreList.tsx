@@ -89,7 +89,7 @@ const ScoreList = () => {
   return (
     <AppLayout>
       <PageHeader title="악보 관리" description="보유 중인 악보와 편성 버전을 관리합니다">
-        <Button className="gap-2">
+        <Button className="gap-2" onClick={() => navigate("/scores/new")}>
           <PlusCircle className="h-4 w-4" />
           악보 추가
         </Button>

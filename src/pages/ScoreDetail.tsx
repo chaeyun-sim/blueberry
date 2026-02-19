@@ -5,26 +5,33 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Download, FileImage } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 
-const mockArrangementDetail = {
+interface ArrangementData {
+  title: string;
+  arrangement: string;
+  instruments: string;
+  createdAt: string;
+}
+
+const mockArrangementDetail: Record<string, Record<string, ArrangementData>> = {
   s1: {
-    a1: { title: "Canon in D", arrangement: "현악 3중주", createdAt: "2025-11-20" },
-    a2: { title: "Canon in D", arrangement: "현악 4중주", createdAt: "2025-10-15" },
-    a3: { title: "Canon in D", arrangement: "피아노 솔로", createdAt: "2025-09-01" },
+    a1: { title: "Canon in D", arrangement: "현악 3중주", instruments: "(Vn, Vn, Vc)", createdAt: "2025-11-20" },
+    a2: { title: "Canon in D", arrangement: "현악 4중주", instruments: "(Vn, Vn, Va, Vc)", createdAt: "2025-10-15" },
+    a3: { title: "Canon in D", arrangement: "피아노 솔로", instruments: "(Pf)", createdAt: "2025-09-01" },
   },
   s2: {
-    a4: { title: "River Flows in You", arrangement: "피아노 솔로", createdAt: "2025-12-01" },
+    a4: { title: "River Flows in You", arrangement: "피아노 솔로", instruments: "(Pf)", createdAt: "2025-12-01" },
   },
   s3: {
-    a5: { title: "A Thousand Years", arrangement: "현악 5중주", createdAt: "2026-01-10" },
-    a6: { title: "A Thousand Years", arrangement: "현악 4중주", createdAt: "2026-01-05" },
+    a5: { title: "A Thousand Years", arrangement: "현악 5중주", instruments: "(Vn, Vn, Va, Vc, Cb)", createdAt: "2026-01-10" },
+    a6: { title: "A Thousand Years", arrangement: "현악 4중주", instruments: "(Vn, Vn, Va, Vc)", createdAt: "2026-01-05" },
   },
   s4: {
-    a7: { title: "Wedding March", arrangement: "브라스 앙상블", createdAt: "2024-06-22" },
+    a7: { title: "Wedding March", arrangement: "브라스 앙상블", instruments: "(Tp, Tp, Hn, Tb, Tu)", createdAt: "2024-06-22" },
   },
   s5: {
-    a8: { title: "Spring Waltz", arrangement: "플룻 듀엣", createdAt: "2026-02-05" },
+    a8: { title: "Spring Waltz", arrangement: "플룻 듀엣", instruments: "(Fl, Fl)", createdAt: "2026-02-05" },
   },
-} as Record<string, Record<string, { title: string; arrangement: string; createdAt: string }>>;
+};
 
 const ScoreDetail = () => {
   const { scoreId, arrangementId } = useParams();
@@ -50,7 +57,7 @@ const ScoreDetail = () => {
         </Button>
       </div>
 
-      <PageHeader title={detail.title} description={detail.arrangement} />
+      <PageHeader title={detail.title} description={`${detail.arrangement} ${detail.instruments}`} />
 
       <Card className="border-border/50">
         <CardContent className="p-5">
