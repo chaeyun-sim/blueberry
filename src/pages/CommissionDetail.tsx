@@ -47,7 +47,35 @@ const CommissionDetail = () => {
   };
 
   return (
-    <AppLayout>
+    <AppLayout bottomBar={
+      <div className="border-t border-border bg-background/95 backdrop-blur-sm">
+        <div className="px-6 py-3 flex justify-end">
+          {detail.status === "received" && (
+            <div className="flex items-center gap-3">
+              <Button onClick={handleNextStatus} className="gap-2 px-6 py-5">
+                <Check className="h-4 w-4" /> 의뢰 승낙
+              </Button>
+              <Button variant="destructive" onClick={handleReject} className="gap-2 px-6 py-5">
+                <X className="h-4 w-4" /> 의뢰 거절
+              </Button>
+            </div>
+          )}
+          {detail.status === "working" && (
+            <Button onClick={handleNextStatus} className="gap-2 px-6 py-5">
+              <ChevronRight className="h-4 w-4" /> 완료로 변경
+            </Button>
+          )}
+          {detail.status === "complete" && (
+            <Button onClick={handleNextStatus} className="gap-2 px-6 py-5">
+              <Mail className="h-4 w-4" /> 메일 전송 및 납품
+            </Button>
+          )}
+          {detail.status === "delivered" && (
+            <p className="text-sm text-muted-foreground py-2">납품이 완료된 의뢰입니다.</p>
+          )}
+        </div>
+      </div>
+    }>
       <div className="mb-6">
         <Button variant="ghost" className="gap-2 text-muted-foreground" onClick={() => navigate(-1)}>
           <ArrowLeft className="h-4 w-4" /> 뒤로
@@ -145,34 +173,7 @@ const CommissionDetail = () => {
         </CardContent>
       </Card>
 
-      {/* Bottom Status Action Bar */}
-      <div className="sticky bottom-0 -mx-6 -mb-6 mt-4 border-t border-border bg-background/95 backdrop-blur-sm z-30">
-        <div className="px-6 py-3 flex justify-end">
-          {detail.status === "received" && (
-            <div className="flex items-center gap-3">
-              <Button onClick={handleNextStatus} className="gap-2 px-6 py-5">
-                <Check className="h-4 w-4" /> 의뢰 승낙
-              </Button>
-              <Button variant="destructive" onClick={handleReject} className="gap-2 px-6 py-5">
-                <X className="h-4 w-4" /> 의뢰 거절
-              </Button>
-            </div>
-          )}
-          {detail.status === "working" && (
-            <Button onClick={handleNextStatus} className="gap-2 px-6 py-5">
-              <ChevronRight className="h-4 w-4" /> 완료로 변경
-            </Button>
-          )}
-          {detail.status === "complete" && (
-            <Button onClick={handleNextStatus} className="gap-2 px-6 py-5">
-              <Mail className="h-4 w-4" /> 메일 전송 및 납품
-            </Button>
-          )}
-          {detail.status === "delivered" && (
-            <p className="text-sm text-muted-foreground py-2">납품이 완료된 의뢰입니다.</p>
-          )}
-        </div>
-      </div>
+
     </AppLayout>
   );
 };

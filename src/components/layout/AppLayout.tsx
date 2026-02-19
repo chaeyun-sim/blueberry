@@ -3,9 +3,10 @@ import { AppSidebar } from "./AppSidebar";
 
 interface AppLayoutProps {
   children: React.ReactNode;
+  bottomBar?: React.ReactNode;
 }
 
-export function AppLayout({ children }: AppLayoutProps) {
+export function AppLayout({ children, bottomBar }: AppLayoutProps) {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
@@ -17,6 +18,7 @@ export function AppLayout({ children }: AppLayoutProps) {
           <main className="flex-1 p-6 animate-fade-in">
             {children}
           </main>
+          {bottomBar}
         </div>
       </div>
     </SidebarProvider>
