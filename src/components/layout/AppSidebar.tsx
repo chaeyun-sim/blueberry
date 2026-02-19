@@ -35,7 +35,7 @@ export function AppSidebar() {
         <img src={logoImg} alt="ScoreFlow" className="h-9 w-9 shrink-0 object-contain" />
         {!collapsed && (
           <span className="font-display font-bold text-lg tracking-tight truncate">
-            ScoreFlow
+            BlueBerry
           </span>
         )}
       </div>
