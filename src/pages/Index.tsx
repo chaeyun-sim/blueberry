@@ -12,8 +12,17 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { AnimatePresence, motion, useMotionValue, useTransform, animate } from "framer-motion";
 import lofiCornerImg from "@/assets/lofi-corner.png";
+import todayDawnImg from "@/assets/today-dawn.png";
 import todayDayImg from "@/assets/today-day.jpg";
+import todaySunsetImg from "@/assets/today-sunset.jpg";
 import todayNightImg from "@/assets/today-night.png";
+
+function getTodayBg(hour: number) {
+  if (hour >= 5 && hour < 11) return todayDawnImg;    // 새벽~아침
+  if (hour >= 11 && hour < 17) return todayDayImg;    // 한낮
+  if (hour >= 17 && hour < 20) return todaySunsetImg;  // 선셋
+  return todayNightImg;                                 // 밤
+}
 
 // ── Data ──
 
@@ -203,7 +212,7 @@ const Dashboard = () => {
         <Card className="border-border/50 overflow-hidden relative min-h-[180px]">
           {/* Background image */}
           <img
-            src={clock.getHours() >= 6 && clock.getHours() < 18 ? todayDayImg : todayNightImg}
+            src={getTodayBg(clock.getHours())}
             alt=""
             className="absolute inset-0 w-full h-full object-cover pointer-events-none"
           />
