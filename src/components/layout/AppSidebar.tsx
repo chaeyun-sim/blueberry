@@ -1,31 +1,19 @@
 import { LayoutDashboard, ClipboardList, Music, PlusCircle, BarChart3, CalendarDays, Sun, Moon } from "lucide-react";
-import { NavLink } from "@/components/NavLink";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useTheme } from "@/components/ThemeProvider";
 import {
   Sidebar,
   SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
   SidebarFooter,
-  SidebarSeparator,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { cn } from "@/lib/utils";
 
-const navGroup1 = [
-  { title: "대시보드", url: "/", icon: LayoutDashboard },
-];
-
-const navGroup2 = [
+const navItems = [
+  { title: "대시보드", url: "/", icon: LayoutDashboard, exact: true },
   { title: "의뢰 목록", url: "/commissions", icon: ClipboardList },
   { title: "악보 관리", url: "/scores", icon: Music },
   { title: "캘린더", url: "/calendar", icon: CalendarDays },
-];
-
-const navGroup3 = [
   { title: "매출 통계", url: "/stats", icon: BarChart3 },
 ];
 
@@ -33,10 +21,15 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
+  const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+
+  const isActive = (item: typeof navItems[0]) =>
+    item.exact ? location.pathname === item.url : location.pathname.startsWith(item.url);
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
+      {/* Logo */}
       <div className="flex h-14 items-center gap-2 px-4 border-b border-sidebar-border">
         <Music className="h-6 w-6 text-primary shrink-0" />
         {!collapsed && (
@@ -46,100 +39,44 @@ export function AppSidebar() {
         )}
       </div>
 
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {navGroup1.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={location.pathname === item.url}
-                    tooltip={item.title}
-                  >
-                    <NavLink to={item.url} end>
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarSeparator />
-
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {navGroup2.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={location.pathname.startsWith(item.url)}
-                    tooltip={item.title}
-                  >
-                    <NavLink to={item.url}>
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarSeparator />
-
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {navGroup3.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={location.pathname.startsWith(item.url)}
-                    tooltip={item.title}
-                  >
-                    <NavLink to={item.url}>
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+      <SidebarContent className="px-3 py-4">
+        <div className="flex flex-col gap-1.5">
+          {navItems.map((item) => (
+            <button
+              key={item.title}
+              onClick={() => navigate(item.url)}
+              className={cn(
+                "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150",
+                "hover:bg-sidebar-accent",
+                isActive(item)
+                  ? "bg-primary/10 text-primary border border-primary/20"
+                  : "text-sidebar-foreground/70 border border-transparent"
+              )}
+            >
+              <item.icon className={cn("h-4 w-4 shrink-0", isActive(item) ? "text-primary" : "")} />
+              {!collapsed && <span>{item.title}</span>}
+            </button>
+          ))}
+        </div>
       </SidebarContent>
 
-      <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild tooltip="새 의뢰" className="h-12">
-              <NavLink to="/new">
-                <PlusCircle className="h-4 w-4" />
-                <span>새 의뢰</span>
-              </NavLink>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <div className="my-1" />
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              tooltip={theme === "dark" ? "라이트 모드" : "다크 모드"}
-              onClick={toggleTheme}
-            >
-              {theme === "dark" ? (
-                <Sun className="h-4 w-4" />
-              ) : (
-                <Moon className="h-4 w-4" />
-              )}
-              <span>{theme === "dark" ? "라이트 모드" : "다크 모드"}</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+      <SidebarFooter className="px-3 pb-4">
+        <div className="flex flex-col gap-1.5">
+          <button
+            onClick={() => navigate("/new")}
+            className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
+          >
+            <PlusCircle className="h-4 w-4 shrink-0" />
+            {!collapsed && <span>새 의뢰</span>}
+          </button>
+          <button
+            onClick={toggleTheme}
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-sidebar-foreground/70 hover:bg-sidebar-accent border border-transparent transition-all duration-150"
+          >
+            {theme === "dark" ? <Sun className="h-4 w-4 shrink-0" /> : <Moon className="h-4 w-4 shrink-0" />}
+            {!collapsed && <span>{theme === "dark" ? "라이트 모드" : "다크 모드"}</span>}
+          </button>
+        </div>
       </SidebarFooter>
     </Sidebar>
   );
