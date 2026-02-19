@@ -6,7 +6,7 @@
 
 @layer base {
   :root {
-    --background: 0 14% 97%;
+    --background: 0 0% 99%;
     --foreground: 213 51% 19%;
 
     --card: 0 0% 100%;
@@ -41,7 +41,7 @@
     --status-delivered: 260 50% 55%;
     --status-complete: 152 60% 45%;
 
-    --sidebar-background: 0 14% 97%;
+    --sidebar-background: 0 0% 99%;
     --sidebar-foreground: 213 51% 19%;
     --sidebar-primary: 213 47% 46%;
     --sidebar-primary-foreground: 0 0% 100%;
