@@ -1,0 +1,461 @@
+import { AppLayout } from "@/components/layout/AppLayout";
+import { PageHeader } from "@/components/PageHeader";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Upload,
+  TrendingUp,
+  Music,
+  DollarSign,
+  BarChart3,
+  FileSpreadsheet,
+  CalendarDays,
+  Trophy,
+  Layers,
+} from "lucide-react";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "@/components/ui/chart";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, PieChart, Pie, Cell } from "recharts";
+
+// Mock data
+const monthlySalesData = [
+  { month: "1월", revenue: 1250000 },
+  { month: "2월", revenue: 980000 },
+  { month: "3월", revenue: 1540000 },
+  { month: "4월", revenue: 1120000 },
+  { month: "5월", revenue: 1780000 },
+  { month: "6월", revenue: 1340000 },
+  { month: "7월", revenue: 1650000 },
+  { month: "8월", revenue: 1420000 },
+  { month: "9월", revenue: 1890000 },
+  { month: "10월", revenue: 2100000 },
+  { month: "11월", revenue: 1760000 },
+  { month: "12월", revenue: 2340000 },
+];
+
+const categoryData = [
+  { name: "CLASSIC", value: 45, fill: "hsl(var(--primary))" },
+  { name: "OST", value: 25, fill: "hsl(var(--accent))" },
+  { name: "ANI", value: 18, fill: "hsl(var(--status-received))" },
+  { name: "ETC", value: 12, fill: "hsl(var(--status-complete))" },
+];
+
+const topSongs = [
+  { rank: 1, title: "Canon in D", category: "CLASSIC", sales: 156, revenue: 2340000 },
+  { rank: 2, title: "River Flows in You", category: "CLASSIC", sales: 132, revenue: 1980000 },
+  { rank: 3, title: "Kiss the Rain", category: "CLASSIC", sales: 98, revenue: 1470000 },
+  { rank: 4, title: "君をのせて (천공의 성 라퓨타)", category: "ANI", sales: 87, revenue: 1305000 },
+  { rank: 5, title: "Merry Go Round of Life", category: "ANI", sales: 76, revenue: 1140000 },
+];
+
+const topArrangements = [
+  { rank: 1, arrangement: "QUARTET (Vn, Vn, Va, Vc)", sales: 234, revenue: 3510000 },
+  { rank: 2, arrangement: "SOLO (Piano)", sales: 189, revenue: 1890000 },
+  { rank: 3, arrangement: "DUET (Fl, Pf)", sales: 145, revenue: 2175000 },
+  { rank: 4, arrangement: "TRIO (Vn, Va, Vc)", sales: 112, revenue: 1680000 },
+  { rank: 5, arrangement: "QUINTET (Str)", sales: 78, revenue: 1560000 },
+];
+
+const lastMonthSales = [
+  { date: "12/1", revenue: 85000 },
+  { date: "12/5", revenue: 120000 },
+  { date: "12/10", revenue: 95000 },
+  { date: "12/15", revenue: 210000 },
+  { date: "12/20", revenue: 180000 },
+  { date: "12/25", revenue: 340000 },
+  { date: "12/31", revenue: 150000 },
+];
+
+const barChartConfig: ChartConfig = {
+  revenue: { label: "매출", color: "hsl(var(--primary))" },
+};
+
+const lastMonthChartConfig: ChartConfig = {
+  revenue: { label: "매출", color: "hsl(var(--accent))" },
+};
+
+const formatCurrency = (value: number) =>
+  new Intl.NumberFormat("ko-KR", { style: "currency", currency: "KRW" }).format(value);
+
+const SalesStats = () => {
+  return (
+    <AppLayout>
+      <PageHeader title="매출 통계" description="엑셀 데이터 기반 매출 분석">
+        <Button variant="outline" className="gap-2">
+          <Upload className="h-4 w-4" />
+          엑셀 업로드
+        </Button>
+      </PageHeader>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <Card className="border-border/50">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-2">
+              <DollarSign className="h-5 w-5 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground font-medium">총 매출</span>
+            </div>
+            <p className="text-2xl font-display font-bold">{formatCurrency(19170000)}</p>
+            <p className="text-xs text-status-complete mt-1 flex items-center gap-1">
+              <TrendingUp className="h-3 w-3" /> +12.5% vs 작년
+            </p>
+          </CardContent>
+        </Card>
+        <Card className="border-border/50">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-2">
+              <FileSpreadsheet className="h-5 w-5 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground font-medium">총 판매건</span>
+            </div>
+            <p className="text-2xl font-display font-bold">1,284</p>
+            <p className="text-xs text-status-complete mt-1 flex items-center gap-1">
+              <TrendingUp className="h-3 w-3" /> +8.3% vs 작년
+            </p>
+          </CardContent>
+        </Card>
+        <Card className="border-border/50">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-2">
+              <Trophy className="h-5 w-5 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground font-medium">베스트셀러</span>
+            </div>
+            <p className="text-lg font-display font-bold truncate">Canon in D</p>
+            <p className="text-xs text-muted-foreground mt-1">156건 판매</p>
+          </CardContent>
+        </Card>
+        <Card className="border-border/50">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-2">
+              <Layers className="h-5 w-5 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground font-medium">인기 편성</span>
+            </div>
+            <p className="text-lg font-display font-bold truncate">현악 4중주</p>
+            <p className="text-xs text-muted-foreground mt-1">234건 판매</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Tabs for different analysis */}
+      <Tabs defaultValue="all" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-3 max-w-md">
+          <TabsTrigger value="all" className="gap-1.5">
+            <BarChart3 className="h-3.5 w-3.5" />
+            전체 분석
+          </TabsTrigger>
+          <TabsTrigger value="yearly" className="gap-1.5">
+            <CalendarDays className="h-3.5 w-3.5" />
+            한 해 분석
+          </TabsTrigger>
+          <TabsTrigger value="monthly" className="gap-1.5">
+            <CalendarDays className="h-3.5 w-3.5" />
+            지난 달
+          </TabsTrigger>
+        </TabsList>
+
+        {/* 전체 분석 */}
+        <TabsContent value="all" className="space-y-6">
+          <div className="grid lg:grid-cols-3 gap-6">
+            {/* Category Pie Chart */}
+            <Card className="border-border/50">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base font-display">카테고리별 분포</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ChartContainer config={{}} className="mx-auto aspect-square max-h-[250px]">
+                  <PieChart>
+                    <Pie
+                      data={categoryData}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={50}
+                      outerRadius={80}
+                      strokeWidth={2}
+                      stroke="hsl(var(--background))"
+                    >
+                      {categoryData.map((entry, i) => (
+                        <Cell key={i} fill={entry.fill} />
+                      ))}
+                    </Pie>
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                  </PieChart>
+                </ChartContainer>
+                <div className="flex flex-wrap justify-center gap-3 mt-2">
+                  {categoryData.map((c) => (
+                    <div key={c.name} className="flex items-center gap-1.5 text-xs">
+                      <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: c.fill }} />
+                      {c.name} ({c.value}%)
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Top Songs */}
+            <Card className="border-border/50 lg:col-span-2">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base font-display flex items-center gap-2">
+                  <Music className="h-4 w-4" />
+                  가장 많이 팔린 곡 TOP 5
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-xs uppercase w-12">#</TableHead>
+                      <TableHead className="text-xs uppercase">곡명</TableHead>
+                      <TableHead className="text-xs uppercase">분류</TableHead>
+                      <TableHead className="text-xs uppercase text-right">판매수</TableHead>
+                      <TableHead className="text-xs uppercase text-right">매출</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {topSongs.map((song) => (
+                      <TableRow key={song.rank}>
+                        <TableCell className="font-display font-bold text-primary">{song.rank}</TableCell>
+                        <TableCell className="font-medium">{song.title}</TableCell>
+                        <TableCell>
+                          <span className="px-2 py-0.5 rounded-full text-xs bg-secondary text-secondary-foreground">
+                            {song.category}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-right tabular-nums">{song.sales}</TableCell>
+                        <TableCell className="text-right tabular-nums">{formatCurrency(song.revenue)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Top Arrangements */}
+          <Card className="border-border/50">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base font-display flex items-center gap-2">
+                <Layers className="h-4 w-4" />
+                가장 많이 팔린 편성 TOP 5
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-xs uppercase w-12">#</TableHead>
+                    <TableHead className="text-xs uppercase">편성</TableHead>
+                    <TableHead className="text-xs uppercase text-right">판매수</TableHead>
+                    <TableHead className="text-xs uppercase text-right">매출</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {topArrangements.map((arr) => (
+                    <TableRow key={arr.rank}>
+                      <TableCell className="font-display font-bold text-primary">{arr.rank}</TableCell>
+                      <TableCell className="font-medium">{arr.arrangement}</TableCell>
+                      <TableCell className="text-right tabular-nums">{arr.sales}</TableCell>
+                      <TableCell className="text-right tabular-nums">{formatCurrency(arr.revenue)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* 한 해 분석 */}
+        <TabsContent value="yearly" className="space-y-6">
+          <div className="flex items-center gap-3 mb-2">
+            <Select defaultValue="2026">
+              <SelectTrigger className="w-32">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="2026">2026년</SelectItem>
+                <SelectItem value="2025">2025년</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <Card className="border-border/50">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base font-display">월별 매출 추이</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ChartContainer config={barChartConfig} className="aspect-[2/1] w-full max-h-[300px]">
+                <BarChart data={monthlySalesData}>
+                  <CartesianGrid vertical={false} strokeDasharray="3 3" />
+                  <XAxis dataKey="month" tickLine={false} axisLine={false} fontSize={12} />
+                  <YAxis
+                    tickLine={false}
+                    axisLine={false}
+                    fontSize={12}
+                    tickFormatter={(v) => `${(v / 10000).toFixed(0)}만`}
+                  />
+                  <ChartTooltip
+                    content={
+                      <ChartTooltipContent
+                        formatter={(value) => formatCurrency(value as number)}
+                      />
+                    }
+                  />
+                  <Bar dataKey="revenue" fill="var(--color-revenue)" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ChartContainer>
+            </CardContent>
+          </Card>
+
+          <div className="grid lg:grid-cols-2 gap-6">
+            <Card className="border-border/50">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base font-display">연간 베스트셀러 곡</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {topSongs.slice(0, 3).map((song) => (
+                    <div key={song.rank} className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                      <span className="text-lg font-display font-bold text-primary w-8">{song.rank}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">{song.title}</p>
+                        <p className="text-xs text-muted-foreground">{song.category} · {song.sales}건</p>
+                      </div>
+                      <span className="text-sm font-medium tabular-nums">{formatCurrency(song.revenue)}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="border-border/50">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base font-display">연간 인기 편성</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {topArrangements.slice(0, 3).map((arr) => (
+                    <div key={arr.rank} className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                      <span className="text-lg font-display font-bold text-primary w-8">{arr.rank}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">{arr.arrangement}</p>
+                        <p className="text-xs text-muted-foreground">{arr.sales}건</p>
+                      </div>
+                      <span className="text-sm font-medium tabular-nums">{formatCurrency(arr.revenue)}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        {/* 지난 달 분석 */}
+        <TabsContent value="monthly" className="space-y-6">
+          <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/30 text-sm text-muted-foreground mb-2">
+            <CalendarDays className="h-4 w-4" />
+            매월 10일~15일에 지난달 매출이 반영됩니다.
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+            <Card className="border-border/50">
+              <CardContent className="p-5">
+                <p className="text-xs text-muted-foreground mb-1">지난달 매출</p>
+                <p className="text-2xl font-display font-bold">{formatCurrency(2340000)}</p>
+                <p className="text-xs text-status-complete mt-1 flex items-center gap-1">
+                  <TrendingUp className="h-3 w-3" /> +15.2% vs 전달
+                </p>
+              </CardContent>
+            </Card>
+            <Card className="border-border/50">
+              <CardContent className="p-5">
+                <p className="text-xs text-muted-foreground mb-1">판매 건수</p>
+                <p className="text-2xl font-display font-bold">127</p>
+              </CardContent>
+            </Card>
+            <Card className="border-border/50">
+              <CardContent className="p-5">
+                <p className="text-xs text-muted-foreground mb-1">건당 평균</p>
+                <p className="text-2xl font-display font-bold">{formatCurrency(18425)}</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card className="border-border/50">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base font-display">지난달 매출 추이 (12월)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ChartContainer config={lastMonthChartConfig} className="aspect-[2/1] w-full max-h-[250px]">
+                <BarChart data={lastMonthSales}>
+                  <CartesianGrid vertical={false} strokeDasharray="3 3" />
+                  <XAxis dataKey="date" tickLine={false} axisLine={false} fontSize={12} />
+                  <YAxis
+                    tickLine={false}
+                    axisLine={false}
+                    fontSize={12}
+                    tickFormatter={(v) => `${(v / 10000).toFixed(0)}만`}
+                  />
+                  <ChartTooltip
+                    content={
+                      <ChartTooltipContent
+                        formatter={(value) => formatCurrency(value as number)}
+                      />
+                    }
+                  />
+                  <Bar dataKey="revenue" fill="var(--color-revenue)" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ChartContainer>
+            </CardContent>
+          </Card>
+
+          <div className="grid lg:grid-cols-2 gap-6">
+            <Card className="border-border/50">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base font-display">지난달 베스트</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {topSongs.slice(0, 3).map((song) => (
+                    <div key={song.rank} className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                      <span className="text-lg font-display font-bold text-primary w-8">{song.rank}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">{song.title}</p>
+                        <p className="text-xs text-muted-foreground">{song.sales}건</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="border-border/50">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base font-display">지난달 인기 편성</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {topArrangements.slice(0, 3).map((arr) => (
+                    <div key={arr.rank} className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                      <span className="text-lg font-display font-bold text-primary w-8">{arr.rank}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">{arr.arrangement}</p>
+                        <p className="text-xs text-muted-foreground">{arr.sales}건</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+      </Tabs>
+    </AppLayout>
+  );
+};
+
+export default SalesStats;
