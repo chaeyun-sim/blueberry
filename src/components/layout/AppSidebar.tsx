@@ -32,7 +32,7 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       {/* Logo */}
       <div className="flex h-14 items-center gap-2 px-4 border-b border-sidebar-border">
-        <img src={logoImg} alt="BlueBerry" className="h-8 w-8 shrink-0 object-contain" />
+        <img src={logoImg} alt="BlueBerry" className="shrink-0 object-contain" style={{ width: 28, height: 28 }} />
         {!collapsed && (
           <span className="font-display font-bold text-lg tracking-tight truncate">
             BlueBerry
