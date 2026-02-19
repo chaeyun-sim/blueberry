@@ -210,25 +210,25 @@ const Dashboard = () => {
           
           <CardContent className="p-6 relative z-10">
             <div className="flex items-center justify-between mb-1">
-              <p className="text-sm text-muted-foreground">{getFormattedDate()}</p>
-              <span className="font-display font-bold text-lg tabular-nums text-foreground">
+              <p className="text-sm text-white/80">{getFormattedDate()}</p>
+              <span className="font-display font-bold text-lg tabular-nums text-white drop-shadow">
                 {clock.toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}
               </span>
             </div>
-            <h2 className="text-2xl font-display font-bold mb-2">{getGreeting()}</h2>
-            <p className="text-xs text-muted-foreground italic mb-4">"{DAILY_QUOTE}"</p>
+            <h2 className="text-2xl font-display font-bold mb-2 text-white drop-shadow">{getGreeting()}</h2>
+            <p className="text-xs text-white/70 italic mb-4">"{DAILY_QUOTE}"</p>
             <div className="flex items-center gap-6 text-sm">
-              <div className="flex items-center gap-2 text-muted-foreground">
+              <div className="flex items-center gap-2 text-white/80">
                 <Sun className="h-4 w-4 text-[hsl(var(--warning))]" />
                 <span>맑음 · 4°C</span>
               </div>
-              <div className="flex items-center gap-2 text-muted-foreground">
+              <div className="flex items-center gap-2 text-white/80">
                 <Music className="h-4 w-4" />
-                <span>진행 중인 의뢰 <strong className="text-foreground">{commissionSummary.working}건</strong></span>
+                <span>진행 중인 의뢰 <strong className="text-white">{commissionSummary.working}건</strong></span>
               </div>
-              <div className="flex items-center gap-2 text-muted-foreground">
+              <div className="flex items-center gap-2 text-white/80">
                 <History className="h-4 w-4 text-[hsl(var(--success))]" />
-                <span>최근 업데이트 <strong className="text-foreground">{recentCommissions.length}건</strong></span>
+                <span>최근 업데이트 <strong className="text-white">{recentCommissions.length}건</strong></span>
               </div>
             </div>
           </CardContent>
