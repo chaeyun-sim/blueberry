@@ -20,6 +20,8 @@ import {
   ArrowUp,
   ArrowDown,
   List,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react";
 import {
   ChartContainer,
@@ -106,6 +108,16 @@ const SalesStats = () => {
   const [groupByCategory, setGroupByCategory] = useState(true);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [excelData, setExcelData] = useState(rawExcelData);
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
+
+  const toggleGroup = (category: string) => {
+    setCollapsedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(category)) next.delete(category);
+      else next.add(category);
+      return next;
+    });
+  };
 
   const handleExcelUpload = useCallback((data: ExcelRow[]) => {
     setExcelData(data);
@@ -521,9 +533,18 @@ const SalesStats = () => {
                     {groupByCategory && groupedData
                       ? Object.entries(groupedData).map(([category, rows]) => (
                           <>
-                            <TableRow key={`group-${category}`} className="bg-muted/40 hover:bg-muted/40">
+                            <TableRow
+                              key={`group-${category}`}
+                              className="bg-muted/40 hover:bg-muted/60 cursor-pointer select-none"
+                              onClick={() => filterCategory === "ALL" && toggleGroup(category)}
+                            >
                               <TableCell colSpan={4} className="py-2">
                                 <span className="inline-flex items-center gap-2 text-sm font-display font-bold">
+                                  {filterCategory === "ALL" && (
+                                    collapsedGroups.has(category)
+                                      ? <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                                      : <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                                  )}
                                   <span className="px-2 py-0.5 rounded-full text-xs bg-primary text-primary-foreground">
                                     {category}
                                   </span>
@@ -531,7 +552,7 @@ const SalesStats = () => {
                                 </span>
                               </TableCell>
                             </TableRow>
-                            {rows.map((row, i) => (
+                            {!collapsedGroups.has(category) && rows.map((row, i) => (
                               <TableRow key={row.id}>
                                 <TableCell className="text-muted-foreground text-xs">{i + 1}</TableCell>
                                 <TableCell className="text-sm tabular-nums">{row.orderDate}</TableCell>
