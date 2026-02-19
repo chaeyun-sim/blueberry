@@ -212,12 +212,19 @@ const Dashboard = () => {
 
         {/* ① Top-Left: Today */}
         <Card className="border-border/50 overflow-hidden relative min-h-[180px]">
-          {/* Background image */}
-          <img
-            src={getTodayBg(clock.getHours())}
-            alt=""
-            className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-          />
+          {/* Background image with crossfade */}
+          <AnimatePresence mode="wait">
+            <motion.img
+              key={getTodayBg(clock.getHours())}
+              src={getTodayBg(clock.getHours())}
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1.2, ease: "easeInOut" }}
+            />
+          </AnimatePresence>
           <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/40 to-black/10" />
           <CardContent className="p-6 relative z-10">
             <div className="flex items-center justify-between mb-1">
