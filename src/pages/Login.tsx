@@ -91,8 +91,8 @@ export default function Login() {
           </div>
 
           <Button
-            variant="outline"
-            className="w-full"
+            variant="ghost"
+            className="w-full border border-transparent hover:bg-foreground/5"
             onClick={() => navigate("/")}
           >
             게스트로 둘러보기
