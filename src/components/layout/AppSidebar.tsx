@@ -18,7 +18,6 @@ const navItems = [
   { title: "악보 관리", url: "/scores", icon: Music },
   { title: "캘린더", url: "/calendar", icon: CalendarDays },
   { title: "매출 통계", url: "/stats", icon: BarChart3 },
-  { title: "새 의뢰", url: "/new", icon: PlusCircle },
 ];
 
 export function AppSidebar() {
@@ -65,6 +64,15 @@ export function AppSidebar() {
             </button>
           ))}
         </div>
+
+        {/* 새 의뢰 버튼 */}
+        <button
+          onClick={() => navigate("/new")}
+          className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-semibold bg-primary text-primary-foreground hover:opacity-90 transition-opacity mt-3"
+        >
+          <PlusCircle className="h-4 w-4 shrink-0" />
+          {!collapsed && <span>새 의뢰</span>}
+        </button>
       </SidebarContent>
 
       <SidebarFooter className="px-3 pb-4">
