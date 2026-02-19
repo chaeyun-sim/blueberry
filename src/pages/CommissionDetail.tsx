@@ -87,7 +87,7 @@ const CommissionDetail = () => {
       {/* Status Progress */}
       <Card className="mb-8 border-border/50">
         <CardContent className="p-6">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between w-full">
             {steps.map((step, i) => (
               <div key={step.status} className="flex items-center flex-1">
                 <div className="flex flex-col items-center">
