@@ -119,7 +119,7 @@ const CommissionDetail = () => {
       </div>
 
       {/* Linked Scores */}
-      <Card className="border-border/50 mb-24">
+      <Card className="border-border/50">
         <CardContent className="p-5">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-display font-semibold">연결된 악보</h2>
@@ -146,8 +146,8 @@ const CommissionDetail = () => {
       </Card>
 
       {/* Bottom Status Action Bar */}
-      <div className="sticky bottom-0 -mx-6 -mb-6 mt-8 border-t border-border bg-background/95 backdrop-blur-sm z-30">
-        <div className="px-6 py-4 flex justify-end">
+      <div className="sticky bottom-0 -mx-6 -mb-6 mt-4 border-t border-border bg-background/95 backdrop-blur-sm z-30">
+        <div className="px-6 py-3 flex justify-end">
           {detail.status === "received" && (
             <div className="flex items-center gap-3">
               <Button onClick={handleNextStatus} className="gap-2 px-6 py-5">
