@@ -36,7 +36,7 @@
 
     --radius: 0.75rem;
 
-    --status-received: 202 100% 64%;
+    --status-received: 0 75% 60%;
     --status-working: 217 85% 47%;
     --status-delivered: 260 50% 55%;
     --status-complete: 152 60% 45%;
@@ -85,7 +85,7 @@
     --input: 204 30% 20%;
     --ring: 217 85% 55%;
 
-    --status-received: 202 100% 64%;
+    --status-received: 0 75% 65%;
     --status-working: 217 85% 55%;
     --status-delivered: 260 50% 60%;
     --status-complete: 152 60% 50%;
