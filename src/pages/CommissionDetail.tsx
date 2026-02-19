@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { CommissionStatus } from "@/components/StatusBadge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, FileImage, Link2, ChevronRight, Check, X, Mail } from "lucide-react";
+import { ArrowLeft, Link2, ChevronRight, Check, X, Mail, ExternalLink } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -86,11 +86,16 @@ const CommissionDetail = () => {
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <div className="mb-8">
         {/* Commission Info */}
         <Card className="border-border/50">
           <CardContent className="p-5">
-            <h2 className="font-display font-semibold mb-4">의뢰 정보</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-display font-semibold">의뢰 정보</h2>
+              <button className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors">
+                원본 이미지 보기 <ExternalLink className="h-3 w-3" />
+              </button>
+            </div>
             <dl className="space-y-3">
               {[
                 ["편성", detail.arrangement],
@@ -109,17 +114,6 @@ const CommissionDetail = () => {
                 <p className="text-sm text-muted-foreground">{detail.notes}</p>
               </div>
             )}
-          </CardContent>
-        </Card>
-
-        {/* Original Image */}
-        <Card className="border-border/50">
-          <CardContent className="p-5">
-            <h2 className="font-display font-semibold mb-4">원본 이미지</h2>
-            <div className="min-h-[200px] border border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-3 bg-muted/30">
-              <FileImage className="h-10 w-10 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">카톡 캡처 이미지</p>
-            </div>
           </CardContent>
         </Card>
       </div>
@@ -153,36 +147,32 @@ const CommissionDetail = () => {
 
       {/* Bottom Status Action Bar */}
       <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-background/95 backdrop-blur-sm z-50">
-        <div className="max-w-screen-xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">현재 상태:</span>
-            <span className="text-sm font-semibold">{steps[currentStepIndex]?.label}</span>
-          </div>
-          <div className="flex items-center gap-3">
-            {detail.status === "received" && (
-              <>
-                <Button onClick={handleNextStatus} className="gap-2">
-                  <Check className="h-4 w-4" /> 의뢰 승낙
-                </Button>
-                <Button variant="destructive" onClick={handleReject} className="gap-2">
-                  <X className="h-4 w-4" /> 의뢰 거절
-                </Button>
-              </>
-            )}
-            {detail.status === "working" && (
-              <Button onClick={handleNextStatus} className="gap-2">
-                <ChevronRight className="h-4 w-4" /> 완료로 변경
+        <div className="max-w-screen-xl mx-auto px-6 py-4">
+          {detail.status === "received" && (
+            <div className="flex items-center gap-3">
+              <Button onClick={handleNextStatus} size="lg" className="flex-1 gap-2 h-12 text-base">
+                <Check className="h-5 w-5" /> 의뢰 승낙
               </Button>
-            )}
-            {detail.status === "complete" && (
-              <Button onClick={handleNextStatus} className="gap-2">
-                <Mail className="h-4 w-4" /> 메일 전송 및 납품
+              <Button variant="destructive" onClick={handleReject} size="lg" className="flex-1 gap-2 h-12 text-base">
+                <X className="h-5 w-5" /> 의뢰 거절
               </Button>
-            )}
-            {detail.status === "delivered" && (
+            </div>
+          )}
+          {detail.status === "working" && (
+            <Button onClick={handleNextStatus} size="lg" className="w-full gap-2 h-12 text-base">
+              <ChevronRight className="h-5 w-5" /> 완료로 변경
+            </Button>
+          )}
+          {detail.status === "complete" && (
+            <Button onClick={handleNextStatus} size="lg" className="w-full gap-2 h-12 text-base">
+              <Mail className="h-5 w-5" /> 메일 전송 및 납품
+            </Button>
+          )}
+          {detail.status === "delivered" && (
+            <div className="text-center py-1">
               <p className="text-sm text-muted-foreground">납품이 완료된 의뢰입니다.</p>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </AppLayout>
