@@ -2,7 +2,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, FileImage } from "lucide-react";
+import { ArrowLeft, Download, FileImage } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 
 const mockArrangementDetail = {
@@ -52,37 +52,19 @@ const ScoreDetail = () => {
 
       <PageHeader title={detail.title} description={detail.arrangement} />
 
-      <div className="grid grid-cols-1 gap-6">
-        {/* Score Info */}
-        <Card className="border-border/50">
-          <CardContent className="p-5">
-            <h2 className="font-display font-semibold mb-4">악보 정보</h2>
-            <dl className="space-y-3">
-              {[
-                ["곡명", detail.title],
-                ["편성", detail.arrangement],
-                ["등록일", detail.createdAt],
-              ].map(([label, value]) => (
-                <div key={label} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
-                  <dt className="text-sm text-muted-foreground">{label}</dt>
-                  <dd className="text-sm font-medium">{value}</dd>
-                </div>
-              ))}
-            </dl>
-          </CardContent>
-        </Card>
-
-        {/* Score Preview */}
-        <Card className="border-border/50">
-          <CardContent className="p-5">
-            <h2 className="font-display font-semibold mb-4">악보 미리보기</h2>
-            <div className="min-h-[400px] border border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-3 bg-muted/30">
-              <FileImage className="h-12 w-12 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">악보 이미지가 여기에 표시됩니다</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <Card className="border-border/50">
+        <CardContent className="p-5">
+          <div className="min-h-[500px] border border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-3 bg-muted/30">
+            <FileImage className="h-12 w-12 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">악보 PDF 미리보기</p>
+          </div>
+          <div className="flex justify-center mt-4">
+            <Button variant="ghost" className="gap-2 text-muted-foreground">
+              <Download className="h-4 w-4" /> 다운로드
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </AppLayout>
   );
 };

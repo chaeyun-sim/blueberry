@@ -124,10 +124,40 @@ const CommissionDetail = () => {
         </Card>
       </div>
 
-      {/* Status Action */}
-      <Card className="mb-8 border-border/50">
+      {/* Linked Scores */}
+      <Card className="border-border/50 mb-24">
         <CardContent className="p-5">
-          <h2 className="font-display font-semibold mb-4">작업 현황 관리</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-display font-semibold">연결된 악보</h2>
+            <Button variant="outline" size="sm" className="gap-2">
+              <Link2 className="h-4 w-4" /> 악보 연결
+            </Button>
+          </div>
+          {detail.linkedScores.length > 0 ? (
+            <div className="space-y-3">
+              {detail.linkedScores.map((score) => (
+                <div key={score.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer">
+                  <div>
+                    <p className="font-medium">{score.title}</p>
+                    <p className="text-sm text-muted-foreground">{score.arrangement}</p>
+                  </div>
+                  <span className="text-xs px-2 py-1 rounded-md bg-accent/15 text-accent font-medium">{score.version}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground text-center py-8">연결된 악보가 없습니다</p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Bottom Status Action Bar */}
+      <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-background/95 backdrop-blur-sm z-50">
+        <div className="max-w-screen-xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">현재 상태:</span>
+            <span className="text-sm font-semibold">{steps[currentStepIndex]?.label}</span>
+          </div>
           <div className="flex items-center gap-3">
             {detail.status === "received" && (
               <>
@@ -153,35 +183,8 @@ const CommissionDetail = () => {
               <p className="text-sm text-muted-foreground">납품이 완료된 의뢰입니다.</p>
             )}
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Linked Scores */}
-      <Card className="border-border/50">
-        <CardContent className="p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-display font-semibold">연결된 악보</h2>
-            <Button variant="outline" size="sm" className="gap-2">
-              <Link2 className="h-4 w-4" /> 악보 연결
-            </Button>
-          </div>
-          {detail.linkedScores.length > 0 ? (
-            <div className="space-y-3">
-              {detail.linkedScores.map((score) => (
-                <div key={score.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer">
-                  <div>
-                    <p className="font-medium">{score.title}</p>
-                    <p className="text-sm text-muted-foreground">{score.arrangement}</p>
-                  </div>
-                  <span className="text-xs px-2 py-1 rounded-md bg-accent/15 text-accent font-medium">{score.version}</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground text-center py-8">연결된 악보가 없습니다</p>
-          )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </AppLayout>
   );
 };
