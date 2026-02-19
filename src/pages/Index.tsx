@@ -159,8 +159,10 @@ const Dashboard = () => {
         </Button>
       </PageHeader>
 
-      {/* Bento Grid — ref image: top row tall, bottom row shorter, ~20px gap */}
-      <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] lg:grid-rows-[minmax(200px,auto)_minmax(0,auto)] gap-5">
+      {/* Bento Grid — top: 3fr 2fr, bottom: 2fr 3fr (staggered like ref) */}
+      <div className="flex flex-col gap-5">
+        {/* Top Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-5">
 
         {/* ① Top-Left: Today */}
         <Card className="border-border/50 overflow-hidden">
@@ -190,7 +192,10 @@ const Dashboard = () => {
             <MiniCalendar onNavigate={() => navigate("/calendar")} />
           </CardContent>
         </Card>
+        </div>
 
+        {/* Bottom Row — flipped ratio: 2fr 3fr */}
+        <div className="grid grid-cols-1 lg:grid-cols-[2fr_3fr] gap-5">
         {/* ③ Bottom-Left: Revenue + Commission Summary — split into 2 stacked cards */}
         <div className="flex flex-col gap-5">
           {/* Revenue Slider Card */}
@@ -312,6 +317,7 @@ const Dashboard = () => {
             </div>
           </CardContent>
         </Card>
+        </div>
       </div>
     </AppLayout>
   );
