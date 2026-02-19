@@ -13,6 +13,7 @@ import ScoreDetail from "./pages/ScoreDetail";
 import ScoreRegister from "./pages/ScoreRegister";
 import SalesStats from "./pages/SalesStats";
 import CalendarView from "./pages/CalendarView";
+import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/scores/new" element={<ScoreRegister />} />
             <Route path="/stats" element={<SalesStats />} />
             <Route path="/calendar" element={<CalendarView />} />
+            <Route path="/login" element={<Login />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
