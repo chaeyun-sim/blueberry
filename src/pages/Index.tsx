@@ -33,7 +33,7 @@ const Dashboard = () => {
   return (
     <AppLayout>
       <PageHeader title="대시보드" description="의뢰 현황을 한눈에 확인하세요">
-        <Button onClick={() => navigate("/commissions/new")} className="gap-2">
+        <Button onClick={() => navigate("/new")} className="gap-2">
           <PlusCircle className="h-4 w-4" />
           새 의뢰
         </Button>
