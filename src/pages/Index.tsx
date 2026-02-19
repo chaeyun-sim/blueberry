@@ -4,7 +4,7 @@ import { StatusBadge, CommissionStatus } from "@/components/StatusBadge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
-  ClipboardList, Clock, Truck, CheckCircle2, AlertTriangle,
+  ClipboardList, Clock, Truck, CheckCircle2, History,
   PlusCircle, TrendingUp, DollarSign, Sun, CloudRain, Cloud,
   ChevronLeft, ChevronRight, Music,
 } from "lucide-react";
@@ -15,10 +15,10 @@ import lofiCornerImg from "@/assets/lofi-corner.png";
 
 // ── Data ──
 
-const urgentCommissions = [
-  { id: "1", title: "Canon in D", arrangement: "현악 4중주", deadline: "2026-02-21", daysLeft: 2 },
-  { id: "2", title: "River Flows in You", arrangement: "피아노 솔로", deadline: "2026-02-23", daysLeft: 4 },
-  { id: "3", title: "Spring Waltz", arrangement: "플룻 듀엣", deadline: "2026-02-25", daysLeft: 6 },
+const recentCommissions = [
+  { id: "1", title: "Canon in D", arrangement: "현악 4중주", status: "working" as const, updatedAt: "2시간 전" },
+  { id: "2", title: "River Flows in You", arrangement: "피아노 솔로", status: "complete" as const, updatedAt: "5시간 전" },
+  { id: "3", title: "Spring Waltz", arrangement: "플룻 듀엣", status: "received" as const, updatedAt: "어제" },
 ];
 
 const commissionSummary = {
@@ -200,8 +200,8 @@ const Dashboard = () => {
                 <span>진행 중인 의뢰 <strong className="text-foreground">{commissionSummary.working}건</strong></span>
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
-                <AlertTriangle className="h-4 w-4 text-[hsl(var(--warning))]" />
-                <span>마감 임박 <strong className="text-[hsl(var(--warning))]">{urgentCommissions.filter(c => c.daysLeft <= 3).length}건</strong></span>
+                <History className="h-4 w-4 text-[hsl(var(--success))]" />
+                <span>최근 업데이트 <strong className="text-foreground">{recentCommissions.length}건</strong></span>
               </div>
             </div>
           </CardContent>
@@ -311,33 +311,28 @@ const Dashboard = () => {
           </Card>
         </div>
 
-        {/* ④ Bottom-Right: 마감 임박 */}
-        <Card className="bg-[hsl(var(--warning)/0.08)]">
+        {/* ④ Bottom-Right: 최근 작업 */}
+        <Card className="border-border/50">
           <CardContent className="p-5 h-full flex flex-col">
             <div className="flex items-center gap-2 mb-4">
-              <AlertTriangle className="h-5 w-5 text-[hsl(var(--warning))]" />
-              <h2 className="font-display font-semibold text-sm">마감 임박</h2>
+              <History className="h-5 w-5 text-foreground" />
+              <h2 className="font-display font-semibold text-sm">최근 작업</h2>
             </div>
             <div className="space-y-2.5 flex-1">
-              {urgentCommissions.map((c) => (
+              {recentCommissions.map((c) => (
                 <div
                   key={c.id}
-                  className="flex items-center justify-between p-3 rounded-lg bg-background/80 cursor-pointer hover:bg-muted/50 transition-colors"
+                  className="flex items-center justify-between p-3 rounded-lg bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors"
                   onClick={() => navigate(`/commissions/${c.id}`)}
                 >
                   <div>
                     <p className="font-medium text-sm">{c.title}</p>
                     <p className="text-xs text-muted-foreground">{c.arrangement}</p>
                   </div>
-                  <span
-                    className={`inline-block px-2.5 py-1 rounded-full text-xs font-bold ${
-                      c.daysLeft <= 3
-                        ? "bg-[hsl(var(--warning)/0.15)] text-[hsl(var(--warning))]"
-                        : "bg-muted text-muted-foreground"
-                    }`}
-                  >
-                    D-{c.daysLeft}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <StatusBadge status={c.status} />
+                    <span className="text-[10px] text-muted-foreground">{c.updatedAt}</span>
+                  </div>
                 </div>
               ))}
             </div>

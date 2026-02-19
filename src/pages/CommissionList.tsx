@@ -95,17 +95,17 @@ const CommissionList = () => {
               {filtered.map((item) => (
                 <TableRow key={item.id} className="cursor-pointer" onClick={() => navigate(`/commissions/${item.id}`)}>
                   <TableCell className="font-medium">{item.title}</TableCell>
-                  <TableCell className="text-muted-foreground">{item.arrangement}</TableCell>
+                  <TableCell className="text-foreground">{item.arrangement}</TableCell>
                   <TableCell>
                     {item.version !== "normal" ? (
-                      <span className="text-xs px-2 py-1 rounded-md bg-accent/15 text-accent font-medium capitalize">
+                      <span className="text-xs px-2 py-1 rounded-md bg-[hsl(var(--warning)/0.12)] text-[hsl(var(--warning))] font-medium capitalize">
                         {versionLabel(item.version)}
                       </span>
                     ) : (
                       <span className="text-muted-foreground">-</span>
                     )}
                   </TableCell>
-                  <TableCell className="text-muted-foreground">{item.deadline}</TableCell>
+                  <TableCell className="text-foreground">{item.deadline}</TableCell>
                   <TableCell><StatusBadge status={item.status} /></TableCell>
                 </TableRow>
               ))}
