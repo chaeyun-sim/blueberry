@@ -1,3 +1,4 @@
+import { useState, useMemo } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +16,10 @@ import {
   CalendarDays,
   Trophy,
   Layers,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  List,
 } from "lucide-react";
 import {
   ChartContainer,
@@ -63,28 +68,62 @@ const topArrangements = [
   { rank: 5, arrangement: "QUINTET (Str)", sales: 78, revenue: 1560000 },
 ];
 
-const lastMonthSales = [
-  { date: "12/1", revenue: 85000 },
-  { date: "12/5", revenue: 120000 },
-  { date: "12/10", revenue: 95000 },
-  { date: "12/15", revenue: 210000 },
-  { date: "12/20", revenue: 180000 },
-  { date: "12/25", revenue: 340000 },
-  { date: "12/31", revenue: 150000 },
+// Mock raw Excel data
+const rawExcelData = [
+  { id: 1, orderDate: "2026-01-03 14:23", category: "CLASSIC", product: "Canon in D - QUARTET(Vn, Vn, Va, Vc)", amount: 15000 },
+  { id: 2, orderDate: "2026-01-04 09:11", category: "ANI", product: "君をのせて - DUET(Fl, Pf)", amount: 12000 },
+  { id: 3, orderDate: "2026-01-05 18:45", category: "CLASSIC", product: "River Flows in You - SOLO(Piano)", amount: 10000 },
+  { id: 4, orderDate: "2026-01-06 11:30", category: "OST", product: "Kiss the Rain - TRIO(Vn, Va, Vc)", amount: 15000 },
+  { id: 5, orderDate: "2026-01-07 16:02", category: "CLASSIC", product: "Canon in D - QUARTET(Vn, Vn, Va, Vc)", amount: 15000 },
+  { id: 6, orderDate: "2026-01-08 10:15", category: "ETC", product: "Wedding March - QUINTET(Brass)", amount: 20000 },
+  { id: 7, orderDate: "2026-01-09 13:40", category: "ANI", product: "Merry Go Round of Life - DUET(Vn, Pf)", amount: 12000 },
+  { id: 8, orderDate: "2026-01-10 08:55", category: "CLASSIC", product: "Spring Waltz - QUARTET(Vn, Vn, Va, Vc)", amount: 15000 },
+  { id: 9, orderDate: "2026-01-11 15:20", category: "OST", product: "A Thousand Years - QUINTET(Str)", amount: 20000 },
+  { id: 10, orderDate: "2026-01-12 12:00", category: "CLASSIC", product: "Canon in D - SOLO(Piano)", amount: 10000 },
+  { id: 11, orderDate: "2026-01-13 17:30", category: "ANI", product: "君をのせて - QUARTET(Vn, Vn, Va, Vc)", amount: 15000 },
+  { id: 12, orderDate: "2026-01-14 09:45", category: "CLASSIC", product: "River Flows in You - DUET(Fl, Pf)", amount: 12000 },
+  { id: 13, orderDate: "2026-01-15 14:10", category: "OST", product: "Butterfly - TRIO(Cl, Cl, Pf)", amount: 15000 },
+  { id: 14, orderDate: "2026-01-16 11:25", category: "CLASSIC", product: "Canon in D - QUARTET(Vn, Vn, Va, Vc)", amount: 15000 },
+  { id: 15, orderDate: "2026-01-17 16:50", category: "ETC", product: "Happy Birthday - SOLO(Piano)", amount: 8000 },
 ];
 
 const barChartConfig: ChartConfig = {
   revenue: { label: "매출", color: "hsl(var(--primary))" },
 };
 
-const lastMonthChartConfig: ChartConfig = {
-  revenue: { label: "매출", color: "hsl(var(--accent))" },
-};
-
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat("ko-KR", { style: "currency", currency: "KRW" }).format(value);
 
+type SortKey = "orderDate" | "category" | "product" | "amount";
+type SortDir = "asc" | "desc";
+
 const SalesStats = () => {
+  const [sortKey, setSortKey] = useState<SortKey>("orderDate");
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
+
+  const toggleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  };
+
+  const sortedData = useMemo(() => {
+    return [...rawExcelData].sort((a, b) => {
+      const aVal = a[sortKey];
+      const bVal = b[sortKey];
+      const cmp = typeof aVal === "number" ? aVal - (bVal as number) : String(aVal).localeCompare(String(bVal), "ko");
+      return sortDir === "asc" ? cmp : -cmp;
+    });
+  }, [sortKey, sortDir]);
+
+  const SortIcon = ({ col }: { col: SortKey }) => {
+    if (sortKey !== col) return <ArrowUpDown className="h-3 w-3 ml-1 opacity-40" />;
+    return sortDir === "asc" ? <ArrowUp className="h-3 w-3 ml-1" /> : <ArrowDown className="h-3 w-3 ml-1" />;
+  };
+
   return (
     <AppLayout>
       <PageHeader title="매출 통계" description="엑셀 데이터 기반 매출 분석">
@@ -103,7 +142,7 @@ const SalesStats = () => {
               <span className="text-xs text-muted-foreground font-medium">총 매출</span>
             </div>
             <p className="text-2xl font-display font-bold">{formatCurrency(19170000)}</p>
-            <p className="text-xs text-status-complete mt-1 flex items-center gap-1">
+            <p className="text-xs text-[hsl(var(--status-complete))] mt-1 flex items-center gap-1">
               <TrendingUp className="h-3 w-3" /> +12.5% vs 작년
             </p>
           </CardContent>
@@ -115,7 +154,7 @@ const SalesStats = () => {
               <span className="text-xs text-muted-foreground font-medium">총 판매건</span>
             </div>
             <p className="text-2xl font-display font-bold">1,284</p>
-            <p className="text-xs text-status-complete mt-1 flex items-center gap-1">
+            <p className="text-xs text-[hsl(var(--status-complete))] mt-1 flex items-center gap-1">
               <TrendingUp className="h-3 w-3" /> +8.3% vs 작년
             </p>
           </CardContent>
@@ -142,7 +181,7 @@ const SalesStats = () => {
         </Card>
       </div>
 
-      {/* Tabs for different analysis */}
+      {/* Tabs */}
       <Tabs defaultValue="all" className="space-y-6">
         <TabsList className="grid w-full grid-cols-3 max-w-md">
           <TabsTrigger value="all" className="gap-1.5">
@@ -151,18 +190,17 @@ const SalesStats = () => {
           </TabsTrigger>
           <TabsTrigger value="yearly" className="gap-1.5">
             <CalendarDays className="h-3.5 w-3.5" />
-            한 해 분석
+            연별 분석
           </TabsTrigger>
-          <TabsTrigger value="monthly" className="gap-1.5">
-            <CalendarDays className="h-3.5 w-3.5" />
-            지난 달
+          <TabsTrigger value="raw" className="gap-1.5">
+            <List className="h-3.5 w-3.5" />
+            전체 보기
           </TabsTrigger>
         </TabsList>
 
         {/* 전체 분석 */}
         <TabsContent value="all" className="space-y-6">
           <div className="grid lg:grid-cols-3 gap-6">
-            {/* Category Pie Chart */}
             <Card className="border-border/50">
               <CardHeader className="pb-2">
                 <CardTitle className="text-base font-display">카테고리별 분포</CardTitle>
@@ -199,7 +237,6 @@ const SalesStats = () => {
               </CardContent>
             </Card>
 
-            {/* Top Songs */}
             <Card className="border-border/50 lg:col-span-2">
               <CardHeader className="pb-2">
                 <CardTitle className="text-base font-display flex items-center gap-2">
@@ -238,7 +275,6 @@ const SalesStats = () => {
             </Card>
           </div>
 
-          {/* Top Arrangements */}
           <Card className="border-border/50">
             <CardHeader className="pb-2">
               <CardTitle className="text-base font-display flex items-center gap-2">
@@ -271,7 +307,7 @@ const SalesStats = () => {
           </Card>
         </TabsContent>
 
-        {/* 한 해 분석 */}
+        {/* 연별 분석 */}
         <TabsContent value="yearly" className="space-y-6">
           <div className="flex items-center gap-3 mb-2">
             <Select defaultValue="2026">
@@ -355,103 +391,81 @@ const SalesStats = () => {
           </div>
         </TabsContent>
 
-        {/* 지난 달 분석 */}
-        <TabsContent value="monthly" className="space-y-6">
-          <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/30 text-sm text-muted-foreground mb-2">
-            <CalendarDays className="h-4 w-4" />
-            매월 10일~15일에 지난달 매출이 반영됩니다.
-          </div>
-
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-            <Card className="border-border/50">
-              <CardContent className="p-5">
-                <p className="text-xs text-muted-foreground mb-1">지난달 매출</p>
-                <p className="text-2xl font-display font-bold">{formatCurrency(2340000)}</p>
-                <p className="text-xs text-status-complete mt-1 flex items-center gap-1">
-                  <TrendingUp className="h-3 w-3" /> +15.2% vs 전달
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="border-border/50">
-              <CardContent className="p-5">
-                <p className="text-xs text-muted-foreground mb-1">판매 건수</p>
-                <p className="text-2xl font-display font-bold">127</p>
-              </CardContent>
-            </Card>
-            <Card className="border-border/50">
-              <CardContent className="p-5">
-                <p className="text-xs text-muted-foreground mb-1">건당 평균</p>
-                <p className="text-2xl font-display font-bold">{formatCurrency(18425)}</p>
-              </CardContent>
-            </Card>
-          </div>
-
+        {/* 전체 보기 (Raw Excel Data) */}
+        <TabsContent value="raw" className="space-y-6">
           <Card className="border-border/50">
             <CardHeader className="pb-2">
-              <CardTitle className="text-base font-display">지난달 매출 추이 (12월)</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base font-display flex items-center gap-2">
+                  <FileSpreadsheet className="h-4 w-4" />
+                  엑셀 데이터 전체 보기
+                </CardTitle>
+                <span className="text-xs text-muted-foreground">{rawExcelData.length}건</span>
+              </div>
             </CardHeader>
             <CardContent>
-              <ChartContainer config={lastMonthChartConfig} className="aspect-[2/1] w-full max-h-[250px]">
-                <BarChart data={lastMonthSales}>
-                  <CartesianGrid vertical={false} strokeDasharray="3 3" />
-                  <XAxis dataKey="date" tickLine={false} axisLine={false} fontSize={12} />
-                  <YAxis
-                    tickLine={false}
-                    axisLine={false}
-                    fontSize={12}
-                    tickFormatter={(v) => `${(v / 10000).toFixed(0)}만`}
-                  />
-                  <ChartTooltip
-                    content={
-                      <ChartTooltipContent
-                        formatter={(value) => formatCurrency(value as number)}
-                      />
-                    }
-                  />
-                  <Bar dataKey="revenue" fill="var(--color-revenue)" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ChartContainer>
+              <div className="rounded-md border border-border/50 overflow-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-xs uppercase w-12">#</TableHead>
+                      <TableHead
+                        className="text-xs uppercase cursor-pointer select-none hover:text-foreground transition-colors"
+                        onClick={() => toggleSort("orderDate")}
+                      >
+                        <span className="inline-flex items-center">
+                          주문일시
+                          <SortIcon col="orderDate" />
+                        </span>
+                      </TableHead>
+                      <TableHead
+                        className="text-xs uppercase cursor-pointer select-none hover:text-foreground transition-colors"
+                        onClick={() => toggleSort("category")}
+                      >
+                        <span className="inline-flex items-center">
+                          대분류
+                          <SortIcon col="category" />
+                        </span>
+                      </TableHead>
+                      <TableHead
+                        className="text-xs uppercase cursor-pointer select-none hover:text-foreground transition-colors"
+                        onClick={() => toggleSort("product")}
+                      >
+                        <span className="inline-flex items-center">
+                          주문상품
+                          <SortIcon col="product" />
+                        </span>
+                      </TableHead>
+                      <TableHead
+                        className="text-xs uppercase text-right cursor-pointer select-none hover:text-foreground transition-colors"
+                        onClick={() => toggleSort("amount")}
+                      >
+                        <span className="inline-flex items-center justify-end">
+                          상품총액
+                          <SortIcon col="amount" />
+                        </span>
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {sortedData.map((row, i) => (
+                      <TableRow key={row.id}>
+                        <TableCell className="text-muted-foreground text-xs">{i + 1}</TableCell>
+                        <TableCell className="text-sm tabular-nums">{row.orderDate}</TableCell>
+                        <TableCell>
+                          <span className="px-2 py-0.5 rounded-full text-xs bg-secondary text-secondary-foreground">
+                            {row.category}
+                          </span>
+                        </TableCell>
+                        <TableCell className="font-medium text-sm">{row.product}</TableCell>
+                        <TableCell className="text-right tabular-nums text-sm">{formatCurrency(row.amount)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </CardContent>
           </Card>
-
-          <div className="grid lg:grid-cols-2 gap-6">
-            <Card className="border-border/50">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base font-display">지난달 베스트</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {topSongs.slice(0, 3).map((song) => (
-                    <div key={song.rank} className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-                      <span className="text-lg font-display font-bold text-primary w-8">{song.rank}</span>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate">{song.title}</p>
-                        <p className="text-xs text-muted-foreground">{song.sales}건</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="border-border/50">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base font-display">지난달 인기 편성</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {topArrangements.slice(0, 3).map((arr) => (
-                    <div key={arr.rank} className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-                      <span className="text-lg font-display font-bold text-primary w-8">{arr.rank}</span>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate">{arr.arrangement}</p>
-                        <p className="text-xs text-muted-foreground">{arr.sales}건</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
         </TabsContent>
       </Tabs>
     </AppLayout>
