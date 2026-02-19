@@ -81,12 +81,22 @@ export default function Login() {
             </Button>
           </form>
 
-          <p className="text-center text-xs text-muted-foreground mt-6">
-            계정이 없으신가요?{" "}
-            <span className="text-primary font-medium cursor-pointer hover:underline">
-              회원가입
-            </span>
-          </p>
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-border" />
+            </div>
+            <div className="relative flex justify-center text-xs">
+              <span className="bg-card px-3 text-muted-foreground">또는</span>
+            </div>
+          </div>
+
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() => navigate("/")}
+          >
+            게스트로 둘러보기
+          </Button>
         </CardContent>
       </Card>
     </div>
