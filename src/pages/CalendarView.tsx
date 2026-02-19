@@ -29,11 +29,17 @@ const mockCommissions: CalendarCommission[] = [
 
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
 
-const statusColorClass: Record<CommissionStatus, string> = {
-  received: "bg-[hsl(var(--warning)/0.12)] text-[hsl(var(--warning))] border-[hsl(var(--warning)/0.25)]",
-  working: "bg-[hsl(var(--status-working)/0.12)] text-[hsl(var(--status-working))] border-[hsl(var(--status-working)/0.25)]",
-  complete: "bg-[hsl(var(--success)/0.12)] text-[hsl(var(--success))] border-[hsl(var(--success)/0.25)]",
-  delivered: "bg-[hsl(var(--status-delivered)/0.12)] text-[hsl(var(--status-delivered))] border-[hsl(var(--status-delivered)/0.25)]",
+const getDateColorClass = (deadline: string) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const deadlineDate = new Date(deadline);
+  deadlineDate.setHours(0, 0, 0, 0);
+  if (deadlineDate < today) {
+    // Past: purple
+    return "bg-[hsl(var(--status-delivered)/0.12)] text-[hsl(var(--status-delivered))] border-[hsl(var(--status-delivered)/0.25)]";
+  }
+  // Today or future: orange
+  return "bg-[hsl(var(--warning)/0.12)] text-[hsl(var(--warning))] border-[hsl(var(--warning)/0.25)]";
 };
 
 export default function CalendarView() {
@@ -92,17 +98,17 @@ export default function CalendarView() {
       {/* Month Navigation */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <Button variant="outline" size="icon" onClick={() => goTo(-1)}>
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <h2 className="font-display font-bold text-xl tabular-nums">
-            {year}년 {month + 1}월
-          </h2>
-          <Button variant="outline" size="icon" onClick={() => goTo(1)}>
-            <ChevronRight className="h-4 w-4" />
-          </Button>
+        <Button variant="ghost" size="icon" className="hover:bg-foreground/5" onClick={() => goTo(-1)}>
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <h2 className="font-display font-bold text-xl tabular-nums">
+          {year}년 {month + 1}월
+        </h2>
+        <Button variant="ghost" size="icon" className="hover:bg-foreground/5" onClick={() => goTo(1)}>
+          <ChevronRight className="h-4 w-4" />
+        </Button>
         </div>
-        <Button variant="outline" size="sm" onClick={() => setCurrentDate(new Date(today.getFullYear(), today.getMonth(), 1))}>
+        <Button variant="ghost" size="sm" className="hover:bg-foreground/5" onClick={() => setCurrentDate(new Date(today.getFullYear(), today.getMonth(), 1))}>
           오늘
         </Button>
       </div>
@@ -171,7 +177,7 @@ export default function CalendarView() {
                         key={c.id}
                         className={cn(
                           "text-xs leading-tight px-1.5 py-0.5 rounded border cursor-pointer truncate font-medium transition-opacity hover:opacity-80",
-                          statusColorClass[c.status]
+                          getDateColorClass(c.deadline)
                         )}
                         onClick={() => navigate(`/commissions/${c.id}`)}
                         title={`${c.title} — ${c.arrangement}`}

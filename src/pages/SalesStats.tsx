@@ -186,7 +186,7 @@ const SalesStats = () => {
         <Card className="border-border/50">
           <CardContent className="p-5">
             <div className="flex items-center justify-between mb-2">
-              <DollarSign className="h-5 w-5 text-muted-foreground" />
+              <DollarSign className="h-5 w-5 text-foreground" />
               <span className="text-xs text-muted-foreground font-medium">총 매출</span>
             </div>
             <p className="text-2xl font-display font-bold">{formatCurrency(19170000)}</p>
@@ -198,7 +198,7 @@ const SalesStats = () => {
         <Card className="border-border/50">
           <CardContent className="p-5">
             <div className="flex items-center justify-between mb-2">
-              <FileSpreadsheet className="h-5 w-5 text-muted-foreground" />
+              <FileSpreadsheet className="h-5 w-5 text-foreground" />
               <span className="text-xs text-muted-foreground font-medium">총 판매건</span>
             </div>
             <p className="text-2xl font-display font-bold">1,284</p>
@@ -210,7 +210,7 @@ const SalesStats = () => {
         <Card className="border-border/50">
           <CardContent className="p-5">
             <div className="flex items-center justify-between mb-2">
-              <CalendarDays className="h-5 w-5 text-muted-foreground" />
+              <CalendarDays className="h-5 w-5 text-foreground" />
               <span className="text-xs text-muted-foreground font-medium">지난달 매출</span>
             </div>
             <p className="text-2xl font-display font-bold">{formatCurrency(1760000)}</p>
@@ -222,7 +222,7 @@ const SalesStats = () => {
         <Card className="border-border/50">
           <CardContent className="p-5">
             <div className="flex items-center justify-between mb-2">
-              <FileSpreadsheet className="h-5 w-5 text-muted-foreground" />
+              <FileSpreadsheet className="h-5 w-5 text-foreground" />
               <span className="text-xs text-muted-foreground font-medium">지난달 판매건</span>
             </div>
             <p className="text-2xl font-display font-bold">98</p>

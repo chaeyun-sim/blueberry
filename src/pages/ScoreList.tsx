@@ -130,8 +130,8 @@ const ScoreList = () => {
                         )}
                       </TableCell>
                       <TableCell className="font-medium">{score.title}</TableCell>
-                      <TableCell className="text-muted-foreground">{score.arrangements.length}개</TableCell>
-                      <TableCell className="text-right text-muted-foreground">{score.createdAt}</TableCell>
+                      <TableCell className="text-foreground">{score.arrangements.length}개</TableCell>
+                      <TableCell className="text-right text-foreground">{score.createdAt}</TableCell>
                     </TableRow>
                     {isExpanded &&
                       score.arrangements.map((arr) => (
