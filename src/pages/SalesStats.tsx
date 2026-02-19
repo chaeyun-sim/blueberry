@@ -100,7 +100,7 @@ const rawExcelData = [
 
 const barChartConfig: ChartConfig = {
   revenue: { label: "매출", color: "hsl(var(--primary))" },
-  prevRevenue: { label: "전년 매출", color: "hsl(var(--warning))" },
+  prevRevenue: { label: "전년 매출", color: "hsl(var(--warning) / 0.4)" },
 };
 
 const formatCurrency = (value: number) =>
