@@ -98,11 +98,12 @@
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-border transition-colors duration-150;
   }
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
+    transition: background-color 150ms ease, color 150ms ease;
   }
 
   h1, h2, h3, h4, h5, h6 {

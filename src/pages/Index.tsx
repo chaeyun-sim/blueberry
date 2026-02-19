@@ -11,7 +11,7 @@ const statusCards: { status: CommissionStatus; icon: typeof ClipboardList; count
   { status: "received", icon: ClipboardList, count: 3, label: "대기" },
   { status: "working", icon: Clock, count: 5, label: "작업중" },
   { status: "complete", icon: CheckCircle2, count: 12, label: "완료" },
-  { status: "delivered", icon: Truck, count: 2, label: "납품" },
+  { status: "delivered", icon: Truck, count: 2, label: "전달" },
 ];
 
 const urgentCommissions = [

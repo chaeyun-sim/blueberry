@@ -13,7 +13,7 @@ const steps: { status: CommissionStatus; label: string }[] = [
   { status: "received", label: "대기" },
   { status: "working", label: "작업중" },
   { status: "complete", label: "완료" },
-  { status: "delivered", label: "납품" },
+  { status: "delivered", label: "전달" },
 ];
 
 const mockDetail = {
@@ -73,11 +73,11 @@ const CommissionDetail = () => {
           )}
           {detail.status === "complete" && (
             <Button onClick={() => setTransitionOpen(true)} className="gap-2 px-6 py-5">
-              <Mail className="h-4 w-4" /> 메일 전송 및 납품
+              <Mail className="h-4 w-4" /> 메일 전송 및 전달
             </Button>
           )}
           {detail.status === "delivered" && (
-            <p className="text-sm text-muted-foreground py-2">납품이 완료된 의뢰입니다.</p>
+            <p className="text-sm text-muted-foreground py-2">전달이 완료된 의뢰입니다.</p>
           )}
         </div>
       </div>
