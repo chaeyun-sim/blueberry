@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { CommissionStatus, StatusBadge } from "@/components/StatusBadge";
+import { CommissionStatus } from "@/components/StatusBadge";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -108,16 +108,9 @@ export default function CalendarView() {
       </div>
 
       {/* Summary */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-        {(["received", "working", "complete", "delivered"] as CommissionStatus[]).map((s) => {
-          const count = monthCommissions.filter((c) => c.status === s).length;
-          return (
-            <div key={s} className="flex items-center gap-2 p-3 rounded-lg bg-card border border-border/50">
-              <StatusBadge status={s} />
-              <span className="text-sm font-display font-bold">{count}건</span>
-            </div>
-          );
-        })}
+      <div className="flex items-center gap-2 mb-6 p-3 rounded-lg bg-card border border-border/50">
+        <span className="text-sm text-muted-foreground">이번 달 마감</span>
+        <span className="text-sm font-display font-bold">{monthCommissions.length}건</span>
       </div>
 
       {/* Calendar Grid */}
@@ -170,10 +163,7 @@ export default function CalendarView() {
                     {commissions.slice(0, 3).map((c) => (
                       <div
                         key={c.id}
-                        className={cn(
-                          "text-[10px] leading-tight px-1.5 py-0.5 rounded border cursor-pointer truncate font-medium transition-opacity hover:opacity-80",
-                          statusColorClass[c.status]
-                        )}
+                        className="text-[10px] leading-tight px-1.5 py-0.5 rounded border border-primary/30 bg-primary/10 text-primary cursor-pointer truncate font-medium transition-opacity hover:opacity-80"
                         onClick={() => navigate(`/commissions/${c.id}`)}
                         title={`${c.title} — ${c.arrangement}`}
                       >

@@ -73,13 +73,14 @@ export function AppSidebar() {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild tooltip="새 의뢰">
+            <SidebarMenuButton asChild tooltip="새 의뢰" className="h-12">
               <NavLink to="/new">
                 <PlusCircle className="h-4 w-4" />
                 <span>새 의뢰</span>
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
+          <div className="my-1" />
           <SidebarMenuItem>
             <SidebarMenuButton
               tooltip={theme === "dark" ? "라이트 모드" : "다크 모드"}

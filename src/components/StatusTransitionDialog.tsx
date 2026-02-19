@@ -39,9 +39,9 @@ const transitionConfigs: Record<string, TransitionConfig> = {
     icon: FileCheck,
   },
   "complete→delivered": {
-    title: "납품 처리 — 메일 발송 증빙",
+    title: "전달 처리 — 메일 발송 증빙",
     description: "의뢰인에게 메일을 보낸 스크린샷을 첨부해 주세요.",
-    acceptLabel: "납품 완료",
+    acceptLabel: "전달 완료",
     fileLabel: "메일 발송 스크린샷",
     fileAccept: "image/*",
     icon: Mail,
