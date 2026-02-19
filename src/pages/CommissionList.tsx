@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/PageHeader";
 import { StatusBadge, CommissionStatus } from "@/components/StatusBadge";
@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PlusCircle, Search, LayoutGrid, List } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 type VersionType = "hard" | "easy" | "professional" | "normal";
 
@@ -34,7 +34,9 @@ const versionLabel = (v: VersionType) => {
 };
 
 const CommissionList = () => {
-  const [filter, setFilter] = useState<CommissionStatus | "all">("all");
+  const [searchParams] = useSearchParams();
+  const initialStatus = searchParams.get("status") as CommissionStatus | null;
+  const [filter, setFilter] = useState<CommissionStatus | "all">(initialStatus || "all");
   const [search, setSearch] = useState("");
   const [viewMode, setViewMode] = useState<"table" | "card">("table");
   const navigate = useNavigate();
@@ -47,12 +49,7 @@ const CommissionList = () => {
 
   return (
     <AppLayout>
-      <PageHeader title="의뢰 목록" description="모든 악보 의뢰를 관리합니다">
-        <Button onClick={() => navigate("/new")} className="gap-2">
-          <PlusCircle className="h-4 w-4" />
-          새 의뢰
-        </Button>
-      </PageHeader>
+      <PageHeader title="의뢰 목록" description="모든 악보 의뢰를 관리합니다" />
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6">

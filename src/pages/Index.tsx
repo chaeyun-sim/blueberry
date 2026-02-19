@@ -42,7 +42,7 @@ const Dashboard = () => {
       {/* Status Count Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {statusCards.map((item) => (
-          <Card key={item.status} className="hover-lift cursor-pointer border-border/50" onClick={() => navigate("/commissions")}>
+          <Card key={item.status} className="hover-lift cursor-pointer border-border/50" onClick={() => navigate(`/commissions?status=${item.status}`)}>
             <CardContent className="p-5">
               <div className="flex items-center justify-between mb-3">
                 <item.icon className="h-5 w-5 text-muted-foreground" />
