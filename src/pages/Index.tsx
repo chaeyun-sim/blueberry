@@ -11,6 +11,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect, useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import lofiEveningImg from "@/assets/lofi-evening.jpg";
 
 // ── Data ──
 
@@ -165,8 +166,13 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-5">
 
         {/* ① Top-Left: Today */}
-        <Card className="border-border/50 overflow-hidden">
-          <CardContent className="p-6">
+        <Card className="border-border/50 overflow-hidden relative">
+          <img
+            src={lofiEveningImg}
+            alt="Lo-fi evening illustration"
+            className="absolute inset-0 w-full h-full object-cover opacity-20"
+          />
+          <CardContent className="p-6 relative z-10">
             <p className="text-sm text-muted-foreground mb-1">{getFormattedDate()}</p>
             <h2 className="text-2xl font-display font-bold mb-4">{getGreeting()}</h2>
             <div className="flex items-center gap-6 text-sm">
