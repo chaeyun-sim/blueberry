@@ -310,10 +310,10 @@ const SalesStats = () => {
                   <TableBody>
                     {topSongs.map((song) => (
                       <TableRow key={song.rank}>
-                        <TableCell className="font-display font-bold text-primary">{song.rank}</TableCell>
+                        <TableCell className="font-display font-bold text-foreground">{song.rank}</TableCell>
                         <TableCell className="font-medium">{song.title}</TableCell>
                         <TableCell>
-                          <span className="px-2 py-0.5 rounded-full text-xs bg-secondary text-secondary-foreground">
+                          <span className="px-2 py-0.5 rounded-full text-xs bg-muted text-foreground font-medium">
                             {song.category}
                           </span>
                         </TableCell>
@@ -347,7 +347,7 @@ const SalesStats = () => {
                 <TableBody>
                   {topArrangements.map((arr) => (
                     <TableRow key={arr.rank}>
-                      <TableCell className="font-display font-bold text-primary">{arr.rank}</TableCell>
+                      <TableCell className="font-display font-bold text-foreground">{arr.rank}</TableCell>
                       <TableCell className="font-medium">{arr.arrangement}</TableCell>
                       <TableCell className="text-right tabular-nums">{arr.sales}</TableCell>
                       <TableCell className="text-right tabular-nums">{formatCurrency(arr.revenue)}</TableCell>
@@ -415,7 +415,7 @@ const SalesStats = () => {
                 <div className="space-y-3">
                   {topSongs.slice(0, 3).map((song) => (
                     <div key={song.rank} className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-                      <span className="text-lg font-display font-bold text-primary w-8">{song.rank}</span>
+                      <span className="text-lg font-display font-bold text-foreground w-8">{song.rank}</span>
                       <div className="flex-1 min-w-0">
                         <p className="font-medium truncate">{song.title}</p>
                         <p className="text-xs text-muted-foreground">{song.category} · {song.sales}건</p>
@@ -434,7 +434,7 @@ const SalesStats = () => {
                 <div className="space-y-3">
                   {topArrangements.slice(0, 3).map((arr) => (
                     <div key={arr.rank} className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-                      <span className="text-lg font-display font-bold text-primary w-8">{arr.rank}</span>
+                      <span className="text-lg font-display font-bold text-foreground w-8">{arr.rank}</span>
                       <div className="flex-1 min-w-0">
                         <p className="font-medium truncate">{arr.arrangement}</p>
                         <p className="text-xs text-muted-foreground">{arr.sales}건</p>
@@ -545,7 +545,7 @@ const SalesStats = () => {
                                       ? <ChevronRight className="h-4 w-4 text-muted-foreground" />
                                       : <ChevronDown className="h-4 w-4 text-muted-foreground" />
                                   )}
-                                  <span className="px-2 py-0.5 rounded-full text-xs bg-primary text-primary-foreground">
+                                  <span className="px-2 py-0.5 rounded-full text-xs bg-foreground text-background font-medium">
                                     {category}
                                   </span>
                                   <span className="text-muted-foreground font-normal text-xs">{rows.length}건</span>
