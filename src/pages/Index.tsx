@@ -3,16 +3,16 @@ import { PageHeader } from "@/components/PageHeader";
 import { StatusBadge, CommissionStatus } from "@/components/StatusBadge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ClipboardList, Clock, Truck, CheckCircle2, AlertTriangle, PlusCircle, TrendingUp, DollarSign, BarChart3 } from "lucide-react";
+import {
+  ClipboardList, Clock, Truck, CheckCircle2, AlertTriangle,
+  PlusCircle, TrendingUp, DollarSign, Sun, CloudRain, Cloud,
+  ChevronLeft, ChevronRight, Music,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { useState, useEffect, useMemo } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 
-const statusCards: { status: CommissionStatus; icon: typeof ClipboardList; count: number; label: string }[] = [
-  { status: "received", icon: ClipboardList, count: 3, label: "대기" },
-  { status: "working", icon: Clock, count: 5, label: "작업중" },
-  { status: "complete", icon: CheckCircle2, count: 12, label: "완료" },
-  { status: "delivered", icon: Truck, count: 2, label: "전달" },
-];
+// ── Data ──
 
 const urgentCommissions = [
   { id: "1", title: "Canon in D", arrangement: "현악 4중주", deadline: "2026-02-21", daysLeft: 2 },
@@ -20,17 +20,135 @@ const urgentCommissions = [
   { id: "3", title: "Spring Waltz", arrangement: "플룻 듀엣", deadline: "2026-02-25", daysLeft: 6 },
 ];
 
-const monthlyData = [
-  { month: "9월", count: 8 },
-  { month: "10월", count: 14 },
-  { month: "11월", count: 11 },
-  { month: "12월", count: 18 },
-  { month: "1월", count: 15 },
-  { month: "2월", count: 10 },
+const commissionSummary = {
+  received: 3,
+  working: 5,
+  complete: 12,
+  delivered: 2,
+};
+
+const revenueSlides = [
+  { label: "올해 총 매출", value: "₩28,450,000", sub: "전년 대비 +22.4%", up: true },
+  { label: "지난 달 매출", value: "₩2,340,000", sub: "전월 대비 +15.2%", up: true },
 ];
+
+// ── Helpers ──
+
+function getGreeting() {
+  const h = new Date().getHours();
+  if (h < 6) return "늦은 밤이에요 🌙";
+  if (h < 12) return "좋은 아침이에요 ☀️";
+  if (h < 18) return "좋은 오후예요 🌤";
+  return "좋은 저녁이에요 🌆";
+}
+
+function getFormattedDate() {
+  const d = new Date();
+  const days = ["일", "월", "화", "수", "목", "금", "토"];
+  return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일 ${days[d.getDay()]}요일`;
+}
+
+// ── Mini Calendar ──
+
+function MiniCalendar({ onNavigate }: { onNavigate: () => void }) {
+  const [viewDate, setViewDate] = useState(new Date());
+  const today = new Date();
+
+  const year = viewDate.getFullYear();
+  const month = viewDate.getMonth();
+
+  const deadlineDays = [21, 23, 25]; // mock
+
+  const { startDay, daysInMonth } = useMemo(() => {
+    const first = new Date(year, month, 1);
+    return {
+      startDay: (first.getDay() + 6) % 7, // Mon=0
+      daysInMonth: new Date(year, month + 1, 0).getDate(),
+    };
+  }, [year, month]);
+
+  const cells: (number | null)[] = [];
+  for (let i = 0; i < startDay; i++) cells.push(null);
+  for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+
+  const isToday = (d: number) =>
+    d === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+
+  const hasDeadline = (d: number) =>
+    month === today.getMonth() && year === today.getFullYear() && deadlineDays.includes(d);
+
+  return (
+    <div className="flex flex-col h-full cursor-pointer" onClick={onNavigate}>
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="font-display font-semibold text-sm">
+          {year}년 {month + 1}월
+        </h3>
+        <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+          <button
+            className="p-1 rounded hover:bg-muted/50 transition-colors"
+            onClick={() => setViewDate(new Date(year, month - 1, 1))}
+          >
+            <ChevronLeft className="h-3.5 w-3.5 text-muted-foreground" />
+          </button>
+          <button
+            className="p-1 rounded hover:bg-muted/50 transition-colors"
+            onClick={() => setViewDate(new Date(year, month + 1, 1))}
+          >
+            <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+          </button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-7 gap-y-1 text-center text-[10px] text-muted-foreground mb-1">
+        {["월", "화", "수", "목", "금", "토", "일"].map((d) => (
+          <span key={d} className="font-medium">{d}</span>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-7 gap-y-0.5 text-center flex-1">
+        {cells.map((d, i) => (
+          <div key={i} className="flex flex-col items-center justify-center">
+            {d ? (
+              <span
+                className={`
+                  w-7 h-7 flex items-center justify-center rounded-full text-xs font-medium transition-colors
+                  ${isToday(d) ? "bg-primary text-primary-foreground font-bold" : ""}
+                  ${hasDeadline(d) && !isToday(d) ? "ring-2 ring-destructive/50 text-destructive font-semibold" : ""}
+                `}
+              >
+                {d}
+              </span>
+            ) : (
+              <span className="w-7 h-7" />
+            )}
+          </div>
+        ))}
+      </div>
+
+      <div className="flex items-center gap-3 mt-2 pt-2 border-t border-border/50 text-[10px] text-muted-foreground">
+        <span className="flex items-center gap-1">
+          <span className="w-2 h-2 rounded-full bg-primary" /> 오늘
+        </span>
+        <span className="flex items-center gap-1">
+          <span className="w-2 h-2 rounded-full ring-2 ring-destructive/50" /> 마감
+        </span>
+      </div>
+    </div>
+  );
+}
+
+// ── Dashboard ──
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const [slideIdx, setSlideIdx] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => setSlideIdx((p) => (p + 1) % revenueSlides.length), 4000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const total = commissionSummary.received + commissionSummary.working + commissionSummary.complete + commissionSummary.delivered;
 
   return (
     <AppLayout>
@@ -41,31 +159,135 @@ const Dashboard = () => {
         </Button>
       </PageHeader>
 
-      {/* Status Count Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {statusCards.map((item) => (
-          <Card key={item.status} className="hover-lift cursor-pointer border-border/50" onClick={() => navigate(`/commissions?status=${item.status}`)}>
-            <CardContent className="p-5">
-              <div className="flex items-center justify-between mb-3">
-                <item.icon className="h-5 w-5 text-muted-foreground" />
-                <StatusBadge status={item.status} />
-              </div>
-              <p className="text-3xl font-display font-bold">{item.count}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      {/* 2x2 Bento Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 grid-rows-[auto_auto] gap-4">
 
-      {/* 1+2 Layout: Urgent (left) + Chart & Sales (right) */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-        {/* Left: 마감 임박 (3col) */}
-        <Card className="lg:col-span-3 border-destructive/30 bg-destructive/5">
+        {/* ① Top-Left: Today */}
+        <Card className="lg:col-span-3 border-border/50 overflow-hidden">
+          <CardContent className="p-6">
+            <p className="text-sm text-muted-foreground mb-1">{getFormattedDate()}</p>
+            <h2 className="text-2xl font-display font-bold mb-4">{getGreeting()}</h2>
+            <div className="flex items-center gap-6 text-sm">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Sun className="h-4 w-4 text-primary" />
+                <span>맑음 · 4°C</span>
+              </div>
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Music className="h-4 w-4" />
+                <span>진행 중인 의뢰 <strong className="text-foreground">{commissionSummary.working}건</strong></span>
+              </div>
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <AlertTriangle className="h-4 w-4 text-destructive" />
+                <span>마감 임박 <strong className="text-destructive">{urgentCommissions.filter(c => c.daysLeft <= 3).length}건</strong></span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* ② Top-Right: Mini Calendar */}
+        <Card className="lg:col-span-2 border-border/50">
+          <CardContent className="p-4 h-full">
+            <MiniCalendar onNavigate={() => navigate("/calendar")} />
+          </CardContent>
+        </Card>
+
+        {/* ③ Bottom-Left: Revenue + Commission Summary */}
+        <Card className="lg:col-span-3 border-border/50">
+          <CardContent className="p-5 flex flex-col gap-5">
+            {/* Revenue Slider */}
+            <div
+              className="cursor-pointer hover:bg-muted/30 rounded-lg p-4 -m-1 transition-colors"
+              onClick={() => navigate("/stats")}
+            >
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-1.5 text-muted-foreground">
+                  <DollarSign className="h-4 w-4" />
+                  <AnimatePresence mode="wait">
+                    <motion.span
+                      key={slideIdx}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      transition={{ duration: 0.3 }}
+                      className="text-xs font-medium"
+                    >
+                      {revenueSlides[slideIdx].label}
+                    </motion.span>
+                  </AnimatePresence>
+                </div>
+                <span className="text-xs text-muted-foreground">자세히 →</span>
+              </div>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={slideIdx}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -12 }}
+                  transition={{ duration: 0.35 }}
+                >
+                  <p className="text-3xl font-display font-bold mb-0.5">
+                    {revenueSlides[slideIdx].value}
+                  </p>
+                  <p className="text-xs text-[hsl(var(--status-complete))] flex items-center gap-0.5">
+                    <TrendingUp className="h-3 w-3" /> {revenueSlides[slideIdx].sub}
+                  </p>
+                </motion.div>
+              </AnimatePresence>
+
+              {/* Slide indicator */}
+              <div className="flex gap-1.5 mt-3">
+                {revenueSlides.map((_, i) => (
+                  <span
+                    key={i}
+                    className={`h-1 rounded-full transition-all duration-300 ${
+                      i === slideIdx ? "w-4 bg-primary" : "w-1.5 bg-muted-foreground/30"
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Commission Summary */}
+            <div className="border-t border-border/50 pt-4">
+              <h3 className="text-xs font-medium text-muted-foreground mb-3">이번 달 의뢰 요약</h3>
+              <div className="grid grid-cols-4 gap-3">
+                {[
+                  { label: "접수", count: commissionSummary.received, status: "received" as CommissionStatus, icon: ClipboardList },
+                  { label: "작업중", count: commissionSummary.working, status: "working" as CommissionStatus, icon: Clock },
+                  { label: "완료", count: commissionSummary.complete, status: "complete" as CommissionStatus, icon: CheckCircle2 },
+                  { label: "전달", count: commissionSummary.delivered, status: "delivered" as CommissionStatus, icon: Truck },
+                ].map((item) => (
+                  <div
+                    key={item.status}
+                    className="flex flex-col items-center p-2.5 rounded-lg hover:bg-muted/30 cursor-pointer transition-colors"
+                    onClick={() => navigate(`/commissions?status=${item.status}`)}
+                  >
+                    <item.icon className="h-4 w-4 text-muted-foreground mb-1.5" />
+                    <p className="text-xl font-display font-bold">{item.count}</p>
+                    <p className="text-[10px] text-muted-foreground">{item.label}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Progress bar */}
+              <div className="flex h-2 rounded-full overflow-hidden mt-3">
+                <div className="bg-[hsl(var(--status-received))]" style={{ width: `${(commissionSummary.received / total) * 100}%` }} />
+                <div className="bg-[hsl(var(--status-working))]" style={{ width: `${(commissionSummary.working / total) * 100}%` }} />
+                <div className="bg-[hsl(var(--status-complete))]" style={{ width: `${(commissionSummary.complete / total) * 100}%` }} />
+                <div className="bg-[hsl(var(--status-delivered))]" style={{ width: `${(commissionSummary.delivered / total) * 100}%` }} />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* ④ Bottom-Right: 마감 임박 */}
+        <Card className="lg:col-span-2 border-destructive/30 bg-destructive/5">
           <CardContent className="p-5 h-full flex flex-col">
             <div className="flex items-center gap-2 mb-4">
               <AlertTriangle className="h-5 w-5 text-destructive" />
-              <h2 className="font-display font-semibold text-lg">마감 임박</h2>
+              <h2 className="font-display font-semibold text-sm">마감 임박</h2>
             </div>
-            <div className="space-y-3 flex-1">
+            <div className="space-y-2.5 flex-1">
               {urgentCommissions.map((c) => (
                 <div
                   key={c.id}
@@ -73,69 +295,23 @@ const Dashboard = () => {
                   onClick={() => navigate(`/commissions/${c.id}`)}
                 >
                   <div>
-                    <p className="font-medium">{c.title}</p>
-                    <p className="text-sm text-muted-foreground">{c.arrangement}</p>
+                    <p className="font-medium text-sm">{c.title}</p>
+                    <p className="text-xs text-muted-foreground">{c.arrangement}</p>
                   </div>
-                  <div className="text-right">
-                    <span className={`inline-block px-2.5 py-1 rounded-full text-sm font-bold ${
-                      c.daysLeft <= 3 ? "bg-destructive/15 text-destructive" : "bg-muted text-muted-foreground"
-                    }`}>
-                      D-{c.daysLeft}
-                    </span>
-                    <p className="text-xs text-muted-foreground mt-1">{c.deadline}</p>
-                  </div>
+                  <span
+                    className={`inline-block px-2.5 py-1 rounded-full text-xs font-bold ${
+                      c.daysLeft <= 3
+                        ? "bg-destructive/15 text-destructive"
+                        : "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    D-{c.daysLeft}
+                  </span>
                 </div>
               ))}
             </div>
           </CardContent>
         </Card>
-
-        {/* Right: Chart + Sales (2col, stacked) */}
-        <div className="lg:col-span-2 flex flex-col gap-4">
-          {/* 미니 차트 */}
-          <Card className="border-border/50 flex-1">
-            <CardContent className="p-5 h-full flex flex-col">
-              <div className="flex items-center gap-2 mb-3">
-                <BarChart3 className="h-4 w-4 text-muted-foreground" />
-                <h3 className="font-display font-semibold text-sm">월별 의뢰 추이</h3>
-              </div>
-              <div className="flex-1 min-h-[120px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={monthlyData} barSize={20}>
-                    <XAxis dataKey="month" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
-                    <YAxis hide />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "hsl(var(--card))",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "8px",
-                        fontSize: "12px",
-                      }}
-                    />
-                    <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* 이번달 매출 */}
-          <Card className="border-border/50 hover-lift cursor-pointer" onClick={() => navigate("/stats")}>
-            <CardContent className="p-5">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-1.5 text-muted-foreground">
-                  <DollarSign className="h-4 w-4" />
-                  <span className="text-xs font-medium">이번 달 매출</span>
-                </div>
-                <span className="text-xs text-muted-foreground">자세히 →</span>
-              </div>
-              <p className="text-2xl font-display font-bold mb-1">₩2,340,000</p>
-              <p className="text-xs text-[hsl(var(--status-complete))] flex items-center gap-0.5">
-                <TrendingUp className="h-3 w-3" /> 전월 대비 +15.2%
-              </p>
-            </CardContent>
-          </Card>
-        </div>
       </div>
     </AppLayout>
   );
