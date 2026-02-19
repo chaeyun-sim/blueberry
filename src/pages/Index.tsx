@@ -11,7 +11,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect, useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import lofiEveningImg from "@/assets/lofi-evening.jpg";
+import lofiCornerImg from "@/assets/lofi-corner.png";
 
 // ── Data ──
 
@@ -167,11 +167,6 @@ const Dashboard = () => {
 
         {/* ① Top-Left: Today */}
         <Card className="border-border/50 overflow-hidden relative">
-          <img
-            src={lofiEveningImg}
-            alt="Lo-fi evening illustration"
-            className="absolute inset-0 w-full h-full object-cover opacity-20"
-          />
           <CardContent className="p-6 relative z-10">
             <p className="text-sm text-muted-foreground mb-1">{getFormattedDate()}</p>
             <h2 className="text-2xl font-display font-bold mb-4">{getGreeting()}</h2>
@@ -190,6 +185,11 @@ const Dashboard = () => {
               </div>
             </div>
           </CardContent>
+          <img
+            src={lofiCornerImg}
+            alt="Lo-fi illustration"
+            className="absolute bottom-0 right-2 h-28 object-contain pointer-events-none opacity-80"
+          />
         </Card>
 
         {/* ② Top-Right: Mini Calendar */}
