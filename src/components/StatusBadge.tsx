@@ -1,11 +1,10 @@
 import { cn } from "@/lib/utils";
 
-export type CommissionStatus = "received" | "working" | "delivered" | "complete";
+export type CommissionStatus = "received" | "working" | "complete";
 
 const statusConfig: Record<CommissionStatus, { label: string; dotClass: string; badgeClass: string }> = {
-  received: { label: "접수", dotClass: "status-received", badgeClass: "badge-received" },
+  received: { label: "대기", dotClass: "status-received", badgeClass: "badge-received" },
   working: { label: "작업중", dotClass: "status-working", badgeClass: "badge-working" },
-  delivered: { label: "납품", dotClass: "status-delivered", badgeClass: "badge-delivered" },
   complete: { label: "완료", dotClass: "status-complete", badgeClass: "badge-complete" },
 };
 

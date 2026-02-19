@@ -8,9 +8,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const steps: { status: CommissionStatus; label: string }[] = [
-  { status: "received", label: "접수" },
+  { status: "received", label: "대기" },
   { status: "working", label: "작업중" },
-  { status: "delivered", label: "납품" },
   { status: "complete", label: "완료" },
 ];
 
