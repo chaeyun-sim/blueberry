@@ -11,6 +11,7 @@ const steps: { status: CommissionStatus; label: string }[] = [
   { status: "received", label: "대기" },
   { status: "working", label: "작업중" },
   { status: "complete", label: "완료" },
+  { status: "delivered", label: "납품" },
 ];
 
 const mockDetail = {
