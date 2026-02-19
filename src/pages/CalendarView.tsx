@@ -143,7 +143,7 @@ export default function CalendarView() {
                 <div
                   key={idx}
                   className={cn(
-                    "min-h-[100px] p-1.5 border-b border-r border-border/50 transition-colors",
+                    "min-h-[150px] p-1.5 border-b border-r border-border/50 transition-colors",
                     !cell.currentMonth && "bg-muted/30",
                     cell.currentMonth && "hover:bg-muted/20"
                   )}
