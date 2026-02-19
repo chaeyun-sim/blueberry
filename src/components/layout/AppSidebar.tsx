@@ -1,6 +1,7 @@
-import { LayoutDashboard, ClipboardList, Music, PlusCircle, BarChart3 } from "lucide-react";
+import { LayoutDashboard, ClipboardList, Music, PlusCircle, BarChart3, CalendarDays, Sun, Moon } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
+import { useTheme } from "@/components/ThemeProvider";
 import {
   Sidebar,
   SidebarContent,
@@ -18,6 +19,7 @@ const mainNav = [
   { title: "대시보드", url: "/", icon: LayoutDashboard },
   { title: "의뢰 목록", url: "/commissions", icon: ClipboardList },
   { title: "악보 관리", url: "/scores", icon: Music },
+  { title: "캘린더", url: "/calendar", icon: CalendarDays },
   { title: "매출 통계", url: "/stats", icon: BarChart3 },
 ];
 
@@ -25,6 +27,7 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const location = useLocation();
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
@@ -75,6 +78,19 @@ export function AppSidebar() {
                 <PlusCircle className="h-4 w-4" />
                 <span>새 의뢰</span>
               </NavLink>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              tooltip={theme === "dark" ? "라이트 모드" : "다크 모드"}
+              onClick={toggleTheme}
+            >
+              {theme === "dark" ? (
+                <Sun className="h-4 w-4" />
+              ) : (
+                <Moon className="h-4 w-4" />
+              )}
+              <span>{theme === "dark" ? "라이트 모드" : "다크 모드"}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

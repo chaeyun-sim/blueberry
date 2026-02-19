@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Link2, ChevronRight, Check, X, Mail, ExternalLink } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { StatusTransitionDialog } from "@/components/StatusTransitionDialog";
 
 const steps: { status: CommissionStatus; label: string }[] = [
   { status: "received", label: "대기" },
@@ -33,16 +34,21 @@ const CommissionDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [detail, setDetail] = useState(mockDetail);
+  const [transitionOpen, setTransitionOpen] = useState(false);
   const currentStepIndex = steps.findIndex((s) => s.status === detail.status);
 
-  const handleNextStatus = () => {
-    if (currentStepIndex < steps.length - 1) {
-      setDetail((prev) => ({ ...prev, status: steps[currentStepIndex + 1].status }));
+  const nextStatus = currentStepIndex < steps.length - 1 ? steps[currentStepIndex + 1].status : null;
+
+  const handleTransitionConfirm = (file: File) => {
+    // In production, upload file then update status
+    console.log("증빙 파일:", file.name, "→", nextStatus);
+    if (nextStatus) {
+      setDetail((prev) => ({ ...prev, status: nextStatus }));
     }
+    setTransitionOpen(false);
   };
 
   const handleReject = () => {
-    // Would handle rejection logic
     navigate(-1);
   };
 
@@ -52,7 +58,7 @@ const CommissionDetail = () => {
         <div className="px-6 py-3 flex justify-end">
           {detail.status === "received" && (
             <div className="flex items-center gap-3">
-              <Button onClick={handleNextStatus} className="gap-2 px-6 py-5">
+              <Button onClick={() => setTransitionOpen(true)} className="gap-2 px-6 py-5">
                 <Check className="h-4 w-4" /> 의뢰 승낙
               </Button>
               <Button variant="destructive" onClick={handleReject} className="gap-2 px-6 py-5">
@@ -61,12 +67,12 @@ const CommissionDetail = () => {
             </div>
           )}
           {detail.status === "working" && (
-            <Button onClick={handleNextStatus} className="gap-2 px-6 py-5">
+            <Button onClick={() => setTransitionOpen(true)} className="gap-2 px-6 py-5">
               <ChevronRight className="h-4 w-4" /> 완료로 변경
             </Button>
           )}
           {detail.status === "complete" && (
-            <Button onClick={handleNextStatus} className="gap-2 px-6 py-5">
+            <Button onClick={() => setTransitionOpen(true)} className="gap-2 px-6 py-5">
               <Mail className="h-4 w-4" /> 메일 전송 및 납품
             </Button>
           )}
@@ -76,6 +82,17 @@ const CommissionDetail = () => {
         </div>
       </div>
     }>
+      {/* Transition Dialog */}
+      {nextStatus && (
+        <StatusTransitionDialog
+          open={transitionOpen}
+          onOpenChange={setTransitionOpen}
+          fromStatus={detail.status}
+          toStatus={nextStatus}
+          onConfirm={handleTransitionConfirm}
+        />
+      )}
+
       <div className="mb-6">
         <Button variant="ghost" className="gap-2 text-muted-foreground" onClick={() => navigate(-1)}>
           <ArrowLeft className="h-4 w-4" /> 뒤로
@@ -172,8 +189,6 @@ const CommissionDetail = () => {
           )}
         </CardContent>
       </Card>
-
-
     </AppLayout>
   );
 };
