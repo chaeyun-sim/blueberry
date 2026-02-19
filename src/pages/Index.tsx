@@ -159,11 +159,11 @@ const Dashboard = () => {
         </Button>
       </PageHeader>
 
-      {/* 2x2 Bento Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 grid-rows-[auto_auto] gap-4">
+      {/* Bento Grid — ref image: top row tall, bottom row shorter, ~20px gap */}
+      <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] lg:grid-rows-[minmax(200px,auto)_minmax(0,auto)] gap-5">
 
         {/* ① Top-Left: Today */}
-        <Card className="lg:col-span-3 border-border/50 overflow-hidden">
+        <Card className="border-border/50 overflow-hidden">
           <CardContent className="p-6">
             <p className="text-sm text-muted-foreground mb-1">{getFormattedDate()}</p>
             <h2 className="text-2xl font-display font-bold mb-4">{getGreeting()}</h2>
@@ -185,70 +185,72 @@ const Dashboard = () => {
         </Card>
 
         {/* ② Top-Right: Mini Calendar */}
-        <Card className="lg:col-span-2 border-border/50">
+        <Card className="border-border/50">
           <CardContent className="p-4 h-full">
             <MiniCalendar onNavigate={() => navigate("/calendar")} />
           </CardContent>
         </Card>
 
-        {/* ③ Bottom-Left: Revenue + Commission Summary */}
-        <Card className="lg:col-span-3 border-border/50">
-          <CardContent className="p-5 flex flex-col gap-5">
-            {/* Revenue Slider */}
-            <div
-              className="cursor-pointer hover:bg-muted/30 rounded-lg p-4 -m-1 transition-colors"
-              onClick={() => navigate("/stats")}
-            >
-              <div className="flex items-center justify-between mb-1">
-                <div className="flex items-center gap-1.5 text-muted-foreground">
-                  <DollarSign className="h-4 w-4" />
-                  <AnimatePresence mode="wait">
-                    <motion.span
-                      key={slideIdx}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -8 }}
-                      transition={{ duration: 0.3 }}
-                      className="text-xs font-medium"
-                    >
-                      {revenueSlides[slideIdx].label}
-                    </motion.span>
-                  </AnimatePresence>
+        {/* ③ Bottom-Left: Revenue + Commission Summary — split into 2 stacked cards */}
+        <div className="flex flex-col gap-5">
+          {/* Revenue Slider Card */}
+          <Card className="border-border/50">
+            <CardContent className="p-5">
+              <div
+                className="cursor-pointer hover:bg-muted/30 rounded-lg p-3 -m-1 transition-colors"
+                onClick={() => navigate("/stats")}
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center gap-1.5 text-muted-foreground">
+                    <DollarSign className="h-4 w-4" />
+                    <AnimatePresence mode="wait">
+                      <motion.span
+                        key={slideIdx}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -8 }}
+                        transition={{ duration: 0.3 }}
+                        className="text-xs font-medium"
+                      >
+                        {revenueSlides[slideIdx].label}
+                      </motion.span>
+                    </AnimatePresence>
+                  </div>
+                  <span className="text-xs text-muted-foreground">자세히 →</span>
                 </div>
-                <span className="text-xs text-muted-foreground">자세히 →</span>
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={slideIdx}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -12 }}
+                    transition={{ duration: 0.35 }}
+                  >
+                    <p className="text-3xl font-display font-bold mb-0.5">
+                      {revenueSlides[slideIdx].value}
+                    </p>
+                    <p className="text-xs text-[hsl(var(--status-complete))] flex items-center gap-0.5">
+                      <TrendingUp className="h-3 w-3" /> {revenueSlides[slideIdx].sub}
+                    </p>
+                  </motion.div>
+                </AnimatePresence>
+                <div className="flex gap-1.5 mt-3">
+                  {revenueSlides.map((_, i) => (
+                    <span
+                      key={i}
+                      className={`h-1 rounded-full transition-all duration-300 ${
+                        i === slideIdx ? "w-4 bg-primary" : "w-1.5 bg-muted-foreground/30"
+                      }`}
+                    />
+                  ))}
+                </div>
               </div>
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={slideIdx}
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -12 }}
-                  transition={{ duration: 0.35 }}
-                >
-                  <p className="text-3xl font-display font-bold mb-0.5">
-                    {revenueSlides[slideIdx].value}
-                  </p>
-                  <p className="text-xs text-[hsl(var(--status-complete))] flex items-center gap-0.5">
-                    <TrendingUp className="h-3 w-3" /> {revenueSlides[slideIdx].sub}
-                  </p>
-                </motion.div>
-              </AnimatePresence>
+            </CardContent>
+          </Card>
 
-              {/* Slide indicator */}
-              <div className="flex gap-1.5 mt-3">
-                {revenueSlides.map((_, i) => (
-                  <span
-                    key={i}
-                    className={`h-1 rounded-full transition-all duration-300 ${
-                      i === slideIdx ? "w-4 bg-primary" : "w-1.5 bg-muted-foreground/30"
-                    }`}
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* Commission Summary */}
-            <div className="border-t border-border/50 pt-4">
+          {/* Commission Summary Card */}
+          <Card className="border-border/50 flex-1">
+            <CardContent className="p-5">
               <h3 className="text-xs font-medium text-muted-foreground mb-3">이번 달 의뢰 요약</h3>
               <div className="grid grid-cols-4 gap-3">
                 {[
@@ -268,20 +270,18 @@ const Dashboard = () => {
                   </div>
                 ))}
               </div>
-
-              {/* Progress bar */}
               <div className="flex h-2 rounded-full overflow-hidden mt-3">
                 <div className="bg-[hsl(var(--status-received))]" style={{ width: `${(commissionSummary.received / total) * 100}%` }} />
                 <div className="bg-[hsl(var(--status-working))]" style={{ width: `${(commissionSummary.working / total) * 100}%` }} />
                 <div className="bg-[hsl(var(--status-complete))]" style={{ width: `${(commissionSummary.complete / total) * 100}%` }} />
                 <div className="bg-[hsl(var(--status-delivered))]" style={{ width: `${(commissionSummary.delivered / total) * 100}%` }} />
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* ④ Bottom-Right: 마감 임박 */}
-        <Card className="lg:col-span-2 border-destructive/30 bg-destructive/5">
+        <Card className="border-destructive/30 bg-destructive/5">
           <CardContent className="p-5 h-full flex flex-col">
             <div className="flex items-center gap-2 mb-4">
               <AlertTriangle className="h-5 w-5 text-destructive" />
