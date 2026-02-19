@@ -25,7 +25,7 @@ export default function Login() {
         <CardContent className="pt-8 pb-8 px-8">
           {/* Logo */}
           <div className="flex flex-col items-center gap-2 mb-8">
-            <img src={logoImg} alt="BlueBerry" className="object-contain" style={{ width: 32, height: 32 }} />
+            <img src={logoImg} alt="BlueBerry" className="object-contain" style={{ width: 48, height: 48 }} />
             <h1 className="font-display font-bold text-2xl tracking-tight text-foreground">
               BlueBerry
             </h1>
