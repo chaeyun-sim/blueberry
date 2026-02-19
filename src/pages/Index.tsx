@@ -12,6 +12,8 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { AnimatePresence, motion, useMotionValue, useTransform, animate } from "framer-motion";
 import lofiCornerImg from "@/assets/lofi-corner.png";
+import todayDayImg from "@/assets/today-day.jpg";
+import todayNightImg from "@/assets/today-night.png";
 
 // ── Data ──
 
@@ -198,7 +200,14 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-5">
 
         {/* ① Top-Left: Today */}
-        <Card className="border-border/50 overflow-hidden relative">
+        <Card className="border-border/50 overflow-hidden relative min-h-[180px]">
+          {/* Background image */}
+          <img
+            src={clock.getHours() >= 6 && clock.getHours() < 18 ? todayDayImg : todayNightImg}
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+          />
+          <div className="absolute inset-0 bg-background/60 backdrop-blur-[2px]" />
           <CardContent className="p-6 relative z-10">
             <div className="flex items-center justify-between mb-1">
               <p className="text-sm text-muted-foreground">{getFormattedDate()}</p>
@@ -223,11 +232,6 @@ const Dashboard = () => {
               </div>
             </div>
           </CardContent>
-          <img
-            src={lofiCornerImg}
-            alt="Lo-fi illustration"
-            className="absolute bottom-0 right-2 h-28 object-contain pointer-events-none opacity-80"
-          />
         </Card>
 
         {/* ② Top-Right: Mini Calendar */}
