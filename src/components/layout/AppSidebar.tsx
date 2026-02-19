@@ -28,7 +28,7 @@ export function AppSidebar() {
     item.exact ? location.pathname === item.url : location.pathname.startsWith(item.url);
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-background">
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       {/* Logo */}
       <div className="flex h-14 items-center gap-2 px-4 border-b border-sidebar-border">
         <Music className="h-6 w-6 text-primary shrink-0" />
