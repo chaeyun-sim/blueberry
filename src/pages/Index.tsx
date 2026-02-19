@@ -9,8 +9,8 @@ import {
   ChevronLeft, ChevronRight, Music,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect, useMemo } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { useState, useEffect, useMemo, useRef } from "react";
+import { AnimatePresence, motion, useMotionValue, useTransform, animate } from "framer-motion";
 import lofiCornerImg from "@/assets/lofi-corner.png";
 
 // ── Data ──
@@ -29,9 +29,29 @@ const commissionSummary = {
 };
 
 const revenueSlides = [
-  { label: "올해 총 매출", value: "₩28,450,000", sub: "전년 대비 +22.4%", up: true },
-  { label: "지난 달 매출", value: "₩2,340,000", sub: "전월 대비 +15.2%", up: true },
+  { label: "올해 총 매출", value: 28450000, sub: "전년 대비 +22.4%", up: true },
+  { label: "지난 달 매출", value: 2340000, sub: "전월 대비 +15.2%", up: true },
 ];
+
+// ── Rolling Number Component ──
+
+function RollingNumber({ value, prefix = "₩" }: { value: number; prefix?: string }) {
+  const motionVal = useMotionValue(0);
+  const [display, setDisplay] = useState("0");
+
+  useEffect(() => {
+    const controls = animate(motionVal, value, {
+      duration: 1.2,
+      ease: "easeOut",
+      onUpdate: (v) => {
+        setDisplay(Math.round(v).toLocaleString("ko-KR"));
+      },
+    });
+    return controls.stop;
+  }, [value]);
+
+  return <>{prefix}{display}</>;
+}
 
 // ── Helpers ──
 
@@ -114,7 +134,7 @@ function MiniCalendar({ onNavigate }: { onNavigate: () => void }) {
                 className={`
                   w-7 h-7 flex items-center justify-center rounded-full text-xs font-medium transition-colors
                   ${isToday(d) ? "bg-primary text-primary-foreground font-bold" : ""}
-                  ${hasDeadline(d) && !isToday(d) ? "ring-2 ring-destructive/50 text-destructive font-semibold" : ""}
+                  ${hasDeadline(d) && !isToday(d) ? "ring-2 ring-[hsl(var(--warning))] text-[hsl(var(--warning))] font-semibold" : ""}
                 `}
               >
                 {d}
@@ -131,7 +151,7 @@ function MiniCalendar({ onNavigate }: { onNavigate: () => void }) {
           <span className="w-2 h-2 rounded-full bg-primary" /> 오늘
         </span>
         <span className="flex items-center gap-1">
-          <span className="w-2 h-2 rounded-full ring-2 ring-destructive/50" /> 마감
+          <span className="w-2 h-2 rounded-full bg-[hsl(var(--warning))]" /> 마감
         </span>
       </div>
     </div>
@@ -160,7 +180,7 @@ const Dashboard = () => {
         </Button>
       </PageHeader>
 
-      {/* Bento Grid — top: 3fr 2fr, bottom: 2fr 3fr (staggered like ref) */}
+      {/* Bento Grid */}
       <div className="flex flex-col gap-5">
         {/* Top Row */}
         <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-5">
@@ -172,7 +192,7 @@ const Dashboard = () => {
             <h2 className="text-2xl font-display font-bold mb-4">{getGreeting()}</h2>
             <div className="flex items-center gap-6 text-sm">
               <div className="flex items-center gap-2 text-muted-foreground">
-                <Sun className="h-4 w-4 text-primary" />
+                <Sun className="h-4 w-4 text-[hsl(var(--warning))]" />
                 <span>맑음 · 4°C</span>
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
@@ -180,8 +200,8 @@ const Dashboard = () => {
                 <span>진행 중인 의뢰 <strong className="text-foreground">{commissionSummary.working}건</strong></span>
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
-                <AlertTriangle className="h-4 w-4 text-destructive" />
-                <span>마감 임박 <strong className="text-destructive">{urgentCommissions.filter(c => c.daysLeft <= 3).length}건</strong></span>
+                <AlertTriangle className="h-4 w-4 text-[hsl(var(--warning))]" />
+                <span>마감 임박 <strong className="text-[hsl(var(--warning))]">{urgentCommissions.filter(c => c.daysLeft <= 3).length}건</strong></span>
               </div>
             </div>
           </CardContent>
@@ -200,9 +220,9 @@ const Dashboard = () => {
         </Card>
         </div>
 
-        {/* Bottom Row — flipped ratio: 2fr 3fr */}
+        {/* Bottom Row */}
         <div className="grid grid-cols-1 lg:grid-cols-[2fr_3fr] gap-5">
-        {/* ③ Bottom-Left: Revenue + Commission Summary — split into 2 stacked cards */}
+        {/* ③ Bottom-Left: Revenue + Commission Summary */}
         <div className="flex flex-col gap-5">
           {/* Revenue Slider Card */}
           <Card className="border-border/50">
@@ -213,7 +233,7 @@ const Dashboard = () => {
               >
                 <div className="flex items-center justify-between mb-1">
                   <div className="flex items-center gap-1.5 text-muted-foreground">
-                    <DollarSign className="h-4 w-4" />
+                    <DollarSign className="h-4 w-4 text-[hsl(var(--success))]" />
                     <AnimatePresence mode="wait">
                       <motion.span
                         key={slideIdx}
@@ -238,9 +258,9 @@ const Dashboard = () => {
                     transition={{ duration: 0.35 }}
                   >
                     <p className="text-3xl font-display font-bold mb-0.5">
-                      {revenueSlides[slideIdx].value}
+                      <RollingNumber value={revenueSlides[slideIdx].value} />
                     </p>
-                    <p className="text-xs text-[hsl(var(--status-complete))] flex items-center gap-0.5">
+                    <p className="text-xs text-[hsl(var(--success))] flex items-center gap-0.5">
                       <TrendingUp className="h-3 w-3" /> {revenueSlides[slideIdx].sub}
                     </p>
                   </motion.div>
@@ -292,10 +312,10 @@ const Dashboard = () => {
         </div>
 
         {/* ④ Bottom-Right: 마감 임박 */}
-        <Card className="border-destructive/30 bg-destructive/5">
+        <Card className="bg-[hsl(var(--warning)/0.08)]">
           <CardContent className="p-5 h-full flex flex-col">
             <div className="flex items-center gap-2 mb-4">
-              <AlertTriangle className="h-5 w-5 text-destructive" />
+              <AlertTriangle className="h-5 w-5 text-[hsl(var(--warning))]" />
               <h2 className="font-display font-semibold text-sm">마감 임박</h2>
             </div>
             <div className="space-y-2.5 flex-1">
@@ -312,7 +332,7 @@ const Dashboard = () => {
                   <span
                     className={`inline-block px-2.5 py-1 rounded-full text-xs font-bold ${
                       c.daysLeft <= 3
-                        ? "bg-destructive/15 text-destructive"
+                        ? "bg-[hsl(var(--warning)/0.15)] text-[hsl(var(--warning))]"
                         : "bg-muted text-muted-foreground"
                     }`}
                   >

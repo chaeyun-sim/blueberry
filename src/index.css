@@ -41,6 +41,11 @@
     --status-delivered: 260 50% 55%;
     --status-complete: 152 60% 45%;
 
+    --warning: 25 95% 53%;
+    --warning-foreground: 0 0% 100%;
+    --success: 152 60% 40%;
+    --success-foreground: 0 0% 100%;
+
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 204 65% 11%;
     --sidebar-primary: 217 85% 47%;
@@ -84,6 +89,11 @@
     --status-working: 217 85% 55%;
     --status-delivered: 260 50% 60%;
     --status-complete: 152 60% 50%;
+
+    --warning: 25 95% 58%;
+    --warning-foreground: 0 0% 100%;
+    --success: 152 60% 45%;
+    --success-foreground: 0 0% 100%;
 
     --sidebar-background: 204 65% 5%;
     --sidebar-foreground: 197 80% 92%;

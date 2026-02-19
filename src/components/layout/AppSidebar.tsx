@@ -47,7 +47,7 @@ export function AppSidebar() {
               onClick={() => navigate(item.url)}
               className={cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150",
-                "hover:bg-sidebar-accent",
+                "hover:bg-foreground/5",
                 isActive(item)
                   ? "bg-primary/10 text-primary border border-primary/20"
                   : "text-sidebar-foreground/70 border border-transparent"
@@ -71,7 +71,7 @@ export function AppSidebar() {
           </button>
           <button
             onClick={toggleTheme}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-sidebar-foreground/70 hover:bg-sidebar-accent border border-transparent transition-all duration-150"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-sidebar-foreground/70 hover:bg-foreground/5 border border-transparent transition-all duration-150"
           >
             {theme === "dark" ? <Sun className="h-4 w-4 shrink-0" /> : <Moon className="h-4 w-4 shrink-0" />}
             {!collapsed && <span>{theme === "dark" ? "라이트 모드" : "다크 모드"}</span>}
