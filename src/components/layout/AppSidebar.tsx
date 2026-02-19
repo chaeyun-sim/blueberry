@@ -7,19 +7,25 @@ import {
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarFooter,
+  SidebarSeparator,
   useSidebar,
 } from "@/components/ui/sidebar";
 
-const mainNav = [
+const navGroup1 = [
   { title: "대시보드", url: "/", icon: LayoutDashboard },
+];
+
+const navGroup2 = [
   { title: "의뢰 목록", url: "/commissions", icon: ClipboardList },
   { title: "악보 관리", url: "/scores", icon: Music },
   { title: "캘린더", url: "/calendar", icon: CalendarDays },
+];
+
+const navGroup3 = [
   { title: "매출 통계", url: "/stats", icon: BarChart3 },
 ];
 
@@ -44,18 +50,60 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {mainNav.map((item) => (
+              {navGroup1.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
-                    isActive={
-                      item.url === "/"
-                        ? location.pathname === "/"
-                        : location.pathname.startsWith(item.url)
-                    }
+                    isActive={location.pathname === item.url}
                     tooltip={item.title}
                   >
-                    <NavLink to={item.url} end={item.url === "/"}>
+                    <NavLink to={item.url} end>
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.title}</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarSeparator />
+
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {navGroup2.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={location.pathname.startsWith(item.url)}
+                    tooltip={item.title}
+                  >
+                    <NavLink to={item.url}>
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.title}</span>
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarSeparator />
+
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {navGroup3.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={location.pathname.startsWith(item.url)}
+                    tooltip={item.title}
+                  >
+                    <NavLink to={item.url}>
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
                     </NavLink>
