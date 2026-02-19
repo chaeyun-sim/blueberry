@@ -32,7 +32,7 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       {/* Logo */}
       <div className="flex h-14 items-center gap-2 px-4 border-b border-sidebar-border">
-        <img src={logoImg} alt="ScoreFlow" className="h-7 w-7 shrink-0 object-contain" />
+        <img src={logoImg} alt="ScoreFlow" className="h-9 w-9 shrink-0 object-contain" />
         {!collapsed && (
           <span className="font-display font-bold text-lg tracking-tight truncate">
             ScoreFlow
