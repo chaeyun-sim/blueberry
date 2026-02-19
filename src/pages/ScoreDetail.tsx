@@ -49,10 +49,13 @@ const ScoreDetail = () => {
     );
   }
 
+  // Mock multiple score pages
+  const scorePages = [1, 2, 3];
+
   return (
     <AppLayout>
       <div className="mb-6">
-        <Button variant="ghost" className="gap-2 text-muted-foreground" onClick={() => navigate(-1)}>
+        <Button variant="ghost" className="gap-2 text-muted-foreground hover:bg-foreground/5" onClick={() => navigate(-1)}>
           <ArrowLeft className="h-4 w-4" /> 뒤로
         </Button>
       </div>
@@ -61,12 +64,19 @@ const ScoreDetail = () => {
 
       <Card className="border-border/50">
         <CardContent className="p-5">
-          <div className="min-h-[500px] border border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-3 bg-muted/30">
-            <FileImage className="h-12 w-12 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">악보 PDF 미리보기</p>
+          <div className="space-y-4">
+            {scorePages.map((page) => (
+              <div
+                key={page}
+                className="min-h-[500px] border border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-3 bg-muted/30"
+              >
+                <FileImage className="h-12 w-12 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">악보 {page}페이지</p>
+              </div>
+            ))}
           </div>
           <div className="flex justify-center mt-4">
-            <Button variant="ghost" className="gap-2 text-muted-foreground">
+            <Button variant="ghost" className="gap-2 text-muted-foreground hover:bg-foreground/5">
               <Download className="h-4 w-4" /> 다운로드
             </Button>
           </div>

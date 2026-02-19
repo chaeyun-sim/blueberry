@@ -33,9 +33,9 @@ const mockScores: Score[] = [
     title: "Canon in D",
     createdAt: "2025-11-20",
     arrangements: [
-      { id: "a1", name: "현악 3중주", version: "v2.1", createdAt: "2025-11-20" },
-      { id: "a2", name: "현악 4중주", version: "v1.0", createdAt: "2025-10-15" },
-      { id: "a3", name: "피아노 솔로", version: "v1.0", createdAt: "2025-09-01" },
+      { id: "a1", name: "현악 3중주 (Vn, Vn, Vc)", version: "v2.1", createdAt: "2025-11-20" },
+      { id: "a2", name: "현악 4중주 (Vn, Vn, Va, Vc)", version: "v1.0", createdAt: "2025-10-15" },
+      { id: "a3", name: "피아노 솔로 (Pf)", version: "v1.0", createdAt: "2025-09-01" },
     ],
   },
   {
@@ -43,7 +43,7 @@ const mockScores: Score[] = [
     title: "River Flows in You",
     createdAt: "2025-12-01",
     arrangements: [
-      { id: "a4", name: "피아노 솔로", version: "v1.2", createdAt: "2025-12-01" },
+      { id: "a4", name: "피아노 솔로 (Pf)", version: "v1.2", createdAt: "2025-12-01" },
     ],
   },
   {
@@ -51,8 +51,8 @@ const mockScores: Score[] = [
     title: "A Thousand Years",
     createdAt: "2026-01-10",
     arrangements: [
-      { id: "a5", name: "현악 5중주", version: "v1.0", createdAt: "2026-01-10" },
-      { id: "a6", name: "현악 4중주", version: "v1.0", createdAt: "2026-01-05" },
+      { id: "a5", name: "현악 5중주 (Vn, Vn, Va, Vc, Cb)", version: "v1.0", createdAt: "2026-01-10" },
+      { id: "a6", name: "현악 4중주 (Vn, Vn, Va, Vc)", version: "v1.0", createdAt: "2026-01-05" },
     ],
   },
   {
@@ -60,7 +60,7 @@ const mockScores: Score[] = [
     title: "Wedding March",
     createdAt: "2024-06-22",
     arrangements: [
-      { id: "a7", name: "브라스 앙상블", version: "v3.0", createdAt: "2024-06-22" },
+      { id: "a7", name: "브라스 앙상블 (Tp, Tp, Hn, Tb, Tu)", version: "v3.0", createdAt: "2024-06-22" },
     ],
   },
   {
@@ -68,7 +68,7 @@ const mockScores: Score[] = [
     title: "Spring Waltz",
     createdAt: "2026-02-05",
     arrangements: [
-      { id: "a8", name: "플룻 듀엣", version: "v1.0", createdAt: "2026-02-05" },
+      { id: "a8", name: "플룻 듀엣 (Fl, Fl)", version: "v1.0", createdAt: "2026-02-05" },
     ],
   },
 ];
@@ -264,7 +264,7 @@ const ScoreList = () => {
       </PageHeader>
 
       {/* Toolbar */}
-      <div className="flex items-center gap-3 mb-2">
+      <div className="flex items-center gap-3 mb-6">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input

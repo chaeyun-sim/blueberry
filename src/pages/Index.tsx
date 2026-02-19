@@ -379,6 +379,38 @@ const Dashboard = () => {
           </CardContent>
         </Card>
         </div>
+
+        {/* Third Row: Quick Stats */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+          <Card className="border-border/50">
+            <CardContent className="p-4 flex flex-col items-center text-center">
+              <Music className="h-5 w-5 text-primary mb-2" />
+              <p className="text-2xl font-display font-bold">24</p>
+              <p className="text-[11px] text-muted-foreground">보유 악보</p>
+            </CardContent>
+          </Card>
+          <Card className="border-border/50">
+            <CardContent className="p-4 flex flex-col items-center text-center">
+              <CheckCircle2 className="h-5 w-5 text-[hsl(var(--status-complete))] mb-2" />
+              <p className="text-2xl font-display font-bold">156</p>
+              <p className="text-[11px] text-muted-foreground">누적 완료</p>
+            </CardContent>
+          </Card>
+          <Card className="border-border/50">
+            <CardContent className="p-4 flex flex-col items-center text-center">
+              <TrendingUp className="h-5 w-5 text-[hsl(var(--success))] mb-2" />
+              <p className="text-2xl font-display font-bold">+22%</p>
+              <p className="text-[11px] text-muted-foreground">전년 대비 성장</p>
+            </CardContent>
+          </Card>
+          <Card className="border-border/50">
+            <CardContent className="p-4 flex flex-col items-center text-center">
+              <DollarSign className="h-5 w-5 text-[hsl(var(--warning))] mb-2" />
+              <p className="text-2xl font-display font-bold">₩14,930</p>
+              <p className="text-[11px] text-muted-foreground">평균 단가</p>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </AppLayout>
   );
