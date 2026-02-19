@@ -54,29 +54,44 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: Props) => {
         const data = new Uint8Array(e.target?.result as ArrayBuffer);
         const workbook = XLSX.read(data, { type: "array" });
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        const json = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet);
+        const json = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { raw: false });
 
-        const parsed: ExcelRow[] = json.map((row, i) => {
-          const orderDate =
-            (row["주문일시"] as string) ||
-            (row["orderDate"] as string) ||
-            (row["날짜"] as string) ||
-            "";
-          const category =
-            (row["대분류"] as string) ||
-            (row["category"] as string) ||
-            (row["카테고리"] as string) ||
-            "";
-          const product =
-            (row["주문상품"] as string) ||
-            (row["product"] as string) ||
-            (row["상품명"] as string) ||
-            "";
-          const amount =
-            Number(row["상품총액"] || row["amount"] || row["금액"] || 0);
+        if (json.length === 0) {
+          setError("데이터가 없습니다.");
+          return;
+        }
 
-          return { id: i + 1, orderDate, category, product, amount };
-        });
+        // Get actual header keys from the first row
+        const headers = Object.keys(json[0]);
+
+        // Fuzzy column finder
+        const findCol = (aliases: string[]): string | null => {
+          const normalized = aliases.map((a) => a.toLowerCase().replace(/[\s_]+/g, ""));
+          for (const h of headers) {
+            const nh = h.toLowerCase().replace(/[\s_]+/g, "");
+            if (normalized.includes(nh)) return h;
+          }
+          for (const h of headers) {
+            const nh = h.toLowerCase().replace(/[\s_]+/g, "");
+            for (const n of normalized) {
+              if (nh.includes(n) || n.includes(nh)) return h;
+            }
+          }
+          return null;
+        };
+
+        const dateCol = findCol(["주문일시", "orderDate", "날짜", "주문날짜", "주문 일시", "order date"]);
+        const catCol = findCol(["대분류", "category", "카테고리", "분류", "대 분류"]);
+        const prodCol = findCol(["주문상품", "product", "상품명", "주문 상품", "상품"]);
+        const amtCol = findCol(["상품총액", "amount", "금액", "총액", "상품 총액", "가격"]);
+
+        const parsed: ExcelRow[] = json.map((row, i) => ({
+          id: i + 1,
+          orderDate: String(dateCol ? row[dateCol] ?? "" : ""),
+          category: String(catCol ? row[catCol] ?? "" : ""),
+          product: String(prodCol ? row[prodCol] ?? "" : ""),
+          amount: Number(amtCol ? row[amtCol] ?? 0 : 0) || 0,
+        }));
 
         setPreview(parsed);
       } catch {
