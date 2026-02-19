@@ -9,22 +9,28 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { PlusCircle, Search, LayoutGrid, List } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
+type VersionType = "hard" | "easy" | "professional" | "normal";
+
 const tabs: { label: string; value: CommissionStatus | "all" }[] = [
   { label: "전체", value: "all" },
-  { label: "접수", value: "received" },
+  { label: "대기", value: "received" },
   { label: "작업중", value: "working" },
-  { label: "납품", value: "delivered" },
   { label: "완료", value: "complete" },
 ];
 
 const mockData = [
-  { id: "1", title: "Canon in D", client: "김OO", arrangement: "현악 4중주", deadline: "2026-02-21", status: "working" as CommissionStatus },
-  { id: "2", title: "River Flows in You", client: "이OO", arrangement: "피아노 솔로", deadline: "2026-02-23", status: "working" as CommissionStatus },
-  { id: "3", title: "Spring Waltz", client: "박OO", arrangement: "플룻 듀엣", deadline: "2026-03-01", status: "received" as CommissionStatus },
-  { id: "4", title: "A Thousand Years", client: "최OO", arrangement: "현악 5중주", deadline: "2026-02-28", status: "working" as CommissionStatus },
-  { id: "5", title: "Butterfly", client: "정OO", arrangement: "클라리넷 트리오", deadline: "2026-02-16", status: "delivered" as CommissionStatus },
-  { id: "6", title: "Wedding March", client: "강OO", arrangement: "브라스 앙상블", deadline: "2026-02-10", status: "complete" as CommissionStatus },
+  { id: "1", title: "Canon in D", arrangement: "현악 4중주", deadline: "2026-02-21", status: "working" as CommissionStatus, version: "hard" as VersionType },
+  { id: "2", title: "River Flows in You", arrangement: "피아노 솔로", deadline: "2026-02-23", status: "working" as CommissionStatus, version: "easy" as VersionType },
+  { id: "3", title: "Spring Waltz", arrangement: "플룻 듀엣", deadline: "2026-03-01", status: "received" as CommissionStatus, version: "normal" as VersionType },
+  { id: "4", title: "A Thousand Years", arrangement: "현악 5중주", deadline: "2026-02-28", status: "working" as CommissionStatus, version: "professional" as VersionType },
+  { id: "5", title: "Butterfly", arrangement: "클라리넷 트리오", deadline: "2026-02-16", status: "complete" as CommissionStatus, version: "normal" as VersionType },
+  { id: "6", title: "Wedding March", arrangement: "브라스 앙상블", deadline: "2026-02-10", status: "complete" as CommissionStatus, version: "hard" as VersionType },
 ];
+
+const versionLabel = (v: VersionType) => {
+  if (v === "normal") return "-";
+  return v;
+};
 
 const CommissionList = () => {
   const [filter, setFilter] = useState<CommissionStatus | "all">("all");
@@ -34,7 +40,7 @@ const CommissionList = () => {
 
   const filtered = mockData.filter((c) => {
     const matchesFilter = filter === "all" || c.status === filter;
-    const matchesSearch = c.title.toLowerCase().includes(search.toLowerCase()) || c.client.toLowerCase().includes(search.toLowerCase());
+    const matchesSearch = c.title.toLowerCase().includes(search.toLowerCase());
     return matchesFilter && matchesSearch;
   });
 
@@ -52,7 +58,7 @@ const CommissionList = () => {
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="곡명 또는 의뢰인 검색..."
+            placeholder="곡명 검색..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9"
@@ -91,8 +97,8 @@ const CommissionList = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead className="text-xs uppercase tracking-wider">곡명</TableHead>
-                  <TableHead className="text-xs uppercase tracking-wider">의뢰인</TableHead>
                   <TableHead className="text-xs uppercase tracking-wider">편성</TableHead>
+                  <TableHead className="text-xs uppercase tracking-wider">버전</TableHead>
                   <TableHead className="text-xs uppercase tracking-wider">마감일</TableHead>
                   <TableHead className="text-xs uppercase tracking-wider">상태</TableHead>
                 </TableRow>
@@ -101,8 +107,16 @@ const CommissionList = () => {
                 {filtered.map((item) => (
                   <TableRow key={item.id} className="cursor-pointer" onClick={() => navigate(`/commissions/${item.id}`)}>
                     <TableCell className="font-medium">{item.title}</TableCell>
-                    <TableCell className="text-muted-foreground">{item.client}</TableCell>
                     <TableCell className="text-muted-foreground">{item.arrangement}</TableCell>
+                    <TableCell>
+                      {item.version !== "normal" ? (
+                        <span className="text-xs px-2 py-1 rounded-md bg-accent/15 text-accent font-medium capitalize">
+                          {versionLabel(item.version)}
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground">-</span>
+                      )}
+                    </TableCell>
                     <TableCell className="text-muted-foreground">{item.deadline}</TableCell>
                     <TableCell><StatusBadge status={item.status} /></TableCell>
                   </TableRow>
@@ -122,8 +136,14 @@ const CommissionList = () => {
                 </div>
                 <p className="text-sm text-muted-foreground">{item.arrangement}</p>
                 <div className="flex items-center justify-between mt-4 text-sm">
-                  <span className="text-muted-foreground">{item.client}</span>
                   <span className="text-muted-foreground">{item.deadline}</span>
+                  {item.version !== "normal" ? (
+                    <span className="text-xs px-2 py-1 rounded-md bg-accent/15 text-accent font-medium capitalize">
+                      {versionLabel(item.version)}
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground">-</span>
+                  )}
                 </div>
               </CardContent>
             </Card>

@@ -5,24 +5,84 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { PlusCircle, Search } from "lucide-react";
+import { PlusCircle, Search, ChevronRight, ChevronDown } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
-const mockScores = [
-  { id: "s1", title: "Canon in D", arrangement: "현악 3중주", version: "v2.1", createdAt: "2025-11-20" },
-  { id: "s2", title: "Canon in D", arrangement: "현악 4중주", version: "v1.0", createdAt: "2025-08-15" },
-  { id: "s3", title: "River Flows in You", arrangement: "피아노 솔로", version: "v1.2", createdAt: "2025-12-01" },
-  { id: "s4", title: "A Thousand Years", arrangement: "현악 5중주", version: "v1.0", createdAt: "2026-01-10" },
-  { id: "s5", title: "Wedding March", arrangement: "브라스 앙상블", version: "v3.0", createdAt: "2024-06-22" },
-  { id: "s6", title: "Spring Waltz", arrangement: "플룻 듀엣", version: "v1.0", createdAt: "2026-02-05" },
+interface Arrangement {
+  id: string;
+  name: string;
+  version: string;
+}
+
+interface Score {
+  id: string;
+  title: string;
+  arrangements: Arrangement[];
+  createdAt: string;
+}
+
+const mockScores: Score[] = [
+  {
+    id: "s1",
+    title: "Canon in D",
+    createdAt: "2025-11-20",
+    arrangements: [
+      { id: "a1", name: "현악 3중주", version: "v2.1" },
+      { id: "a2", name: "현악 4중주", version: "v1.0" },
+      { id: "a3", name: "피아노 솔로", version: "v1.0" },
+    ],
+  },
+  {
+    id: "s2",
+    title: "River Flows in You",
+    createdAt: "2025-12-01",
+    arrangements: [
+      { id: "a4", name: "피아노 솔로", version: "v1.2" },
+    ],
+  },
+  {
+    id: "s3",
+    title: "A Thousand Years",
+    createdAt: "2026-01-10",
+    arrangements: [
+      { id: "a5", name: "현악 5중주", version: "v1.0" },
+      { id: "a6", name: "현악 4중주", version: "v1.0" },
+    ],
+  },
+  {
+    id: "s4",
+    title: "Wedding March",
+    createdAt: "2024-06-22",
+    arrangements: [
+      { id: "a7", name: "브라스 앙상블", version: "v3.0" },
+    ],
+  },
+  {
+    id: "s5",
+    title: "Spring Waltz",
+    createdAt: "2026-02-05",
+    arrangements: [
+      { id: "a8", name: "플룻 듀엣", version: "v1.0" },
+    ],
+  },
 ];
 
 const ScoreList = () => {
   const [search, setSearch] = useState("");
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const navigate = useNavigate();
+
+  const toggleExpand = (id: string) => {
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   const filtered = mockScores.filter(
-    (s) =>
-      s.title.toLowerCase().includes(search.toLowerCase()) ||
-      s.arrangement.toLowerCase().includes(search.toLowerCase())
+    (s) => s.title.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -37,7 +97,7 @@ const ScoreList = () => {
       <div className="relative max-w-sm mb-6">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="곡명 또는 편성 검색..."
+          placeholder="곡명 검색..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="pl-9"
@@ -49,25 +109,49 @@ const ScoreList = () => {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="text-xs uppercase tracking-wider w-10"></TableHead>
                 <TableHead className="text-xs uppercase tracking-wider">곡명</TableHead>
-                <TableHead className="text-xs uppercase tracking-wider">편성</TableHead>
-                <TableHead className="text-xs uppercase tracking-wider">버전</TableHead>
+                <TableHead className="text-xs uppercase tracking-wider">편성 수</TableHead>
                 <TableHead className="text-xs uppercase tracking-wider text-right">등록일</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map((score) => (
-                <TableRow key={score.id} className="cursor-pointer">
-                  <TableCell className="font-medium">{score.title}</TableCell>
-                  <TableCell className="text-muted-foreground">{score.arrangement}</TableCell>
-                  <TableCell>
-                    <span className="text-xs px-2 py-1 rounded-md bg-accent/15 text-accent font-medium">
-                      {score.version}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-right text-muted-foreground">{score.createdAt}</TableCell>
-                </TableRow>
-              ))}
+              {filtered.map((score) => {
+                const isExpanded = expandedIds.has(score.id);
+                return (
+                  <>
+                    <TableRow key={score.id} className="cursor-pointer" onClick={() => toggleExpand(score.id)}>
+                      <TableCell className="w-10 pr-0">
+                        {isExpanded ? (
+                          <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                        )}
+                      </TableCell>
+                      <TableCell className="font-medium">{score.title}</TableCell>
+                      <TableCell className="text-muted-foreground">{score.arrangements.length}개</TableCell>
+                      <TableCell className="text-right text-muted-foreground">{score.createdAt}</TableCell>
+                    </TableRow>
+                    {isExpanded &&
+                      score.arrangements.map((arr) => (
+                        <TableRow
+                          key={arr.id}
+                          className="cursor-pointer hover:bg-muted/50 bg-muted/20"
+                          onClick={() => navigate(`/scores/${score.id}/arrangements/${arr.id}`)}
+                        >
+                          <TableCell></TableCell>
+                          <TableCell className="text-muted-foreground pl-8">↳ {arr.name}</TableCell>
+                          <TableCell>
+                            <span className="text-xs px-2 py-1 rounded-md bg-accent/15 text-accent font-medium">
+                              {arr.version}
+                            </span>
+                          </TableCell>
+                          <TableCell></TableCell>
+                        </TableRow>
+                      ))}
+                  </>
+                );
+              })}
             </TableBody>
           </Table>
         </CardContent>

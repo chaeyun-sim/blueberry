@@ -3,14 +3,13 @@ import { PageHeader } from "@/components/PageHeader";
 import { StatusBadge, CommissionStatus } from "@/components/StatusBadge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ClipboardList, Clock, Truck, CheckCircle2, AlertTriangle } from "lucide-react";
+import { ClipboardList, Clock, CheckCircle2, AlertTriangle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-const statusCards: { status: CommissionStatus; icon: typeof ClipboardList; count: number; label: string }[] = [
-  { status: "received", icon: ClipboardList, count: 3, label: "접수" },
-  { status: "working", icon: Clock, count: 5, label: "작업중" },
-  { status: "delivered", icon: Truck, count: 2, label: "납품" },
-  { status: "complete", icon: CheckCircle2, count: 12, label: "완료" },
+const statusCards: { status: CommissionStatus; icon: typeof ClipboardList; count: number; label: string; description: string }[] = [
+  { status: "received", icon: ClipboardList, count: 3, label: "대기", description: "새로 접수된 의뢰" },
+  { status: "working", icon: Clock, count: 5, label: "작업중", description: "진행 중인 작업" },
+  { status: "complete", icon: CheckCircle2, count: 12, label: "완료", description: "완료된 의뢰" },
 ];
 
 const urgentCommissions = [
@@ -22,7 +21,7 @@ const recentActivity = [
   { id: "1", title: "Spring Waltz", arrangement: "플룻 듀엣", status: "received" as CommissionStatus, date: "2026-02-19" },
   { id: "2", title: "A Thousand Years", arrangement: "현악 5중주", status: "working" as CommissionStatus, date: "2026-02-18" },
   { id: "3", title: "Canon in D", arrangement: "현악 4중주", status: "working" as CommissionStatus, date: "2026-02-17" },
-  { id: "4", title: "Butterfly", arrangement: "클라리넷 트리오", status: "delivered" as CommissionStatus, date: "2026-02-16" },
+  { id: "4", title: "Butterfly", arrangement: "클라리넷 트리오", status: "complete" as CommissionStatus, date: "2026-02-16" },
   { id: "5", title: "Wedding March", arrangement: "브라스 앙상블", status: "complete" as CommissionStatus, date: "2026-02-15" },
 ];
 
@@ -34,7 +33,7 @@ const Dashboard = () => {
       <PageHeader title="대시보드" description="의뢰 현황을 한눈에 확인하세요" />
 
       {/* Status Count Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         {statusCards.map((item) => (
           <Card key={item.status} className="hover-lift cursor-pointer border-border/50" onClick={() => navigate("/commissions")}>
             <CardContent className="p-5">
@@ -43,7 +42,7 @@ const Dashboard = () => {
                 <StatusBadge status={item.status} />
               </div>
               <p className="text-3xl font-display font-bold animate-count-up">{item.count}</p>
-              <p className="text-sm text-muted-foreground mt-1">{item.label}</p>
+              <p className="text-sm text-muted-foreground mt-1">{item.description}</p>
             </CardContent>
           </Card>
         ))}
