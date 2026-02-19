@@ -163,7 +163,7 @@ export default function CalendarView() {
                     {commissions.slice(0, 3).map((c) => (
                       <div
                         key={c.id}
-                        className="text-[10px] leading-tight px-1.5 py-0.5 rounded border border-primary/30 bg-primary/10 text-primary cursor-pointer truncate font-medium transition-opacity hover:opacity-80"
+                        className="text-xs leading-tight px-1.5 py-0.5 rounded border border-primary/30 bg-primary/10 text-primary cursor-pointer truncate font-medium transition-opacity hover:opacity-80"
                         onClick={() => navigate(`/commissions/${c.id}`)}
                         title={`${c.title} — ${c.arrangement}`}
                       >
