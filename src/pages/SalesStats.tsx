@@ -97,9 +97,13 @@ const formatCurrency = (value: number) =>
 type SortKey = "orderDate" | "category" | "product" | "amount";
 type SortDir = "asc" | "desc";
 
+const ALL_CATEGORIES = ["ALL", ...Array.from(new Set(rawExcelData.map((r) => r.category)))];
+
 const SalesStats = () => {
-  const [sortKey, setSortKey] = useState<SortKey>("orderDate");
-  const [sortDir, setSortDir] = useState<SortDir>("desc");
+  const [sortKey, setSortKey] = useState<SortKey>("category");
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
+  const [filterCategory, setFilterCategory] = useState("ALL");
+  const [groupByCategory, setGroupByCategory] = useState(true);
 
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -111,13 +115,33 @@ const SalesStats = () => {
   };
 
   const sortedData = useMemo(() => {
-    return [...rawExcelData].sort((a, b) => {
+    let data = [...rawExcelData];
+    if (filterCategory !== "ALL") {
+      data = data.filter((r) => r.category === filterCategory);
+    }
+    data.sort((a, b) => {
+      // Primary: category alphabetical when grouping
+      if (groupByCategory && sortKey !== "category") {
+        const catCmp = a.category.localeCompare(b.category, "ko");
+        if (catCmp !== 0) return catCmp;
+      }
       const aVal = a[sortKey];
       const bVal = b[sortKey];
       const cmp = typeof aVal === "number" ? aVal - (bVal as number) : String(aVal).localeCompare(String(bVal), "ko");
       return sortDir === "asc" ? cmp : -cmp;
     });
-  }, [sortKey, sortDir]);
+    return data;
+  }, [sortKey, sortDir, filterCategory, groupByCategory]);
+
+  const groupedData = useMemo(() => {
+    if (!groupByCategory) return null;
+    const groups: Record<string, typeof rawExcelData> = {};
+    sortedData.forEach((row) => {
+      if (!groups[row.category]) groups[row.category] = [];
+      groups[row.category].push(row);
+    });
+    return groups;
+  }, [sortedData, groupByCategory]);
 
   const SortIcon = ({ col }: { col: SortKey }) => {
     if (sortKey !== col) return <ArrowUpDown className="h-3 w-3 ml-1 opacity-40" />;
@@ -395,12 +419,35 @@ const SalesStats = () => {
         <TabsContent value="raw" className="space-y-6">
           <Card className="border-border/50">
             <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap gap-3">
                 <CardTitle className="text-base font-display flex items-center gap-2">
                   <FileSpreadsheet className="h-4 w-4" />
                   엑셀 데이터 전체 보기
                 </CardTitle>
-                <span className="text-xs text-muted-foreground">{rawExcelData.length}건</span>
+                <div className="flex items-center gap-2">
+                  <Select value={filterCategory} onValueChange={setFilterCategory}>
+                    <SelectTrigger className="w-32 h-8 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ALL_CATEGORIES.map((cat) => (
+                        <SelectItem key={cat} value={cat}>
+                          {cat === "ALL" ? "전체 대분류" : cat}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    variant={groupByCategory ? "default" : "outline"}
+                    size="sm"
+                    className="gap-1.5 h-8 text-xs"
+                    onClick={() => setGroupByCategory((v) => !v)}
+                  >
+                    <Layers className="h-3 w-3" />
+                    그룹핑
+                  </Button>
+                  <span className="text-xs text-muted-foreground">{sortedData.length}건</span>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
@@ -418,15 +465,17 @@ const SalesStats = () => {
                           <SortIcon col="orderDate" />
                         </span>
                       </TableHead>
-                      <TableHead
-                        className="text-xs uppercase cursor-pointer select-none hover:text-foreground transition-colors"
-                        onClick={() => toggleSort("category")}
-                      >
-                        <span className="inline-flex items-center">
-                          대분류
-                          <SortIcon col="category" />
-                        </span>
-                      </TableHead>
+                      {!groupByCategory && (
+                        <TableHead
+                          className="text-xs uppercase cursor-pointer select-none hover:text-foreground transition-colors"
+                          onClick={() => toggleSort("category")}
+                        >
+                          <span className="inline-flex items-center">
+                            대분류
+                            <SortIcon col="category" />
+                          </span>
+                        </TableHead>
+                      )}
                       <TableHead
                         className="text-xs uppercase cursor-pointer select-none hover:text-foreground transition-colors"
                         onClick={() => toggleSort("product")}
@@ -448,19 +497,42 @@ const SalesStats = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {sortedData.map((row, i) => (
-                      <TableRow key={row.id}>
-                        <TableCell className="text-muted-foreground text-xs">{i + 1}</TableCell>
-                        <TableCell className="text-sm tabular-nums">{row.orderDate}</TableCell>
-                        <TableCell>
-                          <span className="px-2 py-0.5 rounded-full text-xs bg-secondary text-secondary-foreground">
-                            {row.category}
-                          </span>
-                        </TableCell>
-                        <TableCell className="font-medium text-sm">{row.product}</TableCell>
-                        <TableCell className="text-right tabular-nums text-sm">{formatCurrency(row.amount)}</TableCell>
-                      </TableRow>
-                    ))}
+                    {groupByCategory && groupedData
+                      ? Object.entries(groupedData).map(([category, rows]) => (
+                          <>
+                            <TableRow key={`group-${category}`} className="bg-muted/40 hover:bg-muted/40">
+                              <TableCell colSpan={4} className="py-2">
+                                <span className="inline-flex items-center gap-2 text-sm font-display font-bold">
+                                  <span className="px-2 py-0.5 rounded-full text-xs bg-primary text-primary-foreground">
+                                    {category}
+                                  </span>
+                                  <span className="text-muted-foreground font-normal text-xs">{rows.length}건</span>
+                                </span>
+                              </TableCell>
+                            </TableRow>
+                            {rows.map((row, i) => (
+                              <TableRow key={row.id}>
+                                <TableCell className="text-muted-foreground text-xs">{i + 1}</TableCell>
+                                <TableCell className="text-sm tabular-nums">{row.orderDate}</TableCell>
+                                <TableCell className="font-medium text-sm">{row.product}</TableCell>
+                                <TableCell className="text-right tabular-nums text-sm">{formatCurrency(row.amount)}</TableCell>
+                              </TableRow>
+                            ))}
+                          </>
+                        ))
+                      : sortedData.map((row, i) => (
+                          <TableRow key={row.id}>
+                            <TableCell className="text-muted-foreground text-xs">{i + 1}</TableCell>
+                            <TableCell className="text-sm tabular-nums">{row.orderDate}</TableCell>
+                            <TableCell>
+                              <span className="px-2 py-0.5 rounded-full text-xs bg-secondary text-secondary-foreground">
+                                {row.category}
+                              </span>
+                            </TableCell>
+                            <TableCell className="font-medium text-sm">{row.product}</TableCell>
+                            <TableCell className="text-right tabular-nums text-sm">{formatCurrency(row.amount)}</TableCell>
+                          </TableRow>
+                        ))}
                   </TableBody>
                 </Table>
               </div>
