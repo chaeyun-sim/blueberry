@@ -143,7 +143,7 @@ export default function CalendarView() {
                 <div
                   key={idx}
                   className={cn(
-                    "min-h-[100px] p-1.5 border-b border-r border-border/50 transition-colors",
+                    "min-h-[120px] aspect-square p-1.5 border-b border-r border-border/50 transition-colors",
                     !cell.currentMonth && "bg-muted/30",
                     cell.currentMonth && "hover:bg-muted/20"
                   )}
@@ -159,7 +159,7 @@ export default function CalendarView() {
                   >
                     {cell.day}
                   </span>
-                  <div className="space-y-0.5">
+                  <div className="space-y-1.5">
                     {commissions.slice(0, 3).map((c) => (
                       <div
                         key={c.id}

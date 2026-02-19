@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { PlusCircle, Search, LayoutGrid, List } from "lucide-react";
+import { PlusCircle, Search } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 type VersionType = "hard" | "easy" | "professional" | "normal";
@@ -38,7 +38,6 @@ const CommissionList = () => {
   const initialStatus = searchParams.get("status") as CommissionStatus | null;
   const [filter, setFilter] = useState<CommissionStatus | "all">(initialStatus || "all");
   const [search, setSearch] = useState("");
-  const [viewMode, setViewMode] = useState<"table" | "card">("table");
   const navigate = useNavigate();
 
   const filtered = mockData.filter((c) => {
@@ -77,77 +76,43 @@ const CommissionList = () => {
             </button>
           ))}
         </div>
-        <div className="flex items-center gap-1 ml-auto">
-          <Button variant={viewMode === "table" ? "secondary" : "ghost"} size="icon" onClick={() => setViewMode("table")}>
-            <List className="h-4 w-4" />
-          </Button>
-          <Button variant={viewMode === "card" ? "secondary" : "ghost"} size="icon" onClick={() => setViewMode("card")}>
-            <LayoutGrid className="h-4 w-4" />
-          </Button>
-        </div>
       </div>
 
       {/* Table View */}
-      {viewMode === "table" ? (
-        <Card className="border-border/50">
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="text-xs uppercase tracking-wider">곡명</TableHead>
-                  <TableHead className="text-xs uppercase tracking-wider">편성</TableHead>
-                  <TableHead className="text-xs uppercase tracking-wider">버전</TableHead>
-                  <TableHead className="text-xs uppercase tracking-wider">마감일</TableHead>
-                  <TableHead className="text-xs uppercase tracking-wider">상태</TableHead>
+      <Card className="border-border/50">
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="text-xs uppercase tracking-wider">곡명</TableHead>
+                <TableHead className="text-xs uppercase tracking-wider">편성</TableHead>
+                <TableHead className="text-xs uppercase tracking-wider">버전</TableHead>
+                <TableHead className="text-xs uppercase tracking-wider">마감일</TableHead>
+                <TableHead className="text-xs uppercase tracking-wider">상태</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filtered.map((item) => (
+                <TableRow key={item.id} className="cursor-pointer" onClick={() => navigate(`/commissions/${item.id}`)}>
+                  <TableCell className="font-medium">{item.title}</TableCell>
+                  <TableCell className="text-muted-foreground">{item.arrangement}</TableCell>
+                  <TableCell>
+                    {item.version !== "normal" ? (
+                      <span className="text-xs px-2 py-1 rounded-md bg-accent/15 text-accent font-medium capitalize">
+                        {versionLabel(item.version)}
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground">-</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">{item.deadline}</TableCell>
+                  <TableCell><StatusBadge status={item.status} /></TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filtered.map((item) => (
-                  <TableRow key={item.id} className="cursor-pointer" onClick={() => navigate(`/commissions/${item.id}`)}>
-                    <TableCell className="font-medium">{item.title}</TableCell>
-                    <TableCell className="text-muted-foreground">{item.arrangement}</TableCell>
-                    <TableCell>
-                      {item.version !== "normal" ? (
-                        <span className="text-xs px-2 py-1 rounded-md bg-accent/15 text-accent font-medium capitalize">
-                          {versionLabel(item.version)}
-                        </span>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">{item.deadline}</TableCell>
-                    <TableCell><StatusBadge status={item.status} /></TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map((item) => (
-            <Card key={item.id} className="hover-lift cursor-pointer border-border/50" onClick={() => navigate(`/commissions/${item.id}`)}>
-              <CardContent className="p-5">
-                <div className="flex items-start justify-between mb-3">
-                  <h3 className="font-display font-semibold">{item.title}</h3>
-                  <StatusBadge status={item.status} />
-                </div>
-                <p className="text-sm text-muted-foreground">{item.arrangement}</p>
-                <div className="flex items-center justify-between mt-4 text-sm">
-                  <span className="text-muted-foreground">{item.deadline}</span>
-                  {item.version !== "normal" ? (
-                    <span className="text-xs px-2 py-1 rounded-md bg-accent/15 text-accent font-medium capitalize">
-                      {versionLabel(item.version)}
-                    </span>
-                  ) : (
-                    <span className="text-muted-foreground">-</span>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </AppLayout>
   );
 };
