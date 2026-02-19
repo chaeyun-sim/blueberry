@@ -46,7 +46,7 @@ export function AppSidebar() {
               key={item.title}
               onClick={() => navigate(item.url)}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150",
+                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150",
                 "hover:bg-sidebar-accent",
                 isActive(item)
                   ? "bg-primary/10 text-primary border border-primary/20"
@@ -64,14 +64,14 @@ export function AppSidebar() {
         <div className="flex flex-col gap-1.5">
           <button
             onClick={() => navigate("/new")}
-            className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
+            className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-semibold bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
           >
             <PlusCircle className="h-4 w-4 shrink-0" />
             {!collapsed && <span>새 의뢰</span>}
           </button>
           <button
             onClick={toggleTheme}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-sidebar-foreground/70 hover:bg-sidebar-accent border border-transparent transition-all duration-150"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-sidebar-foreground/70 hover:bg-sidebar-accent border border-transparent transition-all duration-150"
           >
             {theme === "dark" ? <Sun className="h-4 w-4 shrink-0" /> : <Moon className="h-4 w-4 shrink-0" />}
             {!collapsed && <span>{theme === "dark" ? "라이트 모드" : "다크 모드"}</span>}
