@@ -1,4 +1,4 @@
-import { LayoutDashboard, ClipboardList, Music, PlusCircle } from "lucide-react";
+import { LayoutDashboard, ClipboardList, Music, PlusCircle, BarChart3 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import {
@@ -18,6 +18,7 @@ const mainNav = [
   { title: "대시보드", url: "/", icon: LayoutDashboard },
   { title: "의뢰 목록", url: "/commissions", icon: ClipboardList },
   { title: "악보 관리", url: "/scores", icon: Music },
+  { title: "매출 통계", url: "/stats", icon: BarChart3 },
 ];
 
 export function AppSidebar() {

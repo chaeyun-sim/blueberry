@@ -4,7 +4,7 @@ import { StatusBadge, CommissionStatus } from "@/components/StatusBadge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { ClipboardList, Clock, Truck, CheckCircle2, AlertTriangle, PlusCircle } from "lucide-react";
+import { ClipboardList, Clock, Truck, CheckCircle2, AlertTriangle, PlusCircle, TrendingUp, DollarSign, Trophy, Layers } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const statusCards: { status: CommissionStatus; icon: typeof ClipboardList; count: number; label: string }[] = [
@@ -83,6 +83,55 @@ const Dashboard = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* Sales Summary */}
+      <Card className="mb-8 border-border/50 hover-lift cursor-pointer" onClick={() => navigate("/stats")}>
+        <CardContent className="p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-display font-semibold text-lg">매출 요약</h2>
+            <span className="text-xs text-muted-foreground">자세히 보기 →</span>
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <DollarSign className="h-3.5 w-3.5" />
+                <span className="text-xs">이번 달 매출</span>
+              </div>
+              <p className="text-xl font-display font-bold">₩2,340,000</p>
+              <p className="text-xs text-[hsl(var(--status-complete))] flex items-center gap-0.5">
+                <TrendingUp className="h-3 w-3" /> +15.2%
+              </p>
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <Trophy className="h-3.5 w-3.5" />
+                <span className="text-xs">베스트셀러</span>
+              </div>
+              <p className="text-base font-display font-bold truncate">Canon in D</p>
+              <p className="text-xs text-muted-foreground">156건</p>
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <Layers className="h-3.5 w-3.5" />
+                <span className="text-xs">인기 편성</span>
+              </div>
+              <p className="text-base font-display font-bold truncate">현악 4중주</p>
+              <p className="text-xs text-muted-foreground">234건</p>
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <ClipboardList className="h-3.5 w-3.5" />
+                <span className="text-xs">총 판매건</span>
+              </div>
+              <p className="text-xl font-display font-bold">1,284</p>
+              <p className="text-xs text-[hsl(var(--status-complete))] flex items-center gap-0.5">
+                <TrendingUp className="h-3 w-3" /> +8.3%
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
 
       {/* Recent Activity */}
       <Card className="border-border/50">

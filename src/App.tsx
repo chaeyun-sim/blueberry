@@ -10,6 +10,7 @@ import CommissionDetail from "./pages/CommissionDetail";
 import ScoreList from "./pages/ScoreList";
 import ScoreDetail from "./pages/ScoreDetail";
 import ScoreRegister from "./pages/ScoreRegister";
+import SalesStats from "./pages/SalesStats";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/scores" element={<ScoreList />} />
           <Route path="/scores/:scoreId/arrangements/:arrangementId" element={<ScoreDetail />} />
           <Route path="/scores/new" element={<ScoreRegister />} />
+          <Route path="/stats" element={<SalesStats />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
