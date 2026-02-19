@@ -14,7 +14,6 @@ import {
   BarChart3,
   FileSpreadsheet,
   CalendarDays,
-  Trophy,
   Layers,
   ArrowUpDown,
   ArrowUp,
@@ -186,21 +185,25 @@ const SalesStats = () => {
         <Card className="border-border/50">
           <CardContent className="p-5">
             <div className="flex items-center justify-between mb-2">
-              <Trophy className="h-5 w-5 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground font-medium">베스트셀러</span>
+              <CalendarDays className="h-5 w-5 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground font-medium">지난달 매출</span>
             </div>
-            <p className="text-lg font-display font-bold truncate">Canon in D</p>
-            <p className="text-xs text-muted-foreground mt-1">156건 판매</p>
+            <p className="text-2xl font-display font-bold">{formatCurrency(1760000)}</p>
+            <p className="text-xs text-[hsl(var(--status-complete))] mt-1 flex items-center gap-1">
+              <TrendingUp className="h-3 w-3" /> +5.2% vs 전월
+            </p>
           </CardContent>
         </Card>
         <Card className="border-border/50">
           <CardContent className="p-5">
             <div className="flex items-center justify-between mb-2">
-              <Layers className="h-5 w-5 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground font-medium">인기 편성</span>
+              <FileSpreadsheet className="h-5 w-5 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground font-medium">지난달 판매건</span>
             </div>
-            <p className="text-lg font-display font-bold truncate">현악 4중주</p>
-            <p className="text-xs text-muted-foreground mt-1">234건 판매</p>
+            <p className="text-2xl font-display font-bold">98</p>
+            <p className="text-xs text-[hsl(var(--status-complete))] mt-1 flex items-center gap-1">
+              <TrendingUp className="h-3 w-3" /> +3.1% vs 전월
+            </p>
           </CardContent>
         </Card>
       </div>
