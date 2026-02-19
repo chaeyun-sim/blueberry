@@ -156,10 +156,11 @@ function MiniCalendar({ onNavigate }: { onNavigate: () => void }) {
                 className={`
                   w-7 h-7 flex items-center justify-center text-xs font-medium transition-colors
                   ${isToday(d) ? "rounded-full bg-primary text-primary-foreground font-bold" : ""}
-                  ${hasDeadline(d) && !isToday(d) ? "rounded-sm bg-yellow-300/40 text-foreground font-semibold" : ""}
                 `}
               >
-                {d}
+                {hasDeadline(d) && !isToday(d) ? (
+                  <span className="px-1 bg-yellow-300/50 rounded-[2px]">{d}</span>
+                ) : d}
               </span>
             ) : (
               <span className="w-7 h-7" />
