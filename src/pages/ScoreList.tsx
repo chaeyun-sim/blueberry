@@ -5,9 +5,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  PlusCircle, Search, FolderOpen, Folder, FileMusic, ArrowLeft,
-  LayoutGrid, List, Music, MoreHorizontal, Calendar, Layers,
+  PlusCircle, Search, Folder, FileMusic,
+  LayoutGrid, List, Music, Calendar, Layers,
 } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -82,7 +83,7 @@ function Breadcrumb({
   onNavigate: (id: string | null) => void;
 }) {
   return (
-    <div className="flex items-center gap-1.5 text-sm mb-5">
+    <div className="flex items-center gap-1.5 text-sm mb-5 mt-1">
       {path.map((item, i) => (
         <span key={i} className="flex items-center gap-1.5">
           {i > 0 && <span className="text-muted-foreground/40">/</span>}
@@ -120,9 +121,6 @@ function FolderCard({ score, onClick }: { score: Score; onClick: () => void }) {
       >
         <div className="relative">
           <Folder className="h-14 w-14 text-primary/70 group-hover:text-primary transition-colors" strokeWidth={1.5} />
-          <span className="absolute -bottom-1 -right-1 text-[10px] font-bold bg-primary/10 text-primary rounded-full w-5 h-5 flex items-center justify-center">
-            {score.arrangements.length}
-          </span>
         </div>
         <div className="text-center">
           <p className="font-medium text-sm truncate max-w-[140px]">{score.title}</p>
@@ -345,46 +343,39 @@ const ScoreList = () => {
                 </motion.div>
               )
             ) : (
-              /* ── Inside folder: Files ── */
-              viewMode === "grid" ? (
-                <motion.div
-                  key="grid-files"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2"
-                >
-                  {openFolder.arrangements.map((arr) => (
-                    <FileCard
-                      key={arr.id}
-                      arrangement={arr}
-                      scoreId={openFolder.id}
-                      onClick={() =>
-                        navigate(`/scores/${openFolder.id}/arrangements/${arr.id}`)
-                      }
-                    />
-                  ))}
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="list-files"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="flex flex-col gap-0.5"
-                >
-                  {openFolder.arrangements.map((arr) => (
-                    <FileRow
-                      key={arr.id}
-                      arrangement={arr}
-                      scoreId={openFolder.id}
-                      onClick={() =>
-                        navigate(`/scores/${openFolder.id}/arrangements/${arr.id}`)
-                      }
-                    />
-                  ))}
-                </motion.div>
-              )
+              /* ── Inside folder: Table ── */
+              <motion.div
+                key="table-files"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-xs uppercase tracking-wider">편성명</TableHead>
+                      <TableHead className="text-xs uppercase tracking-wider text-right">등록일</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {openFolder.arrangements.map((arr) => (
+                      <TableRow
+                        key={arr.id}
+                        className="cursor-pointer hover:bg-muted/50"
+                        onClick={() =>
+                          navigate(`/scores/${openFolder.id}/arrangements/${arr.id}`)
+                        }
+                      >
+                        <TableCell className="font-medium flex items-center gap-2">
+                          <FileMusic className="h-4 w-4 text-muted-foreground/60 shrink-0" />
+                          {arr.name}
+                        </TableCell>
+                        <TableCell className="text-right text-muted-foreground">{arr.createdAt}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </motion.div>
             )}
           </AnimatePresence>
 
