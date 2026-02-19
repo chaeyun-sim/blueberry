@@ -154,9 +154,9 @@ function MiniCalendar({ onNavigate }: { onNavigate: () => void }) {
             {d ? (
               <span
                 className={`
-                  w-7 h-7 flex items-center justify-center rounded-full text-xs font-medium transition-colors
-                  ${isToday(d) ? "bg-primary text-primary-foreground font-bold" : ""}
-                  ${hasDeadline(d) && !isToday(d) ? "ring-2 ring-[hsl(var(--warning))] text-[hsl(var(--warning))] font-semibold" : ""}
+                  w-7 h-7 flex items-center justify-center text-xs font-medium transition-colors
+                  ${isToday(d) ? "rounded-full bg-primary text-primary-foreground font-bold" : ""}
+                  ${hasDeadline(d) && !isToday(d) ? "rounded-sm bg-yellow-300/40 text-foreground font-semibold" : ""}
                 `}
               >
                 {d}
@@ -173,7 +173,7 @@ function MiniCalendar({ onNavigate }: { onNavigate: () => void }) {
           <span className="w-2 h-2 rounded-full bg-primary" /> 오늘
         </span>
         <span className="flex items-center gap-1">
-          <span className="w-2 h-2 rounded-full bg-[hsl(var(--warning))]" /> 마감
+          <span className="w-2 h-2 rounded-sm bg-yellow-300/40" /> 마감
         </span>
       </div>
     </div>
