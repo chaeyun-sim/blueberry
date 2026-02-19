@@ -69,15 +69,7 @@ function getFormattedDate() {
   return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일 ${days[d.getDay()]}요일`;
 }
 
-const quotes = [
-  "적게 일하고 돈 많이 벌자 💰",
-  "오늘의 편곡이 내일의 명곡이 됩니다.",
-  "좋은 악보는 연주자를 미소 짓게 한다.",
-  "매일 한 마디씩, 꾸준히.",
-  "창작의 기쁨은 마감 후에 찾아온다.",
-  "음악은 영혼의 언어다. — 베토벤",
-  "한 음표가 세상을 바꿀 수 있다.",
-];
+const DAILY_QUOTE = "적게 일하고 돈 많이 벌자 💰";
 
 function useLiveClock() {
   const [time, setTime] = useState(new Date());
@@ -86,13 +78,6 @@ function useLiveClock() {
     return () => clearInterval(timer);
   }, []);
   return time;
-}
-
-function getDailyQuote() {
-  const dayOfYear = Math.floor(
-    (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000
-  );
-  return quotes[dayOfYear % quotes.length];
 }
 
 // ── Mini Calendar ──
@@ -222,7 +207,7 @@ const Dashboard = () => {
               </span>
             </div>
             <h2 className="text-2xl font-display font-bold mb-2">{getGreeting()}</h2>
-            <p className="text-xs text-muted-foreground italic mb-4">"{getDailyQuote()}"</p>
+            <p className="text-xs text-muted-foreground italic mb-4">"{DAILY_QUOTE}"</p>
             <div className="flex items-center gap-6 text-sm">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Sun className="h-4 w-4 text-[hsl(var(--warning))]" />
