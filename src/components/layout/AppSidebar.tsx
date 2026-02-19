@@ -8,6 +8,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
+import logoImg from "@/assets/logo.png";
 
 const navItems = [
   { title: "대시보드", url: "/", icon: LayoutDashboard, exact: true },
@@ -31,7 +32,7 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       {/* Logo */}
       <div className="flex h-14 items-center gap-2 px-4 border-b border-sidebar-border">
-        <Music className="h-6 w-6 text-primary shrink-0" />
+        <img src={logoImg} alt="ScoreFlow" className="h-7 w-7 shrink-0 object-contain" />
         {!collapsed && (
           <span className="font-display font-bold text-lg tracking-tight truncate">
             ScoreFlow
