@@ -146,8 +146,8 @@ const CommissionDetail = () => {
       </Card>
 
       {/* Bottom Status Action Bar */}
-      <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-background/95 backdrop-blur-sm z-50">
-        <div className="max-w-screen-xl mx-auto px-6 py-4 flex justify-end">
+      <div className="sticky bottom-0 -mx-6 -mb-6 mt-8 border-t border-border bg-background/95 backdrop-blur-sm z-30">
+        <div className="px-6 py-4 flex justify-end">
           {detail.status === "received" && (
             <div className="flex items-center gap-3">
               <Button onClick={handleNextStatus} className="gap-2 px-6 py-5">
