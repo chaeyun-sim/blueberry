@@ -7,12 +7,12 @@ interface ThemeContextProps {
   toggleTheme: () => void;
 }
 
-const ThemeContext = createContext<ThemeContextProps>({ theme: "dark", toggleTheme: () => {} });
+const ThemeContext = createContext<ThemeContextProps>({ theme: "light", toggleTheme: () => {} });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
     const stored = localStorage.getItem("scoreflow-theme") as Theme | null;
-    return stored || "dark";
+    return stored || "light";
   });
 
   useEffect(() => {
