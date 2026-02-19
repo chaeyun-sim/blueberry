@@ -113,6 +113,7 @@ function MiniCalendar({ onNavigate }: { onNavigate: () => void }) {
   const cells: (number | null)[] = [];
   for (let i = 0; i < startDay; i++) cells.push(null);
   for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+  while (cells.length < 42) cells.push(null); // 항상 6주(42칸) 고정
 
   const isToday = (d: number) =>
     d === today.getDate() && month === today.getMonth() && year === today.getFullYear();
