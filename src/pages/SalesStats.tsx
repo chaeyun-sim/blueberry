@@ -1,6 +1,7 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/PageHeader";
+import { ExcelUploadDialog, type ExcelRow } from "@/components/ExcelUploadDialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -30,18 +31,18 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, PieChart, Pie, Cell } from 
 
 // Mock data
 const monthlySalesData = [
-  { month: "1월", revenue: 1250000 },
-  { month: "2월", revenue: 980000 },
-  { month: "3월", revenue: 1540000 },
-  { month: "4월", revenue: 1120000 },
-  { month: "5월", revenue: 1780000 },
-  { month: "6월", revenue: 1340000 },
-  { month: "7월", revenue: 1650000 },
-  { month: "8월", revenue: 1420000 },
-  { month: "9월", revenue: 1890000 },
-  { month: "10월", revenue: 2100000 },
-  { month: "11월", revenue: 1760000 },
-  { month: "12월", revenue: 2340000 },
+  { month: "1월", revenue: 1250000, count: 102 },
+  { month: "2월", revenue: 980000, count: 87 },
+  { month: "3월", revenue: 1540000, count: 118 },
+  { month: "4월", revenue: 1120000, count: 95 },
+  { month: "5월", revenue: 1780000, count: 134 },
+  { month: "6월", revenue: 1340000, count: 108 },
+  { month: "7월", revenue: 1650000, count: 125 },
+  { month: "8월", revenue: 1420000, count: 110 },
+  { month: "9월", revenue: 1890000, count: 142 },
+  { month: "10월", revenue: 2100000, count: 156 },
+  { month: "11월", revenue: 1760000, count: 98 },
+  { month: "12월", revenue: 2340000, count: 109 },
 ];
 
 const categoryData = [
@@ -103,6 +104,17 @@ const SalesStats = () => {
   const [sortDir, setSortDir] = useState<SortDir>("asc");
   const [filterCategory, setFilterCategory] = useState("ALL");
   const [groupByCategory, setGroupByCategory] = useState(true);
+  const [uploadOpen, setUploadOpen] = useState(false);
+  const [excelData, setExcelData] = useState(rawExcelData);
+
+  const handleExcelUpload = useCallback((data: ExcelRow[]) => {
+    setExcelData(data);
+  }, []);
+
+  const categories = useMemo(
+    () => ["ALL", ...Array.from(new Set(excelData.map((r) => r.category)))],
+    [excelData]
+  );
 
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -114,7 +126,7 @@ const SalesStats = () => {
   };
 
   const sortedData = useMemo(() => {
-    let data = [...rawExcelData];
+    let data = [...excelData];
     if (filterCategory !== "ALL") {
       data = data.filter((r) => r.category === filterCategory);
     }
@@ -130,11 +142,11 @@ const SalesStats = () => {
       return sortDir === "asc" ? cmp : -cmp;
     });
     return data;
-  }, [sortKey, sortDir, filterCategory, groupByCategory]);
+  }, [sortKey, sortDir, filterCategory, groupByCategory, excelData]);
 
   const groupedData = useMemo(() => {
     if (!groupByCategory) return null;
-    const groups: Record<string, typeof rawExcelData> = {};
+    const groups: Record<string, typeof excelData> = {};
     sortedData.forEach((row) => {
       if (!groups[row.category]) groups[row.category] = [];
       groups[row.category].push(row);
@@ -150,11 +162,12 @@ const SalesStats = () => {
   return (
     <AppLayout>
       <PageHeader title="매출 통계" description="엑셀 데이터 기반 매출 분석">
-        <Button variant="outline" className="gap-2">
+        <Button variant="outline" className="gap-2" onClick={() => setUploadOpen(true)}>
           <Upload className="h-4 w-4" />
           엑셀 업로드
         </Button>
       </PageHeader>
+      <ExcelUploadDialog open={uploadOpen} onOpenChange={setUploadOpen} onUpload={handleExcelUpload} />
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -366,7 +379,12 @@ const SalesStats = () => {
                   <ChartTooltip
                     content={
                       <ChartTooltipContent
-                        formatter={(value) => formatCurrency(value as number)}
+                        formatter={(value, name, item) => (
+                          <div className="flex flex-col">
+                            <span>{formatCurrency(value as number)}</span>
+                            <span className="text-muted-foreground">{(item.payload as { count: number }).count}건</span>
+                          </div>
+                        )}
                       />
                     }
                   />
@@ -433,7 +451,7 @@ const SalesStats = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {ALL_CATEGORIES.map((cat) => (
+                      {categories.map((cat) => (
                         <SelectItem key={cat} value={cat}>
                           {cat === "ALL" ? "전체 대분류" : cat}
                         </SelectItem>
