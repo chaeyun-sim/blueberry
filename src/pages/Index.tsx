@@ -159,7 +159,7 @@ function MiniCalendar({ onNavigate }: { onNavigate: () => void }) {
                 `}
               >
                 {hasDeadline(d) && !isToday(d) ? (
-                  <span className="px-1 bg-yellow-300/50 rounded-[2px]">{d}</span>
+                  <span className="px-1 bg-yellow-300/30 rounded-[2px]">{d}</span>
                 ) : d}
               </span>
             ) : (
