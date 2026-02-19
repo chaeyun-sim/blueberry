@@ -89,7 +89,7 @@ const CommissionDetail = () => {
         <CardContent className="p-6">
           <div className="flex items-center justify-between w-full">
             {steps.map((step, i) => (
-              <div key={step.status} className="flex items-center flex-1">
+              <div key={step.status} className={cn("flex items-center", i < steps.length - 1 ? "flex-1" : "")}>
                 <div className="flex flex-col items-center">
                   <div
                     className={cn(
