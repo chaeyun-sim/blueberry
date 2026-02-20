@@ -1,13 +1,9 @@
 import RollingNumber from '@/components/RollingNumber';
-import { Card, CardContent } from '@/components/ui/card';
 import { AnimatePresence, motion } from 'framer-motion';
-import { DollarSign, TrendingUp } from 'lucide-react';
+import { DollarSign, Link, TrendingUp } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 function RevenueSliderCard() {
-  const navigate = useNavigate();
-
   const revenueSlides = [
     { label: '올해 총 매출', value: 28450000, sub: '전년 대비 +22.4%', up: true },
     { label: '지난 달 매출', value: 2340000, sub: '전월 대비 +15.2%', up: true },
@@ -22,9 +18,9 @@ function RevenueSliderCard() {
   }, []);
 
   return (
-    <div
+    <Link
+      to='/stats'
       className='cursor-pointer hover:bg-muted/30 rounded-lg p-3 -m-1 transition-colors'
-      onClick={() => navigate('/stats')}
     >
       <div className='flex items-center justify-between mb-1'>
         <div className='flex items-center gap-1.5 text-muted-foreground'>
@@ -70,7 +66,7 @@ function RevenueSliderCard() {
           />
         ))}
       </div>
-    </div>
+    </Link>
   );
 }
 
