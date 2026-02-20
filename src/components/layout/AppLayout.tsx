@@ -13,9 +13,9 @@ export function AppLayout({ children, bottomBar }: AppLayoutProps) {
 
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="min-h-screen flex w-full">
+      <div className="min-h-screen flex w-full overflow-hidden">
         <AppSidebar />
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
           {isMobile && (
             <header className="flex items-center h-12 px-4 border-b border-border">
               <SidebarTrigger className="p-2 rounded-lg hover:bg-muted transition-colors">
