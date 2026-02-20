@@ -46,11 +46,16 @@ const CommissionDetail = () => {
       ? commissionStatuses[currentStatusIndex + 1]
       : null;
 
-  const handleTransitionConfirm = (file?: File) => {
-    // TODO: 작업 완료 로직 구현
+  const toastMessages: Partial<Record<CommissionStatus, string>> = {
+    working: '작업을 시작합니다.',
+    complete: '작업이 완료되었습니다.',
+    delivered: '의뢰인에게 전달되었습니다.',
+  };
 
+  const handleTransitionConfirm = (file?: File) => {
+    // TODO: 실제 상태 전환 API 연동
     setDetail(prev => ({ ...prev, status: nextStatus as CommissionStatus }));
-    toast({ title: '작업 완료되었습니다.' })
+    toast({ title: toastMessages[nextStatus as CommissionStatus] ?? '상태가 변경되었습니다.' });
   };
 
   const handleReject = () => {
@@ -67,7 +72,7 @@ const CommissionDetail = () => {
             fromStatus={detail.status}
             toStatus={nextStatus as CommissionStatus}
             onReject={handleReject}
-            onConfirm={() => { }}
+            onConfirm={handleTransitionConfirm}
           />
         ),
         { overlayId: 'receive-and-send-dialog' },
@@ -102,13 +107,17 @@ const CommissionDetail = () => {
       bottomBar={
         <div className='border-t border-border bg-background/95 backdrop-blur-sm'>
           <div className='px-6 py-3 flex justify-end'>
-            <Button
-              onClick={handleOpenDialog}
-              className='gap-2 px-6 py-5'
-            >
-              <ChevronRight className='h-4 w-4' /> {COMMISSION_STATUS_TRANSLATE[nextStatus]}
-              {nextStatus === 'working' ? '으로' : '로'} 변경
-            </Button>
+            {nextStatus ? (
+              <Button
+                onClick={handleOpenDialog}
+                className='gap-2 px-6 py-5'
+              >
+                <ChevronRight className='h-4 w-4' /> {COMMISSION_STATUS_TRANSLATE[nextStatus]}
+                {nextStatus === 'working' ? '으로' : '로'} 변경
+              </Button>
+            ) : (
+              <p className='text-sm text-muted-foreground py-2'>전달이 완료된 의뢰입니다.</p>
+            )}
           </div>
         </div>
       }
