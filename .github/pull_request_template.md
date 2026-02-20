@@ -1,11 +1,5 @@
-## 개요
+## Overview
 
-## 주요 변경 사항
+## New Features
 
-## 테스트 계획
-
-- [ ] 로컬 실행 확인
-- [ ] 기능 동작 확인
-- [ ] 테스트 코드 작성
-
-## 비고
+## New environment variables
