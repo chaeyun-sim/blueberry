@@ -31,7 +31,11 @@ const versionLabel = (v: DifficultyLevelType) => (v || '-');
 const CommissionList = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const initialStatus = searchParams.get('status') as CommissionStatus | null;
+  const statusParam = searchParams.get('status');
+
+  const initialStatus = tabs.some(t => t.value === statusParam)
+    ? (statusParam as CommissionStatus | 'all')
+    : 'all';
 
   const [filter, setFilter] = useState<CommissionStatus | 'all'>(initialStatus || 'all');
   const [search, setSearch] = useState('');
