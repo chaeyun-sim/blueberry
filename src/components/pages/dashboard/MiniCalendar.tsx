@@ -46,7 +46,9 @@ function MiniCalendar() {
       tabIndex={0}
       role='button'
       onKeyDown={e => {
+        if (e.currentTarget !== e.target) return;
         if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
           navigate('/calendar')
         }
       }}
