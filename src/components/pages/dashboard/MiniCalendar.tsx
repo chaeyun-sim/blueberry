@@ -19,7 +19,7 @@ function MiniCalendar() {
   const { startDay, daysInMonth } = useMemo(() => {
     const first = viewDate.startOf('month');
     return {
-      startDay: (first.day() + 6) % 7,
+      startDay: first.day(),
       daysInMonth: viewDate.daysInMonth(),
     };
   }, [viewDate]);
