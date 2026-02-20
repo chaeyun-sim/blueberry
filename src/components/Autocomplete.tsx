@@ -5,7 +5,7 @@ interface AutocompleteProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
-  suggestions?: string[];
+  suggestions: string[];
   inputProps?: React.ComponentProps<typeof Input>;
 }
 
@@ -14,7 +14,7 @@ function Autocomplete({ value, onChange, placeholder = "곡 제목을 입력하�
   const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
   const filtered = value
-    ? suggestions?.filter((s) => s.toLowerCase().includes(value.toLowerCase())).slice(0, 6)
+    ? suggestions.filter((s) => s.toLowerCase().includes(value.toLowerCase())).slice(0, 6)
     : [];
 
   return (
