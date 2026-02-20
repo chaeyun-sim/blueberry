@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { SongAutocomplete } from "@/components/SongAutocomplete";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,6 +11,7 @@ import {
   FileMusic, FileAudio, FileText, Check,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import Autocomplete from '@/components/Autocomplete';
 
 const INSTRUMENT_OPTIONS = [
   "Violin", "Viola", "Cello", "Double Bass", "Flute", "Oboe", "Clarinet",
@@ -181,7 +181,7 @@ const ScoreRegister = () => {
             <div className="space-y-5">
               <div className="space-y-2">
                 <Label>곡명</Label>
-                <SongAutocomplete value={songTitle} onChange={setSongTitle} />
+                <Autocomplete suggestions={[]} value={songTitle} onChange={setSongTitle} />
               </div>
 
               <div className="space-y-2">
