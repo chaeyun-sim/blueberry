@@ -15,4 +15,4 @@ You are about to create a GitHub pull request.
 
 ## PR Template
 
-@.github/PULL_REQUEST_TEMPLATE.md
+@.github/pull_request_template.md
