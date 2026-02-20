@@ -2,11 +2,11 @@ import { cn } from "@/lib/utils";
 
 export type CommissionStatus = "received" | "working" | "delivered" | "complete";
 
-const statusConfig: Record<CommissionStatus, { label: string; dotClass: string; badgeClass: string }> = {
-  received: { label: "대기", dotClass: "status-received", badgeClass: "badge-received" },
-  working: { label: "작업중", dotClass: "status-working", badgeClass: "badge-working" },
-  delivered: { label: "전달", dotClass: "status-delivered", badgeClass: "badge-delivered" },
-  complete: { label: "완료", dotClass: "status-complete", badgeClass: "badge-complete" },
+const statusConfig: Record<CommissionStatus, { label: string; badgeClass: string }> = {
+  received: { label: "대기", badgeClass: "badge-received" },
+  working: { label: "작업중", badgeClass: "badge-working" },
+  delivered: { label: "전달", badgeClass: "badge-delivered" },
+  complete: { label: "완료", badgeClass: "badge-complete" },
 };
 
 interface StatusBadgeProps {
@@ -15,11 +15,10 @@ interface StatusBadgeProps {
 }
 
 export function StatusBadge({ status, className }: StatusBadgeProps) {
-  const config = statusConfig[status];
+  const { label, badgeClass } = statusConfig[status];
   return (
-    <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium", config.badgeClass, className)}>
-      <span className={cn("status-dot", config.dotClass)} />
-      {config.label}
+    <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium", badgeClass, className)}>
+      {label}
     </span>
   );
 }
