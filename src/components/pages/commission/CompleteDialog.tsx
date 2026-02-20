@@ -110,7 +110,7 @@ export function CompleteDialog({
             ) : (
               <div className='flex flex-col items-center gap-2'>
                 <Upload className='h-8 w-8 text-muted-foreground' />
-                <p className='text-sm font-medium'>MusicXML 파일 (.xml, .musicxml)</p>
+                <p className='text-sm font-medium'>MusicXML 파일 (.mxl, .musicxml)</p>
                 <p className='text-xs text-muted-foreground'>클릭하거나 파일을 드래그해 주세요</p>
               </div>
             )}
