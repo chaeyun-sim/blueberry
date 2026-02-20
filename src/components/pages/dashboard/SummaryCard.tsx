@@ -7,7 +7,7 @@ interface SummaryCardProps {
   icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>;
   value: string;
 	description: string;
-	colorStatus: string;
+	colorStatus: 'primary' | 'complete' | 'success' | 'warning';
 }
 
 function SummaryCard({ icon, value, description, colorStatus }: SummaryCardProps) {

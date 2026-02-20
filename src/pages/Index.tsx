@@ -14,41 +14,55 @@ import {
 import { useNavigate } from 'react-router-dom';
 import MiniCalendar from '@/components/pages/dashboard/MiniCalendar';
 import TodayCard from '@/components/pages/dashboard/TodayCard';
-import useLiveClock from '@/hooks/use-live-clock';
 import CommisionSummaryBar from '@/components/pages/dashboard/CommisionSummaryBar';
 import SummaryCard from '@/components/pages/dashboard/SummaryCard';
-import { mockRecentCommissions } from '@/mock/dashboard';
+import { mockCommissionSummary, mockRecentCommissions } from '@/mock/dashboard';
 import RevenueSliderCard from '@/components/pages/dashboard/RevenueSliderCard';
 
-const commissionSummary = {
-  received: 3,
-  working: 5,
-  complete: 12,
-  delivered: 2,
-};
+const summary = [{
+  icon: Music,
+  value: '24',
+  description: '보유 악보',
+  colorStatus: 'primary',
+}, {
+  icon: CheckCircle2,
+  value: '156',
+  description: '누적 완료',
+  colorStatus: 'complete',
+}, {
+  icon: ClipboardList,
+  value: '+22.4%',
+  description: '전년 대비 성장',
+  colorStatus: 'success',
+}, {
+  icon: DollarSign,
+  value: '₩14,930',
+  description: '평균 단가',
+  colorStatus: 'warning',
+}];
 
 const workStatus = [
   {
     label: '접수',
-    count: commissionSummary.received,
+    count: mockCommissionSummary.received,
     status: 'received' as CommissionStatus,
     icon: ClipboardList,
   },
   {
     label: '작업중',
-    count: commissionSummary.working,
+    count: mockCommissionSummary.working,
     status: 'working' as CommissionStatus,
     icon: Clock,
   },
   {
     label: '완료',
-    count: commissionSummary.complete,
+    count: mockCommissionSummary.complete,
     status: 'complete' as CommissionStatus,
     icon: CheckCircle2,
   },
   {
     label: '전달',
-    count: commissionSummary.delivered,
+    count: mockCommissionSummary.delivered,
     status: 'delivered' as CommissionStatus,
     icon: Truck,
   },
@@ -57,7 +71,7 @@ const workStatus = [
 const Dashboard = () => {
   const navigate = useNavigate();
 
-  const total = Object.values(commissionSummary).reduce((acc, curr) => acc + curr, 0);
+  const total = Object.values(mockCommissionSummary).reduce((acc, curr) => acc + curr, 0);
 
   return (
     <AppLayout>
@@ -72,10 +86,7 @@ const Dashboard = () => {
         <div className='grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-5'>
           {/* ① Top-Left: Today */}
           <Card className='border-border/50 overflow-hidden relative min-h-[180px]'>
-            <TodayCard
-              commissionSummary={commissionSummary}
-              recentCommissions={mockRecentCommissions}
-            />
+            <TodayCard />
           </Card>
 
           {/* ② Top-Right: Mini Calendar */}
@@ -117,7 +128,7 @@ const Dashboard = () => {
                   ))}
                 </div>
                 <div className='flex h-2 rounded-full overflow-hidden mt-3'>
-                  {Object.entries(commissionSummary).map(([key, value]) => (
+                  {Object.entries(mockCommissionSummary).map(([key, value]) => (
                     <CommisionSummaryBar
                       key={key}
                       status={key}
@@ -161,30 +172,15 @@ const Dashboard = () => {
 
         {/* Third Row: Quick Stats */}
         <div className='grid grid-cols-2 lg:grid-cols-4 gap-5'>
-          <SummaryCard
-            icon={Music}
-            value='24'
-            description='보유 악보'
-            colorStatus='primary'
-          />
-          <SummaryCard
-            icon={CheckCircle2}
-            value='156'
-            description='누적 완료'
-            colorStatus='complete'
-          />
-          <SummaryCard
-            icon={ClipboardList}
-            value='+22.4%'
-            description='전년 대비 성장'
-            colorStatus='success'
-          />
-          <SummaryCard
-            icon={DollarSign}
-            value='₩14,930'
-            description='평균 단가'
-            colorStatus='warning'
-          />
+          {summary.map(item => (
+            <SummaryCard
+              key={item.description}
+              icon={item.icon}
+              value={item.value}
+              description={item.description}
+              colorStatus={item.colorStatus as 'primary' | 'complete' | 'success' | 'warning'}
+            />
+          ))}
         </div>
       </div>
     </AppLayout>

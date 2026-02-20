@@ -21,3 +21,11 @@ export const mockRecentCommissions = [
     updatedAt: '어제',
   },
 ];
+
+
+export const mockCommissionSummary = {
+  received: 3,
+  working: 5,
+  complete: 12,
+  delivered: 2,
+};

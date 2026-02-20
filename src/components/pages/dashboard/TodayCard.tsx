@@ -9,26 +9,18 @@ import todayDayImg from "@/assets/today-day.jpg";
 import todaySunsetImg from "@/assets/today-sunset.jpg";
 import todayNightImg from "@/assets/today-night.png";
 import useLiveClock from '@/hooks/use-live-clock';
+import { mockCommissionSummary, mockRecentCommissions } from '@/mock/dashboard';
 
-interface TodayCardProps {
-	commissionSummary: Record<'received' | 'working' | 'complete' | 'delivered', number>;
-	recentCommissions: Array<{
-		id: string;
-		title: string;
-		arrangement: string;
-		status: 'received' | 'working' | 'complete' | 'delivered';
-		updatedAt: string;
-	}>;
-}
-
-function TodayCard({ commissionSummary, recentCommissions }: TodayCardProps) {
+function TodayCard() {
   const DAILY_QUOTE = "적게 일하고 돈 많이 벌자 💰";
+
+  const commissionSummary = mockCommissionSummary;
+  const recentCommissions = mockRecentCommissions;
   
   const clock = useLiveClock();
 
 	const getFormattedDate = () => {
-		const d = new Date();
-		return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일 ${WEEK_KOR[d.getDay()]}요일`;
+		return `${clock.getFullYear()}년 ${clock.getMonth() + 1}월 ${clock.getDate()}일 ${WEEK_KOR[clock.getDay()]}요일`;
 	}
 
 	const getTodayBg = (hour: number) => {
@@ -39,7 +31,7 @@ function TodayCard({ commissionSummary, recentCommissions }: TodayCardProps) {
 	}
 
 	const getGreeting = () => {
-		const h = new Date().getHours();
+		const h = clock.getHours();
 		if (h < 6) return "늦은 밤이에요 🌙";
 		if (h < 12) return "좋은 아침이에요 ☀️";
 		if (h < 18) return "좋은 오후예요 🌤";
