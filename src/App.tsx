@@ -15,6 +15,7 @@ import SalesStats from "./pages/SalesStats";
 import CalendarView from "./pages/CalendarView";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
+import { OverlayProvider } from 'overlay-kit';
 
 const queryClient = new QueryClient();
 
@@ -25,21 +26,23 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/commissions" element={<CommissionList />} />
-            <Route path="/new" element={<CommissionRegister />} />
-            <Route path="/commissions/:id" element={<CommissionDetail />} />
-            <Route path="/scores" element={<ScoreList />} />
-            <Route path="/scores/:scoreId/arrangements/:arrangementId" element={<ScoreDetail />} />
-            <Route path="/scores/new" element={<ScoreRegister />} />
-            <Route path="/stats" element={<SalesStats />} />
-            <Route path="/calendar" element={<CalendarView />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
+        <OverlayProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/commissions" element={<CommissionList />} />
+              <Route path="/new" element={<CommissionRegister />} />
+              <Route path="/commissions/:id" element={<CommissionDetail />} />
+              <Route path="/scores" element={<ScoreList />} />
+              <Route path="/scores/:scoreId/arrangements/:arrangementId" element={<ScoreDetail />} />
+              <Route path="/scores/new" element={<ScoreRegister />} />
+              <Route path="/stats" element={<SalesStats />} />
+              <Route path="/calendar" element={<CalendarView />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </OverlayProvider>
       </TooltipProvider>
     </ThemeProvider>
   </QueryClientProvider>

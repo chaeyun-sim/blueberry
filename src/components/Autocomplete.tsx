@@ -1,36 +1,20 @@
 import { useState, useRef } from "react";
 import { Input } from "@/components/ui/input";
 
-const SONG_SUGGESTIONS = [
-  "Canon in D",
-  "River Flows in You",
-  "Kiss the Rain",
-  "A Thousand Years",
-  "Spring Waltz",
-  "Wedding March",
-  "Merry Go Round of Life",
-  "君をのせて (천공의 성 라퓨타)",
-  "Summer (久石譲)",
-  "Love Me Tender",
-  "Butterfly",
-  "Pachelbel Canon",
-  "Clair de Lune",
-  "Gymnopédie No.1",
-  "La Campanella",
-];
-
-interface SongAutocompleteProps {
+interface AutocompleteProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  suggestions: string[];
+  inputProps?: React.ComponentProps<typeof Input>;
 }
 
-export function SongAutocomplete({ value, onChange, placeholder = "곡 제목을 입력하세요" }: SongAutocompleteProps) {
+function Autocomplete({ value, onChange, placeholder = "곡 제목을 입력하세요", suggestions, inputProps }: AutocompleteProps) {
   const [open, setOpen] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
   const filtered = value
-    ? SONG_SUGGESTIONS.filter((s) => s.toLowerCase().includes(value.toLowerCase())).slice(0, 6)
+    ? suggestions.filter((s) => s.toLowerCase().includes(value.toLowerCase())).slice(0, 6)
     : [];
 
   return (
@@ -46,6 +30,7 @@ export function SongAutocomplete({ value, onChange, placeholder = "곡 제목을
           timeoutRef.current = setTimeout(() => setOpen(false), 200);
         }}
         placeholder={placeholder}
+        {...inputProps}
       />
       {open && value && filtered.length > 0 && (
         <div className="absolute z-10 top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg max-h-48 overflow-y-auto">
@@ -68,3 +53,5 @@ export function SongAutocomplete({ value, onChange, placeholder = "곡 제목을
     </div>
   );
 }
+
+export default Autocomplete;
