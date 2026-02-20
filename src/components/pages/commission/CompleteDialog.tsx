@@ -64,8 +64,11 @@ export function CompleteDialog({
         <div className='space-y-4 py-2'>
           {/* Drop Zone */}
           <div
+            role='button'
+            tabIndex={0}
+            aria-label='MusicXML 파일 업로드'
             className={cn(
-              'relative border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer',
+              'relative border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
               dragOver
                 ? 'border-primary bg-primary/10'
                 : file
@@ -79,6 +82,12 @@ export function CompleteDialog({
             onDragLeave={() => setDragOver(false)}
             onDrop={handleDrop}
             onClick={() => inputRef.current?.click()}
+            onKeyDown={e => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                inputRef.current?.click();
+              }
+            }}
           >
             <input
               ref={inputRef}
