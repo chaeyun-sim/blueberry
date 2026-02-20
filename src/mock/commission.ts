@@ -81,3 +81,35 @@ export const mockCommissionDetail = {
     { id: "s2", title: "Canon in D", arrangement: "Vn, Vn, Va, Vc, Db", version: null },
   ],
 };
+
+export const mockSongSuggestions = [
+  "Canon in D",
+  "River Flows in You",
+  "Kiss the Rain",
+  "A Thousand Years",
+  "Spring Waltz",
+  "Wedding March",
+  "Merry Go Round of Life",
+  "君をのせて (천공의 성 라퓨타)",
+  "Summer (久石譲)",
+  "Love Me Tender",
+  "Butterfly",
+  "Pachelbel Canon",
+  "Clair de Lune",
+  "Gymnopédie No.1",
+  "La Campanella",
+];
+
+export const mockComposerSuggestions = [
+  "Johann Sebastian Bach",
+  "Frédéric Chopin",
+  "Pyotr Ilyich Tchaikovsky",
+  "Wolfgang Amadeus Mozart",
+  "Johannes Brahms",
+  "Ludwig van Beethoven",
+  "George Frideric Handel",
+  "Antonio Vivaldi",
+  "Franz Schubert",
+  "Robert Schumann",
+  "Claude Debussy",
+]
