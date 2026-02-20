@@ -23,7 +23,7 @@ export function AppLayout({ children, bottomBar }: AppLayoutProps) {
               </SidebarTrigger>
             </header>
           )}
-          <main className="flex-1 p-6 animate-fade-in overflow-hidden">
+          <main className="flex-1 p-6 animate-fade-in overflow-x-hidden overflow-y-auto">
             {children}
           </main>
           {bottomBar}
