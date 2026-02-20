@@ -1,5 +1,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { OverlayProps } from '@/types/overlay';
+import logoImg from '@/assets/logo.png';
 
 interface CommissionImageDialogProps extends OverlayProps {
 	date: string;
@@ -29,7 +30,7 @@ function CommissionImageDialog({
 
         <div className='h-full w-full rounded-lg border border-border aspect-square'>
           <img
-            src={`/src/assets/logo.png`}
+            src={logoImg}
             alt='commission image'
             className='w-full h-full object-cover'
           />
