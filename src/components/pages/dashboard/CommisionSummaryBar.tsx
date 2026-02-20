@@ -5,10 +5,15 @@ interface CommisionSummaryBarProps {
 }
 
 function CommisionSummaryBar({ status, value, maxValue }: CommisionSummaryBarProps) {
+  const percent = maxValue > 0 ? (value / maxValue) * 100 : 0;
+  const clamped = Math.min(100, Math.max(0, percent));
+  
   return (
     <div
-      className={`bg-[hsl(var(--status-${status}))]`}
-      style={{ width: `${(value / maxValue) * 100}%` }}
+      style={{
+        width: `${clamped}%`,
+        backgroundColor: `hsl(var(--status-${status}))`
+      }}
     />
   );
 }
