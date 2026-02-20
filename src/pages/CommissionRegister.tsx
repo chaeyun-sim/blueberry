@@ -311,7 +311,7 @@ const CommissionRegister = () => {
                     <SelectItem value='normal'>-</SelectItem>
                     <SelectItem value='easy'>Easy</SelectItem>
                     <SelectItem value='hard'>Hard</SelectItem>
-                    <SelectItem value='professional'>Professional</SelectItem>
+                    <SelectItem value='pro'>Pro</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
