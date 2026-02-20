@@ -14,10 +14,10 @@ import {
 import { useNavigate } from 'react-router-dom';
 import MiniCalendar from '@/components/pages/dashboard/MiniCalendar';
 import TodayCard from '@/components/pages/dashboard/TodayCard';
-import CommisionSummaryBar from '@/components/pages/dashboard/CommisionSummaryBar';
 import SummaryCard from '@/components/pages/dashboard/SummaryCard';
 import { mockCommissionSummary, mockRecentCommissions } from '@/mock/dashboard';
 import RevenueSliderCard from '@/components/pages/dashboard/RevenueSliderCard';
+import CommissionSummaryBar from '@/components/pages/dashboard/CommissionSummaryBar';
 
 const summary = [{
   icon: Music,
@@ -129,7 +129,7 @@ const Dashboard = () => {
                 </div>
                 <div className='flex h-2 rounded-full overflow-hidden mt-3'>
                   {Object.entries(mockCommissionSummary).map(([key, value]) => (
-                    <CommisionSummaryBar
+                    <CommissionSummaryBar
                       key={key}
                       status={key}
                       value={value}

@@ -1,10 +1,10 @@
-interface CommisionSummaryBarProps {
+interface CommissionSummaryBarProps {
   status: string;
 	value: number;
 	maxValue: number;
 }
 
-function CommisionSummaryBar({ status, value, maxValue }: CommisionSummaryBarProps) {
+function CommissionSummaryBar({ status, value, maxValue }: CommissionSummaryBarProps) {
   const percent = maxValue > 0 ? (value / maxValue) * 100 : 0;
   const clamped = Math.min(100, Math.max(0, percent));
   
@@ -18,4 +18,4 @@ function CommisionSummaryBar({ status, value, maxValue }: CommisionSummaryBarPro
   );
 }
 
-export default CommisionSummaryBar;
+export default CommissionSummaryBar;
