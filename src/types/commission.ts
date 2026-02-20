@@ -1,1 +1,1 @@
-export type DifficultyLevelType = "hard" | "easy" | "professional" | "normal";
+export type DifficultyLevelType = "hard" | "easy" | "pro" | null;

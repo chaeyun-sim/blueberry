@@ -26,7 +26,7 @@ const tabs: { label: string; value: CommissionStatus | 'all' }[] = [
   { label: '전달', value: 'delivered' },
 ];
 
-const versionLabel = (v: DifficultyLevelType) => (v === 'normal' ? '-' : v);
+const versionLabel = (v: DifficultyLevelType) => (v || '-');
 
 const CommissionList = () => {
   const navigate = useNavigate();
@@ -106,7 +106,7 @@ const CommissionList = () => {
                     <TableCell className='text-foreground truncate'>{item.composer}</TableCell>
                     <TableCell className='text-foreground'>{item.arrangement}</TableCell>
                     <TableCell>
-                      {item.version !== 'normal' ? (
+                      {item.version ? (
                         <span className='text-xs px-2 py-1 rounded-md bg-[hsl(var(--warning)/0.12)] text-[hsl(var(--warning))] font-medium capitalize'>
                           {versionLabel(item.version)}
                         </span>
