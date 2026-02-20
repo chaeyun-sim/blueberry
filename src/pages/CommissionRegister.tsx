@@ -41,7 +41,7 @@ const CommissionRegister = () => {
     composer: '',
     version: '',
     deadline: '',
-    notes: undefined,
+    notes: '',
   });
 
   const [instrumentInput, setInstrumentInput] = useState('');
