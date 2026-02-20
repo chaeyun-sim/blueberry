@@ -15,7 +15,6 @@ function MiniCalendar() {
   const year = viewDate.year();
   const month = viewDate.month();
 
-
   const { startDay, daysInMonth } = useMemo(() => {
     const first = viewDate.startOf('month');
     return {
@@ -33,61 +32,87 @@ function MiniCalendar() {
   }, [startDay, daysInMonth]);
 
   const isToday = (d: number) => viewDate.date(d).isSame(today, 'day');
-  const hasDeadline = (d: number) => viewDate.isSame(today, 'month') && mockDeadlineDays.includes(d);
+  const hasDeadline = (d: number) =>
+    viewDate.isSame(today, 'month') && mockDeadlineDays.includes(d);
 
   return (
-    <div className="flex flex-col h-full cursor-pointer" onClick={() => navigate("/calendar")}>
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="font-display font-semibold text-sm">
+    <div
+      className='flex flex-col h-full cursor-pointer'
+      tabIndex={0}
+      role='button'
+      onKeyDown={e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          navigate('/calendar')
+        }
+      }}
+      onClick={() => navigate('/calendar')}
+    >
+      <div className='flex items-center justify-between mb-3'>
+        <h3 className='font-display font-semibold text-sm'>
           {year}년 {month + 1}월
         </h3>
-        <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+        <div
+          className='flex gap-1'
+          onClick={e => e.stopPropagation()}
+        >
           <button
-            className="p-1 rounded hover:bg-muted/50 transition-colors"
+            className='p-1 rounded hover:bg-muted/50 transition-colors'
             onClick={() => setViewDate(viewDate.subtract(1, 'month'))}
           >
-            <ChevronLeft className="h-3.5 w-3.5 text-muted-foreground" />
+            <ChevronLeft className='h-3.5 w-3.5 text-muted-foreground' />
           </button>
           <button
-            className="p-1 rounded hover:bg-muted/50 transition-colors"
+            className='p-1 rounded hover:bg-muted/50 transition-colors'
             onClick={() => setViewDate(viewDate.add(1, 'month'))}
           >
-            <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+            <ChevronRight className='h-3.5 w-3.5 text-muted-foreground' />
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-7 gap-y-1 text-center text-[10px] text-muted-foreground mb-1">
-        {WEEK_KOR.map((weekDay) => <span key={weekDay} className="font-medium">{weekDay}</span>)}
+      <div className='grid grid-cols-7 gap-y-1 text-center text-[10px] text-muted-foreground mb-1'>
+        {WEEK_KOR.map(weekDay => (
+          <span
+            key={weekDay}
+            className='font-medium'
+          >
+            {weekDay}
+          </span>
+        ))}
       </div>
 
-      <div className="grid grid-cols-7 gap-y-0.5 text-center flex-1">
+      <div className='grid grid-cols-7 gap-y-0.5 text-center flex-1'>
         {cells.map((d, i) => (
-          <div key={i} className="flex flex-col items-center justify-center">
+          <div
+            key={i}
+            className='flex flex-col items-center justify-center'
+          >
             {d ? (
               <span
                 className={`
                   w-7 h-7 flex items-center justify-center text-xs font-medium transition-colors
-                  ${isToday(d) ? "rounded-full bg-primary text-primary-foreground font-bold" : ""}
+                  ${isToday(d) ? 'rounded-full bg-primary text-primary-foreground font-bold' : ''}
                 `}
               >
                 {hasDeadline(d) && !isToday(d) ? (
-                  <span className="px-1 bg-yellow-300/30 rounded-[2px]">{d}</span>
-                ) : d}
+                  <span className='px-1 bg-yellow-300/30 rounded-[2px]'>{d}</span>
+                ) : (
+                  d
+                )}
               </span>
             ) : (
-              <span className="w-7 h-7" />
+              <span className='w-7 h-7' />
             )}
           </div>
         ))}
       </div>
 
-      <div className="flex items-center gap-3 mt-2 pt-2 border-t border-border/50 text-[10px] text-muted-foreground">
-        <span className="flex items-center gap-1">
-          <span className="w-2 h-2 rounded-full bg-primary" /> 오늘
+      <div className='flex items-center gap-3 mt-2 pt-2 border-t border-border/50 text-[10px] text-muted-foreground'>
+        <span className='flex items-center gap-1'>
+          <span className='w-2 h-2 rounded-full bg-primary' /> 오늘
         </span>
-        <span className="flex items-center gap-1">
-          <span className="w-2 h-2 rounded-sm bg-yellow-300/40" /> 마감
+        <span className='flex items-center gap-1'>
+          <span className='w-2 h-2 rounded-sm bg-yellow-300/40' /> 마감
         </span>
       </div>
     </div>
