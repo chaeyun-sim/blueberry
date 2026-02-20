@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/PageHeader';
-import { CommissionStatus } from '@/components/StatusBadge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ChevronRight, ExternalLink } from 'lucide-react';
+import { ArrowLeft, CheckCircle, ChevronRight, ExternalLink, Image, LucideProps, Music, Music2, Package, Package2, RadioReceiver, Truck, Workflow } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { COMMISSION_STATUS_TRANSLATE } from '@/constants/translate';
@@ -14,6 +13,7 @@ import ReceiveAndSendDialog from '@/components/pages/commission/ReceiveAndSendDi
 import { CompleteDialog } from '@/components/pages/commission/CompleteDialog';
 import { toast } from '@/hooks/use-toast';
 import CommissionImageDialog from '@/components/pages/commission/CommissionImageDialog';
+import { CommissionStatus } from '@/components/StatusBadge';
 
 const commissionInfo = {
   arrangement: '편성',
@@ -21,6 +21,13 @@ const commissionInfo = {
   createdAt: '등록일',
   deadline: '마감일',
 };
+
+const statusProgress: Record<CommissionStatus, React.ForwardRefExoticComponent<Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>>> = {
+  received: Package2,
+  working: Music2,
+  complete: CheckCircle,
+  delivered: Truck,
+}
 
 const CommissionDetail = () => {
   const { id } = useParams();
@@ -122,44 +129,47 @@ const CommissionDetail = () => {
       <Card className='mb-8 border-border/50'>
         <CardContent className='p-6'>
           <div className='flex items-center justify-between w-full'>
-            {Object.entries(COMMISSION_STATUS_TRANSLATE).map(([status, label], i, originArray) => (
-              <div
-                key={status}
-                className={cn(
-                  'flex items-center',
-                  i < Object.keys(originArray).length - 1 ? 'flex-1' : '',
-                )}
-              >
-                <div className='flex flex-col items-center'>
-                  <div
-                    className={cn(
-                      'w-10 h-10 rounded-full flex items-center justify-center text-sm font-display font-bold border-2 transition-colors',
-                      i <= currentStatusIndex
-                        ? 'border-primary bg-primary text-primary-foreground'
-                        : 'border-border bg-muted text-muted-foreground',
-                    )}
-                  >
-                    {i + 1}
+            {Object.entries(COMMISSION_STATUS_TRANSLATE).map(([status, label], i, originArray) => {
+              const Icon = statusProgress[status as CommissionStatus];
+              return (
+                <div
+                  key={status}
+                  className={cn(
+                    'flex items-center',
+                    i < Object.keys(originArray).length - 1 ? 'flex-1' : '',
+                  )}
+                >
+                  <div className='flex flex-col items-center'>
+                    <div
+                      className={cn(
+                        'w-10 h-10 rounded-full flex items-center justify-center transition-colors',
+                        i <= currentStatusIndex
+                          ? 'bg-primary text-primary-foreground'
+                          : 'border-2 border-border text-muted-foreground/40',
+                      )}
+                    >
+                      <Icon className={i <= currentStatusIndex ? 'h-5 w-5' : 'h-4 w-4'} />
+                    </div>
+                    <span
+                      className={cn(
+                        'text-xs mt-2',
+                        i <= currentStatusIndex ? 'font-medium' : 'text-muted-foreground',
+                      )}
+                    >
+                      {label}
+                    </span>
                   </div>
-                  <span
-                    className={cn(
-                      'text-xs mt-2',
-                      i <= currentStatusIndex ? 'font-medium' : 'text-muted-foreground',
-                    )}
-                  >
-                    {label}
-                  </span>
+                  {i < originArray.length - 1 && (
+                    <div
+                      className={cn(
+                        'flex-1 h-0.5 mx-3',
+                        i < currentStatusIndex ? 'bg-primary' : 'bg-border',
+                      )}
+                    />
+                  )}
                 </div>
-                {i < originArray.length - 1 && (
-                  <div
-                    className={cn(
-                      'flex-1 h-0.5 mx-3',
-                      i < currentStatusIndex ? 'bg-primary' : 'bg-border',
-                    )}
-                  />
-                )}
-              </div>
-            ))}
+              )
+            })}
           </div>
         </CardContent>
       </Card>
