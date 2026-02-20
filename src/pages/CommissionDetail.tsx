@@ -3,7 +3,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, CheckCircle, ChevronRight, ExternalLink, Image, LucideProps, Music, Music2, Package, Package2, RadioReceiver, Truck, Workflow } from 'lucide-react';
+import { ArrowLeft, CheckCircle, ChevronRight, ExternalLink, LucideProps, Music2, Package2, Truck } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { COMMISSION_STATUS_TRANSLATE } from '@/constants/translate';
