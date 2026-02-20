@@ -52,7 +52,17 @@ function ReceiveAndSendDialog({
 
   if (!config) return null;
 
-	const Icon = config.icon;
+  const Icon = config.icon;
+  
+  const handleReject = () => {
+    onReject()
+    close()
+  }
+
+  const handleConfirm = () => {
+    onConfirm()
+    close()
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && close()}>
@@ -66,12 +76,12 @@ function ReceiveAndSendDialog({
 
         <DialogFooter className="gap-2 sm:gap-0">
           {fromStatus === 'received' && (
-						<Button variant="destructive" onClick={onReject}>
+            <Button variant="destructive" onClick={handleReject}>
 							<X className="h-4 w-4" />
               작업 거부
             </Button>
           )}
-          <Button onClick={onConfirm} className="gap-2">
+          <Button onClick={handleConfirm} className="gap-2">
             {Icon && <Icon className="h-4 w-4" />}
             {config.acceptLabel}
           </Button>
