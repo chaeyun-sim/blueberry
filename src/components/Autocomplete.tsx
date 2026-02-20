@@ -1,36 +1,19 @@
 import { useState, useRef } from "react";
 import { Input } from "@/components/ui/input";
 
-const SONG_SUGGESTIONS = [
-  "Canon in D",
-  "River Flows in You",
-  "Kiss the Rain",
-  "A Thousand Years",
-  "Spring Waltz",
-  "Wedding March",
-  "Merry Go Round of Life",
-  "君をのせて (천공의 성 라퓨타)",
-  "Summer (久石譲)",
-  "Love Me Tender",
-  "Butterfly",
-  "Pachelbel Canon",
-  "Clair de Lune",
-  "Gymnopédie No.1",
-  "La Campanella",
-];
-
-interface SongAutocompleteProps {
+interface AutocompleteProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  suggestions?: string[];
 }
 
-export function SongAutocomplete({ value, onChange, placeholder = "곡 제목을 입력하세요" }: SongAutocompleteProps) {
+function Autocomplete({ value, onChange, placeholder = "곡 제목을 입력하세요", suggestions }: AutocompleteProps) {
   const [open, setOpen] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
   const filtered = value
-    ? SONG_SUGGESTIONS.filter((s) => s.toLowerCase().includes(value.toLowerCase())).slice(0, 6)
+    ? suggestions?.filter((s) => s.toLowerCase().includes(value.toLowerCase())).slice(0, 6)
     : [];
 
   return (
@@ -68,3 +51,5 @@ export function SongAutocomplete({ value, onChange, placeholder = "곡 제목을
     </div>
   );
 }
+
+export default Autocomplete;
