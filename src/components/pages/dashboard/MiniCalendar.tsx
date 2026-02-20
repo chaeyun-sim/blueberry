@@ -35,6 +35,11 @@ function MiniCalendar() {
   const hasDeadline = (d: number) =>
     viewDate.isSame(today, 'month') && mockDeadlineDays.includes(d);
 
+  const handleChangeMonth = (type: 'add' | 'sub') => {
+    const value = type === 'add' ? viewDate.add(1, 'month') : viewDate.subtract(1, 'month');
+    setViewDate(value);
+  }
+
   return (
     <div
       className='flex flex-col h-full cursor-pointer'
@@ -57,13 +62,13 @@ function MiniCalendar() {
         >
           <button
             className='p-1 rounded hover:bg-muted/50 transition-colors'
-            onClick={() => setViewDate(viewDate.subtract(1, 'month'))}
+            onClick={() => handleChangeMonth('sub')}
           >
             <ChevronLeft className='h-3.5 w-3.5 text-muted-foreground' />
           </button>
           <button
             className='p-1 rounded hover:bg-muted/50 transition-colors'
-            onClick={() => setViewDate(viewDate.add(1, 'month'))}
+            onClick={() => handleChangeMonth('add')}
           >
             <ChevronRight className='h-3.5 w-3.5 text-muted-foreground' />
           </button>
