@@ -1,4 +1,21 @@
+import { ChartConfig } from '@/components/ui/chart';
 import { MONTH } from '@/constants/month';
+
+// 월별 카테고리 비율 (12월엔 크리스마스 곡으로 CLASSIC↑, 여름엔 ANI↑)
+const categoryRatios = [
+  { CLASSIC: 0.50, OST: 0.22, ANI: 0.18, ETC: 0.10 }, // 1월
+  { CLASSIC: 0.42, OST: 0.28, ANI: 0.20, ETC: 0.10 }, // 2월
+  { CLASSIC: 0.45, OST: 0.25, ANI: 0.20, ETC: 0.10 }, // 3월
+  { CLASSIC: 0.40, OST: 0.30, ANI: 0.22, ETC: 0.08 }, // 4월
+  { CLASSIC: 0.43, OST: 0.27, ANI: 0.22, ETC: 0.08 }, // 5월
+  { CLASSIC: 0.45, OST: 0.25, ANI: 0.20, ETC: 0.10 }, // 6월
+  { CLASSIC: 0.38, OST: 0.23, ANI: 0.29, ETC: 0.10 }, // 7월 (여름 ANI↑)
+  { CLASSIC: 0.36, OST: 0.22, ANI: 0.32, ETC: 0.10 }, // 8월 (여름 ANI↑)
+  { CLASSIC: 0.45, OST: 0.25, ANI: 0.20, ETC: 0.10 }, // 9월
+  { CLASSIC: 0.47, OST: 0.24, ANI: 0.18, ETC: 0.11 }, // 10월
+  { CLASSIC: 0.48, OST: 0.24, ANI: 0.17, ETC: 0.11 }, // 11월
+  { CLASSIC: 0.58, OST: 0.20, ANI: 0.13, ETC: 0.09 }, // 12월 (크리스마스 CLASSIC↑)
+];
 
 export const monthlySalesData = [
   { revenue: 1250000, count: 102, prevRevenue: 1100000, prevCount: 90 },
@@ -15,6 +32,16 @@ export const monthlySalesData = [
   { revenue: 2340000, count: 109, prevRevenue: 2000000, prevCount: 150 },
 ].map((item, i) => ({ month: MONTH[i + 1 as keyof typeof MONTH], ...item }));
 
+export const monthlyCategoryData = monthlySalesData.map((d, i) => {
+  const r = categoryRatios[i];
+  return {
+    month: d.month,
+    CLASSIC: Math.round(d.revenue * r.CLASSIC),
+    OST: Math.round(d.revenue * r.OST),
+    ANI: Math.round(d.revenue * r.ANI),
+    ETC: Math.round(d.revenue * r.ETC),
+  };
+});
 
 export const mockExcelData = [
   { id: 1, orderDate: "2026-01-03 14:23", category: "CLASSIC", product: "Canon in D - QUARTET(Vn, Vn, Va, Vc)", amount: 15000 },
@@ -51,6 +78,31 @@ export const mockMonthlyBestSellers = [
   { rank: 5, title: "君をのせて", month: "9월", sales: 25, category: "ANI" },
 ];
 
+// 인기곡 TOP5 월별 판매 건수 (Canon in D, River Flows in You, Kiss the Rain, 君をのせて, Merry Go Round)
+const topProductMonthlyRaw = [
+  [10, 8, 6, 5, 4],   // 1월
+  [9,  7, 5, 4, 3],   // 2월
+  [14, 12, 9, 7, 6],  // 3월
+  [12, 10, 8, 7, 7],  // 4월
+  [16, 14, 11, 9, 12],// 5월
+  [13, 11, 9, 8, 8],  // 6월
+  [15, 13, 10, 12, 10],// 7월 (ANI↑)
+  [14, 12, 9, 13, 10],// 8월 (ANI↑)
+  [17, 15, 11, 8, 6], // 9월
+  [20, 17, 12, 7, 5], // 10월
+  [10, 8,  5, 4, 3],  // 11월
+  [6,  5,  3, 3, 2],  // 12월
+];
+
+export const mockTopProductMonthlySales = topProductMonthlyRaw.map((v, i) => ({
+  month: MONTH[i + 1 as keyof typeof MONTH],
+  canonInD:     v[0],
+  riverFlows:   v[1],
+  kissTheRain:  v[2],
+  kimitachi:    v[3],
+  merryGoRound: v[4],
+}));
+
 export const mockTopArrangements = [
   { rank: 1, arrangement: "QUARTET (Vn, Vn, Va, Vc)", sales: 234, revenue: 3510000 },
   { rank: 2, arrangement: "SOLO (Piano)", sales: 189, revenue: 1890000 },
@@ -58,3 +110,10 @@ export const mockTopArrangements = [
   { rank: 4, arrangement: "TRIO (Vn, Va, Vc)", sales: 112, revenue: 1680000 },
   { rank: 5, arrangement: "QUINTET (Str)", sales: 78, revenue: 1560000 },
 ];
+
+export const mockTopProductConfig = {
+  canonInD: 'Canon in D',
+  riverFlows: 'River Flows in You',
+  kissTheRain: 'Kiss the Rain',
+  kimitachi: '君をのせて',
+};
