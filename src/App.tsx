@@ -16,12 +16,16 @@ import CalendarView from "./pages/CalendarView";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import { OverlayProvider } from 'overlay-kit';
+import { Analytics } from "@vercel/analytics/next"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 const queryClient = new QueryClient();
 
 // App root
 const App = () => (
   <QueryClientProvider client={queryClient}>
+    <Analytics />
+    <SpeedInsights />
     <ThemeProvider>
       <TooltipProvider>
         <Toaster />
