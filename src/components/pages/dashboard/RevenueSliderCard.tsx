@@ -1,6 +1,7 @@
 import RollingNumber from '@/components/RollingNumber';
 import { AnimatePresence, motion } from 'framer-motion';
-import { DollarSign, Link, TrendingUp } from 'lucide-react';
+import { DollarSign, TrendingUp } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 
 function RevenueSliderCard() {
@@ -56,7 +57,7 @@ function RevenueSliderCard() {
           </p>
         </motion.div>
       </AnimatePresence>
-      <div className='flex gap-1.5 mt-3'>
+      <div className='flex gap-1.5 mt-6'>
         {revenueSlides.map((_, i) => (
           <span
             key={i}

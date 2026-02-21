@@ -47,7 +47,7 @@ export function AppSidebar() {
               key={item.title}
               onClick={() => navigate(item.url)}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150",
+                "flex items-center gap-3 px-3 py-2.5 rounded-[12px] text-sm font-medium transition-all duration-150",
                 "hover:bg-foreground/5",
                 isActive(item)
                   ? "bg-primary/10 text-primary border border-primary/20"
