@@ -38,7 +38,7 @@ function CategoryGrowthRateChart({ data, config }: CategoryGrowthRateChartProps)
           content={({ active, payload }) => {
             if (!active || !payload?.length) return null;
             const d = payload[0].payload;
-            const total = d.CLASSIC + d.OST + d.ANI + d.ETC;
+            const total = d.CLASSIC + d.OST + d.ANI + d.ETC || 1;
             return (
               <div className='rounded-lg border border-border bg-background px-3 py-2 text-xs shadow-md space-y-1'>
                 <p className='font-semibold text-sm mb-1'>{d.month}</p>
