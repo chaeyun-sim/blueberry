@@ -1,5 +1,4 @@
 import { AppLayout } from '@/components/layout/AppLayout';
-import { PageHeader } from '@/components/PageHeader';
 import { StatusBadge, CommissionStatus } from '@/components/StatusBadge';
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -10,14 +9,15 @@ import {
   History,
   DollarSign,
   Music,
+  Sun,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import MiniCalendar from '@/components/pages/dashboard/MiniCalendar';
-import TodayCard from '@/components/pages/dashboard/TodayCard';
+import useLiveClock from '@/hooks/use-live-clock';
 import SummaryCard from '@/components/pages/dashboard/SummaryCard';
 import { mockCommissionSummary, mockRecentCommissions } from '@/mock/dashboard';
 import RevenueSliderCard from '@/components/pages/dashboard/RevenueSliderCard';
 import CommissionSummaryBar from '@/components/pages/dashboard/CommissionSummaryBar';
+import MonthlyChart from '@/components/pages/dashboard/MonthlyChart';
 
 const summary = [{
   icon: Music,
@@ -68,66 +68,96 @@ const workStatus = [
   },
 ];
 
+
 const Dashboard = () => {
   const navigate = useNavigate();
+  const clock = useLiveClock();
+
+  const getGreeting = () => {
+    const h = clock.getHours();
+    if (h < 6)  return '🌙 Good Night';
+    if (h < 12) return '☀️ Good Morning';
+    if (h < 18) return '🌤️ Good Evening';
+    return '🌙 Good Night';
+  };
 
   const total = Object.values(mockCommissionSummary).reduce((acc, curr) => acc + curr, 0);
 
   return (
     <AppLayout>
-      <PageHeader
-        title='대시보드'
-        description='의뢰 현황을 한눈에 확인하세요'
-      />
-
-      {/* Bento Grid */}
-      <div className='flex flex-col gap-5'>
-        {/* Top Row */}
-        <div className='grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-5'>
-          {/* ① Top-Left: Today */}
-          <Card className='border-border/50 overflow-hidden relative min-h-[180px]'>
-            <TodayCard />
-          </Card>
-
-          {/* ② Top-Right: Mini Calendar */}
-          <Card className='border-border/50'>
-            <CardContent className='p-4 h-full'>
-              <MiniCalendar />
-            </CardContent>
-          </Card>
+      {/* Dashboard Header */}
+      <div className='flex items-start justify-between mb-6 gap-6 py-2'>
+        {/* Left: Greeting */}
+        <div className='shrink-0'>
+          <h1 className='text-3xl font-display font-bold tracking-tight'>
+            {getGreeting()}
+          </h1>
+          <div className='flex items-center gap-5 mt-2 text-sm text-muted-foreground'>
+            <span className='flex items-center gap-1.5'>
+              <Sun className='h-3.5 w-3.5 text-[hsl(var(--warning))]' />
+              맑음 · 4°C
+            </span>
+            <span className='flex items-center gap-1.5'>
+              <Music className='h-3.5 w-3.5' />
+              진행 중인 의뢰 <strong className='text-foreground ml-0.5'>{mockCommissionSummary.working}건</strong>
+            </span>
+            <span className='flex items-center gap-1.5'>
+              <History className='h-3.5 w-3.5 text-[hsl(var(--success))]' />
+              최근 업데이트 <strong className='text-foreground ml-0.5'>{mockRecentCommissions.length}건</strong>
+            </span>
+          </div>
         </div>
 
-        {/* Bottom Row */}
-        <div className='grid grid-cols-1 lg:grid-cols-[2fr_3fr] gap-5'>
+        {/* Right: Clock */}
+        <div className='hidden md:block shrink-0 text-right'>
+          <p className='text-4xl font-bold tabular-nums tracking-tight' style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+            {clock.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false })}
+          </p>
+          <p className='text-xs text-muted-foreground mt-1'>
+            {clock.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' })}
+          </p>
+        </div>
+      </div>
+
+      {/* Bento Grid */}
+      <div className='flex flex-col gap-4'>
+        <div className='rounded-3xl shadow-sm overflow-hidden h-[180px]'>
+          <img src='https://images.unsplash.com/photo-1771506364945-0b6566c6cd5f?q=80&w=2232&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' className='w-full h-full object-fill lg:object-center' />
+        </div>
+        {/* Top Row */}
+        <div className='grid grid-cols-1 lg:grid-cols-[2fr_3fr] gap-4'>
           {/* ③ Bottom-Left: Revenue + Commission Summary */}
-          <div className='flex flex-col gap-5'>
-            {/* Revenue Slider Card */}
-            <Card className='border-border/50'>
-              <CardContent className='p-5'>
+          <div className='flex flex-col gap-4'>
+            {/* Revenue Slider Card — green tint */}
+            <Card className='border-[1px] shadow-sm'>
+              <CardContent className="pb-0">
                 <RevenueSliderCard />
               </CardContent>
             </Card>
 
-            {/* Commission Summary Card */}
-            <Card className='border-border/50 flex-1'>
+            {/* Commission Summary Card — lavender tint */}
+            <Card className='border-[1px] shadow-sm flex-1'>
               <CardContent className='p-5'>
-                <h3 className='text-xs font-medium text-muted-foreground mb-3'>
+                <h3 className='text-xs font-semibold text-muted-foreground mb-4 uppercase tracking-wider'>
                   이번 달 의뢰 요약
                 </h3>
-                <div className='grid grid-cols-4 gap-3'>
+                <div className='grid grid-cols-4 gap-2'>
                   {workStatus.map(item => (
-                    <div
+                    <button
                       key={item.status}
-                      className='flex flex-col items-center p-2.5 rounded-lg hover:bg-muted/30 cursor-pointer transition-colors'
+                      className='flex flex-col items-center p-3 rounded-2xl bg-background/60 hover:bg-background/90 cursor-pointer transition-colors'
                       onClick={() => navigate(`/commissions?status=${item.status}`)}
                     >
-                      <item.icon className='h-4 w-4 text-muted-foreground mb-1.5' />
+                      <item.icon
+                        className='h-4 w-4 mb-1.5'
+                        style={{ color: `hsl(var(--status-${item.status}))` }}
+                      />
                       <p className='text-xl font-display font-bold'>{item.count}</p>
                       <p className='text-[10px] text-muted-foreground'>{item.label}</p>
-                    </div>
+                    </button>
                   ))}
                 </div>
-                <div className='flex h-2 rounded-full overflow-hidden mt-3'>
+                <div className='flex h-2.5 rounded-full overflow-hidden mt-4'>
                   {Object.entries(mockCommissionSummary).map(([key, value]) => (
                     <CommissionSummaryBar
                       key={key}
@@ -141,23 +171,28 @@ const Dashboard = () => {
             </Card>
           </div>
 
-          {/* ④ Bottom-Right: 최근 작업 */}
-          <Card className='border-border/50'>
+          {/* ④ Bottom-Right: 최근 작업 — white card */}
+          <Card className='border-[1px] shadow-sm'>
             <CardContent className='p-5 h-full flex flex-col'>
-              <div className='flex items-center gap-2 mb-4'>
-                <History className='h-5 w-5 text-foreground' />
-                <h2 className='font-display font-semibold text-sm'>최근 작업</h2>
+              <div className='flex items-center gap-2.5 mb-5'>
+                <div className='w-9 h-9 rounded-2xl bg-foreground flex items-center justify-center shrink-0'>
+                  <History className='h-4 w-4 text-background' />
+                </div>
+                <div>
+                  <h2 className='font-display font-bold text-sm leading-tight'>최근 작업</h2>
+                  <p className='text-[10px] text-muted-foreground'>최근 업데이트된 의뢰</p>
+                </div>
               </div>
-              <div className='space-y-2.5 flex-1'>
+              <div className='space-y-2 flex-1'>
                 {mockRecentCommissions.map(c => (
                   <div
                     key={c.id}
-                    className='flex items-center justify-between p-3 rounded-lg bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors'
+                    className='flex items-center justify-between p-3.5 rounded-2xl bg-muted/30 cursor-pointer hover:bg-muted/60 transition-colors'
                     onClick={() => navigate(`/commissions/${c.id}`)}
                   >
                     <div>
-                      <p className='font-medium text-sm'>{c.title}</p>
-                      <p className='text-xs text-muted-foreground'>{c.arrangement}</p>
+                      <p className='font-semibold text-sm'>{c.title}</p>
+                      <p className='text-xs text-muted-foreground mt-0.5'>{c.arrangement}</p>
                     </div>
                     <div className='flex items-center gap-2'>
                       <StatusBadge status={c.status} />
@@ -170,8 +205,11 @@ const Dashboard = () => {
           </Card>
         </div>
 
+        {/* Second Row: Monthly Chart */}
+        <MonthlyChart />
+
         {/* Third Row: Quick Stats */}
-        <div className='grid grid-cols-2 lg:grid-cols-4 gap-5'>
+        <div className='grid grid-cols-2 lg:grid-cols-4 gap-4'>
           {summary.map(item => (
             <SummaryCard
               key={item.description}
