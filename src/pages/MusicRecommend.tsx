@@ -1,0 +1,73 @@
+import { useState, useCallback } from 'react';
+import { AppLayout } from '@/components/layout/AppLayout';
+import { PageHeader } from '@/components/PageHeader';
+import { recommendationPool, type MusicRecommendation } from '@/mock/recommendations';
+import { useWorkedSongs } from '@/hooks/useWorkedSongs';
+import { AiBanner } from '@/components/pages/recommend/AiBanner';
+import { RecommendCard } from '@/components/pages/recommend/RecommendCard';
+import SidePanel from '@/components/pages/recommend/SidePanel';
+
+function MusicRecommend() {
+  const today = new Date();
+
+  const { workedSongs, markAsWorked } = useWorkedSongs();
+  const [refreshOffset, setRefreshOffset] = useState(0);
+  const [selectedRec, setSelectedRec] = useState<MusicRecommendation | null>(null);
+
+  const availablePool = recommendationPool.filter(r => !workedSongs.has(r.id));
+  const effectivePool = availablePool.length > 0 ? availablePool : recommendationPool;
+
+  const baseDayIdx = (() => {
+    const start = new Date(today.getFullYear(), 0, 0);
+    return Math.floor((today.getTime() - start.getTime()) / 86400000) % effectivePool.length;
+  })();
+
+  const dailyRec = effectivePool[(baseDayIdx + refreshOffset) % effectivePool.length];
+  const rec = selectedRec ?? dailyRec;
+
+  const handleMarkAsWorked = useCallback(() => {
+    markAsWorked(rec.id);
+    setSelectedRec(null);
+    setRefreshOffset(0);
+  }, [markAsWorked, rec.id]);
+
+  const handleRefresh = () => {
+    setSelectedRec(null);
+    setRefreshOffset(v => v + 1);
+  };
+
+  return (
+    <AppLayout>
+      <div className='h-full overflow-auto'>
+        <PageHeader
+          title='음악 추천'
+          description='클래식 & 연주곡 편곡 추천'
+        />
+
+        <AiBanner />
+
+        <div className='grid lg:grid-cols-3 gap-6'>
+          <div className='lg:col-span-2'>
+            <RecommendCard
+              rec={rec}
+              isSelectedRec={!!selectedRec}
+              isWorked={workedSongs.has(rec.id)}
+              onResetSelection={() => setSelectedRec(null)}
+              onRefresh={handleRefresh}
+              onMarkAsWorked={handleMarkAsWorked}
+            />
+          </div>
+
+          <SidePanel
+            selectedRec={selectedRec}
+            workedSongs={workedSongs}
+            setSelectedRec={setSelectedRec}
+            effectivePool={effectivePool}
+          />
+        </div>
+      </div>
+    </AppLayout>
+  );
+}
+
+export default MusicRecommend;
