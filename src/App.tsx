@@ -17,12 +17,16 @@ import MusicRecommend from "./pages/MusicRecommend";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import { OverlayProvider } from 'overlay-kit';
+import { Analytics } from "@vercel/analytics/react"
+import { SpeedInsights } from "@vercel/speed-insights/react"
 
 const queryClient = new QueryClient();
 
 // App root
 const App = () => (
   <QueryClientProvider client={queryClient}>
+    <Analytics />
+    <SpeedInsights />
     <ThemeProvider>
       <TooltipProvider>
         <Toaster />
