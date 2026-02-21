@@ -204,7 +204,7 @@ function SalesAll({ originData }: SalesAllProps) {
                           colSpan={4}
                           className='py-2 text-left'
                         >
-                          <span className='inline-flex items-center gap-2 text-sm font-display font-bold w-full justify-between'>
+                          <div className='inline-flex items-center gap-2 text-sm font-display font-bold w-full justify-between'>
                             <div className='inline-flex items-center gap-2'>
                               {filterCategory === 'ALL' &&
                                 (collapsedGroups.has(category) ? (
@@ -219,7 +219,7 @@ function SalesAll({ originData }: SalesAllProps) {
                             <span className='text-muted-foreground font-normal text-xs'>
                               {rows.length}건
                             </span>
-                          </span>
+                          </div>
                         </TableCell>
                       </TableRow>
                       {!collapsedGroups.has(category) &&

@@ -43,6 +43,36 @@ export const monthlyCategoryData = monthlySalesData.map((d, i) => {
   };
 });
 
+// 2025 data derived from prevRevenue/prevCount; 2024 prev values approximated at ~92% of 2025
+const monthlySalesData2025 = monthlySalesData.map(d => ({
+  month: d.month,
+  revenue: d.prevRevenue,
+  count: d.prevCount,
+  prevRevenue: Math.round(d.prevRevenue * 0.92),
+  prevCount: Math.round(d.prevCount * 0.92),
+}));
+
+const monthlyCategoryData2025 = monthlySalesData2025.map((d, i) => {
+  const r = categoryRatios[i];
+  return {
+    month: d.month,
+    CLASSIC: Math.round(d.revenue * r.CLASSIC),
+    OST: Math.round(d.revenue * r.OST),
+    ANI: Math.round(d.revenue * r.ANI),
+    ETC: Math.round(d.revenue * r.ETC),
+  };
+});
+
+export const monthlySalesByYear: Record<string, typeof monthlySalesData> = {
+  '2026': monthlySalesData,
+  '2025': monthlySalesData2025,
+};
+
+export const monthlyCategoryByYear: Record<string, typeof monthlyCategoryData> = {
+  '2026': monthlyCategoryData,
+  '2025': monthlyCategoryData2025,
+};
+
 export const mockExcelData = [
   { id: 1, orderDate: "2026-01-03 14:23", category: "CLASSIC", product: "Canon in D - QUARTET(Vn, Vn, Va, Vc)", amount: 15000 },
   { id: 2, orderDate: "2026-01-04 09:11", category: "ANI", product: "君をのせて - DUET(Fl, Pf)", amount: 12000 },
@@ -116,4 +146,5 @@ export const mockTopProductConfig = {
   riverFlows: 'River Flows in You',
   kissTheRain: 'Kiss the Rain',
   kimitachi: '君をのせて',
+  merryGoRound: 'Merry Go Round of Life',
 };

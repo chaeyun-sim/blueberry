@@ -1,6 +1,6 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { formatCurrency } from '@/utils/format-currency';
-import { LucideProps, TrendingUp } from 'lucide-react';
+import { LucideProps, TrendingDown, TrendingUp } from 'lucide-react';
 import { ForwardRefExoticComponent, RefAttributes } from 'react';
 
 interface SalesSummaryCardProps {
@@ -23,8 +23,9 @@ function SalesSummaryCard({ icon, title, value, percentage, compareKey, isMoney 
           <span className='text-xs text-muted-foreground font-medium'>{title}</span>
         </div>
         <p className='text-2xl font-display font-bold'>{isMoney ? formatCurrency(value) : value.toLocaleString()}</p>
-        <p className='text-xs text-[hsl(var(--status-complete))] mt-1 flex items-center gap-1'>
-          <TrendingUp className='h-3 w-3' /> {percentage}% vs {compareKey === 'lastYear' ? '작년' : '전월'}
+        <p className={`text-xs mt-1 flex items-center gap-1 ${percentage >= 0 ? 'text-[hsl(var(--status-complete))]' : 'text-destructive'}`}>
+          {percentage >= 0 ? <TrendingUp className='h-3 w-3' /> : <TrendingDown className='h-3 w-3' />}
+          {percentage}% vs {compareKey === 'lastYear' ? '작년' : '전월'}
         </p>
       </CardContent>
     </Card>
