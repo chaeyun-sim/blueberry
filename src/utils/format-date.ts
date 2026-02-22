@@ -1,3 +1,5 @@
-export const formatDate = (date: Date) => {
-  return `${date.getMonth() + 1}월 ${date.getDate()}일`;
+import { Dayjs } from 'dayjs';
+
+export const formatDate = (date: Dayjs) => {
+  return `${date.month() + 1}월 ${date.date()}일`;
 }

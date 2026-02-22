@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import dayjs from 'dayjs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, ExternalLink, CheckCircle, PenLine, RotateCcw } from 'lucide-react';
@@ -31,7 +32,7 @@ export function RecommendCard({
 
   const { status: soundpostStatus, titleUrl, composerUrl } = useSoundpostCheck(rec);
 
-  const today = new Date();
+  const today = dayjs();
   const youtubeUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(rec.youtubeQuery)}`;
 
   return (

@@ -1,3 +1,8 @@
+import dayjs, { Dayjs } from 'dayjs';
+import dayOfYear from 'dayjs/plugin/dayOfYear';
+
+dayjs.extend(dayOfYear);
+
 export interface MusicRecommendation {
   id: number;
   title: string;
@@ -235,21 +240,18 @@ export const recommendationPool: MusicRecommendation[] = [
 
 export function getDailyRecommendation(
   pool: MusicRecommendation[] = recommendationPool,
-  date: Date = new Date(),
+  date: Dayjs = dayjs(),
 ): MusicRecommendation {
-  const start = new Date(date.getFullYear(), 0, 0);
-  const dayOfYear = Math.floor((date.getTime() - start.getTime()) / 86400000);
-  return pool[dayOfYear % pool.length];
+  return pool[date.dayOfYear() % pool.length];
 }
 
 export function getRecentRecommendations(
   days: number = 5,
   pool: MusicRecommendation[] = recommendationPool,
-): Array<{ date: Date; rec: MusicRecommendation }> {
-  const today = new Date();
+): Array<{ date: Dayjs; rec: MusicRecommendation }> {
+  const today = dayjs();
   return Array.from({ length: days }, (_, i) => {
-    const date = new Date(today);
-    date.setDate(today.getDate() - i - 1);
+    const date = today.subtract(i + 1, 'day');
     return { date, rec: getDailyRecommendation(pool, date) };
   });
 }

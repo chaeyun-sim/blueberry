@@ -1,15 +1,13 @@
 import { useState, useCallback } from 'react';
+import dayjs from 'dayjs';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/PageHeader';
 import { recommendationPool, type MusicRecommendation } from '@/mock/recommendations';
 import { useWorkedSongs } from '@/hooks/useWorkedSongs';
-import { AiBanner } from '@/components/pages/recommend/AiBanner';
 import { RecommendCard } from '@/components/pages/recommend/RecommendCard';
 import SidePanel from '@/components/pages/recommend/SidePanel';
 
 function MusicRecommend() {
-  const today = new Date();
-
   const { workedSongs, markAsWorked, unmarkAsWorked } = useWorkedSongs();
   const [refreshOffset, setRefreshOffset] = useState(0);
   const [selectedRec, setSelectedRec] = useState<MusicRecommendation | null>(null);
@@ -17,10 +15,7 @@ function MusicRecommend() {
   const availablePool = recommendationPool.filter(r => !workedSongs.has(r.id));
   const effectivePool = availablePool.length > 0 ? availablePool : recommendationPool;
 
-  const baseDayIdx = (() => {
-    const start = new Date(today.getFullYear(), 0, 0);
-    return Math.floor((today.getTime() - start.getTime()) / 86400000) % effectivePool.length;
-  })();
+  const baseDayIdx = dayjs().dayOfYear() % effectivePool.length;
 
   const dailyRec = effectivePool[(baseDayIdx + refreshOffset) % effectivePool.length];
   const rec = selectedRec ?? dailyRec;
@@ -43,8 +38,6 @@ function MusicRecommend() {
           title='음악 추천'
           description='클래식 & 연주곡 편곡 추천'
         />
-
-        <AiBanner />
 
         <div className='grid lg:grid-cols-3 gap-6'>
           <div className='lg:col-span-2'>
