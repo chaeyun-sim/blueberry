@@ -1,14 +1,14 @@
 import { useState, useCallback } from 'react';
-import { loadWorkedSongs, saveWorkedSongs } from '@/utils/worked-songs';
+import { recommendationPool } from '@/mock/recommendations';
 
 export function useWorkedSongs() {
-  const [workedSongs, setWorkedSongs] = useState<Set<number>>(loadWorkedSongs);
+  const [workedSongs, setWorkedSongs] = useState<Set<number>>(new Set(recommendationPool.map(rec => rec.id)));
 
   const markAsWorked = useCallback((id: number) => {
     setWorkedSongs(prev => {
       const next = new Set(prev);
       next.add(id);
-      saveWorkedSongs(next);
+      // TODO: localStorage.setItem('workedSongs', JSON.stringify([...next]));
       return next;
     });
   }, []);
@@ -17,7 +17,7 @@ export function useWorkedSongs() {
     setWorkedSongs(prev => {
       const next = new Set(prev);
       next.delete(id);
-      saveWorkedSongs(next);
+      // TODO: localStorage.setItem('workedSongs', JSON.stringify([...next]));
       return next;
     });
   }, []);

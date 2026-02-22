@@ -110,7 +110,7 @@ export function RecommendCard({
             variant='outline'
             size='sm'
             className='gap-2 w-full hover:bg-muted'
-            onClick={() => window.open(youtubeUrl, '_blank')}
+            onClick={() => window.open(youtubeUrl, '_blank', 'noopener,noreferrer')}
           >
             <ExternalLink className='h-3.5 w-3.5' />
             YouTube에서 듣기

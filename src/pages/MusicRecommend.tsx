@@ -15,6 +15,17 @@ function MusicRecommend() {
   const availablePool = recommendationPool.filter(r => !workedSongs.has(r.id));
   const effectivePool = availablePool.length > 0 ? availablePool : recommendationPool;
 
+  if (effectivePool.length === 0) {
+    return (
+      <AppLayout>
+        <div className='h-full overflow-auto'>
+          <PageHeader title='음악 추천' description='클래식 & 연주곡 편곡 추천' />
+          <p className='text-sm text-muted-foreground'>추천 가능한 곡이 없습니다.</p>
+        </div>
+      </AppLayout>
+    );
+  }
+
   const baseDayIdx = dayjs().dayOfYear() % effectivePool.length;
 
   const dailyRec = effectivePool[(baseDayIdx + refreshOffset) % effectivePool.length];

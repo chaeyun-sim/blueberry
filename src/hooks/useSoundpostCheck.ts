@@ -14,7 +14,7 @@ export function useSoundpostCheck(rec: MusicRecommendation) {
     .toLowerCase()
     .replace(/[^a-z0-9 ]/g, '')
     .trim();
-  const composerSearchStr = rec.composer.split(' ').at(-1) ?? rec.composer;
+  const composerSearchStr = rec.composer.split(' ').filter(Boolean).at(-1) ?? rec.composer;
 
   useEffect(() => {
     setStatus('loading');

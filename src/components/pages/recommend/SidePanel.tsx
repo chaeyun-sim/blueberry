@@ -99,7 +99,7 @@ function SidePanel({ selectedRec, workedSongs, setSelectedRec }: SidePanelProps)
             const done = workedSongs.has(r.id);
             return (
               <button
-                key={r.id}
+                key={date.format('YYYY-MM-DD')}
                 disabled={done}
                 className={cn(
                   'w-full text-left px-4 py-3 border-t border-border/50 first:border-t-0 transition-colors focus:outline-none',
