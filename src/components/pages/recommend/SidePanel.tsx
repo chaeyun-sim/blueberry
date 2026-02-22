@@ -38,6 +38,7 @@ function SidePanel({ selectedRec, workedSongs, setSelectedRec }: SidePanelProps)
           value={query}
           onChange={e => setQuery(e.target.value)}
           className='w-full pl-8 pr-8 py-2 text-sm rounded-md border border-border/50 bg-background focus:outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground'
+          aria-label='곡명 또는 작곡가 검색'
         />
         {query && (
           <button
