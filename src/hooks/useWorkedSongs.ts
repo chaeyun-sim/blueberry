@@ -13,5 +13,14 @@ export function useWorkedSongs() {
     });
   }, []);
 
-  return { workedSongs, markAsWorked };
+  const unmarkAsWorked = useCallback((id: number) => {
+    setWorkedSongs(prev => {
+      const next = new Set(prev);
+      next.delete(id);
+      saveWorkedSongs(next);
+      return next;
+    });
+  }, []);
+
+  return { workedSongs, markAsWorked, unmarkAsWorked };
 }

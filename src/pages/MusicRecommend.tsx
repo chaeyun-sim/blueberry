@@ -10,7 +10,7 @@ import SidePanel from '@/components/pages/recommend/SidePanel';
 function MusicRecommend() {
   const today = new Date();
 
-  const { workedSongs, markAsWorked } = useWorkedSongs();
+  const { workedSongs, markAsWorked, unmarkAsWorked } = useWorkedSongs();
   const [refreshOffset, setRefreshOffset] = useState(0);
   const [selectedRec, setSelectedRec] = useState<MusicRecommendation | null>(null);
 
@@ -55,6 +55,7 @@ function MusicRecommend() {
               onResetSelection={() => setSelectedRec(null)}
               onRefresh={handleRefresh}
               onMarkAsWorked={handleMarkAsWorked}
+              onUnmarkAsWorked={() => unmarkAsWorked(rec.id)}
             />
           </div>
 
@@ -62,7 +63,6 @@ function MusicRecommend() {
             selectedRec={selectedRec}
             workedSongs={workedSongs}
             setSelectedRec={setSelectedRec}
-            effectivePool={effectivePool}
           />
         </div>
       </div>
