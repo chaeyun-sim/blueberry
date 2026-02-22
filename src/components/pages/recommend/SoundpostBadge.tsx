@@ -28,7 +28,7 @@ export function SoundpostBadge({ status, titleUrl, category, difficulty }: Props
       {status === 'error' && (
         <button
           className='inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-muted text-muted-foreground border border-border/50 hover:text-foreground transition-colors'
-          onClick={() => window.open(titleUrl, '_blank')}
+          onClick={() => window.open(titleUrl, '_blank', 'noopener,noreferrer')}
         >
           <AlertCircle className='h-3 w-3' />
           사이트에서 직접 확인

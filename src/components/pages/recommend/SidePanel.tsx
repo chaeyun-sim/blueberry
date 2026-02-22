@@ -9,7 +9,7 @@ import { useState } from 'react';
 interface SidePanelProps {
   selectedRec: MusicRecommendation | null;
   workedSongs: Set<number>;
-  setSelectedRec: (rec: MusicRecommendation) => void;
+  setSelectedRec: (rec: MusicRecommendation | null) => void;
 }
 
 function SidePanel({ selectedRec, workedSongs, setSelectedRec }: SidePanelProps) {
@@ -59,12 +59,13 @@ function SidePanel({ selectedRec, workedSongs, setSelectedRec }: SidePanelProps)
               return (
                 <button
                   key={r.id}
+                  disabled={done}
                   className={cn(
                     'w-full text-left px-4 py-3 border-t border-border/50 first:border-t-0 transition-colors focus:outline-none',
-                    isSelected ? 'bg-primary/5' : 'hover:bg-muted/40',
-                    'cursor-pointer',
+                    isSelected ? 'bg-primary/5' : !done && 'hover:bg-muted/40',
+                    done ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer',
                   )}
-                  onClick={() => { setSelectedRec(r); setQuery(''); }}
+                  onClick={() => { if (!done) { setSelectedRec(r); setQuery(''); } }}
                 >
                   <p className='text-sm font-medium leading-snug'>
                     {r.title}
