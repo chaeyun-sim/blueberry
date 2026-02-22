@@ -1,24 +1,27 @@
-import { useState } from 'react';
+import dayjs from 'dayjs';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, CheckCircle, ChevronRight, ExternalLink, LucideProps, Music2, Package2, Truck } from 'lucide-react';
+import { ArrowLeft, CheckCircle, ChevronRight, ExternalLink, LucideProps, Music2, Package2, Pencil, Trash2, Truck } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { COMMISSION_STATUS_TRANSLATE } from '@/constants/translate';
-import { mockCommissionDetail, mockCommissions } from '@/mock/commission';
 import { overlay } from 'overlay-kit';
 import ReceiveAndSendDialog from '@/components/pages/commission/ReceiveAndSendDialog';
 import { CompleteDialog } from '@/components/pages/commission/CompleteDialog';
 import { toast } from '@/hooks/use-toast';
 import CommissionImageDialog from '@/components/pages/commission/CommissionImageDialog';
 import { CommissionStatus } from '@/components/StatusBadge';
+import { useQuery } from '@tanstack/react-query';
+import { commissionQueries } from '@/api/commission/queries';
+import DeleteCommissionDialog from '@/components/pages/commission/DeleteCommissionDialog';
 
 const commissionInfo = {
+  composer: '작곡가',
   arrangement: '편성',
   version: '버전',
-  createdAt: '등록일',
+  created_at: '등록일',
   deadline: '마감일',
 };
 
@@ -33,13 +36,10 @@ const CommissionDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const commission = mockCommissions.find(commission => commission.id === id);
-  const commissionDetail = {...mockCommissionDetail, id, ...commission};
-
-  const [detail, setDetail] = useState(commissionDetail);
+  const { data: commission } = useQuery(commissionQueries.getCommission(id))
 
   const commissionStatuses = Object.keys(COMMISSION_STATUS_TRANSLATE);
-  const currentStatusIndex = commissionStatuses.findIndex(status => status === detail.status);
+  const currentStatusIndex = commissionStatuses.findIndex(status => status === commission?.status);
 
   const nextStatus =
     currentStatusIndex < commissionStatuses.length - 1
@@ -54,7 +54,6 @@ const CommissionDetail = () => {
 
   const handleTransitionConfirm = (file?: File) => {
     // TODO: 실제 상태 전환 API 연동
-    setDetail(prev => ({ ...prev, status: nextStatus as CommissionStatus }));
     toast({ title: toastMessages[nextStatus as CommissionStatus] ?? '상태가 변경되었습니다.' });
   };
 
@@ -69,7 +68,7 @@ const CommissionDetail = () => {
         overlayProps => (
           <ReceiveAndSendDialog
             {...overlayProps}
-            fromStatus={detail.status}
+            fromStatus={commission?.status}
             toStatus={nextStatus as CommissionStatus}
             onReject={handleReject}
             onConfirm={handleTransitionConfirm}
@@ -95,10 +94,21 @@ const CommissionDetail = () => {
       overlayProps => (
         <CommissionImageDialog
           {...overlayProps}
-          date={detail.createdAt}
+          date={commission?.created_at}
+          imageUrl={ commission?.image_url }
         />
       ),
       { overlayId: 'original-image-dialog' },
+    );
+  };
+
+
+  const handleDelete = () => {
+    overlay.open(
+      overlayProps => (
+        <DeleteCommissionDialog {...overlayProps} commissionId={id}/>
+      ),
+      { overlayId: 'delete-commission-dialog' },
     );
   };
 
@@ -106,7 +116,11 @@ const CommissionDetail = () => {
     <AppLayout
       bottomBar={
         <div className='border-t border-border bg-background/95 backdrop-blur-sm'>
-          <div className='px-6 py-3 flex justify-end'>
+          <div className='px-6 py-3 flex items-center justify-between'>
+            <Button variant='ghost' className='gap-2 text-destructive hover:bg-destructive/10 hover:text-destructive' onClick={handleDelete}>
+              <Trash2 className='h-4 w-4' /> 삭제
+            </Button>
+
             {nextStatus ? (
               <Button
                 onClick={handleOpenDialog}
@@ -122,7 +136,7 @@ const CommissionDetail = () => {
         </div>
       }
     >
-      <div className='mb-6'>
+      <div className='mb-6 flex items-center justify-between'>
         <Button
           variant='ghost'
           className='gap-2 hover:bg-foreground/5 text-muted-foreground'
@@ -130,9 +144,16 @@ const CommissionDetail = () => {
         >
           <ArrowLeft className='h-4 w-4' /> 뒤로
         </Button>
+        <Button
+          variant='ghost'
+          className='gap-2 hover:bg-foreground/5 text-muted-foreground'
+          onClick={() => navigate(`/commissions/${id}/edit`)}
+        >
+          <Pencil className='h-4 w-4' /> 수정
+        </Button>
       </div>
 
-      <PageHeader title={detail.title} />
+      <PageHeader title={commission?.title ?? ''} />
 
       {/* Status Progress */}
       <Card className='mb-8 border-border/50'>
@@ -194,19 +215,30 @@ const CommissionDetail = () => {
               </button>
             </div>
             <dl className='space-y-3'>
-              {Object.keys(commissionInfo).map(key => (
-                <div
+              {Object.keys(commissionInfo).map(key => {
+                const value = () => {
+                  if (key === 'version') {
+                    return commission?.version ? `${commission?.version} ver.` : '-';
+                  }
+                  if (key === 'created_at') {
+                    return commission?.created_at ? dayjs(commission.created_at).format('YYYY-MM-DD HH:mm') : '-';
+                  }
+                  return commission?.[key] ?? '-';
+                }
+                return (
+                  <div
                   key={key}
                   className='flex items-center justify-between py-2 border-b border-border/50 last:border-0'
                 >
                   <dt className='text-sm text-muted-foreground'>{commissionInfo[key]}</dt>
-                  <dd className='text-sm font-medium'>{(key === 'version' ? `${detail[key]} ver.` : detail[key]) || '-'}</dd>
+                  <dd className='text-sm font-medium'>{value()}</dd>
                 </div>
-              ))}
+                )
+              })}
             </dl>
-            {detail.notes && (
+            {commission?.notes && (
               <div className='mt-4 p-3 rounded-lg bg-muted/50'>
-                <p className='text-sm text-muted-foreground'>{detail.notes}</p>
+                <p className='text-sm text-muted-foreground'>{commission?.notes}</p>
               </div>
             )}
           </CardContent>
@@ -214,14 +246,15 @@ const CommissionDetail = () => {
       </div>
 
       {/* Linked Scores */}
-      <Card className='border-border/50'>
+      {commission?.song_id && <Card className='border-border/50'>
         <CardContent className='p-5'>
           <div className='flex items-center justify-between mb-4'>
             <h2 className='font-display font-semibold'>연결된 악보</h2>
           </div>
-          {detail.linkedScores.length > 0 ? (
+          {/* TODO: score list 연결 */}
+          {/* {commission?.length > 0 ? (
             <div className='space-y-3'>
-              {detail.linkedScores.map(score => (
+              {commission?.linkedScores.map(score => (
                 <div
                   key={score.id}
                   className='flex flex-col p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer'
@@ -233,9 +266,9 @@ const CommissionDetail = () => {
             </div>
           ) : (
             <p className='text-sm text-muted-foreground text-center py-8'>연결된 악보가 없습니다</p>
-          )}
+          )} */}
         </CardContent>
-      </Card>
+      </Card>}
     </AppLayout>
   );
 };

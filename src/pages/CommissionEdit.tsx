@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
@@ -12,33 +12,25 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
+} from '@/components/ui/select'
 import { ArrowLeft, Calendar, Plus, Undo2, X } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { mockCommissionDetail, mockCommissions } from '@/mock/commission';
 import { toast } from '@/hooks/use-toast';
 import { ALL_INSTRUMENTS } from '@/constants/instruments';
 import { COMMISSION_STATUS_TRANSLATE } from '@/constants/translate';
 import { CommissionStatus } from '@/components/StatusBadge';
 import { commissionQueries } from '@/api/commission/queries';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { commissionMutations } from '@/api/commission/mutations';
+import { DifficultyLevelType } from '@/types/commission';
 
 interface EditForm {
+  composer: string;
   instruments: string[];
-  version: string;
+  version: DifficultyLevelType;
   deadline: string;
   notes: string;
+  status: CommissionStatus;
 }
 
 const CommissionEdit = () => {
@@ -50,15 +42,23 @@ const CommissionEdit = () => {
 
   const [form, setForm] = useState<EditForm>({
     instruments: commission?.arrangement ? commission.arrangement.split(', ') : [],
-    version: commission?.version ?? '',
+    version: commission?.version ?? null,
     deadline: commission?.deadline ?? '',
     notes: commission?.notes ?? '',
+    status: commission?.status ?? null,
+    composer: commission?.composer ?? '',
   });
 
   const commissionStatuses = Object.keys(COMMISSION_STATUS_TRANSLATE) as CommissionStatus[];
   const currentStatusIndex = commissionStatuses.findIndex(s => s === commission?.status);
   const prevStatus = currentStatusIndex > 0 ? commissionStatuses[currentStatusIndex - 1] : null;
   const prevStatusLabel = prevStatus ? COMMISSION_STATUS_TRANSLATE[prevStatus] : null;
+
+  useEffect(() => {
+    if (prevStatusLabel) {
+      setForm(prev => ({ ...prev, status: prevStatusLabel as CommissionStatus }));
+    }
+  }, [prevStatusLabel])
 
   const [instrumentInput, setInstrumentInput] = useState('');
   const [showInstrumentDropdown, setShowInstrumentDropdown] = useState(false);
@@ -102,16 +102,33 @@ const CommissionEdit = () => {
     }
   };
 
-  const handleSave = () => {
-    // TODO: 수정 API 연동
-    toast({ title: '의뢰가 수정되었습니다.' });
-    navigate(-1);
-  };
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleStatusCancel = () => {
-    // TODO: 상태 취소 API 연동
-    toast({ title: '상태가 취소되었습니다.' });
-    navigate(`/commissions/${id}`);
+  const { mutate: updateCommission } = useMutation(commissionMutations.updateCommission())
+
+  const handleSave = () => {
+    setIsSubmitting(true);
+    
+    updateCommission({
+      commissionId: id,
+      input: {
+        arrangement: form.instruments.join(', '),
+        version: form.version,
+        deadline: form.deadline,
+        notes: form.notes,
+        status: form.status,
+        composer: form.composer,
+      },
+    }, {
+      onSuccess: () => {
+        toast({ title: '의뢰가 수정되었습니다.' });
+        navigate(-1);
+      },
+      onError: (e) => {
+        setIsSubmitting(false);
+        toast({ title: '의뢰 수정에 실패했습니다.', description: e.message });
+      }
+    })
   };
 
   return (
@@ -119,38 +136,17 @@ const CommissionEdit = () => {
       bottomBar={
         <div className='border-t border-border bg-background/95 backdrop-blur-sm'>
           <div className={`px-6 py-3 flex items-center ${prevStatus ? 'justify-between' : 'justify-end'}`}>
-            {prevStatus && (
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant='ghost' className='gap-2 text-muted-foreground hover:bg-foreground/5'>
-                    <Undo2 className='h-4 w-4' /> {prevStatusLabel}로 되돌리기
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>이전 상태로 되돌리시겠습니까?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      상태가 <strong>{prevStatusLabel}</strong>(으)로 변경됩니다.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>취소</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleStatusCancel}>확인</AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            )}
-
             <div className='flex gap-2'>
               <Button
                 variant='ghost'
                 className='text-muted-foreground hover:bg-foreground/5'
+                disabled={isSubmitting}
                 onClick={() => navigate(-1)}
               >
                 수정 취소
               </Button>
-              <Button onClick={handleSave} className='px-6'>
-                수정 저장
+              <Button onClick={handleSave} className='px-6' disabled={isSubmitting}>
+                {isSubmitting ? '수정 중...' : '수정 저장'}
               </Button>
             </div>
           </div>
@@ -174,6 +170,38 @@ const CommissionEdit = () => {
           <h2 className='font-display font-semibold mb-4'>의뢰 정보</h2>
           <div className='space-y-5'>
 
+            <div className='space-y-2'>
+              <Label>현재 상태</Label>
+              <Select
+                value={form.status}
+                onValueChange={value =>
+                  setForm(prev => ({ ...prev, status: value as CommissionStatus }))
+                }
+                disabled={isSubmitting}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder='상태를 선택하세요' />
+                </SelectTrigger>
+                <SelectContent>
+                  {commissionStatuses.map(status => (
+                    <SelectItem key={status} value={status}>{COMMISSION_STATUS_TRANSLATE[status]}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className='space-y-2'>
+              <Label>작곡가</Label>
+              <div className='relative'>
+                <Input
+                  placeholder='작곡가를 입력하세요'
+                  value={form.composer}
+                  onChange={e => setForm(prev => ({ ...prev, composer: e.target.value }))}
+                  disabled={isSubmitting}
+                />
+              </div>
+            </div>
+
             {/* 편성 */}
             <div className='space-y-2'>
               <Label>편성</Label>
@@ -190,6 +218,7 @@ const CommissionEdit = () => {
                   onKeyDown={e => {
                     if (e.key === 'Enter') handleAddInstrument(instrumentInput);
                   }}
+                  disabled={isSubmitting}
                 />
                 {showInstrumentDropdown && instrumentInput && filteredOptions.length > 0 && (
                   <div className='absolute z-10 top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg max-h-48 overflow-y-auto'>
@@ -218,13 +247,13 @@ const CommissionEdit = () => {
                       className='inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium bg-primary/15 text-primary border border-primary/20'
                     >
                       {inst}
-                      <button
+                      {!isSubmitting && <button
                         type='button'
                         onClick={() => removeInstrument(idx)}
                         className='ml-0.5 hover:text-destructive transition-colors'
                       >
                         <X className='h-3 w-3' />
-                      </button>
+                      </button>}
                     </span>
                   ))}
                 </div>
@@ -237,8 +266,9 @@ const CommissionEdit = () => {
               <Select
                 value={form.version || 'normal'}
                 onValueChange={value =>
-                  setForm(prev => ({ ...prev, version: value === 'normal' ? '' : value }))
+                  setForm(prev => ({ ...prev, version: value as DifficultyLevelType }))
                 }
+                disabled={isSubmitting}
               >
                 <SelectTrigger>
                   <SelectValue placeholder='버전을 선택하세요' />
@@ -262,6 +292,7 @@ const CommissionEdit = () => {
                   className='pr-9 [&::-webkit-calendar-picker-indicator]:hidden'
                   value={form.deadline}
                   onChange={e => setForm(prev => ({ ...prev, deadline: e.target.value }))}
+                  disabled={isSubmitting}
                 />
                 <button
                   type='button'
@@ -281,6 +312,7 @@ const CommissionEdit = () => {
                 rows={4}
                 value={form.notes}
                 onChange={e => setForm(prev => ({ ...prev, notes: e.target.value }))}
+                disabled={isSubmitting}
               />
             </div>
 
