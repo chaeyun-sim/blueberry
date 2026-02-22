@@ -9,3 +9,50 @@ export const INSTRUMENTS = {
 } as const;
 
 export const ALL_INSTRUMENTS = Object.values(INSTRUMENTS).flat();
+
+export const INSTRUMENT_ABBREVIATIONS: Record<string, string> = {
+  // Strings
+  Violin: 'Vn',
+  Viola: 'Va',
+  Cello: 'Vc',
+  'Double Bass': 'Cb',
+  // Woodwinds
+  Flute: 'Fl',
+  Oboe: 'Ob',
+  Clarinet: 'Cl',
+  Bassoon: 'Bn',
+  // Brass
+  Horn: 'Hn',
+  Trumpet: 'Tp',
+  Trombone: 'Tb',
+  Tuba: 'Tu',
+  // Piano
+  Piano: 'Pf',
+  // Percussion
+  Timpani: 'Timp',
+  'Drum Set': 'Dr',
+  'Bass Drum': 'BD',
+  'Snare Drum': 'SD',
+  Cymbals: 'Cym',
+  Triangle: 'Tri',
+  Tambourine: 'Tamb',
+  // Pitched Percussion
+  Xylophone: 'Xyl',
+  Marimba: 'Mar',
+  Celesta: 'Cel',
+  Vibraphone: 'Vib',
+  Glockenspiel: 'Glock',
+  // Guitar
+  Guitar: 'Gtr',
+};
+
+// "Violin I" → "Vn.I", "Flute" → "Fl."
+export function abbreviateInstrument(name: string): string {
+  const romanMatch = name.match(/^(.+?)\s+(I{1,3}V?|IV|VI{0,3}|V)$/);
+  if (romanMatch) {
+    const base = romanMatch[1];
+    const roman = romanMatch[2];
+    return (INSTRUMENT_ABBREVIATIONS[base] ?? base) + roman;
+  }
+  return INSTRUMENT_ABBREVIATIONS[name] ?? name;
+}
