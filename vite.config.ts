@@ -11,6 +11,13 @@ export default defineConfig(({ mode }) => ({
     hmr: {
       overlay: false,
     },
+    proxy: {
+      '/api/soundpost': {
+        target: 'https://www.soundpost.co.kr',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/soundpost/, ''),
+      },
+    },
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {

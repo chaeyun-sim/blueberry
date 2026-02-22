@@ -13,6 +13,7 @@ import ScoreDetail from "./pages/ScoreDetail";
 import ScoreRegister from "./pages/ScoreRegister";
 import SalesStats from "./pages/SalesStats";
 import CalendarView from "./pages/CalendarView";
+import MusicRecommend from "./pages/MusicRecommend";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import { OverlayProvider } from 'overlay-kit';
@@ -42,6 +43,7 @@ const App = () => (
               <Route path="/scores/new" element={<ScoreRegister />} />
               <Route path="/stats" element={<SalesStats />} />
               <Route path="/calendar" element={<CalendarView />} />
+              <Route path="/recommend" element={<MusicRecommend />} />
               <Route path="/login" element={<Login />} />
               <Route path="*" element={<NotFound />} />
             </Routes>

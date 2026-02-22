@@ -20,7 +20,7 @@ function TodayCard() {
   const clock = useLiveClock();
 
 	const getFormattedDate = () => {
-		return `${clock.getFullYear()}년 ${clock.getMonth() + 1}월 ${clock.getDate()}일 ${WEEK_KOR[clock.getDay()]}요일`;
+		return `${clock.year()}년 ${clock.month() + 1}월 ${clock.date()}일 ${WEEK_KOR[clock.day()]}요일`;
 	}
 
 	const getTodayBg = (hour: number) => {
@@ -31,7 +31,7 @@ function TodayCard() {
 	}
 
 	const getGreeting = () => {
-		const h = clock.getHours();
+		const h = clock.hour();
 		if (h < 6) return "늦은 밤이에요 🌙";
 		if (h < 12) return "좋은 아침이에요 ☀️";
 		if (h < 18) return "좋은 오후예요 🌤";
@@ -42,8 +42,8 @@ function TodayCard() {
     <>
       <AnimatePresence mode='wait'>
         <motion.img
-          key={getTodayBg(clock.getHours())}
-          src={getTodayBg(clock.getHours())}
+          key={getTodayBg(clock.hour())}
+          src={getTodayBg(clock.hour())}
           alt=''
           className='absolute inset-0 w-full h-full object-cover pointer-events-none'
           initial={{ opacity: 0 }}
@@ -57,7 +57,7 @@ function TodayCard() {
         <div className='flex items-center justify-between mb-1'>
           <p className='text-sm text-white/80'>{getFormattedDate()}</p>
           <span className='font-display font-bold text-lg tabular-nums text-white drop-shadow'>
-            {clock.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+            {clock.format('HH:mm')}
           </span>
         </div>
         <h2 className='text-2xl font-display font-bold mb-2 text-white drop-shadow'>

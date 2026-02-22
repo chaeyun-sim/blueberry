@@ -1,4 +1,4 @@
-import { LayoutDashboard, ClipboardList, Music, PlusCircle, BarChart3, CalendarDays, Sun, Moon, LogIn, LogOut } from "lucide-react";
+import { LayoutDashboard, ClipboardList, Music, PlusCircle, BarChart3, CalendarDays, Sparkles, Sun, Moon, LogIn, LogOut } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useTheme } from "@/components/ThemeProvider";
@@ -13,10 +13,11 @@ import logoImg from "@/assets/logo.png";
 
 const navItems = [
   { title: "대시보드", url: "/", icon: LayoutDashboard, exact: true },
-  { title: "의뢰 목록", url: "/commissions", icon: ClipboardList },
   { title: "캘린더", url: "/calendar", icon: CalendarDays },
+  { title: "의뢰 목록", url: "/commissions", icon: ClipboardList },
   { title: "매출 통계", url: "/stats", icon: BarChart3 },
   { title: "악보 관리", url: "/scores", icon: Music },
+  { title: "음악 추천", url: "/recommend", icon: Sparkles },
 ];
 
 export function AppSidebar() {

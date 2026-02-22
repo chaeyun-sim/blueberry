@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import useLiveClock from '@/hooks/use-live-clock';
+import { WEEK_KOR } from '@/constants/week';
 import SummaryCard from '@/components/pages/dashboard/SummaryCard';
 import { mockCommissionSummary, mockRecentCommissions } from '@/mock/dashboard';
 import RevenueSliderCard from '@/components/pages/dashboard/RevenueSliderCard';
@@ -74,7 +75,7 @@ const Dashboard = () => {
   const clock = useLiveClock();
 
   const getGreeting = () => {
-    const h = clock.getHours();
+    const h = clock.hour();
     if (h < 6)  return '🌙 Good Night';
     if (h < 12) return '☀️ Good Morning';
     if (h < 18) return '🌤️ Good Evening';
@@ -111,10 +112,10 @@ const Dashboard = () => {
         {/* Right: Clock */}
         <div className='hidden md:block shrink-0 text-right'>
           <p className='text-4xl font-bold tabular-nums tracking-tight' style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}>
-            {clock.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false })}
+            {clock.format('HH:mm')}
           </p>
           <p className='text-xs text-muted-foreground mt-1'>
-            {clock.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' })}
+            {`${clock.month() + 1}월 ${clock.date()}일 (${WEEK_KOR[clock.day()]})`}
           </p>
         </div>
       </div>

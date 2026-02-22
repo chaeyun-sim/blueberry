@@ -1,4 +1,5 @@
 import { useState } from "react";
+import dayjs from "dayjs";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
@@ -30,11 +31,9 @@ const mockCommissions: CalendarCommission[] = [
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
 
 const getDateColorClass = (deadline: string) => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const deadlineDate = new Date(deadline);
-  deadlineDate.setHours(0, 0, 0, 0);
-  if (deadlineDate < today) {
+  const today = dayjs().startOf('day');
+  const deadlineDate = dayjs(deadline);
+  if (deadlineDate.isBefore(today)) {
     // Past: purple
     return "bg-[hsl(var(--status-delivered)/0.12)] text-[hsl(var(--status-delivered))] border-[hsl(var(--status-delivered)/0.25)]";
   }
@@ -44,18 +43,18 @@ const getDateColorClass = (deadline: string) => {
 
 export default function CalendarView() {
   const navigate = useNavigate();
-  const today = new Date();
-  const [currentDate, setCurrentDate] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
+  const today = dayjs();
+  const [currentDate, setCurrentDate] = useState(dayjs().startOf('month'));
 
-  const year = currentDate.getFullYear();
-  const month = currentDate.getMonth();
+  const year = currentDate.year();
+  const month = currentDate.month();
 
-  const firstDay = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const prevMonthDays = new Date(year, month, 0).getDate();
+  const firstDay = dayjs().year(year).month(month).date(1).day();
+  const daysInMonth = dayjs().year(year).month(month).daysInMonth();
+  const prevMonthDays = dayjs().year(year).month(month - 1).daysInMonth();
 
   const goTo = (offset: number) =>
-    setCurrentDate(new Date(year, month + offset, 1));
+    setCurrentDate(currentDate.add(offset, 'month').startOf('month'));
 
   const getCommissionsForDate = (dateStr: string) =>
     mockCommissions.filter((c) => c.deadline === dateStr);
@@ -67,7 +66,7 @@ export default function CalendarView() {
   };
 
   const isToday = (d: number) => {
-    return year === today.getFullYear() && month === today.getMonth() && d === today.getDate();
+    return year === today.year() && month === today.month() && d === today.date();
   };
 
   // Build calendar grid
@@ -87,8 +86,8 @@ export default function CalendarView() {
 
   // Stats
   const monthCommissions = mockCommissions.filter((c) => {
-    const d = new Date(c.deadline);
-    return d.getFullYear() === year && d.getMonth() === month;
+    const d = dayjs(c.deadline);
+    return d.year() === year && d.month() === month;
   });
 
   return (
@@ -108,7 +107,7 @@ export default function CalendarView() {
           <ChevronRight className="h-4 w-4" />
         </Button>
         </div>
-        <Button variant="ghost" size="sm" className="hover:bg-foreground/5" onClick={() => setCurrentDate(new Date(today.getFullYear(), today.getMonth(), 1))}>
+        <Button variant="ghost" size="sm" className="hover:bg-foreground/5" onClick={() => setCurrentDate(dayjs().startOf('month'))}>
           오늘
         </Button>
       </div>
