@@ -352,9 +352,9 @@ const CommissionRegister = () => {
               <div className='space-y-2'>
                 <Label htmlFor='version'>버전</Label>
                 <Select
-                  value={form.version}
+                  value={form.version ?? 'normal'}
                   onValueChange={value =>
-                    setForm(prev => ({ ...prev, version: value as DifficultyLevelType }))
+                    setForm(prev => ({ ...prev, version: value === 'normal' ? null : value as DifficultyLevelType }))
                   }
                   disabled={isAnalyzing || isSubmitting}
                 >

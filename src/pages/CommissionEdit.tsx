@@ -13,14 +13,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { ArrowLeft, Calendar, Plus, Undo2, X } from 'lucide-react';
+import { ArrowLeft, Calendar, Plus, X } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import { ALL_INSTRUMENTS } from '@/constants/instruments';
 import { COMMISSION_STATUS_TRANSLATE } from '@/constants/translate';
 import { CommissionStatus } from '@/components/StatusBadge';
 import { commissionQueries } from '@/api/commission/queries';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { commissionKeys } from '@/api/commission/queryKeys';
 import { commissionMutations } from '@/api/commission/mutations';
 import { DifficultyLevelType } from '@/types/commission';
 
@@ -37,8 +38,10 @@ const CommissionEdit = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const dateInputRef = useRef<HTMLInputElement>(null);
+  const queryClient = useQueryClient();
 
-  const { data: commission } = useQuery(commissionQueries.getCommission(id))
+  const { data: commission, isLoading } = useQuery(commissionQueries.getCommission(id))
+
 
   const [form, setForm] = useState<EditForm>({
     instruments: commission?.arrangement ? commission.arrangement.split(', ') : [],
@@ -52,7 +55,6 @@ const CommissionEdit = () => {
   const commissionStatuses = Object.keys(COMMISSION_STATUS_TRANSLATE) as CommissionStatus[];
   const currentStatusIndex = commissionStatuses.findIndex(s => s === commission?.status);
   const prevStatus = currentStatusIndex > 0 ? commissionStatuses[currentStatusIndex - 1] : null;
-  const prevStatusLabel = prevStatus ? COMMISSION_STATUS_TRANSLATE[prevStatus] : null;
 
   useEffect(() => {
     if (!commission) return
@@ -127,6 +129,9 @@ const CommissionEdit = () => {
       },
     }, {
       onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: commissionKeys.detail(id) });
+        queryClient.invalidateQueries({ queryKey: commissionKeys.list() });
+        setIsSubmitting(false);
         toast({ title: '의뢰가 수정되었습니다.' });
         navigate(-1);
       },
@@ -136,6 +141,13 @@ const CommissionEdit = () => {
       }
     })
   };
+
+  if (!id) {
+    navigate('/commissions');
+    return null;
+  }
+
+  if (isLoading || !commission) return null
 
   return (
     <AppLayout
@@ -270,9 +282,9 @@ const CommissionEdit = () => {
             <div className='space-y-2'>
               <Label>버전</Label>
               <Select
-                value={form.version || 'normal'}
+                value={form.version ?? 'normal'}
                 onValueChange={value =>
-                  setForm(prev => ({ ...prev, version: value as DifficultyLevelType }))
+                  setForm(prev => ({ ...prev, version: value === 'normal' ? null : value as DifficultyLevelType }))
                 }
                 disabled={isSubmitting}
               >

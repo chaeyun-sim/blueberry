@@ -113,7 +113,7 @@ const CommissionList = () => {
                     <TableCell className='font-medium truncate'>{item.title}</TableCell>
                     <TableCell className='text-foreground truncate'>{item.composer}</TableCell>
                     <TableCell className='text-foreground'>
-                      {item.arrangement.split(', ').map(abbreviateInstrument).join(', ')}
+                      {(item.arrangement ?? '').split(', ').map(abbreviateInstrument).join(', ')}
                     </TableCell>
                     <TableCell>
                       {item.version ? (

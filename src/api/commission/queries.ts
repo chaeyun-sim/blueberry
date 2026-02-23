@@ -8,7 +8,7 @@ export const commissionQueries = {
 		queryFn: getCommissions,
 	}),
 	getCommission: (commissionId: string) => queryOptions({
-		queryKey: ['commission', commissionId],
+		queryKey: commissionKeys.detail(commissionId),
 		queryFn: () => getCommission(commissionId),
 		enabled: !!commissionId,
 	}),
