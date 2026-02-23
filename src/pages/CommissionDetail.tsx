@@ -13,8 +13,10 @@ import { CompleteDialog } from '@/components/pages/commission/CompleteDialog';
 import { toast } from '@/hooks/use-toast';
 import CommissionImageDialog from '@/components/pages/commission/CommissionImageDialog';
 import { CommissionStatus } from '@/components/StatusBadge';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { commissionQueries } from '@/api/commission/queries';
+import { commissionMutations } from '@/api/commission/mutations';
+import { commissionKeys } from '@/api/commission/queryKeys';
 import DeleteCommissionDialog from '@/components/pages/commission/DeleteCommissionDialog';
 
 const commissionInfo = {
@@ -36,7 +38,9 @@ const CommissionDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
+  const queryClient = useQueryClient()
   const { data: commission } = useQuery(commissionQueries.getCommission(id))
+  const { mutate: updateStatus } = useMutation(commissionMutations.updateCommissionStatus())
 
   const commissionStatuses = Object.keys(COMMISSION_STATUS_TRANSLATE);
   const currentStatusIndex = commissionStatuses.findIndex(status => status === commission?.status);
@@ -52,14 +56,17 @@ const CommissionDetail = () => {
     delivered: '의뢰인에게 전달되었습니다.',
   };
 
-  const handleTransitionConfirm = (file?: File) => {
-    // TODO: 실제 상태 전환 API 연동
-    toast({ title: toastMessages[nextStatus as CommissionStatus] ?? '상태가 변경되었습니다.' });
-  };
-
-  const handleReject = () => {
-    // TODO: 작업 거부 로직 구현
-    toast({ title: '작업 거부되었습니다.' })
+  const handleTransitionConfirm = () => {
+    if (!nextStatus) return
+    updateStatus({ commissionId: id, status: nextStatus as CommissionStatus }, {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: commissionKeys.detail(id) })
+        toast({ title: toastMessages[nextStatus as CommissionStatus] ?? '상태가 변경되었습니다.' })
+      },
+      onError: (e) => {
+        toast({ title: '상태 변경에 실패했습니다.', description: e.message })
+      },
+    })
   };
 
   const handleOpenDialog = () => {
@@ -70,7 +77,6 @@ const CommissionDetail = () => {
             {...overlayProps}
             fromStatus={commission?.status}
             toStatus={nextStatus as CommissionStatus}
-            onReject={handleReject}
             onConfirm={handleTransitionConfirm}
           />
         ),
