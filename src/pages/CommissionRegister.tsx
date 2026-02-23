@@ -18,6 +18,7 @@ import { Sparkles, ImageIcon, X, Plus, ArrowLeft, Calendar } from 'lucide-react'
 import { useNavigate } from 'react-router-dom';
 import { ALL_INSTRUMENTS } from '@/constants/instruments';
 import { analyzeCommissionImage } from '@/api/commission';
+import { createSong, findSongByTitle } from '@/api/score';
 import { mockComposerSuggestions, mockSongSuggestions } from '@/mock/commission';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { commissionMutations } from '@/api/commission/mutations';
@@ -90,7 +91,7 @@ const CommissionRegister = () => {
         ...prev,
         songTitle: result.songTitle ?? '',
         composer: result.composer ?? '',
-        instruments: result.instruments ?? [],
+        instruments: buildInstrumentList(result.instruments ?? []),
         version: result.version ?? null,
         deadline: result.deadline ?? '',
         notes: result.notes ?? '',
@@ -102,23 +103,29 @@ const CommissionRegister = () => {
     }
   };
 
-  const handleAddInstrument = (name: string) => {
-    const sameBase = form.instruments.filter(i => i.startsWith(name));
-    if (sameBase.length === 0) {
-      setForm(prev => ({ ...prev, instruments: [...prev.instruments, name] }));
-    } else if (sameBase.length === 1 && !sameBase[0].includes(' ')) {
-      setForm(prev => ({
-        ...prev,
-        instruments: [...prev.instruments.map(i => (i === name ? `${name} I` : i)), `${name} II`],
-      }));
-    } else {
-      const nextNum = sameBase.length + 1;
-      const roman = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
-      setForm(prev => ({
-        ...prev,
-        instruments: [...prev.instruments, `${name} ${roman[nextNum - 1] || nextNum}`],
-      }));
+  const hasRomanSuffix = (name: string) => /\s+(I{1,3}V?|IV|VI{0,3}|V)$/.test(name);
+
+  const buildInstrumentList = (names: string[]) => {
+    const result: string[] = [];
+    const roman = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
+    for (const name of names) {
+      const sameBase = result.filter(i => i === name || i.startsWith(name + ' '));
+      if (sameBase.length === 0) {
+        result.push(name);
+      } else if (sameBase.length === 1 && !hasRomanSuffix(sameBase[0])) {
+        const idx = result.indexOf(name);
+        result[idx] = `${name} I`;
+        result.push(`${name} II`);
+      } else {
+        const nextNum = sameBase.length + 1;
+        result.push(`${name} ${roman[nextNum - 1] || nextNum}`);
+      }
     }
+    return result;
+  };
+
+  const handleAddInstrument = (name: string) => {
+    setForm(prev => ({ ...prev, instruments: buildInstrumentList([...prev.instruments, name]) }));
     setInstrumentInput('');
     setShowInstrumentDropdown(false);
   };
@@ -128,8 +135,8 @@ const CommissionRegister = () => {
     const baseName = removed.replace(/ (I{1,3}V?|IV|V|VI{0,3})$/, '');
     const remaining = form.instruments.filter((_, i) => i !== index);
 
-    const sameBase = remaining.filter(i => i.startsWith(baseName));
-    if (sameBase.length === 1 && sameBase[0].includes(' ')) {
+    const sameBase = remaining.filter(i => i === baseName || i.startsWith(baseName + ' '));
+    if (sameBase.length === 1 && hasRomanSuffix(sameBase[0])) {
       setForm(prev => ({
         ...prev,
         instruments: remaining.map(i => (i.startsWith(baseName) ? baseName : i)),
@@ -143,41 +150,51 @@ const CommissionRegister = () => {
     opt.toLowerCase().includes(instrumentInput.toLowerCase()),
   );
 
-  const { mutate: createCommission } = useMutation(commissionMutations.createCommission())
+  const { mutateAsync: createCommission } = useMutation(commissionMutations.createCommission())
   const { mutateAsync: uploadCommissionImage } = useMutation(commissionMutations.uploadCommissionImage())
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setIsSubmitting(true);
-    // TODO: song list 확인하고 곡이 등록되어있다면 song_id 사용
-    createCommission({
-      title: form.songTitle,
-      composer: form.composer,
-      arrangement: form.instruments.join(', '),
-      deadline: form.deadline,
-      notes: form.notes,
-      version: form.version as DifficultyLevelType,
-    }, {
-      onSuccess: async (res) => {
-        if (imageFile) {
-          try {
-            await uploadCommissionImage({ commissionId: res?.id, file: imageFile })
-          } catch {
-            toast.error('이미지 업로드에 실패했습니다.', {
-              description: '의뢰는 등록되었지만 이미지를 첨부하지 못했습니다.',
-            })
-          }
+    try {
+      let songId: string | undefined;
+
+      if (form.songTitle) {
+        const existing = await findSongByTitle(form.songTitle);
+        if (existing) {
+          songId = existing.id;
+        } else {
+          const newSong = await createSong({ title: form.songTitle, composer: form.composer });
+          songId = newSong.id;
         }
-        queryClient.invalidateQueries({ queryKey: commissionKeys.list() })
-        setIsSubmitting(false)
-        navigate(`/commissions/${res?.id}`)
-      },
-      onError: (e) => {
-        setIsSubmitting(false)
-        toast.error('의뢰 등록에 실패했습니다.', {
-          description: e.message
-        })
       }
-    })
+
+      const res = await createCommission({
+        song_id: songId,
+        title: songId ? undefined : form.songTitle,
+        composer: songId ? undefined : form.composer,
+        arrangement: form.instruments.join(', '),
+        deadline: form.deadline,
+        notes: form.notes,
+        version: form.version as DifficultyLevelType,
+      });
+
+      if (imageFile) {
+        try {
+          await uploadCommissionImage({ commissionId: res?.id, file: imageFile });
+        } catch {
+          toast.error('이미지 업로드에 실패했습니다.', {
+            description: '의뢰는 등록되었지만 이미지를 첨부하지 못했습니다.',
+          });
+        }
+      }
+
+      queryClient.invalidateQueries({ queryKey: commissionKeys.list() });
+      navigate(`/commissions/${res?.id}`);
+    } catch (e) {
+      toast.error('의뢰 등록에 실패했습니다.', { description: (e as Error).message });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
