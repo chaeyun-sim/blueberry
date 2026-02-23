@@ -55,10 +55,16 @@ const CommissionEdit = () => {
   const prevStatusLabel = prevStatus ? COMMISSION_STATUS_TRANSLATE[prevStatus] : null;
 
   useEffect(() => {
-    if (prevStatusLabel) {
-      setForm(prev => ({ ...prev, status: prevStatusLabel as CommissionStatus }));
-    }
-  }, [prevStatusLabel])
+    if (!commission) return
+    setForm({
+      composer: commission.composer ?? '',
+      instruments: commission.arrangement ? commission.arrangement.split(', ') : [],
+      version: commission.version ?? null,
+      deadline: commission.deadline ?? '',
+      notes: commission.notes ?? '',
+      status: commission.status,
+    })
+  }, [commission])
 
   const [instrumentInput, setInstrumentInput] = useState('');
   const [showInstrumentDropdown, setShowInstrumentDropdown] = useState(false);

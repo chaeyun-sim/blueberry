@@ -61,6 +61,7 @@ const CommissionDetail = () => {
     updateStatus({ commissionId: id, status: nextStatus as CommissionStatus }, {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: commissionKeys.detail(id) })
+        queryClient.invalidateQueries({ queryKey: commissionKeys.list() })
         toast({ title: toastMessages[nextStatus as CommissionStatus] ?? '상태가 변경되었습니다.' })
       },
       onError: (e) => {
