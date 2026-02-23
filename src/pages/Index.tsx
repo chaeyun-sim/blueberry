@@ -205,7 +205,7 @@ const Dashboard = () => {
                       </div>
                       <div className='flex items-center gap-2'>
                         <StatusBadge status={c.status} />
-                        <span className='text-[10px] text-muted-foreground'>{dayjs(c.deadline).format('MM/DD')} 마감</span>
+                        <span className='text-[10px] text-muted-foreground'>{c.deadline ? `${dayjs(c.deadline).format('MM/DD')} 마감` : '-'}</span>
                       </div>
                     </div>
                   ))
