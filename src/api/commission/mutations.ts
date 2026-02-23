@@ -1,6 +1,7 @@
 import { mutationOptions } from '@tanstack/react-query';
-import { createCommission, deleteCommission, updateCommission, uploadCommissionImage } from '.';
+import { createCommission, deleteCommission, updateCommission, updateCommissionStatus, uploadCommissionImage } from '.';
 import { CreateCommissionInput, UpdateCommissionInput } from '@/types/commission';
+import { CommissionStatus } from '@/components/StatusBadge';
 
 export const commissionMutations = {
   createCommission: () =>
@@ -25,5 +26,10 @@ export const commissionMutations = {
     mutationOptions({
       mutationFn: ({ commissionId, file }: { commissionId: string; file: File }) =>
         uploadCommissionImage(commissionId, file),
+    }),
+  updateCommissionStatus: () =>
+    mutationOptions({
+      mutationFn: ({ commissionId, status }: { commissionId: string; status: CommissionStatus }) =>
+        updateCommissionStatus(commissionId, status),
     }),
 };
