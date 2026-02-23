@@ -5,28 +5,10 @@ import { PageHeader } from "@/components/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Star } from "lucide-react";
-import { CommissionStatus } from "@/components/StatusBadge";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-
-interface CalendarCommission {
-  id: string;
-  title: string;
-  arrangement: string;
-  deadline: string;
-  status: CommissionStatus;
-}
-
-const mockCommissions: CalendarCommission[] = [
-  { id: "1", title: "Canon in D", arrangement: "현악 4중주", deadline: "2026-02-21", status: "working" },
-  { id: "2", title: "River Flows in You", arrangement: "피아노 솔로", deadline: "2026-02-23", status: "working" },
-  { id: "3", title: "Spring Waltz", arrangement: "플룻 듀엣", deadline: "2026-02-19", status: "received" },
-  { id: "4", title: "A Thousand Years", arrangement: "현악 5중주", deadline: "2026-02-28", status: "working" },
-  { id: "5", title: "Butterfly", arrangement: "클라리넷 트리오", deadline: "2026-03-05", status: "received" },
-  { id: "6", title: "Wedding March", arrangement: "브라스 앙상블", deadline: "2026-03-12", status: "complete" },
-  { id: "7", title: "Moonlight Sonata", arrangement: "피아노 솔로", deadline: "2026-02-25", status: "received" },
-  { id: "8", title: "Ave Maria", arrangement: "소프라노 + 현악", deadline: "2026-02-21", status: "delivered" },
-];
+import { useQuery } from "@tanstack/react-query";
+import { commissionQueries } from "@/api/commission/queries";
 
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
 
@@ -46,6 +28,8 @@ export default function CalendarView() {
   const today = dayjs();
   const [currentDate, setCurrentDate] = useState(dayjs().startOf('month'));
 
+  const { data: commissions = [] } = useQuery(commissionQueries.getCommissions());
+
   const year = currentDate.year();
   const month = currentDate.month();
 
@@ -57,7 +41,7 @@ export default function CalendarView() {
     setCurrentDate(currentDate.add(offset, 'month').startOf('month'));
 
   const getCommissionsForDate = (dateStr: string) =>
-    mockCommissions.filter((c) => c.deadline === dateStr);
+    commissions.filter((c) => c.deadline === dateStr);
 
   const formatDate = (d: number) => {
     const m = String(month + 1).padStart(2, "0");
@@ -85,7 +69,7 @@ export default function CalendarView() {
   }
 
   // Stats
-  const monthCommissions = mockCommissions.filter((c) => {
+  const monthCommissions = commissions.filter((c) => {
     const d = dayjs(c.deadline);
     return d.year() === year && d.month() === month;
   });
@@ -179,9 +163,9 @@ export default function CalendarView() {
                           getDateColorClass(c.deadline)
                         )}
                         onClick={() => navigate(`/commissions/${c.id}`)}
-                        title={`${c.title} — ${c.arrangement}`}
+                        title={`${c.songs?.title ?? c.title} — ${c.arrangement}`}
                       >
-                        {c.title}
+                        {c.songs?.title ?? c.title}
                       </div>
                     ))}
                     {commissions.length > 3 && (

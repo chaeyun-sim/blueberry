@@ -1,24 +1,28 @@
 import { AppLayout } from '@/components/layout/AppLayout';
-import { StatusBadge, CommissionStatus } from '@/components/StatusBadge';
+import { StatusBadge } from '@/components/StatusBadge';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   ClipboardList,
-  Clock,
   Truck,
+  CheckCircle,
   CheckCircle2,
   History,
   DollarSign,
   Music,
+  Music2,
+  Package2,
   Sun,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import useLiveClock from '@/hooks/use-live-clock';
 import { WEEK_KOR } from '@/constants/week';
 import SummaryCard from '@/components/pages/dashboard/SummaryCard';
-import { mockCommissionSummary, mockRecentCommissions } from '@/mock/dashboard';
 import RevenueSliderCard from '@/components/pages/dashboard/RevenueSliderCard';
 import CommissionSummaryBar from '@/components/pages/dashboard/CommissionSummaryBar';
 import MonthlyChart from '@/components/pages/dashboard/MonthlyChart';
+import { useQuery } from '@tanstack/react-query';
+import { commissionQueries } from '@/api/commission/queries';
+import dayjs from 'dayjs';
 
 const summary = [{
   icon: Music,
@@ -42,37 +46,32 @@ const summary = [{
   colorStatus: 'warning',
 }];
 
-const workStatus = [
-  {
-    label: '접수',
-    count: mockCommissionSummary.received,
-    status: 'received' as CommissionStatus,
-    icon: ClipboardList,
-  },
-  {
-    label: '작업중',
-    count: mockCommissionSummary.working,
-    status: 'working' as CommissionStatus,
-    icon: Clock,
-  },
-  {
-    label: '완료',
-    count: mockCommissionSummary.complete,
-    status: 'complete' as CommissionStatus,
-    icon: CheckCircle2,
-  },
-  {
-    label: '전달',
-    count: mockCommissionSummary.delivered,
-    status: 'delivered' as CommissionStatus,
-    icon: Truck,
-  },
-];
-
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const clock = useLiveClock();
+
+  const { data: commissions = [], isLoading, isError } = useQuery(commissionQueries.getCommissions());
+
+  const thisMonthCommissions = commissions.filter(c =>
+    dayjs(c.created_at).isSame(dayjs(), 'month')
+  );
+
+  const counts = thisMonthCommissions.reduce(
+    (acc, c) => { acc[c.status] = (acc[c.status] ?? 0) + 1; return acc; },
+    {} as Record<string, number>
+  );
+
+  const workStatusConfig = {
+    received: { label: '접수', icon: Package2, summary: counts.received ?? 0 },
+    working: { label: '작업중', icon: Music2, summary: counts.working ?? 0 },
+    complete: { label: '완료', icon: CheckCircle, summary: counts.complete ?? 0 },
+    delivered: { label: '전달', icon: Truck, summary: counts.delivered ?? 0 },
+  };
+
+  const recentCommissions = [...commissions]
+    .sort((a, b) => dayjs(b.created_at).valueOf() - dayjs(a.created_at).valueOf())
+    .slice(0, 5);
 
   const getGreeting = () => {
     const h = clock.hour();
@@ -82,7 +81,7 @@ const Dashboard = () => {
     return '🌙 Good Night';
   };
 
-  const total = Object.values(mockCommissionSummary).reduce((acc, curr) => acc + curr, 0);
+  const total = Object.values(workStatusConfig).reduce((acc, { summary }) => acc + summary, 0);
 
   return (
     <AppLayout>
@@ -100,11 +99,11 @@ const Dashboard = () => {
             </span>
             <span className='flex items-center gap-1.5'>
               <Music className='h-3.5 w-3.5' />
-              진행 중인 의뢰 <strong className='text-foreground ml-0.5'>{mockCommissionSummary.working}건</strong>
+              진행 중인 의뢰 <strong className='text-foreground ml-0.5'>{workStatusConfig.working.summary}건</strong>
             </span>
             <span className='flex items-center gap-1.5'>
               <History className='h-3.5 w-3.5 text-[hsl(var(--success))]' />
-              최근 업데이트 <strong className='text-foreground ml-0.5'>{mockRecentCommissions.length}건</strong>
+              최근 업데이트 <strong className='text-foreground ml-0.5'>{recentCommissions.length}건</strong>
             </span>
           </div>
         </div>
@@ -143,27 +142,27 @@ const Dashboard = () => {
                   이번 달 의뢰 요약
                 </h3>
                 <div className='grid grid-cols-4 gap-2'>
-                  {workStatus.map(item => (
+                  {Object.entries(workStatusConfig).map(([key, item]) => (
                     <button
-                      key={item.status}
+                      key={key}
                       className='flex flex-col items-center p-3 rounded-2xl bg-background/60 hover:bg-background/90 cursor-pointer transition-colors'
-                      onClick={() => navigate(`/commissions?status=${item.status}`)}
+                      onClick={() => navigate(`/commissions?status=${key}`)}
                     >
                       <item.icon
                         className='h-4 w-4 mb-1.5'
-                        style={{ color: `hsl(var(--status-${item.status}))` }}
+                        style={{ color: `hsl(var(--status-${key}))` }}
                       />
-                      <p className='text-xl font-display font-bold'>{item.count}</p>
+                      <p className='text-xl font-display font-bold'>{isLoading ? '-' : item.summary}</p>
                       <p className='text-[10px] text-muted-foreground'>{item.label}</p>
                     </button>
                   ))}
                 </div>
                 <div className='flex h-2.5 rounded-full overflow-hidden mt-4'>
-                  {Object.entries(mockCommissionSummary).map(([key, value]) => (
+                  {Object.entries(workStatusConfig).map(([key, { summary }]) => (
                     <CommissionSummaryBar
                       key={key}
                       status={key}
-                      value={value}
+                      value={summary}
                       maxValue={total}
                     />
                   ))}
@@ -185,22 +184,32 @@ const Dashboard = () => {
                 </div>
               </div>
               <div className='space-y-2 flex-1'>
-                {mockRecentCommissions.map(c => (
-                  <div
-                    key={c.id}
-                    className='flex items-center justify-between p-3.5 rounded-2xl bg-muted/30 cursor-pointer hover:bg-muted/60 transition-colors'
-                    onClick={() => navigate(`/commissions/${c.id}`)}
-                  >
-                    <div>
-                      <p className='font-semibold text-sm'>{c.title}</p>
-                      <p className='text-xs text-muted-foreground mt-0.5'>{c.arrangement}</p>
+                {isError ? (
+                  <p className='text-sm text-muted-foreground text-center py-6'>데이터를 불러오지 못했습니다.</p>
+                ) : isLoading ? (
+                  [0, 1, 2].map(i => (
+                    <div key={i} className='h-[58px] rounded-2xl bg-muted/30 animate-pulse' />
+                  ))
+                ) : recentCommissions.length === 0 ? (
+                  <p className='text-sm text-muted-foreground text-center py-6'>최근 의뢰가 없습니다.</p>
+                ) : (
+                  recentCommissions.map(c => (
+                    <div
+                      key={c.id}
+                      className='flex items-center justify-between p-3.5 rounded-2xl bg-muted/30 cursor-pointer hover:bg-muted/60 transition-colors'
+                      onClick={() => navigate(`/commissions/${c.id}`)}
+                    >
+                      <div>
+                        <p className='font-semibold text-sm'>{c.songs?.title ?? c.title}</p>
+                        <p className='text-xs text-muted-foreground mt-0.5'>{c.arrangement}</p>
+                      </div>
+                      <div className='flex items-center gap-2'>
+                        <StatusBadge status={c.status} />
+                        <span className='text-[10px] text-muted-foreground'>{c.deadline ? `${dayjs(c.deadline).format('MM/DD')} 마감` : '-'}</span>
+                      </div>
                     </div>
-                    <div className='flex items-center gap-2'>
-                      <StatusBadge status={c.status} />
-                      <span className='text-[10px] text-muted-foreground'>{c.updatedAt}</span>
-                    </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </CardContent>
           </Card>

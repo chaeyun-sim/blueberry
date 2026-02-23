@@ -26,6 +26,7 @@ import { commissionMutations } from '@/api/commission/mutations';
 import { DifficultyLevelType } from '@/types/commission';
 
 interface EditForm {
+  title: string;
   composer: string;
   instruments: string[];
   version: DifficultyLevelType;
@@ -44,6 +45,7 @@ const CommissionEdit = () => {
 
 
   const [form, setForm] = useState<EditForm>({
+    title: commission?.title ?? '',
     instruments: commission?.arrangement ? commission.arrangement.split(', ') : [],
     version: commission?.version ?? null,
     deadline: commission?.deadline ?? '',
@@ -59,6 +61,7 @@ const CommissionEdit = () => {
   useEffect(() => {
     if (!commission) return
     setForm({
+      title: commission.title ?? '',
       composer: commission.composer ?? '',
       instruments: commission.arrangement ? commission.arrangement.split(', ') : [],
       version: commission.version ?? null,
@@ -120,6 +123,7 @@ const CommissionEdit = () => {
     updateCommission({
       commissionId: id,
       input: {
+        title: form.title,
         arrangement: form.instruments.join(', '),
         version: form.version,
         deadline: form.deadline,
@@ -184,6 +188,16 @@ const CommissionEdit = () => {
         <CardContent className='p-5'>
           <h2 className='font-display font-semibold mb-4'>의뢰 정보</h2>
           <div className='space-y-5'>
+
+            <div className='space-y-2'>
+              <Label>곡명</Label>
+              <Input
+                placeholder='곡명을 입력하세요'
+                value={form.title}
+                onChange={e => setForm(prev => ({ ...prev, title: e.target.value }))}
+                disabled={isSubmitting}
+              />
+            </div>
 
             <div className='space-y-2'>
               <Label>현재 상태</Label>
