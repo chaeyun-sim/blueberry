@@ -415,7 +415,7 @@ const CommissionRegister = () => {
               <div className='flex pt-2'>
                 <Button
                   className='flex-1'
-                  disabled={isSubmitting || !form.imagePreview}
+                  disabled={isSubmitting || isAnalyzing || !form.imagePreview}
                   onClick={handleSubmit}
                 >
                   {isSubmitting ? '등록 중...' : '의뢰 등록'}
