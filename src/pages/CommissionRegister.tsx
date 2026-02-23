@@ -17,14 +17,20 @@ import {
 import { Sparkles, ImageIcon, X, Plus, ArrowLeft, Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { ALL_INSTRUMENTS } from '@/constants/instruments';
+import { analyzeCommissionImage } from '@/api/commission';
 import { mockComposerSuggestions, mockSongSuggestions } from '@/mock/commission';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { commissionMutations } from '@/api/commission/mutations';
+import { DifficultyLevelType } from '@/types/commission';
+import { commissionKeys } from '@/api/commission/queryKeys';
+import { toast } from 'sonner';
 
 interface Form {
   imagePreview: string | null;
   instruments: string[];
   songTitle: string;
   composer: string;
-  version: string | null;
+  version: DifficultyLevelType | null;
   deadline: string;
   notes?: string;
 }
@@ -34,16 +40,19 @@ const CommissionRegister = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dateInputRef = useRef<HTMLInputElement>(null);
 
+  const queryClient = useQueryClient();
+
   const [form, setForm] = useState<Form>({
     imagePreview: null,
     instruments: [],
     songTitle: '',
     composer: '',
-    version: '',
+    version: null,
     deadline: '',
     notes: '',
   });
 
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [instrumentInput, setInstrumentInput] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showInstrumentDropdown, setShowInstrumentDropdown] = useState(false);
@@ -53,7 +62,10 @@ const CommissionRegister = () => {
   const loadImageFile = (file: File) => {
     if (!file.type.startsWith('image/')) return;
     const reader = new FileReader();
-    reader.onload = e => setForm(prev => ({ ...prev, imagePreview: e.target?.result as string }));
+    reader.onload = e => {
+      setForm(prev => ({ ...prev, imagePreview: e.target?.result as string }));
+      setImageFile(file);
+    };
     reader.readAsDataURL(file);
   };
 
@@ -68,9 +80,26 @@ const CommissionRegister = () => {
     if (file) loadImageFile(file);
   };
 
-  const handleAnalyze = () => {
+  const handleAnalyze = async () => {
+    if (!form.imagePreview || !imageFile) return;
     setIsAnalyzing(true);
-    setTimeout(() => setIsAnalyzing(false), 2000);
+    try {
+      const base64 = form.imagePreview.split(',')[1];
+      const result = await analyzeCommissionImage(base64, imageFile.type);
+      setForm(prev => ({
+        ...prev,
+        songTitle: result.songTitle ?? '',
+        composer: result.composer ?? '',
+        instruments: result.instruments ?? [],
+        version: result.version ?? null,
+        deadline: result.deadline ?? '',
+        notes: result.notes ?? '',
+      }));
+    } catch (e) {
+      toast.error('AI 분석에 실패했습니다.');
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   const handleAddInstrument = (name: string) => {
@@ -114,10 +143,32 @@ const CommissionRegister = () => {
     opt.toLowerCase().includes(instrumentInput.toLowerCase()),
   );
 
+  const { mutate: createCommission } = useMutation(commissionMutations.createCommission())
+  const { mutateAsync: uploadCommissionImage } = useMutation(commissionMutations.uploadCommissionImage())
+
   const handleSubmit = () => {
     setIsSubmitting(true);
-    // TODO: 실제 등록 API 연동
-    setIsSubmitting(false);
+    // TODO: song list 확인하고 곡이 등록되어있다면 song_id 사용
+    createCommission({
+      title: form.songTitle,
+      composer: form.composer,
+      arrangement: form.instruments.join(', '),
+      deadline: form.deadline,
+      notes: form.notes,
+      version: form.version as DifficultyLevelType,
+    }, {
+      onSuccess: async (res) => {
+        if (imageFile) await uploadCommissionImage({ commissionId: res?.id, file: imageFile })
+        queryClient.invalidateQueries({ queryKey: commissionKeys.list() })
+        navigate(`/commissions/${res?.id}`)
+      },
+      onError: (e) => {
+        setIsSubmitting(false)
+        toast.error('의뢰 등록에 실패했습니다.', {
+          description: e.message
+        })
+      }
+    })
   };
 
   return (
@@ -217,21 +268,23 @@ const CommissionRegister = () => {
               <div className='space-y-2'>
                 <Label>곡명</Label>
                 <Autocomplete
+                  // TODO: song list 연결
                   value={form.songTitle}
                   onChange={value => setForm(prev => ({ ...prev, songTitle: value }))}
                   suggestions={mockSongSuggestions}
-                  inputProps={{ readOnly: isSubmitting }}
+                  inputProps={{ readOnly: isAnalyzing || isSubmitting }}
                 />
               </div>
 
               <div className='space-y-2'>
                 <Label>작곡가</Label>
                 <Autocomplete
+                  // TODO: song이 등록된 작곡가 이름 연결
                   value={form.composer}
                   onChange={value => setForm(prev => ({ ...prev, composer: value }))}
                   placeholder='작곡가를 입력하세요'
                   suggestions={mockComposerSuggestions}
-                  inputProps={{ readOnly: isSubmitting }}
+                  inputProps={{ readOnly: isAnalyzing || isSubmitting }}
                 />
               </div>
 
@@ -284,8 +337,9 @@ const CommissionRegister = () => {
                         {inst}
                         <button
                           type='button'
+                          disabled={isAnalyzing || isSubmitting}
                           onClick={() => removeInstrument(idx)}
-                          className='ml-0.5 hover:text-destructive transition-colors'
+                          className='ml-0.5 hover:text-destructive transition-colors disabled:opacity-50 disabled:pointer-events-none'
                         >
                           <X className='h-3 w-3' />
                         </button>
@@ -300,9 +354,9 @@ const CommissionRegister = () => {
                 <Select
                   value={form.version}
                   onValueChange={value =>
-                    setForm(prev => ({ ...prev, version: value === 'normal' ? null : value }))
+                    setForm(prev => ({ ...prev, version: value as DifficultyLevelType }))
                   }
-                  disabled={isSubmitting}
+                  disabled={isAnalyzing || isSubmitting}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder='버전을 선택하세요' />
@@ -326,10 +380,11 @@ const CommissionRegister = () => {
                     className='pr-9 [&::-webkit-calendar-picker-indicator]:hidden'
                     value={form.deadline}
                     onChange={e => setForm(prev => ({ ...prev, deadline: e.target.value }))}
-                    readOnly={isSubmitting}
+                    readOnly={isAnalyzing || isSubmitting}
                   />
                   <button
                     type='button'
+                    disabled={isAnalyzing || isSubmitting}
                     onClick={() => dateInputRef.current?.showPicker()}
                     className='absolute right-0 top-0 bottom-0 px-3 flex items-center text-muted-foreground hover:text-foreground transition-colors'
                   >
@@ -351,10 +406,10 @@ const CommissionRegister = () => {
               <div className='flex pt-2'>
                 <Button
                   className='flex-1'
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || !form.imagePreview}
                   onClick={handleSubmit}
                 >
-                  의뢰 등록
+                  {isSubmitting ? '등록 중...' : '의뢰 등록'}
                 </Button>
               </div>
             </div>
