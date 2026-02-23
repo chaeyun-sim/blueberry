@@ -10,7 +10,7 @@ const NotFound = () => {
     <div className='flex min-h-screen flex-col items-center justify-center gap-6'>
       <div className='text-center'>
         <div>
-          <img src={sobbingImg} className='h-[40px] mx-auto' />
+          <img src={sobbingImg} alt='' className='h-[40px] mx-auto' />
           <p className='-mt-[54px] text-[120px] font-bold text-primary/20 font-display'>404</p>
         </div>
         <h1 className='mt-2 text-xl font-semibold font-display'>페이지를 찾을 수 없어요</h1>
