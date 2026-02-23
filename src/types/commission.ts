@@ -32,6 +32,7 @@ export type CreateCommissionInput = {
 }
 
 export type UpdateCommissionInput = {
+  title?: string
   composer?: string
   arrangement?: string
   version?: DifficultyLevelType

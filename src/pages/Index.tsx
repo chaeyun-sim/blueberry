@@ -3,22 +3,26 @@ import { StatusBadge, CommissionStatus } from '@/components/StatusBadge';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   ClipboardList,
-  Clock,
   Truck,
+  CheckCircle,
   CheckCircle2,
   History,
   DollarSign,
   Music,
+  Music2,
+  Package2,
   Sun,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import useLiveClock from '@/hooks/use-live-clock';
 import { WEEK_KOR } from '@/constants/week';
 import SummaryCard from '@/components/pages/dashboard/SummaryCard';
-import { mockCommissionSummary, mockRecentCommissions } from '@/mock/dashboard';
 import RevenueSliderCard from '@/components/pages/dashboard/RevenueSliderCard';
 import CommissionSummaryBar from '@/components/pages/dashboard/CommissionSummaryBar';
 import MonthlyChart from '@/components/pages/dashboard/MonthlyChart';
+import { useQuery } from '@tanstack/react-query';
+import { commissionQueries } from '@/api/commission/queries';
+import dayjs from 'dayjs';
 
 const summary = [{
   icon: Music,
@@ -42,37 +46,34 @@ const summary = [{
   colorStatus: 'warning',
 }];
 
-const workStatus = [
-  {
-    label: '접수',
-    count: mockCommissionSummary.received,
-    status: 'received' as CommissionStatus,
-    icon: ClipboardList,
-  },
-  {
-    label: '작업중',
-    count: mockCommissionSummary.working,
-    status: 'working' as CommissionStatus,
-    icon: Clock,
-  },
-  {
-    label: '완료',
-    count: mockCommissionSummary.complete,
-    status: 'complete' as CommissionStatus,
-    icon: CheckCircle2,
-  },
-  {
-    label: '전달',
-    count: mockCommissionSummary.delivered,
-    status: 'delivered' as CommissionStatus,
-    icon: Truck,
-  },
+const workStatusConfig = [
+  { label: '접수', status: 'received' as CommissionStatus, icon: Package2 },
+  { label: '작업중', status: 'working' as CommissionStatus, icon: Music2 },
+  { label: '완료', status: 'complete' as CommissionStatus, icon: CheckCircle },
+  { label: '전달', status: 'delivered' as CommissionStatus, icon: Truck },
 ];
 
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const clock = useLiveClock();
+
+  const { data: commissions = [] } = useQuery(commissionQueries.getCommissions());
+
+  const thisMonthCommissions = commissions.filter(c =>
+    dayjs(c.created_at).isSame(dayjs(), 'month')
+  );
+
+  const commissionSummary = {
+    received: thisMonthCommissions.filter(c => c.status === 'received').length,
+    working: thisMonthCommissions.filter(c => c.status === 'working').length,
+    complete: thisMonthCommissions.filter(c => c.status === 'complete').length,
+    delivered: thisMonthCommissions.filter(c => c.status === 'delivered').length,
+  };
+
+  const recentCommissions = [...commissions]
+    .sort((a, b) => dayjs(b.created_at).valueOf() - dayjs(a.created_at).valueOf())
+    .slice(0, 5);
 
   const getGreeting = () => {
     const h = clock.hour();
@@ -82,7 +83,12 @@ const Dashboard = () => {
     return '🌙 Good Night';
   };
 
-  const total = Object.values(mockCommissionSummary).reduce((acc, curr) => acc + curr, 0);
+  const workStatus = workStatusConfig.map(item => ({
+    ...item,
+    count: commissionSummary[item.status],
+  }));
+
+  const total = Object.values(commissionSummary).reduce((acc, curr) => acc + curr, 0);
 
   return (
     <AppLayout>
@@ -100,11 +106,11 @@ const Dashboard = () => {
             </span>
             <span className='flex items-center gap-1.5'>
               <Music className='h-3.5 w-3.5' />
-              진행 중인 의뢰 <strong className='text-foreground ml-0.5'>{mockCommissionSummary.working}건</strong>
+              진행 중인 의뢰 <strong className='text-foreground ml-0.5'>{commissionSummary.working}건</strong>
             </span>
             <span className='flex items-center gap-1.5'>
               <History className='h-3.5 w-3.5 text-[hsl(var(--success))]' />
-              최근 업데이트 <strong className='text-foreground ml-0.5'>{mockRecentCommissions.length}건</strong>
+              최근 업데이트 <strong className='text-foreground ml-0.5'>{recentCommissions.length}건</strong>
             </span>
           </div>
         </div>
@@ -159,7 +165,7 @@ const Dashboard = () => {
                   ))}
                 </div>
                 <div className='flex h-2.5 rounded-full overflow-hidden mt-4'>
-                  {Object.entries(mockCommissionSummary).map(([key, value]) => (
+                  {Object.entries(commissionSummary).map(([key, value]) => (
                     <CommissionSummaryBar
                       key={key}
                       status={key}
@@ -185,19 +191,19 @@ const Dashboard = () => {
                 </div>
               </div>
               <div className='space-y-2 flex-1'>
-                {mockRecentCommissions.map(c => (
+                {recentCommissions.map(c => (
                   <div
                     key={c.id}
                     className='flex items-center justify-between p-3.5 rounded-2xl bg-muted/30 cursor-pointer hover:bg-muted/60 transition-colors'
                     onClick={() => navigate(`/commissions/${c.id}`)}
                   >
                     <div>
-                      <p className='font-semibold text-sm'>{c.title}</p>
+                      <p className='font-semibold text-sm'>{c.songs?.title ?? c.title}</p>
                       <p className='text-xs text-muted-foreground mt-0.5'>{c.arrangement}</p>
                     </div>
                     <div className='flex items-center gap-2'>
                       <StatusBadge status={c.status} />
-                      <span className='text-[10px] text-muted-foreground'>{c.updatedAt}</span>
+                      <span className='text-[10px] text-muted-foreground'>{dayjs(c.created_at).format('M/D')}</span>
                     </div>
                   </div>
                 ))}
