@@ -36,7 +36,6 @@ const transitionConfigs: Record<string, TransitionConfig> = {
 interface ReceiveAndSendDialogProps extends OverlayProps {
   fromStatus: CommissionStatus;
   toStatus: CommissionStatus;
-	onReject: () => void;
 	onConfirm: () => void;
 }
 
@@ -45,7 +44,6 @@ function ReceiveAndSendDialog({
   close,
   fromStatus,
   toStatus,
-  onReject,
   onConfirm
 }: ReceiveAndSendDialogProps) {
   const config = transitionConfigs[toStatus];
@@ -54,11 +52,6 @@ function ReceiveAndSendDialog({
 
   const Icon = config.icon;
   
-  const handleReject = () => {
-    onReject()
-    close()
-  }
-
   const handleConfirm = () => {
     onConfirm()
     close()
@@ -75,12 +68,6 @@ function ReceiveAndSendDialog({
         </DialogHeader>
 
         <DialogFooter className="gap-2 sm:gap-0">
-          {fromStatus === 'received' && (
-            <Button variant="destructive" onClick={handleReject}>
-							<X className="h-4 w-4" />
-              작업 거부
-            </Button>
-          )}
           <Button onClick={handleConfirm} className="gap-2">
             {Icon && <Icon className="h-4 w-4" />}
             {config.acceptLabel}

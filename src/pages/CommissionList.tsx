@@ -14,9 +14,11 @@ import {
 } from '@/components/ui/table';
 import { Search } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { mockCommissions } from '@/mock/commission';
 import { DifficultyLevelType } from '@/types/commission';
 import { cn } from '@/lib/utils';
+import { useQuery } from '@tanstack/react-query';
+import { commissionQueries } from '@/api/commission/queries';
+import { abbreviateInstrument } from '@/constants/instruments';
 
 const tabs: { label: string; value: CommissionStatus | 'all' }[] = [
   { label: '전체', value: 'all' },
@@ -40,13 +42,15 @@ const CommissionList = () => {
   const [filter, setFilter] = useState<CommissionStatus | 'all'>(initialStatus || 'all');
   const [search, setSearch] = useState('');
 
-  const commissions = mockCommissions;
+  const { data: commissions } = useQuery(commissionQueries.getCommissions())
 
-  const filtered = commissions.filter(c => {
+  const filtered = (commissions ?? []).filter(c => {
     const matchesFilter = filter === 'all' || c.status === filter;
-    const matchesSearch = c.title.toLowerCase().includes(search.toLowerCase());
+    const title = c.songs?.title ?? c.title ?? '';
+    const matchesSearch = title.toLowerCase().includes(search.toLowerCase());
     return matchesFilter && matchesSearch;
   });
+
 
   return (
     <AppLayout>
@@ -108,7 +112,9 @@ const CommissionList = () => {
                     <TableCell className='text-foreground'>{item.deadline}</TableCell>
                     <TableCell className='font-medium truncate'>{item.title}</TableCell>
                     <TableCell className='text-foreground truncate'>{item.composer}</TableCell>
-                    <TableCell className='text-foreground'>{item.arrangement}</TableCell>
+                    <TableCell className='text-foreground'>
+                      {(item.arrangement ?? '').split(', ').map(abbreviateInstrument).join(', ')}
+                    </TableCell>
                     <TableCell>
                       {item.version ? (
                         <span className='text-xs px-2 py-1 rounded-md bg-[hsl(var(--warning)/0.12)] text-[hsl(var(--warning))] font-medium capitalize'>
@@ -133,3 +139,4 @@ const CommissionList = () => {
 };
 
 export default CommissionList;
+

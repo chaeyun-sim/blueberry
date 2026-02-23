@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import CommissionList from "./pages/CommissionList";
 import CommissionRegister from "./pages/CommissionRegister";
 import CommissionDetail from "./pages/CommissionDetail";
+import CommissionEdit from "./pages/CommissionEdit";
 import ScoreList from "./pages/ScoreList";
 import ScoreDetail from "./pages/ScoreDetail";
 import ScoreRegister from "./pages/ScoreRegister";
@@ -31,13 +32,14 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <OverlayProvider>
-          <BrowserRouter>
+        <BrowserRouter>
+          <OverlayProvider>
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/commissions" element={<CommissionList />} />
               <Route path="/new" element={<CommissionRegister />} />
               <Route path="/commissions/:id" element={<CommissionDetail />} />
+              <Route path="/commissions/:id/edit" element={<CommissionEdit />} />
               <Route path="/scores" element={<ScoreList />} />
               <Route path="/scores/:scoreId/arrangements/:arrangementId" element={<ScoreDetail />} />
               <Route path="/scores/new" element={<ScoreRegister />} />
@@ -47,8 +49,8 @@ const App = () => (
               <Route path="/login" element={<Login />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
-          </BrowserRouter>
-        </OverlayProvider>
+          </OverlayProvider>
+        </BrowserRouter>
       </TooltipProvider>
     </ThemeProvider>
   </QueryClientProvider>
