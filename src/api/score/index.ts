@@ -1,12 +1,16 @@
 import { supabase } from '@/lib/supabase'
 import { Arrangement, ArrangementFile, CreateArrangementInput, CreateSongInput, Song, UpdateSongInput } from '@/types/score'
 
+const ALLOWED_EXTENSIONS = ['musicxml', 'mxl', 'wav', 'aiff', 'mid', 'midi', 'musx']
+const MAX_FILE_SIZE = 50 * 1024 * 1024 // 50MB
+
 // 곡명으로 song 검색
 export async function findSongByTitle(title: string) {
   const { data, error } = await supabase
     .from('songs')
     .select('id, title, composer')
     .ilike('title', title)
+    .is('deleted_at', null)
     .maybeSingle()
 
   if (error) throw error
@@ -18,6 +22,7 @@ export async function getSongs() {
   const { data, error } = await supabase
     .from('songs')
     .select('*, arrangements(*), categories(name)')
+    .is('deleted_at', null)
     .order('created_at', { ascending: false })
 
   if (error) throw error
@@ -30,6 +35,7 @@ export async function getSong(id: string) {
     .from('songs')
     .select('*, arrangements(*), categories(name)')
     .eq('id', id)
+    .is('deleted_at', null)
     .single()
 
   if (error) throw error
@@ -42,17 +48,18 @@ export async function getArrangement(arrangementId: string) {
     .from('arrangements')
     .select('*, arrangement_files(*), songs(title, composer, english_title)')
     .eq('id', arrangementId)
+    .is('deleted_at', null)
     .single()
 
   if (error) throw error
   return data as Arrangement
 }
 
-// 악보 등록
+// 악보 등록 (upsert — title unique 제약 기반)
 export async function createSong(input: CreateSongInput) {
   const { data, error } = await supabase
     .from('songs')
-    .insert(input)
+    .upsert(input, { onConflict: 'title', ignoreDuplicates: false })
     .select()
     .single()
 
@@ -73,11 +80,11 @@ export async function updateSong(id: string, input: UpdateSongInput) {
   return data as Song
 }
 
-// 악보 삭제
+// 악보 삭제 (soft delete)
 export async function deleteSong(id: string) {
   const { error } = await supabase
     .from('songs')
-    .delete()
+    .update({ deleted_at: new Date().toISOString() })
     .eq('id', id)
 
   if (error) throw error
@@ -95,11 +102,11 @@ export async function createArrangement(input: CreateArrangementInput) {
   return data as Arrangement
 }
 
-// 편성 삭제
+// 편성 삭제 (soft delete)
 export async function deleteArrangement(id: string) {
   const { error } = await supabase
     .from('arrangements')
-    .delete()
+    .update({ deleted_at: new Date().toISOString() })
     .eq('id', id)
 
   if (error) throw error
@@ -112,7 +119,14 @@ export async function uploadArrangementFile(
   label: string,
   fileType: string,
 ) {
-  const ext = file.name.split('.').pop()
+  const ext = file.name.split('.').pop()?.toLowerCase() ?? ''
+  if (!ALLOWED_EXTENSIONS.includes(ext)) {
+    throw new Error(`허용되지 않는 파일 형식입니다: .${ext}`)
+  }
+  if (file.size > MAX_FILE_SIZE) {
+    throw new Error(`파일 크기가 50MB를 초과합니다: ${file.name}`)
+  }
+
   const safeName = label.replace(/[,\s]+/g, '_').replace(/[^a-zA-Z0-9._-]/g, '_')
   const path = `${arrangementId}/${safeName}.${ext}`
 

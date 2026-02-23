@@ -14,6 +14,7 @@ export type Arrangement = {
   version: string | null
   commission_id: string | null
   created_at: string
+  deleted_at?: string | null
   arrangement_files?: ArrangementFile[]
   songs?: { title: string; composer: string; english_title: string | null } | null
 }
@@ -25,6 +26,7 @@ export type Song = {
   composer: string
   category_id: string | null
   created_at: string
+  deleted_at?: string | null
   categories: { name: string } | null
   arrangements: Arrangement[]
 }

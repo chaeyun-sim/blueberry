@@ -186,9 +186,18 @@ const ScoreRegister = () => {
     }
   };
 
+  const MAX_ZIP_SIZE = 200 * 1024 * 1024; // 200MB
+  const MAX_DECOMPRESSED = 500 * 1024 * 1024; // 500MB
+  const MAX_FILE_COUNT = 100;
+
   const handleZipFile = async (file: File) => {
     if (!file.name.toLowerCase().endsWith('.zip')) {
       toast.error('ZIP 파일만 업로드할 수 있습니다.');
+      return;
+    }
+
+    if (file.size > MAX_ZIP_SIZE) {
+      toast.error('ZIP 파일 크기는 200MB 이하여야 합니다.');
       return;
     }
 
@@ -202,13 +211,31 @@ const ScoreRegister = () => {
       const zip = await JSZip.loadAsync(buffer);
       const entries: FileEntry[] = [];
 
+      let totalSize = 0;
+      let fileCount = 0;
+      let aborted = false;
+
       for (const [path, entry] of Object.entries(zip.files)) {
         if (entry.dir) continue;
         const fileName = path.split('/').pop() ?? path;
         if (fileName.startsWith('.') || path.startsWith('__MACOSX')) continue;
         if (detectFileType(fileName) === 'audio') continue;
 
+        fileCount++;
+        if (fileCount > MAX_FILE_COUNT) {
+          toast.error('ZIP 내 파일이 100개를 초과합니다.');
+          aborted = true;
+          break;
+        }
+
         const blob = await entry.async('blob');
+        totalSize += blob.size;
+        if (totalSize > MAX_DECOMPRESSED) {
+          toast.error('압축 해제 크기가 500MB를 초과합니다.');
+          aborted = true;
+          break;
+        }
+
         const extractedFile = new File([blob], fileName);
         entries.push({
           file: extractedFile,
@@ -217,10 +244,18 @@ const ScoreRegister = () => {
         });
       }
 
-      setFiles(entries);
+      if (!aborted) {
+        setFiles(entries);
 
-      const parsed = parseInstrumentsFromZipName(file.name);
-      if (parsed.length > 0) setInstruments(buildInstrumentList(parsed));
+        const parsed = parseInstrumentsFromZipName(file.name);
+        if (parsed.length > 0) {
+          setInstruments(buildInstrumentList(parsed));
+        } else {
+          toast.info('악기 정보를 자동으로 인식하지 못했습니다. 직접 입력해주세요.');
+        }
+      } else {
+        setZipName(null);
+      }
     } catch (e) {
       console.error('ZIP extraction error:', e);
       toast.error('ZIP 파일을 읽을 수 없습니다.', { description: (e as Error).message });
@@ -254,6 +289,14 @@ const ScoreRegister = () => {
   const handleSubmit = async () => {
     if (!songTitle.trim()) {
       toast.error('곡명을 입력해주세요.');
+      return;
+    }
+    if (instruments.length === 0) {
+      toast.error('악기 편성을 입력해주세요.');
+      return;
+    }
+    if (files.length === 0) {
+      toast.error('악보 파일이 없습니다. ZIP 파일을 먼저 업로드해주세요.');
       return;
     }
     setIsSubmitting(true);
