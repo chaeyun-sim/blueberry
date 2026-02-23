@@ -18,6 +18,8 @@ import { commissionQueries } from '@/api/commission/queries';
 import { commissionMutations } from '@/api/commission/mutations';
 import { commissionKeys } from '@/api/commission/queryKeys';
 import DeleteCommissionDialog from '@/components/pages/commission/DeleteCommissionDialog';
+import NotFound from './NotFound';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const commissionInfo = {
   composer: '작곡가',
@@ -39,7 +41,7 @@ const CommissionDetail = () => {
   const navigate = useNavigate();
 
   const queryClient = useQueryClient()
-  const { data: commission } = useQuery(commissionQueries.getCommission(id))
+  const { data: commission, isLoading } = useQuery(commissionQueries.getCommission(id))
   const { mutate: updateStatus } = useMutation(commissionMutations.updateCommissionStatus())
 
   const commissionStatuses = Object.keys(COMMISSION_STATUS_TRANSLATE);
@@ -118,6 +120,44 @@ const CommissionDetail = () => {
       { overlayId: 'delete-commission-dialog' },
     );
   };
+
+  if (isLoading) return (
+    <AppLayout>
+      <div className='mb-6 flex items-center justify-between'>
+        <Skeleton className='h-9 w-16' />
+        <Skeleton className='h-9 w-16' />
+      </div>
+      <Skeleton className='h-8 w-48 mb-8' />
+      <Card className='mb-8 border-border/50'>
+        <CardContent className='p-6'>
+          <div className='flex items-center justify-between w-full'>
+            {[0, 1, 2, 3].map(i => (
+              <div key={i} className='flex items-center flex-1'>
+                <div className='flex flex-col items-center'>
+                  <Skeleton className='w-10 h-10 rounded-full' />
+                  <Skeleton className='h-3 w-10 mt-2' />
+                </div>
+                {i < 3 && <Skeleton className='flex-1 h-0.5 mx-3' />}
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+      <Card className='border-border/50'>
+        <CardContent className='p-5 space-y-4'>
+          <Skeleton className='h-5 w-20' />
+          {[0, 1, 2, 3, 4].map(i => (
+            <div key={i} className='flex items-center justify-between py-2 border-b border-border/50 last:border-0'>
+              <Skeleton className='h-4 w-16' />
+              <Skeleton className='h-4 w-24' />
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+    </AppLayout>
+  );
+
+  if (!commission) return <NotFound />;
 
   return (
     <AppLayout
