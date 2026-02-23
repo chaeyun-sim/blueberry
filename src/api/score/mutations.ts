@@ -5,6 +5,7 @@ import {
   deleteArrangement,
   deleteArrangementFile,
   deleteSong,
+  findSongByTitle,
   updateSong,
   uploadArrangementFile,
 } from '.'
@@ -49,5 +50,9 @@ export const scoreMutations = {
   deleteArrangementFile: () =>
     mutationOptions({
       mutationFn: ({ id }: { id: string }) => deleteArrangementFile(id),
+    }),
+  findSongByTitle: () =>
+    mutationOptions({
+      mutationFn: ({ title }: {title: string}) => findSongByTitle(title),
     }),
 }
