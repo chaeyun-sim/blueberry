@@ -15,7 +15,7 @@ export const INSTRUMENT_ABBREVIATIONS: Record<string, string> = {
   Violin: 'Vn',
   Viola: 'Va',
   Cello: 'Vc',
-  'Double Bass': 'Cb',
+  'Double Bass': 'Db',
   // Woodwinds
   Flute: 'Fl',
   Oboe: 'Ob',
@@ -23,19 +23,19 @@ export const INSTRUMENT_ABBREVIATIONS: Record<string, string> = {
   Bassoon: 'Bn',
   // Brass
   Horn: 'Hn',
-  Trumpet: 'Tp',
-  Trombone: 'Tb',
-  Tuba: 'Tu',
+  Trumpet: 'Tpt',
+  Trombone: 'Tbn',
+  Tuba: 'Tb',
   // Piano
   Piano: 'Pf',
   // Percussion
   Timpani: 'Timp',
   'Drum Set': 'Dr',
-  'Bass Drum': 'BD',
-  'Snare Drum': 'SD',
+  'Bass Drum': 'Bass Drum',
+  'Snare Drum': 'Snare Drum',
   Cymbals: 'Cym',
   Triangle: 'Tri',
-  Tambourine: 'Tamb',
+  Tambourine: 'Tam',
   // Pitched Percussion
   Xylophone: 'Xyl',
   Marimba: 'Mar',
