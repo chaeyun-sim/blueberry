@@ -46,13 +46,6 @@ const summary = [{
   colorStatus: 'warning',
 }];
 
-const workStatusConfig = [
-  { label: '접수', status: 'received' as CommissionStatus, icon: Package2 },
-  { label: '작업중', status: 'working' as CommissionStatus, icon: Music2 },
-  { label: '완료', status: 'complete' as CommissionStatus, icon: CheckCircle },
-  { label: '전달', status: 'delivered' as CommissionStatus, icon: Truck },
-];
-
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -64,12 +57,12 @@ const Dashboard = () => {
     dayjs(c.created_at).isSame(dayjs(), 'month')
   );
 
-  const commissionSummary = {
-    received: thisMonthCommissions.filter(c => c.status === 'received').length,
-    working: thisMonthCommissions.filter(c => c.status === 'working').length,
-    complete: thisMonthCommissions.filter(c => c.status === 'complete').length,
-    delivered: thisMonthCommissions.filter(c => c.status === 'delivered').length,
-  };
+  const workStatusConfig = {
+    received: {label: '접수', icon: Package2, summary: thisMonthCommissions.filter(c => c.status === 'received').length},
+    working: {label: '작업중', icon: Music2, summary: thisMonthCommissions.filter(c => c.status === 'working').length},
+    complete: {label: '완료', icon: CheckCircle, summary: thisMonthCommissions.filter(c => c.status === 'complete').length},
+    delivered: {label: '전달', icon: Truck, summary: thisMonthCommissions.filter(c => c.status === 'delivered').length},
+  }
 
   const recentCommissions = [...commissions]
     .sort((a, b) => dayjs(b.created_at).valueOf() - dayjs(a.created_at).valueOf())
@@ -83,12 +76,7 @@ const Dashboard = () => {
     return '🌙 Good Night';
   };
 
-  const workStatus = workStatusConfig.map(item => ({
-    ...item,
-    count: commissionSummary[item.status],
-  }));
-
-  const total = Object.values(commissionSummary).reduce((acc, curr) => acc + curr, 0);
+  const total = Object.keys(workStatusConfig).map(key => workStatusConfig[key].summary).reduce((acc, curr) => acc + curr, 0);
 
   return (
     <AppLayout>
@@ -106,7 +94,7 @@ const Dashboard = () => {
             </span>
             <span className='flex items-center gap-1.5'>
               <Music className='h-3.5 w-3.5' />
-              진행 중인 의뢰 <strong className='text-foreground ml-0.5'>{commissionSummary.working}건</strong>
+              진행 중인 의뢰 <strong className='text-foreground ml-0.5'>{workStatusConfig.working.summary ?? 0}건</strong>
             </span>
             <span className='flex items-center gap-1.5'>
               <History className='h-3.5 w-3.5 text-[hsl(var(--success))]' />
@@ -149,27 +137,30 @@ const Dashboard = () => {
                   이번 달 의뢰 요약
                 </h3>
                 <div className='grid grid-cols-4 gap-2'>
-                  {workStatus.map(item => (
-                    <button
-                      key={item.status}
-                      className='flex flex-col items-center p-3 rounded-2xl bg-background/60 hover:bg-background/90 cursor-pointer transition-colors'
-                      onClick={() => navigate(`/commissions?status=${item.status}`)}
-                    >
-                      <item.icon
-                        className='h-4 w-4 mb-1.5'
-                        style={{ color: `hsl(var(--status-${item.status}))` }}
-                      />
-                      <p className='text-xl font-display font-bold'>{item.count}</p>
-                      <p className='text-[10px] text-muted-foreground'>{item.label}</p>
-                    </button>
-                  ))}
+                  {Object.keys(workStatusConfig).map(key => {
+                    const item = workStatusConfig[key as keyof typeof workStatusConfig];
+                    return (
+                      <button
+                        key={key}
+                        className='flex flex-col items-center p-3 rounded-2xl bg-background/60 hover:bg-background/90 cursor-pointer transition-colors'
+                        onClick={() => navigate(`/commissions?status=${key}`)}
+                      >
+                        <item.icon
+                          className='h-4 w-4 mb-1.5'
+                          style={{ color: `hsl(var(--status-${key}))` }}
+                        />
+                        <p className='text-xl font-display font-bold'>{item.summary}</p>
+                        <p className='text-[10px] text-muted-foreground'>{item.label}</p>
+                      </button>
+                    )
+                  })}
                 </div>
                 <div className='flex h-2.5 rounded-full overflow-hidden mt-4'>
-                  {Object.entries(commissionSummary).map(([key, value]) => (
+                  {Object.entries(workStatusConfig).map(([key, { summary }]) => (
                     <CommissionSummaryBar
                       key={key}
                       status={key}
-                      value={value}
+                      value={summary}
                       maxValue={total}
                     />
                   ))}
@@ -203,7 +194,7 @@ const Dashboard = () => {
                     </div>
                     <div className='flex items-center gap-2'>
                       <StatusBadge status={c.status} />
-                      <span className='text-[10px] text-muted-foreground'>{dayjs(c.created_at).format('M/D')}</span>
+                      <span className='text-[10px] text-muted-foreground'>{dayjs(c.deadline).format('MM/DD')} 마감</span>
                     </div>
                   </div>
                 ))}
