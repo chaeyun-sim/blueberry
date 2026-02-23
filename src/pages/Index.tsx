@@ -1,5 +1,5 @@
 import { AppLayout } from '@/components/layout/AppLayout';
-import { StatusBadge, CommissionStatus } from '@/components/StatusBadge';
+import { StatusBadge } from '@/components/StatusBadge';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   ClipboardList,
@@ -51,18 +51,23 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const clock = useLiveClock();
 
-  const { data: commissions = [] } = useQuery(commissionQueries.getCommissions());
+  const { data: commissions = [], isLoading } = useQuery(commissionQueries.getCommissions());
 
   const thisMonthCommissions = commissions.filter(c =>
     dayjs(c.created_at).isSame(dayjs(), 'month')
   );
 
+  const counts = thisMonthCommissions.reduce(
+    (acc, c) => { acc[c.status] = (acc[c.status] ?? 0) + 1; return acc; },
+    {} as Record<string, number>
+  );
+
   const workStatusConfig = {
-    received: {label: '접수', icon: Package2, summary: thisMonthCommissions.filter(c => c.status === 'received').length},
-    working: {label: '작업중', icon: Music2, summary: thisMonthCommissions.filter(c => c.status === 'working').length},
-    complete: {label: '완료', icon: CheckCircle, summary: thisMonthCommissions.filter(c => c.status === 'complete').length},
-    delivered: {label: '전달', icon: Truck, summary: thisMonthCommissions.filter(c => c.status === 'delivered').length},
-  }
+    received: { label: '접수', icon: Package2, summary: counts.received ?? 0 },
+    working: { label: '작업중', icon: Music2, summary: counts.working ?? 0 },
+    complete: { label: '완료', icon: CheckCircle, summary: counts.complete ?? 0 },
+    delivered: { label: '전달', icon: Truck, summary: counts.delivered ?? 0 },
+  };
 
   const recentCommissions = [...commissions]
     .sort((a, b) => dayjs(b.created_at).valueOf() - dayjs(a.created_at).valueOf())
@@ -76,7 +81,7 @@ const Dashboard = () => {
     return '🌙 Good Night';
   };
 
-  const total = Object.keys(workStatusConfig).map(key => workStatusConfig[key].summary).reduce((acc, curr) => acc + curr, 0);
+  const total = Object.values(workStatusConfig).reduce((acc, { summary }) => acc + summary, 0);
 
   return (
     <AppLayout>
@@ -137,23 +142,20 @@ const Dashboard = () => {
                   이번 달 의뢰 요약
                 </h3>
                 <div className='grid grid-cols-4 gap-2'>
-                  {Object.keys(workStatusConfig).map(key => {
-                    const item = workStatusConfig[key as keyof typeof workStatusConfig];
-                    return (
-                      <button
-                        key={key}
-                        className='flex flex-col items-center p-3 rounded-2xl bg-background/60 hover:bg-background/90 cursor-pointer transition-colors'
-                        onClick={() => navigate(`/commissions?status=${key}`)}
-                      >
-                        <item.icon
-                          className='h-4 w-4 mb-1.5'
-                          style={{ color: `hsl(var(--status-${key}))` }}
-                        />
-                        <p className='text-xl font-display font-bold'>{item.summary}</p>
-                        <p className='text-[10px] text-muted-foreground'>{item.label}</p>
-                      </button>
-                    )
-                  })}
+                  {Object.entries(workStatusConfig).map(([key, item]) => (
+                    <button
+                      key={key}
+                      className='flex flex-col items-center p-3 rounded-2xl bg-background/60 hover:bg-background/90 cursor-pointer transition-colors'
+                      onClick={() => navigate(`/commissions?status=${key}`)}
+                    >
+                      <item.icon
+                        className='h-4 w-4 mb-1.5'
+                        style={{ color: `hsl(var(--status-${key}))` }}
+                      />
+                      <p className='text-xl font-display font-bold'>{isLoading ? '-' : item.summary}</p>
+                      <p className='text-[10px] text-muted-foreground'>{item.label}</p>
+                    </button>
+                  ))}
                 </div>
                 <div className='flex h-2.5 rounded-full overflow-hidden mt-4'>
                   {Object.entries(workStatusConfig).map(([key, { summary }]) => (
