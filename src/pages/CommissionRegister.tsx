@@ -158,8 +158,17 @@ const CommissionRegister = () => {
       version: form.version as DifficultyLevelType,
     }, {
       onSuccess: async (res) => {
-        if (imageFile) await uploadCommissionImage({ commissionId: res?.id, file: imageFile })
+        if (imageFile) {
+          try {
+            await uploadCommissionImage({ commissionId: res?.id, file: imageFile })
+          } catch {
+            toast.error('이미지 업로드에 실패했습니다.', {
+              description: '의뢰는 등록되었지만 이미지를 첨부하지 못했습니다.',
+            })
+          }
+        }
         queryClient.invalidateQueries({ queryKey: commissionKeys.list() })
+        setIsSubmitting(false)
         navigate(`/commissions/${res?.id}`)
       },
       onError: (e) => {
