@@ -121,6 +121,11 @@ const CommissionDetail = () => {
     );
   };
 
+  if (!id) {
+    navigate('/commissions');
+    return null;
+  }
+
   if (isLoading) return (
     <AppLayout>
       <div className='mb-6 flex items-center justify-between'>
