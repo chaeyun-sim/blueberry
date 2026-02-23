@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { ArrowLeft, Calendar, Plus, X } from 'lucide-react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import { ALL_INSTRUMENTS } from '@/constants/instruments';
 import { COMMISSION_STATUS_TRANSLATE } from '@/constants/translate';
@@ -142,10 +142,7 @@ const CommissionEdit = () => {
     })
   };
 
-  if (!id) {
-    navigate('/commissions');
-    return null;
-  }
+  if (!id) return <Navigate to='/commissions' replace />;
 
   if (isLoading || !commission) return null
 

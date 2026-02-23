@@ -4,7 +4,7 @@ import { PageHeader } from '@/components/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, CheckCircle, ChevronRight, ExternalLink, LucideProps, Music2, Package2, Pencil, Trash2, Truck } from 'lucide-react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { COMMISSION_STATUS_TRANSLATE } from '@/constants/translate';
 import { overlay } from 'overlay-kit';
@@ -121,10 +121,7 @@ const CommissionDetail = () => {
     );
   };
 
-  if (!id) {
-    navigate('/commissions');
-    return null;
-  }
+  if (!id) return <Navigate to='/commissions' replace />;
 
   if (isLoading) return (
     <AppLayout>
