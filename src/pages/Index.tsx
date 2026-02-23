@@ -23,6 +23,7 @@ import MonthlyChart from '@/components/pages/dashboard/MonthlyChart';
 import { useQuery } from '@tanstack/react-query';
 import { commissionQueries } from '@/api/commission/queries';
 import dayjs from 'dayjs';
+import { scoreQueries } from '@/api/score/queries';
 
 const summary = [{
   icon: Music,
@@ -52,6 +53,22 @@ const Dashboard = () => {
   const clock = useLiveClock();
 
   const { data: commissions = [], isLoading, isError } = useQuery(commissionQueries.getCommissions());
+  const { data: scores = [] } = useQuery(scoreQueries.getSongs());
+  const totalScores = scores.reduce((acc, score) => acc + score.arrangements.length, 0);
+
+  const summaryValues = [{
+    ...summary[0],
+    value: totalScores,
+  }, {
+    ...summary[1],
+    value: 0,
+  }, {
+    ...summary[2],
+    value: 0,
+  }, {
+    ...summary[3],
+    value: 0,
+  }]
 
   const thisMonthCommissions = commissions.filter(c =>
     dayjs(c.created_at).isSame(dayjs(), 'month')
@@ -220,7 +237,7 @@ const Dashboard = () => {
 
         {/* Third Row: Quick Stats */}
         <div className='grid grid-cols-2 lg:grid-cols-4 gap-4'>
-          {summary.map(item => (
+          {summaryValues.map(item => (
             <SummaryCard
               key={item.description}
               icon={item.icon}
