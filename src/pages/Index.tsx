@@ -51,7 +51,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const clock = useLiveClock();
 
-  const { data: commissions = [], isLoading } = useQuery(commissionQueries.getCommissions());
+  const { data: commissions = [], isLoading, isError } = useQuery(commissionQueries.getCommissions());
 
   const thisMonthCommissions = commissions.filter(c =>
     dayjs(c.created_at).isSame(dayjs(), 'month')
@@ -99,7 +99,7 @@ const Dashboard = () => {
             </span>
             <span className='flex items-center gap-1.5'>
               <Music className='h-3.5 w-3.5' />
-              진행 중인 의뢰 <strong className='text-foreground ml-0.5'>{workStatusConfig.working.summary ?? 0}건</strong>
+              진행 중인 의뢰 <strong className='text-foreground ml-0.5'>{workStatusConfig.working.summary}건</strong>
             </span>
             <span className='flex items-center gap-1.5'>
               <History className='h-3.5 w-3.5 text-[hsl(var(--success))]' />
@@ -184,22 +184,32 @@ const Dashboard = () => {
                 </div>
               </div>
               <div className='space-y-2 flex-1'>
-                {recentCommissions.map(c => (
-                  <div
-                    key={c.id}
-                    className='flex items-center justify-between p-3.5 rounded-2xl bg-muted/30 cursor-pointer hover:bg-muted/60 transition-colors'
-                    onClick={() => navigate(`/commissions/${c.id}`)}
-                  >
-                    <div>
-                      <p className='font-semibold text-sm'>{c.songs?.title ?? c.title}</p>
-                      <p className='text-xs text-muted-foreground mt-0.5'>{c.arrangement}</p>
+                {isError ? (
+                  <p className='text-sm text-muted-foreground text-center py-6'>데이터를 불러오지 못했습니다.</p>
+                ) : isLoading ? (
+                  [0, 1, 2].map(i => (
+                    <div key={i} className='h-[58px] rounded-2xl bg-muted/30 animate-pulse' />
+                  ))
+                ) : recentCommissions.length === 0 ? (
+                  <p className='text-sm text-muted-foreground text-center py-6'>최근 의뢰가 없습니다.</p>
+                ) : (
+                  recentCommissions.map(c => (
+                    <div
+                      key={c.id}
+                      className='flex items-center justify-between p-3.5 rounded-2xl bg-muted/30 cursor-pointer hover:bg-muted/60 transition-colors'
+                      onClick={() => navigate(`/commissions/${c.id}`)}
+                    >
+                      <div>
+                        <p className='font-semibold text-sm'>{c.songs?.title ?? c.title}</p>
+                        <p className='text-xs text-muted-foreground mt-0.5'>{c.arrangement}</p>
+                      </div>
+                      <div className='flex items-center gap-2'>
+                        <StatusBadge status={c.status} />
+                        <span className='text-[10px] text-muted-foreground'>{dayjs(c.deadline).format('MM/DD')} 마감</span>
+                      </div>
                     </div>
-                    <div className='flex items-center gap-2'>
-                      <StatusBadge status={c.status} />
-                      <span className='text-[10px] text-muted-foreground'>{dayjs(c.deadline).format('MM/DD')} 마감</span>
-                    </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </CardContent>
           </Card>
