@@ -12,13 +12,15 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Search } from 'lucide-react';
+import { Search, AlertCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { DifficultyLevelType } from '@/types/commission';
 import { cn } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import { commissionQueries } from '@/api/commission/queries';
 import { abbreviateInstrument } from '@/constants/instruments';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 const tabs: { label: string; value: CommissionStatus | 'all' }[] = [
   { label: '전체', value: 'all' },
@@ -28,9 +30,9 @@ const tabs: { label: string; value: CommissionStatus | 'all' }[] = [
   { label: '전달', value: 'delivered' },
 ];
 
-const versionLabel = (v: DifficultyLevelType) => (v || '-');
+const versionLabel = (v: DifficultyLevelType) => v || '-';
 
-const CommissionList = () => {
+const CommissionListContent = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const statusParam = searchParams.get('status');
@@ -42,15 +44,60 @@ const CommissionList = () => {
   const [filter, setFilter] = useState<CommissionStatus | 'all'>(initialStatus || 'all');
   const [search, setSearch] = useState('');
 
-  const { data: commissions } = useQuery(commissionQueries.getCommissions())
+  const commissionsQuery = useQuery(commissionQueries.getCommissions());
+  const { data: commissions = [], isLoading, isError, refetch } = commissionsQuery;
 
+  // L1: 로딩 상태
+  if (isLoading && !commissions.length) {
+    return (
+      <AppLayout>
+        <PageHeader
+          title='의뢰 목록'
+          description='모든 악보 의뢰를 관리합니다'
+        />
+        <div className='space-y-4'>
+          {[0, 1, 2, 3].map(i => (
+            <div
+              key={i}
+              className='h-12 rounded-lg bg-muted animate-pulse'
+            />
+          ))}
+        </div>
+      </AppLayout>
+    );
+  }
+
+  // L2: 에러 상태 (React Query isError - Error Boundary와 분리)
+  if (isError) {
+    return (
+      <AppLayout>
+        <PageHeader
+          title='의뢰 목록'
+          description='모든 악보 의뢰를 관리합니다'
+        />
+        <Card className='border-destructive/50'>
+          <CardContent className='p-6'>
+            <div className='flex items-center gap-4'>
+              <AlertCircle className='h-8 w-8 text-destructive flex-shrink-0' />
+              <div className='flex-1'>
+                <p className='font-medium text-destructive'>의뢰 목록을 불러올 수 없습니다</p>
+                <p className='text-sm text-muted-foreground mt-1'>잠시 후 다시 시도해주세요.</p>
+              </div>
+              <Button onClick={() => refetch()}>다시 시도</Button>
+            </div>
+          </CardContent>
+        </Card>
+      </AppLayout>
+    );
+  }
+
+  // L3: 정상 렌더링
   const filtered = (commissions ?? []).filter(c => {
     const matchesFilter = filter === 'all' || c.status === filter;
     const title = c.songs?.title ?? c.title ?? '';
     const matchesSearch = title.toLowerCase().includes(search.toLowerCase());
     return matchesFilter && matchesSearch;
   });
-
 
   return (
     <AppLayout>
@@ -91,8 +138,8 @@ const CommissionList = () => {
       <Card>
         <CardContent className='p-0'>
           <Table className='table-fixed'>
-            <TableHeader className={cn(filtered.length === 0 && "border-none")}>
-              <TableRow className={cn("hover:bg-none!", filtered.length === 0 && 'border-none')}>
+            <TableHeader className={cn(filtered.length === 0 && 'border-none')}>
+              <TableRow className={cn('hover:bg-none!', filtered.length === 0 && 'border-none')}>
                 <TableHead className='text-xs uppercase tracking-wider w-[14%]'>마감일</TableHead>
                 <TableHead className='text-xs uppercase tracking-wider w-[22%]'>곡명</TableHead>
                 <TableHead className='text-xs uppercase tracking-wider w-[22%]'>작곡가</TableHead>
@@ -138,5 +185,10 @@ const CommissionList = () => {
   );
 };
 
-export default CommissionList;
+const CommissionList = () => (
+  <ErrorBoundary level='page'>
+    <CommissionListContent />
+  </ErrorBoundary>
+);
 
+export default CommissionList;

@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import Index from "./pages/Index";
 import CommissionList from "./pages/CommissionList";
 import CommissionRegister from "./pages/CommissionRegister";
@@ -20,40 +21,46 @@ import NotFound from "./pages/NotFound";
 import { OverlayProvider } from 'overlay-kit';
 import { Analytics } from "@vercel/analytics/react"
 import { SpeedInsights } from "@vercel/speed-insights/react"
-
-const queryClient = new QueryClient();
+import { queryClient } from './utils/query-client';
 
 // App root
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <Analytics />
-    <SpeedInsights />
-    <ThemeProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <OverlayProvider>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/commissions" element={<CommissionList />} />
-              <Route path="/new" element={<CommissionRegister />} />
-              <Route path="/commissions/:id" element={<CommissionDetail />} />
-              <Route path="/commissions/:id/edit" element={<CommissionEdit />} />
-              <Route path="/scores" element={<ScoreList />} />
-              <Route path="/scores/:scoreId/arrangements/:arrangementId" element={<ScoreDetail />} />
-              <Route path="/scores/new" element={<ScoreRegister />} />
-              <Route path="/stats" element={<SalesStats />} />
-              <Route path="/calendar" element={<CalendarView />} />
-              <Route path="/recommend" element={<MusicRecommend />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </OverlayProvider>
-        </BrowserRouter>
-      </TooltipProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
+  <ErrorBoundary
+    level="global"
+    onError={(error, info) => {
+      console.error('Global Error:', error, info);
+    }}
+  >
+    <QueryClientProvider client={queryClient}>
+      <Analytics />
+      <SpeedInsights />
+      <ThemeProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <OverlayProvider>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/commissions" element={<CommissionList />} />
+                <Route path="/new" element={<CommissionRegister />} />
+                <Route path="/commissions/:id" element={<CommissionDetail />} />
+                <Route path="/commissions/:id/edit" element={<CommissionEdit />} />
+                <Route path="/scores" element={<ScoreList />} />
+                <Route path="/scores/:scoreId/arrangements/:arrangementId" element={<ScoreDetail />} />
+                <Route path="/scores/new" element={<ScoreRegister />} />
+                <Route path="/stats" element={<SalesStats />} />
+                <Route path="/calendar" element={<CalendarView />} />
+                <Route path="/recommend" element={<MusicRecommend />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </OverlayProvider>
+          </BrowserRouter>
+        </TooltipProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;
