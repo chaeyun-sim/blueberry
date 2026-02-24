@@ -4,11 +4,11 @@ export const buildInstrumentList = (names: string[]) => {
     const result: string[] = [];
     const roman = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
     for (const name of names) {
-      const sameBase = result.filter(i => i === name || i.startsWith(name + ' '));
+      const sameBase = result.filter(i => i === name || (i.startsWith(name + ' ') && hasRomanSuffix(i)));
       if (sameBase.length === 0) {
         result.push(name);
       } else if (sameBase.length === 1 && !hasRomanSuffix(sameBase[0])) {
-        const idx = result.indexOf(name);
+        const idx = result.indexOf(sameBase[0]);
         result[idx] = `${name} I`;
         result.push(`${name} II`);
       } else {
