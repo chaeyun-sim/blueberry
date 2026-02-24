@@ -461,8 +461,18 @@ export async function saveSalesRows(rows: ExcelRow[], uploadName: string): Promi
     }
   })
 
-  const { error } = await supabase.from('sales').insert(inserts)
-  if (error) throw error
+  // 500행 단위로 청크 insert (페이로드 크기 제한 대응)
+  const CHUNK_SIZE = 500
+  try {
+    for (let i = 0; i < inserts.length; i += CHUNK_SIZE) {
+      const { error } = await supabase.from('sales').insert(inserts.slice(i, i + CHUNK_SIZE))
+      if (error) throw error
+    }
+  } catch (err) {
+    // sales insert 실패 시 고아 upload 레코드 제거
+    await supabase.from('excel_uploads').delete().eq('id', uploadId)
+    throw err
+  }
 }
 
 /**
