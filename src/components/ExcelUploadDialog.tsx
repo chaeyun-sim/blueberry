@@ -125,7 +125,7 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: Props) => {
             id: i + 1,
             category: String(catCol ? row[catCol] ?? "" : ""),
             product: String(prodCol ? row[prodCol] ?? "" : ""),
-            amount: Number(amtCol ? row[amtCol] ?? 0 : 0) || 0,
+            amount: Number(amtCol ? String(row[amtCol] ?? '0').replace(/,/g, '') : '0') || 0,
           }));
         }
 
