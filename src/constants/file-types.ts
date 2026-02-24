@@ -38,5 +38,9 @@ export const fileTypeConfig: Record<
   },
 };
 
-export const ALLOWED_EXTENSIONS = ['musicxml', 'mxl', 'wav', 'aiff', 'mid', 'midi', 'musx', 'xml', 'pdf']
+export const MUSICXML_EXTENSIONS = ['xml', 'musicxml', 'mxl'];
+export const FINALE_EXTENSIONS = ['musx'];
+export const AUDIO_EXTENSIONS = ['wav', 'aiff', 'mid', 'midi'];
+
+export const ALLOWED_EXTENSIONS = [...MUSICXML_EXTENSIONS, ...FINALE_EXTENSIONS, ...AUDIO_EXTENSIONS, 'pdf']
 export const MAX_FILE_SIZE = 50 * 1024 * 1024 // 50MB
