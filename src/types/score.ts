@@ -24,10 +24,9 @@ export type Song = {
   title: string
   english_title: string | null
   composer: string
-  category_id: string | null
+  category: string | null
   created_at: string
   deleted_at?: string | null
-  categories: { name: string } | null
   arrangements: Arrangement[]
 }
 
@@ -35,14 +34,14 @@ export type CreateSongInput = {
   title: string
   english_title?: string
   composer: string
-  category_id?: string
+  category?: string
 }
 
 export type UpdateSongInput = {
   title?: string
   english_title?: string
   composer?: string
-  category_id?: string
+  category?: string
 }
 
 export type CreateArrangementInput = {

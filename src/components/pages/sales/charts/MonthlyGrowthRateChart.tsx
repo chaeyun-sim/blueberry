@@ -10,8 +10,8 @@ interface MonthlyGrowthRateChartProps {
 
 function MonthlyGrowthRateChart({ data, avgCount }: MonthlyGrowthRateChartProps) {
 	const chartConfig: ChartConfig = {
-		revenue: { label: '매출', color: 'hsl(var(--primary))' },
-		avgRevenue: { label: '총 평균', color: 'hsl(var(--muted-foreground) / 0.2)' },
+		revenue: { label: '올해', color: 'hsl(var(--primary))' },
+		prevRevenue: { label: '전년도', color: 'hsl(var(--muted-foreground) / 0.2)' },
 	};
 	
   return (
@@ -45,6 +45,11 @@ function MonthlyGrowthRateChart({ data, avgCount }: MonthlyGrowthRateChartProps)
                 <p className='text-foreground font-medium'>
                   {formatCurrency(d.revenue)} · {d.count}건
                 </p>
+                {d.prevRevenue > 0 && (
+                  <p className='text-muted-foreground'>
+                    전년도 {formatCurrency(d.prevRevenue)} · {d.prevCount}건
+                  </p>
+                )}
                 <p
                   style={{
                     color:
@@ -53,16 +58,15 @@ function MonthlyGrowthRateChart({ data, avgCount }: MonthlyGrowthRateChartProps)
                         : 'hsl(var(--destructive))',
                   }}
                 >
-                  평균 대비 {d.count - avgCount >= 0 ? '+' : ''}
-                  {d.count - avgCount}건
+                  월평균 대비 {d.count - avgCount >= 0 ? '+' : ''}{d.count - avgCount}건
                 </p>
               </div>
             );
           }}
         />
         <Bar
-          dataKey='avgRevenue'
-          fill='var(--color-avgRevenue)'
+          dataKey='prevRevenue'
+          fill='var(--color-prevRevenue)'
           radius={[4, 4, 0, 0]}
         />
         <Bar

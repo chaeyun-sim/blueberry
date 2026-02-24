@@ -1,12 +1,12 @@
-import { mockTopSongs } from '@/mock/sales';
+import type { TopSong } from '@/types/stats';
 
 interface TopSongBarProps {
   x?: number;
   y?: number;
   width?: number;
   height?: number;
-	index?: number;
-	song: typeof mockTopSongs[number];
+  index?: number;
+  song: TopSong;
 }
 
 function TopSongBar(props: TopSongBarProps) {

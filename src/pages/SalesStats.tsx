@@ -1,28 +1,59 @@
 import React, { useState, useCallback } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/PageHeader';
-import { ExcelUploadDialog, type ExcelRow } from '@/components/ExcelUploadDialog';
+import { ExcelUploadDialog } from '@/components/ExcelUploadDialog';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Upload, DollarSign, BarChart3, FileSpreadsheet, CalendarDays, List } from 'lucide-react';
-import { mockExcelData } from '@/mock/sales';
 import Stats from '@/components/pages/sales/Stats';
 import YearlyStats from '@/components/pages/sales/YearlyStats';
 import SalesSummaryCard from '@/components/pages/sales/SalesSummaryCard';
 import SalesAll from '@/components/pages/sales/SalesAll';
 import { TabsContent } from '@radix-ui/react-tabs';
+import { statsMutations } from '@/api/stats/mutations';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { statsKeys } from '@/api/stats/queryKeys';
+import { useToast } from '@/hooks/use-toast';
+import { queryClient } from '@/utils/query-client';
+import { statsQueries } from '@/api/stats/queries';
+import { ExcelRow } from '@/types/excel';
 
 const tabItems = {
   all: { icon: BarChart3, label: '전체 분석', component: Stats },
   yearly: { icon: CalendarDays, label: '월별 분석', component: YearlyStats },
   raw: { icon: List, label: '전체 보기', component: SalesAll },
-} satisfies Record<string, { icon: React.ElementType; label: string; component: React.ElementType }>;
+} satisfies Record<
+  string,
+  { icon: React.ElementType; label: string; component: React.ElementType }
+>;
 
 const SalesStats = () => {
+  const { toast } = useToast();
   const [uploadOpen, setUploadOpen] = useState(false);
-  const [originData, setOriginData] = useState(mockExcelData);
 
-  const handleExcelUpload = useCallback((data: ExcelRow[]) => setOriginData(data), []);
+  const { data: salesSummary } = useQuery(statsQueries.getSalesSummary());
+  const { mutate: saveRows } = useMutation(statsMutations.saveSalesRows());
+
+  const handleExcelUpload = useCallback(
+    (data: ExcelRow[], name: string) => {
+      saveRows(
+        { rows: data, name },
+        {
+          onSuccess: (_, { rows }) => {
+            queryClient.invalidateQueries({ queryKey: statsKeys.all });
+            toast({ title: `${rows.length}건이 저장되었습니다.` });
+          },
+          onError: e =>
+            toast({
+              title: '저장에 실패했습니다.',
+              description: e instanceof Error ? e.message : undefined,
+              variant: 'destructive',
+            }),
+        },
+      );
+    },
+    [saveRows, toast],
+  );
 
   return (
     <AppLayout>
@@ -49,31 +80,27 @@ const SalesStats = () => {
         <SalesSummaryCard
           icon={DollarSign}
           title='총 매출'
-          value={19170000}
-          percentage={12.5}
-          compareKey='lastYear'
+          value={salesSummary?.totalRevenue ?? 0}
           isMoney
         />
         <SalesSummaryCard
           icon={FileSpreadsheet}
           title='총 판매건'
-          value={1284}
-          percentage={8.3}
-          compareKey='lastYear'
+          value={salesSummary?.totalCount ?? 0}
         />
         <SalesSummaryCard
           icon={CalendarDays}
           title='지난달 매출'
-          value={1760000}
-          percentage={5.2}
+          value={salesSummary?.lastMonthRevenue ?? 0}
+          percentage={salesSummary?.revenueVsLastMonth ?? 0}
           compareKey='lastMonth'
           isMoney
         />
         <SalesSummaryCard
           icon={FileSpreadsheet}
           title='지난달 판매건'
-          value={98}
-          percentage={3.1}
+          value={salesSummary?.lastMonthCount ?? 0}
+          percentage={salesSummary?.countVsLastMonth ?? 0}
           compareKey='lastMonth'
         />
       </div>
@@ -106,7 +133,7 @@ const SalesStats = () => {
               value={tab}
               className='space-y-6'
             >
-              <Component {...(tab === 'raw' ? { originData } : {})} />
+              <Component />
             </TabsContent>
           );
         })}

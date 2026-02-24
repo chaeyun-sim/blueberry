@@ -17,7 +17,7 @@ export type Commission = {
   songs: {
     title: string
     composer: string
-    category_id: string | null
+    category: string | null
   } | null
 }
 

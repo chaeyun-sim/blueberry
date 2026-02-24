@@ -19,7 +19,7 @@ export async function findSongByTitle(title: string) {
 export async function getSongs() {
   const { data, error } = await supabase
     .from('songs')
-    .select('*, arrangements(*), categories(name)')
+    .select('*, arrangements(*), category')
     .is('deleted_at', null)
     .is('arrangements.deleted_at', null)
     .order('created_at', { ascending: false })
@@ -32,7 +32,7 @@ export async function getSongs() {
 export async function getSong(id: string) {
   const { data, error } = await supabase
     .from('songs')
-    .select('*, arrangements(*), categories(name)')
+    .select('*, arrangements(*), category')
     .eq('id', id)
     .is('deleted_at', null)
     .is('arrangements.deleted_at', null)
