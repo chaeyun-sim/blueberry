@@ -61,15 +61,15 @@ const CommissionRegister = () => {
             setImageFile(file);
           }}
           setForm={res =>
-            setForm({
-              ...form,
+            setForm(prev => ({
+              ...prev,
               songTitle: res.songTitle ?? '',
               composer: res.composer ?? '',
               instruments: buildInstrumentList(res.instruments ?? []),
               version: res.version ?? null,
               deadline: res.deadline ?? '',
               notes: res.notes ?? '',
-            })
+            }))
           }
           isAnalyzing={isAnalyzing}
           setIsAnalyzing={setIsAnalyzing}
