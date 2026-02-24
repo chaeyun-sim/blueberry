@@ -14,7 +14,7 @@ import * as XLSX from "xlsx";
 import { splitProduct } from "@/utils/split-product";
 
 export type ExcelRow = {
-  id: number;
+  id: string | number;
   category: string;
   product: string;
   amount: number;

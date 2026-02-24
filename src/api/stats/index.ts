@@ -386,8 +386,8 @@ export async function getSalesRowsByUploadId(uploadId: string): Promise<ExcelRow
 
   if (error) throw error
 
-  return (data ?? []).map((row, i) => ({
-    id: i + 1,
+  return (data ?? []).map(row => ({
+    id: row.id,
     category: row.category ?? '미분류',
     product: row.product ?? '',
     amount: row.amount,
@@ -482,8 +482,8 @@ export async function getSalesRows(year?: number): Promise<ExcelRow[]> {
   const { data, error } = await query
   if (error) throw error
 
-  return (data ?? []).map((row, i) => ({
-    id: i + 1,
+  return (data ?? []).map(row => ({
+    id: row.id,
     category: row.category ?? '미분류',
     product: row.product ?? '',
     amount: row.amount,
