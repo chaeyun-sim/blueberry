@@ -29,7 +29,7 @@ import { DifficultyLevelType } from '@/types/commission';
 import { parseInstrumentsFromZipName } from '@/utils/parse-instruments-from-zipName';
 import { formatFileSize } from '@/utils/format-file-size';
 import { detectFileType } from '@/utils/detect-file-type';
-import { fileTypeConfig } from '@/constants/file-types';
+import { fileTypeConfig, ALLOWED_EXTENSIONS } from '@/constants/file-types';
 import { FileEntry } from '@/types/form';
 
 
@@ -126,7 +126,8 @@ const ScoreRegister = () => {
         if (entry.dir) continue;
         const fileName = path.split('/').pop() ?? path;
         if (fileName.startsWith('.') || path.startsWith('__MACOSX')) continue;
-        if (detectFileType(fileName) === 'audio') continue;
+        const ext = fileName.split('.').pop()?.toLowerCase() ?? '';
+        if (!ALLOWED_EXTENSIONS.includes(ext)) continue;
 
         fileCount++;
         if (fileCount > MAX_FILE_COUNT) {
