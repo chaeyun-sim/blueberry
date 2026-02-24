@@ -19,6 +19,7 @@ import { commissionKeys } from '@/api/commission/queryKeys';
 import { CommissionRegisterFormType } from '@/types/form';
 import { useNavigate } from 'react-router-dom';
 import { queryClient } from '@/utils/query-client';
+import useRemoveInstrument from '@/hooks/use-remove-instrument';
 
 interface CommissionRegisterFormProps {
   form: CommissionRegisterFormType
@@ -31,6 +32,8 @@ interface CommissionRegisterFormProps {
 function CommissionRegisterForm({ form, setForm, imageFile, isAnalyzing }: CommissionRegisterFormProps) {
   const navigate = useNavigate();
   const dateInputRef = useRef<HTMLInputElement>(null);
+
+  const { removeInstrument } = useRemoveInstrument();
 
   const [showInstrumentDropdown, setShowInstrumentDropdown] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -48,22 +51,6 @@ function CommissionRegisterForm({ form, setForm, imageFile, isAnalyzing }: Commi
     setForm({ ...form, instruments: buildInstrumentList([...form.instruments, trimmed]) });
     setInstrumentInput('');
     setShowInstrumentDropdown(false);
-  };
-
-  const removeInstrument = (index: number) => {
-    const removed = form.instruments[index];
-    const baseName = removed.replace(/ (I{1,3}V?|IV|V|VI{0,3})$/, '');
-    const remaining = form.instruments.filter((_, i) => i !== index);
-
-    const sameBase = remaining.filter(i => i === baseName || i.startsWith(baseName + ' '));
-    if (sameBase.length === 1 && hasRomanSuffix(sameBase[0])) {
-      setForm({
-        ...form,
-        instruments: remaining.map(i => (i.startsWith(baseName) ? baseName : i)),
-      });
-    } else {
-      setForm({ ...form, instruments: remaining });
-    }
   };
 
   const filteredOptions = ALL_INSTRUMENTS.filter(opt =>
@@ -201,7 +188,7 @@ function CommissionRegisterForm({ form, setForm, imageFile, isAnalyzing }: Commi
                     <button
                       type='button'
                       disabled={isAnalyzing || isSubmitting}
-                      onClick={() => removeInstrument(idx)}
+                      onClick={() => setForm(prev => ({ ...prev, instruments: removeInstrument(prev.instruments, idx) }))}
                       className='ml-0.5 hover:text-destructive transition-colors disabled:opacity-50 disabled:pointer-events-none'
                     >
                       <X className='h-3 w-3' />
