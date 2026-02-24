@@ -1,4 +1,4 @@
-import { ElementType, useState } from 'react';
+import { useState } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
@@ -15,7 +15,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { ArrowLeft, FileMusic, FileAudio, FileText, File, Music, Trash2 } from 'lucide-react';
+import { ArrowLeft, Music, Trash2 } from 'lucide-react';
 import { useNavigate, useParams, Navigate } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { scoreQueries } from '@/api/score/queries';
@@ -23,14 +23,7 @@ import { scoreMutations } from '@/api/score/mutations';
 import { scoreKeys } from '@/api/score/queryKeys';
 import { toast } from 'sonner';
 import { queryClient } from '@/utils/query-client';
-
-const fileTypeConfig: Record<string, { icon: ElementType; label: string; color: string }> = {
-  score: { icon: FileMusic, label: '스코어', color: 'text-primary' },
-  part: { icon: FileMusic, label: '파트보', color: 'text-[hsl(var(--status-working))]' },
-  audio: { icon: FileAudio, label: '오디오', color: 'text-[hsl(var(--warning))]' },
-  musicxml: { icon: FileText, label: 'MusicXML', color: 'text-[hsl(var(--success))]' },
-  pdf: { icon: File, label: 'PDF', color: 'text-muted-foreground' },
-};
+import { fileTypeConfig } from '@/constants/file-types';
 
 const ScoreDetail = () => {
   const { scoreId: _scoreId, arrangementId } = useParams();
