@@ -13,13 +13,14 @@ import { CompleteDialog } from '@/components/pages/commission/CompleteDialog';
 import { toast } from '@/hooks/use-toast';
 import CommissionImageDialog from '@/components/pages/commission/CommissionImageDialog';
 import { CommissionStatus } from '@/components/StatusBadge';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { commissionQueries } from '@/api/commission/queries';
 import { commissionMutations } from '@/api/commission/mutations';
 import { commissionKeys } from '@/api/commission/queryKeys';
 import DeleteCommissionDialog from '@/components/pages/commission/DeleteCommissionDialog';
 import NotFound from './NotFound';
 import { Skeleton } from '@/components/ui/skeleton';
+import { queryClient } from '@/utils/query-client';
 
 const commissionInfo = {
   composer: '작곡가',
@@ -40,7 +41,6 @@ const CommissionDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const queryClient = useQueryClient()
   const { data: commission, isLoading } = useQuery(commissionQueries.getCommission(id))
   const { mutate: updateStatus } = useMutation(commissionMutations.updateCommissionStatus())
 

@@ -8,7 +8,7 @@ import { Calendar, Plus, X } from 'lucide-react';
 import { DifficultyLevelType } from '@/types/commission';
 import { Button } from '@/components/ui/button';
 import { useRef, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { scoreQueries } from '@/api/score/queries';
 import { commissionMutations } from '@/api/commission/mutations';
 import { ALL_INSTRUMENTS } from '@/constants/instruments';
@@ -18,6 +18,7 @@ import { toast } from 'sonner';
 import { commissionKeys } from '@/api/commission/queryKeys';
 import { CommissionRegisterFormType } from '@/pages/CommissionRegister';
 import { useNavigate } from 'react-router-dom';
+import { queryClient } from '@/utils/query-client';
 
 interface CommissionRegisterFormProps {
   form: CommissionRegisterFormType
@@ -29,11 +30,11 @@ interface CommissionRegisterFormProps {
 
 function CommissionRegisterForm({ form, setForm, imageFile, isAnalyzing }: CommissionRegisterFormProps) {
   const navigate = useNavigate();
-    const dateInputRef = useRef<HTMLInputElement>(null);
+  const dateInputRef = useRef<HTMLInputElement>(null);
 
   const [showInstrumentDropdown, setShowInstrumentDropdown] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-    const [instrumentInput, setInstrumentInput] = useState('');
+  const [instrumentInput, setInstrumentInput] = useState('');
 
   const { data: songs = [] } = useQuery(scoreQueries.getSongs());
   const { mutateAsync: createCommission } = useMutation(commissionMutations.createCommission());
@@ -75,9 +76,6 @@ function CommissionRegisterForm({ form, setForm, imageFile, isAnalyzing }: Commi
     const match = songs.find(s => s.title === value);
     if (match) setForm({ ...form, composer: match.composer });
   };
-  
-        const queryClient = useQueryClient();
-
   
   const { mutateAsync: createSong } = useMutation(scoreMutations.createSong());
   const { mutateAsync: findSongByTitle } = useMutation(scoreMutations.findSongByTitle());

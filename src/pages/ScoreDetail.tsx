@@ -17,11 +17,12 @@ import {
 } from '@/components/ui/alert-dialog';
 import { ArrowLeft, FileMusic, FileAudio, FileText, File, Music, Trash2 } from 'lucide-react';
 import { useNavigate, useParams, Navigate } from 'react-router-dom';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { scoreQueries } from '@/api/score/queries';
 import { scoreMutations } from '@/api/score/mutations';
 import { scoreKeys } from '@/api/score/queryKeys';
 import { toast } from 'sonner';
+import { queryClient } from '@/utils/query-client';
 
 const fileTypeConfig: Record<string, { icon: ElementType; label: string; color: string }> = {
   score: { icon: FileMusic, label: '스코어', color: 'text-primary' },
@@ -34,10 +35,7 @@ const fileTypeConfig: Record<string, { icon: ElementType; label: string; color: 
 const ScoreDetail = () => {
   const { scoreId: _scoreId, arrangementId } = useParams();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const [isDeleting, setIsDeleting] = useState(false);
-
-  if (!arrangementId) return <Navigate to='/scores' replace />;
 
   const { data: arrangement, isLoading } = useQuery(scoreQueries.getArrangement(arrangementId));
   const { mutateAsync: deleteArrangement } = useMutation(scoreMutations.deleteArrangement());
@@ -53,6 +51,8 @@ const ScoreDetail = () => {
       setIsDeleting(false);
     }
   };
+
+  if (!arrangementId) return <Navigate to='/scores' replace />;
 
   if (isLoading) {
     return (
@@ -82,6 +82,8 @@ const ScoreDetail = () => {
       </AppLayout>
     );
   }
+
+
 
   const songTitle = arrangement.songs?.title ?? '알 수 없는 곡';
   const files = arrangement.arrangement_files ?? [];

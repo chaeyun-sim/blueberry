@@ -26,13 +26,14 @@ import {
 import { useNavigate } from 'react-router-dom';
 import Autocomplete from '@/components/Autocomplete';
 import { ALL_INSTRUMENTS, INSTRUMENT_ABBREVIATIONS } from '@/constants/instruments';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { scoreQueries } from '@/api/score/queries';
 import { scoreMutations } from '@/api/score/mutations';
 import { scoreKeys } from '@/api/score/queryKeys';
 import { findSongByTitle } from '@/api/score';
 import { toast } from 'sonner';
 import JSZip from 'jszip';
+import { queryClient } from '@/utils/query-client';
 
 interface FileEntry {
   file: File;
@@ -137,7 +138,6 @@ function parseInstrumentsFromZipName(fileName: string): string[] {
 const ScoreRegister = () => {
   const navigate = useNavigate();
   const zipInputRef = useRef<HTMLInputElement>(null);
-  const queryClient = useQueryClient();
 
   const { data: songs = [] } = useQuery(scoreQueries.getSongs());
 

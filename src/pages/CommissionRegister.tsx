@@ -57,8 +57,8 @@ const CommissionRegister = () => {
           url={form.imagePreview}
           file={imageFile}
           setImage={({ url, file }) => {
-            setForm(prev => ({ ...prev, imagePreview: url }))
-            setImageFile(file)
+            setForm(prev => ({ ...prev, imagePreview: url }));
+            setImageFile(file);
           }}
           setForm={res =>
             setForm({
@@ -76,7 +76,12 @@ const CommissionRegister = () => {
         />
 
         {/* Right: Form Fields */}
-        <CommissionRegisterForm form={form} setForm={setForm} imageFile={imageFile} isAnalyzing={isAnalyzing} />
+        <CommissionRegisterForm
+          form={form}
+          setForm={setForm}
+          imageFile={imageFile}
+          isAnalyzing={isAnalyzing}
+        />
       </div>
     </AppLayout>
   );
