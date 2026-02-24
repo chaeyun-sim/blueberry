@@ -380,7 +380,6 @@ export async function getSalesRowsByUploadId(uploadId: string): Promise<ExcelRow
 
   return (data ?? []).map((row, i) => ({
     id: i + 1,
-    orderDate: row.sold_at.replace('T', ' ').slice(0, 16),
     category: row.category ?? '미분류',
     product: row.product ?? '',
     amount: row.amount,
@@ -399,18 +398,14 @@ export async function saveSalesRows(rows: ExcelRow[], uploadName: string): Promi
   // 공백·대소문자·구두점 차이를 무시하는 정규화 (Excel vs DB 포맷 차이 대응)
   const norm = (s: string) => s.toLowerCase().replace(/\s*([(),])\s*/g, '$1').trim()
 
-  // AM/PM 날짜 포맷 → Supabase timestamptz 호환 형식으로 변환
-  const parseDate = (dateStr: string): string => {
-    const match = dateStr.match(/^(\d{4}-\d{2}-\d{2})\s+(\d{1,2}):(\d{2}):(\d{2})\s*(AM|PM)$/i)
-    if (match) {
-      let h = parseInt(match[2])
-      const [, date, , m, s, period] = match
-      if (period.toUpperCase() === 'PM' && h < 12) h += 12
-      if (period.toUpperCase() === 'AM' && h === 12) h = 0
-      return `${date} ${String(h).padStart(2, '0')}:${m}:${s}`
-    }
-    return dateStr
-  }
+  // 업로드 이름에서 sold_at 유도 (예: "2025-12" 또는 "202512" → "2025-12-01 00:00:00")
+  const uploadDate = (() => {
+    const m1 = uploadName.match(/(\d{4})[^\d](\d{2})/)
+    if (m1) return `${m1[1]}-${m1[2]}-01 00:00:00`
+    const m2 = uploadName.match(/(\d{4})(\d{2})/)
+    if (m2) return `${m2[1]}-${m2[2]}-01 00:00:00`
+    return new Date().toISOString().slice(0, 10) + ' 00:00:00'
+  })()
 
   // excel_uploads 레코드 생성
   const { data: uploadRecord, error: uploadError } = await supabase
@@ -454,7 +449,7 @@ export async function saveSalesRows(rows: ExcelRow[], uploadName: string): Promi
       category: row.category,
       product: row.product,
       amount: row.amount,
-      sold_at: parseDate(row.orderDate),
+      sold_at: uploadDate,
     }
   })
 
@@ -480,7 +475,6 @@ export async function getSalesRows(year?: number): Promise<ExcelRow[]> {
 
   return (data ?? []).map((row, i) => ({
     id: i + 1,
-    orderDate: row.sold_at.replace('T', ' ').slice(0, 16),
     category: row.category ?? '미분류',
     product: row.product ?? '',
     amount: row.amount,

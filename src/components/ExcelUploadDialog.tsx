@@ -11,10 +11,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Upload, FileSpreadsheet, X, CheckCircle2 } from "lucide-react";
 import * as XLSX from "xlsx";
+import { splitProduct } from "@/utils/split-product";
 
 export type ExcelRow = {
   id: number;
-  orderDate: string;
   category: string;
   product: string;
   amount: number;
@@ -89,7 +89,6 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: Props) => {
           return null;
         };
 
-        const dateCol = findCol(["주문일시", "orderDate", "날짜", "주문날짜", "주문 일시", "order date"]);
         const catCol = findCol(["대분류", "category", "카테고리", "분류", "대 분류"]);
         const prodCol = findCol(["주문상품", "product", "상품명", "주문 상품", "상품"]);
         const amtCol = findCol(["상품총액", "amount", "금액", "총액", "상품 총액", "가격"]);
@@ -103,7 +102,7 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: Props) => {
           const sample = rawRows.slice(0, Math.min(20, rawRows.length));
           const colCount = Math.max(...rawRows.map(r => r.length), 0);
 
-          let catIdx = -1, prodIdx = -1, amtIdx = -1, dateIdx = -1;
+          let catIdx = -1, prodIdx = -1, amtIdx = -1;
 
           for (let c = 0; c < colCount; c++) {
             const vals = sample.map(r => String(r[c] ?? '')).filter(v => v !== '' && v !== 'null');
@@ -111,19 +110,11 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: Props) => {
             const catScore = vals.filter(v => knownCats.has(v)).length;
             const numScore = vals.filter(v => v !== '' && !isNaN(Number(v.replace(/,/g, '')))).length;
             const prodScore = vals.filter(v => /\s*-/.test(v) && v.length > 5).length;
-            const dateScore = vals.filter(v => /\d{4}[-/]\d{2}[-/]\d{2}/.test(v)).length;
 
-            if (dateScore > 0 && dateIdx === -1) dateIdx = c;
             if (catScore > vals.length * 0.5 && catIdx === -1) catIdx = c;
             else if (prodScore > vals.length * 0.5 && prodIdx === -1) prodIdx = c;
             else if (numScore > vals.length * 0.7 && amtIdx === -1) amtIdx = c;
           }
-
-          // 파일명에서 날짜 추출 (예: 202512_... → 2025-12-01)
-          const dateFromFile = (() => {
-            const m = file.name.match(/(\d{4})(\d{2})/);
-            return m ? `${m[1]}-${m[2]}-01 00:00:00` : '';
-          })();
 
           const dataRows = rawRows.filter(r =>
             (catIdx >= 0 && r[catIdx]) || (prodIdx >= 0 && r[prodIdx])
@@ -131,7 +122,6 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: Props) => {
 
           parsed = dataRows.map((row, i) => ({
             id: i + 1,
-            orderDate: dateIdx >= 0 ? String(row[dateIdx] ?? '') : dateFromFile,
             category: catIdx >= 0 ? String(row[catIdx] ?? '') : '',
             product: prodIdx >= 0 ? String(row[prodIdx] ?? '') : '',
             amount: amtIdx >= 0 ? Number(String(row[amtIdx] ?? '0').replace(/,/g, '')) || 0 : 0,
@@ -139,7 +129,6 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: Props) => {
         } else {
           parsed = json.map((row, i) => ({
             id: i + 1,
-            orderDate: String(dateCol ? row[dateCol] ?? "" : ""),
             category: String(catCol ? row[catCol] ?? "" : ""),
             product: String(prodCol ? row[prodCol] ?? "" : ""),
             amount: Number(amtCol ? row[amtCol] ?? 0 : 0) || 0,
@@ -264,25 +253,26 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: Props) => {
                   <table className="w-full text-xs">
                     <thead>
                       <tr className="border-b bg-muted/30">
-                        <th className="p-2 text-left">주문일시</th>
                         <th className="p-2 text-left">대분류</th>
-                        <th className="p-2 text-left">주문상품</th>
+                        <th className="p-2 text-left">곡명</th>
+                        <th className="p-2 text-left">편성명</th>
                         <th className="p-2 text-right">상품총액</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {preview.slice(0, 5).map((row) => (
-                        <tr key={row.id} className="border-b last:border-0">
-                          <td className="p-2">{row.orderDate}</td>
-                          <td className="p-2">{row.category}</td>
-                          <td className="p-2 max-w-[150px] truncate">
-                            {row.product}
-                          </td>
-                          <td className="p-2 text-right tabular-nums">
-                            ₩{row.amount.toLocaleString()}
-                          </td>
-                        </tr>
-                      ))}
+                      {preview.slice(0, 5).map((row) => {
+                        const { song, arrangement } = splitProduct(row.product);
+                        return (
+                          <tr key={row.id} className="border-b last:border-0">
+                            <td className="p-2">{row.category}</td>
+                            <td className="p-2 max-w-[120px] truncate">{song}</td>
+                            <td className="p-2 max-w-[100px] truncate">{arrangement}</td>
+                            <td className="p-2 text-right tabular-nums">
+                              ₩{row.amount.toLocaleString()}
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
