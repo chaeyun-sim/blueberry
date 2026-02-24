@@ -54,7 +54,7 @@ const Dashboard = () => {
 
   const { data: commissions = [], isLoading, isError } = useQuery(commissionQueries.getCommissions());
   const { data: scores = [] } = useQuery(scoreQueries.getSongs());
-  const totalScores = scores.reduce((acc, score) => acc + score.arrangements.length, 0);
+  const totalScores = scores.reduce((acc, score) => acc + (score.arrangements?.length ?? 0), 0);
 
   const summaryValues = [{
     ...summary[0],
