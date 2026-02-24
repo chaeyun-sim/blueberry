@@ -34,6 +34,7 @@ import { findSongByTitle } from '@/api/score';
 import { toast } from 'sonner';
 import JSZip from 'jszip';
 import { queryClient } from '@/utils/query-client';
+import { buildInstrumentList, hasRomanSuffix } from '@/utils/build-instrument-list';
 
 interface FileEntry {
   file: File;
@@ -72,9 +73,11 @@ const fileTypeConfig: Record<
   },
 };
 
+// API의 ALLOWED_EXTENSIONS와 동기화 (src/api/score/index.ts)
+const SUPPORTED_EXTENSIONS = new Set(['musicxml', 'mxl', 'xml', 'pdf', 'mid', 'midi', 'musx'])
+
 function detectFileType(fileName: string): string {
   const ext = fileName.split('.').pop()?.toLowerCase() ?? '';
-  if (['wav', 'mp3', 'm4a', 'flac', 'aiff'].includes(ext)) return 'audio';
   if (['xml', 'musicxml', 'mxl'].includes(ext)) return 'musicxml';
   if (ext === 'pdf') return 'pdf';
   const nameWithoutExt = fileName.replace(/\.[^.]+$/, '');
@@ -85,27 +88,6 @@ function detectFileType(fileName: string): string {
 function formatFileSize(bytes: number) {
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-const hasRomanSuffix = (name: string) => /\s+(I{1,3}V?|IV|VI{0,3}|V)$/.test(name);
-
-function buildInstrumentList(names: string[]) {
-  const result: string[] = [];
-  const roman = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
-  for (const name of names) {
-    const sameBase = result.filter(i => i === name || i.startsWith(name + ' '));
-    if (sameBase.length === 0) {
-      result.push(name);
-    } else if (sameBase.length === 1 && !hasRomanSuffix(sameBase[0])) {
-      const idx = result.indexOf(name);
-      result[idx] = `${name} I`;
-      result.push(`${name} II`);
-    } else {
-      const nextNum = sameBase.length + 1;
-      result.push(`${name} ${roman[nextNum - 1] || nextNum}`);
-    }
-  }
-  return result;
 }
 
 const ABBR_TO_INSTRUMENT = Object.fromEntries(
@@ -219,7 +201,8 @@ const ScoreRegister = () => {
         if (entry.dir) continue;
         const fileName = path.split('/').pop() ?? path;
         if (fileName.startsWith('.') || path.startsWith('__MACOSX')) continue;
-        if (detectFileType(fileName) === 'audio') continue;
+        const ext = fileName.split('.').pop()?.toLowerCase() ?? '';
+        if (!SUPPORTED_EXTENSIONS.has(ext)) continue;
 
         fileCount++;
         if (fileCount > MAX_FILE_COUNT) {
@@ -257,7 +240,6 @@ const ScoreRegister = () => {
         setZipName(null);
       }
     } catch (e) {
-      console.error('ZIP extraction error:', e);
       toast.error('ZIP 파일을 읽을 수 없습니다.', { description: (e as Error).message });
       setZipName(null);
     } finally {
