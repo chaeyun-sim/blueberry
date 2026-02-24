@@ -136,7 +136,7 @@ function ErrorFallback({
               </div>
               <p className='text-xs text-muted-foreground'>
                 문제가 지속되면{' '}
-                <a href='mailto:support@example.com' className='underline hover:text-foreground'>
+                <a href='mailto:bysimune@example.com' className='underline hover:text-foreground'>
                   지원팀에 연락
                 </a>
               </p>
