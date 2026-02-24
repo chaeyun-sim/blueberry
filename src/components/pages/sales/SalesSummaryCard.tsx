@@ -7,13 +7,13 @@ interface SalesSummaryCardProps {
   icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>;
   title: string;
   value: number;
-	percentage: number;
-	compareKey: 'lastYear' | 'lastMonth';
-	isMoney?: boolean;
+  percentage?: number;
+  compareKey?: 'lastYear' | 'lastMonth';
+  isMoney?: boolean;
 }
 
 function SalesSummaryCard({ icon, title, value, percentage, compareKey, isMoney = false }: SalesSummaryCardProps) {
-	const Icon = icon
+  const Icon = icon
 
   return (
     <Card className='border-border/50'>
@@ -23,10 +23,14 @@ function SalesSummaryCard({ icon, title, value, percentage, compareKey, isMoney 
           <span className='text-xs text-muted-foreground font-medium'>{title}</span>
         </div>
         <p className='text-2xl font-display font-bold'>{isMoney ? formatCurrency(value) : value.toLocaleString()}</p>
-        <p className={`text-xs mt-1 flex items-center gap-1 ${percentage >= 0 ? 'text-[hsl(var(--status-complete))]' : 'text-destructive'}`}>
-          {percentage >= 0 ? <TrendingUp className='h-3 w-3' /> : <TrendingDown className='h-3 w-3' />}
-          {percentage}% vs {compareKey === 'lastYear' ? '작년' : '전월'}
-        </p>
+        {percentage !== undefined && compareKey ? (
+          <p className={`text-xs mt-1 flex items-center gap-1 ${percentage >= 0 ? 'text-[hsl(var(--status-complete))]' : 'text-destructive'}`}>
+            {percentage >= 0 ? <TrendingUp className='h-3 w-3' /> : <TrendingDown className='h-3 w-3' />}
+            {percentage}% vs {compareKey === 'lastYear' ? '작년' : '전월'}
+          </p>
+        ) : (
+          <p className='text-xs mt-1 text-muted-foreground'>누적 합계</p>
+        )}
       </CardContent>
     </Card>
   );

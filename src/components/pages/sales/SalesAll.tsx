@@ -16,18 +16,11 @@ import {
   SelectItem,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-} from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 import { formatCurrency } from '@/utils/format-currency';
 import { Fragment, useMemo, useState } from 'react';
-import { ExcelRow } from '@/components/ExcelUploadDialog';
+import { statsQueries } from '@/api/stats/queries';
+import { useQuery } from '@tanstack/react-query';
 
 type SortKey = 'orderDate' | 'category' | 'product' | 'amount';
 type SortDir = 'asc' | 'desc';
@@ -37,11 +30,20 @@ function SortIcon({ col, sortKey, sortDir }: { col: SortKey; sortKey: SortKey; s
   return sortDir === 'asc' ? <ArrowUp className='h-3 w-3 ml-1' /> : <ArrowDown className='h-3 w-3 ml-1' />;
 }
 
-interface SalesAllProps {
-  originData: ExcelRow[];
-}
+// 컬럼 flex 비율 — 헤더·바디에서 공유
+const COL = {
+  idx: 'w-8 shrink-0',
+  date: 'flex-[1.5] min-w-0',
+  cat: 'flex-[0.8] min-w-0',
+  product: 'flex-[4] min-w-0',
+  amount: 'flex-[1.2] min-w-0',
+} as const;
 
-function SalesAll({ originData }: SalesAllProps) {
+const HEAD_BASE = 'text-xs uppercase text-muted-foreground select-none px-3 py-2.5';
+const ROW_BASE = 'flex items-center border-b border-border/40 last:border-0 hover:bg-muted/30 transition-colors';
+
+function SalesAll() {
+  const { data: originData = [] } = useQuery(statsQueries.getSalesRows());
   const [sortKey, setSortKey] = useState<SortKey>('category');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
   const [filterCategory, setFilterCategory] = useState('ALL');
@@ -58,7 +60,7 @@ function SalesAll({ originData }: SalesAllProps) {
   };
 
   const categories = useMemo(
-    () => ['ALL', ...Array.from(new Set(originData.map(r => r.category)))],
+    () => ['ALL', ...Array.from(new Set(originData.map(r => r.category).filter(Boolean)))],
     [originData],
   );
 
@@ -111,19 +113,13 @@ function SalesAll({ originData }: SalesAllProps) {
             엑셀 데이터 전체 보기
           </CardTitle>
           <div className='flex items-center gap-2'>
-            <Select
-              value={filterCategory}
-              onValueChange={setFilterCategory}
-            >
+            <Select value={filterCategory} onValueChange={setFilterCategory}>
               <SelectTrigger className='w-32 h-8 text-xs'>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {categories.map(cat => (
-                  <SelectItem
-                    key={cat}
-                    value={cat}
-                  >
+                  <SelectItem key={cat} value={cat}>
                     {cat === 'ALL' ? '전체 대분류' : cat}
                   </SelectItem>
                 ))}
@@ -148,110 +144,92 @@ function SalesAll({ originData }: SalesAllProps) {
 
       <CardContent>
         <div className='rounded-md border border-border/50 overflow-auto'>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className='text-xs uppercase w-12'>#</TableHead>
-                <TableHead
-                  className='text-xs uppercase cursor-pointer select-none hover:text-foreground transition-colors'
-                  onClick={() => toggleSort('orderDate')}
-                >
-                  <span className='inline-flex items-center'>
-                    주문일시
-                    <SortIcon col='orderDate' sortKey={sortKey} sortDir={sortDir} />
-                  </span>
-                </TableHead>
-                {!groupByCategory && (
-                  <TableHead
-                    className='text-xs uppercase cursor-pointer select-none hover:text-foreground transition-colors'
-                    onClick={() => toggleSort('category')}
+          {/* ── Header ── */}
+          <div className='flex items-center bg-muted/30 border-b border-border/40'>
+            <div className={cn(COL.idx, HEAD_BASE)} />
+            <button
+              type='button'
+              className={cn(COL.date, HEAD_BASE, 'inline-flex items-center cursor-pointer hover:text-foreground transition-colors')}
+              onClick={() => toggleSort('orderDate')}
+            >
+              주문일시
+              <SortIcon col='orderDate' sortKey={sortKey} sortDir={sortDir} />
+            </button>
+            {!groupByCategory && (
+              <button
+                type='button'
+                className={cn(COL.cat, HEAD_BASE, 'inline-flex items-center cursor-pointer hover:text-foreground transition-colors')}
+                onClick={() => toggleSort('category')}
+              >
+                대분류
+                <SortIcon col='category' sortKey={sortKey} sortDir={sortDir} />
+              </button>
+            )}
+            <button
+              type='button'
+              className={cn(COL.product, HEAD_BASE, 'inline-flex items-center cursor-pointer hover:text-foreground transition-colors')}
+              onClick={() => toggleSort('product')}
+            >
+              주문상품
+              <SortIcon col='product' sortKey={sortKey} sortDir={sortDir} />
+            </button>
+            <button
+              type='button'
+              className={cn(COL.amount, HEAD_BASE, 'inline-flex items-center justify-end cursor-pointer hover:text-foreground transition-colors')}
+              onClick={() => toggleSort('amount')}
+            >
+              상품총액
+              <SortIcon col='amount' sortKey={sortKey} sortDir={sortDir} />
+            </button>
+          </div>
+
+          {/* ── Body ── */}
+          {groupByCategory && groupedData
+            ? Object.entries(groupedData).map(([category, rows]) => (
+                <Fragment key={`group-${category}`}>
+                  {/* Group header */}
+                  <div
+                    className='flex items-center justify-between px-4 py-2 bg-muted/40 hover:bg-muted/60 cursor-pointer select-none border-b border-border/40'
+                    onClick={() => filterCategory === 'ALL' && toggleGroup(category)}
                   >
-                    <span className='inline-flex items-center'>
-                      대분류
-                      <SortIcon col='category' sortKey={sortKey} sortDir={sortDir} />
-                    </span>
-                  </TableHead>
-                )}
-                <TableHead
-                  className='text-xs uppercase cursor-pointer select-none hover:text-foreground transition-colors'
-                  onClick={() => toggleSort('product')}
-                >
-                  <span className='inline-flex items-center'>
-                    주문상품
-                    <SortIcon col='product' sortKey={sortKey} sortDir={sortDir} />
-                  </span>
-                </TableHead>
-                <TableHead
-                  className='text-xs uppercase text-right cursor-pointer select-none hover:text-foreground transition-colors'
-                  onClick={() => toggleSort('amount')}
-                >
-                  <span className='inline-flex items-center justify-end'>
-                    상품총액
-                    <SortIcon col='amount' sortKey={sortKey} sortDir={sortDir} />
-                  </span>
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {groupByCategory && groupedData
-                ? Object.entries(groupedData).map(([category, rows]) => (
-                    <Fragment key={`group-${category}`}>
-                      <TableRow
-                        className='bg-muted/40 hover:bg-muted/60 cursor-pointer select-none'
-                        onClick={() => filterCategory === 'ALL' && toggleGroup(category)}
-                      >
-                        <TableCell
-                          colSpan={4}
-                          className='py-2 text-left'
-                        >
-                          <div className='inline-flex items-center gap-2 text-sm font-display font-bold w-full justify-between'>
-                            <div className='inline-flex items-center gap-2'>
-                              {filterCategory === 'ALL' &&
-                                (collapsedGroups.has(category) ? (
-                                  <ChevronRight className='h-4 w-4 text-muted-foreground' />
-                                ) : (
-                                  <ChevronDown className='h-4 w-4 text-muted-foreground' />
-                                ))}
-                              <span className='px-2 py-0.5 rounded-full text-xs bg-foreground text-background font-medium'>
-                                {category}
-                              </span>
-                            </div>
-                            <span className='text-muted-foreground font-normal text-xs'>
-                              {rows.length}건
-                            </span>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                      {!collapsedGroups.has(category) &&
-                        rows.map((row, i) => (
-                          <TableRow key={row.id}>
-                            <TableCell className='text-muted-foreground text-xs'>{i + 1}</TableCell>
-                            <TableCell className='text-sm tabular-nums'>{row.orderDate}</TableCell>
-                            <TableCell className='font-medium text-sm'>{row.product}</TableCell>
-                            <TableCell className='text-right tabular-nums text-sm'>
-                              {formatCurrency(row.amount)}
-                            </TableCell>
-                          </TableRow>
+                    <div className='inline-flex items-center gap-2'>
+                      {filterCategory === 'ALL' &&
+                        (collapsedGroups.has(category) ? (
+                          <ChevronRight className='h-4 w-4 text-muted-foreground' />
+                        ) : (
+                          <ChevronDown className='h-4 w-4 text-muted-foreground' />
                         ))}
-                    </Fragment>
-                  ))
-                : sortedData.map((row, i) => (
-                    <TableRow key={row.id}>
-                      <TableCell className='text-muted-foreground text-xs'>{i + 1}</TableCell>
-                      <TableCell className='text-sm tabular-nums'>{row.orderDate}</TableCell>
-                      <TableCell>
-                        <span className='px-2 py-0.5 rounded-full text-xs bg-secondary text-secondary-foreground'>
-                          {row.category}
-                        </span>
-                      </TableCell>
-                      <TableCell className='font-medium text-sm'>{row.product}</TableCell>
-                      <TableCell className='text-right tabular-nums text-sm'>
-                        {formatCurrency(row.amount)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-            </TableBody>
-          </Table>
+                      <span className='px-2 py-0.5 rounded-full text-xs bg-foreground text-background font-medium font-display font-bold'>
+                        {category}
+                      </span>
+                    </div>
+                    <span className='text-muted-foreground text-xs'>{rows.length}건</span>
+                  </div>
+                  {/* Group rows */}
+                  {!collapsedGroups.has(category) &&
+                    rows.map((row, i) => (
+                      <div key={row.id} className={ROW_BASE}>
+                        <div className={cn(COL.idx, 'px-3 py-2.5 text-xs text-muted-foreground')}>{i + 1}</div>
+                        <div className={cn(COL.date, 'px-3 py-2.5 text-sm tabular-nums truncate')}>{row.orderDate}</div>
+                        <div className={cn(COL.product, 'px-3 py-2.5 font-medium text-sm truncate')}>{row.product}</div>
+                        <div className={cn(COL.amount, 'px-3 py-2.5 text-right tabular-nums text-sm')}>{formatCurrency(row.amount)}</div>
+                      </div>
+                    ))}
+                </Fragment>
+              ))
+            : sortedData.map((row, i) => (
+                <div key={row.id} className={ROW_BASE}>
+                  <div className={cn(COL.idx, 'px-3 py-2.5 text-xs text-muted-foreground')}>{i + 1}</div>
+                  <div className={cn(COL.date, 'px-3 py-2.5 text-sm tabular-nums truncate')}>{row.orderDate}</div>
+                  <div className={cn(COL.cat, 'px-3 py-2.5')}>
+                    <span className='px-2 py-0.5 rounded-full text-xs bg-secondary text-secondary-foreground'>
+                      {row.category}
+                    </span>
+                  </div>
+                  <div className={cn(COL.product, 'px-3 py-2.5 font-medium text-sm truncate')}>{row.product}</div>
+                  <div className={cn(COL.amount, 'px-3 py-2.5 text-right tabular-nums text-sm')}>{formatCurrency(row.amount)}</div>
+                </div>
+              ))}
         </div>
       </CardContent>
     </Card>

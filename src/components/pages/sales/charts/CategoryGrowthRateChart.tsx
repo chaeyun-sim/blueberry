@@ -8,7 +8,7 @@ interface CategoryGrowthRateChartProps {
 	config: ChartConfig;
 }
 
-function CategoryGrowthRateChart({ data, config }: CategoryGrowthRateChartProps) {
+function CategoryGrowthRateChart({ data, config }: CategoryGrowthRateChartProps) {  
   return (
     <ChartContainer
       config={config}

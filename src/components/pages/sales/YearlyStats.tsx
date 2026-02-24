@@ -1,6 +1,5 @@
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { ChartConfig } from '@/components/ui/chart';
-import { monthlySalesByYear, monthlyCategoryByYear } from '@/mock/sales';
 import {
   Select,
   SelectTrigger,
@@ -9,28 +8,37 @@ import {
   SelectItem,
 } from '@/components/ui/select';
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { statsQueries } from '@/api/stats/queries';
 import GrowthRateChart from './charts/GrowthRateChart';
 import CategoryGrowthRateChart from './charts/CategoryGrowthRateChart';
 import MonthlyGrowthRateChart from './charts/MonthlyGrowthRateChart';
 
 const categoryChartConfig: ChartConfig = {
   CLASSIC: { label: 'CLASSIC', color: 'hsl(var(--status-complete))' },
-  OST: { label: 'OST', color: 'hsl(var(--status-complete) / 0.72)' },
-  ANI: { label: 'ANI', color: 'hsl(var(--status-complete) / 0.48)' },
-  ETC: { label: 'ETC', color: 'hsl(var(--status-complete) / 0.28)' },
+  POP:     { label: 'POP',     color: 'hsl(var(--primary))' },
+  'K-POP': { label: 'K-POP',  color: 'hsl(var(--accent))' },
+  OST:     { label: 'OST',     color: 'hsl(var(--status-received))' },
+  ANI:     { label: 'ANI',     color: 'hsl(220 70% 55%)' },
+  ETC:     { label: 'ETC',     color: 'hsl(var(--muted-foreground))' },
 };
 
 function YearlyStats() {
-  const [selectedYear, setSelectedYear] = useState('2026');
+  const { data: yearRange } = useQuery(statsQueries.getSalesYearRange());
+  const [selectedYear, setSelectedYear] = useState<number | null>(null);
 
-  const salesData = monthlySalesByYear[selectedYear];
-  const categoryData = monthlyCategoryByYear[selectedYear];
+  const year = selectedYear ?? yearRange?.max ?? new Date().getFullYear();
+  const yearOptions = yearRange
+    ? Array.from({ length: yearRange.max - yearRange.min + 1 }, (_, i) => yearRange.max - i)
+    : [year];
 
-  const avgCount = Math.round(salesData.reduce((sum, d) => sum + d.count, 0) / salesData.length);
-  const avgRevenue = Math.round(
-    salesData.reduce((sum, d) => sum + d.revenue, 0) / salesData.length,
-  );
-  const monthlySalesWithAvg = salesData.map(d => ({ ...d, avgRevenue }));
+  const { data: salesData = [] } = useQuery(statsQueries.getMonthlySales(year));
+  const { data: categoryData = [] } = useQuery(statsQueries.getMonthlyCategoryBreakdown(year));
+
+  const avgCount = salesData.length
+    ? Math.round(salesData.reduce((sum, d) => sum + d.count, 0) / salesData.length)
+    : 0;
+  const monthlySalesWithAvg = salesData.map(d => ({ ...d }));
 
   const growthData = salesData.map(d => ({
     month: d.month,
@@ -40,24 +48,33 @@ function YearlyStats() {
         : parseFloat((((d.revenue - d.prevRevenue) / d.prevRevenue) * 100).toFixed(1)),
   }));
 
-  const maxGrowth = Math.max(...growthData.map(d => d.growth));
-  const minGrowth = Math.min(...growthData.map(d => d.growth));
+  const maxGrowth = growthData.length ? Math.max(...growthData.map(d => d.growth)) : 0;
+  const minGrowth = growthData.length ? Math.min(...growthData.map(d => d.growth)) : 0;
   const range = maxGrowth - minGrowth;
   const zeroOffset = range === 0 ? '50%' : `${((maxGrowth / range) * 100).toFixed(1)}%`;
+
+  // 실제 데이터에 존재하는 카테고리만 범례에 표시
+  const activeCategories = Object.keys(categoryChartConfig).filter(key =>
+    categoryData.some(d => (d as Record<string, unknown>)[key])
+  );
+  const activeCategoryConfig: ChartConfig = Object.fromEntries(
+    activeCategories.map(k => [k, categoryChartConfig[k]])
+  );
 
   return (
     <>
       <div className='flex items-center gap-3 mb-2'>
         <Select
-          value={selectedYear}
-          onValueChange={setSelectedYear}
+          value={String(year)}
+          onValueChange={v => setSelectedYear(Number(v))}
         >
           <SelectTrigger className='w-32'>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value='2026'>2026년</SelectItem>
-            <SelectItem value='2025'>2025년</SelectItem>
+            {yearOptions.map(y => (
+              <SelectItem key={y} value={String(y)}>{y}년</SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
@@ -72,7 +89,7 @@ function YearlyStats() {
                 올해
               </span>
               <span className='flex items-center gap-1.5 text-xs text-muted-foreground'>
-                <span className='w-2 h-2 rounded-full bg-muted-foreground/40 inline-block' />총 평균
+                <span className='w-2 h-2 rounded-full bg-muted-foreground/40 inline-block' />전년도
               </span>
             </div>
           </div>
@@ -91,7 +108,7 @@ function YearlyStats() {
             <div className='flex items-center justify-between'>
               <CardTitle className='text-base font-display'>카테고리별 월 매출 비중</CardTitle>
               <div className='flex items-center gap-3'>
-                {Object.entries(categoryChartConfig).map(([key, cfg]) => (
+                {Object.entries(activeCategoryConfig).map(([key, cfg]) => (
                   <span
                     key={key}
                     className='flex items-center gap-1 text-xs text-muted-foreground'
@@ -109,7 +126,7 @@ function YearlyStats() {
           <CardContent>
             <CategoryGrowthRateChart
               data={categoryData}
-              config={categoryChartConfig}
+              config={activeCategoryConfig}
             />
           </CardContent>
         </Card>
