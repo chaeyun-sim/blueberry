@@ -13,6 +13,7 @@ function Breadcrumb({
         <span key={i} className="flex items-center gap-1.5">
           {i > 0 && <span className="text-muted-foreground/40">/</span>}
           <button
+            type='button'
             onClick={() => onNavigate(item.id)}
             className={cn(
               "hover:text-primary transition-colors",
