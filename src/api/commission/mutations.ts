@@ -17,6 +17,7 @@ export const commissionMutations = {
         commissionId: string;
         input: UpdateCommissionInput;
       }) => updateCommission(commissionId, input),
+      retry: 1,
     }),
   deleteCommission: () =>
     mutationOptions({
@@ -31,5 +32,6 @@ export const commissionMutations = {
     mutationOptions({
       mutationFn: ({ commissionId, status }: { commissionId: string; status: CommissionStatus }) =>
         updateCommissionStatus(commissionId, status),
+      retry: 1,
     }),
 };

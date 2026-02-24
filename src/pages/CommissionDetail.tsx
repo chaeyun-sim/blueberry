@@ -12,22 +12,16 @@ import ReceiveAndSendDialog from '@/components/pages/commission/ReceiveAndSendDi
 import { CompleteDialog } from '@/components/pages/commission/CompleteDialog';
 import { toast } from '@/hooks/use-toast';
 import CommissionImageDialog from '@/components/pages/commission/CommissionImageDialog';
-import { CommissionStatus } from '@/components/StatusBadge';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { CommissionStatus } from '@/constants/status-config';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { commissionQueries } from '@/api/commission/queries';
 import { commissionMutations } from '@/api/commission/mutations';
 import { commissionKeys } from '@/api/commission/queryKeys';
 import DeleteCommissionDialog from '@/components/pages/commission/DeleteCommissionDialog';
 import NotFound from './NotFound';
 import { Skeleton } from '@/components/ui/skeleton';
-
-const commissionInfo = {
-  composer: '작곡가',
-  arrangement: '편성',
-  version: '버전',
-  created_at: '등록일',
-  deadline: '마감일',
-};
+import { queryClient } from '@/utils/query-client';
+import { COMMISSION_INFO } from '@/types/commission';
 
 const statusProgress: Record<CommissionStatus, React.ForwardRefExoticComponent<Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>>> = {
   received: Package2,
@@ -40,7 +34,6 @@ const CommissionDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const queryClient = useQueryClient()
   const { data: commission, isLoading } = useQuery(commissionQueries.getCommission(id))
   const { mutate: updateStatus } = useMutation(commissionMutations.updateCommissionStatus())
 
@@ -264,7 +257,7 @@ const CommissionDetail = () => {
               </button>
             </div>
             <dl className='space-y-3'>
-              {Object.keys(commissionInfo).map(key => {
+              {Object.keys(COMMISSION_INFO).map(key => {
                 const value = () => {
                   if (key === 'version') {
                     return commission?.version ? `${commission?.version} ver.` : '-';
@@ -279,7 +272,7 @@ const CommissionDetail = () => {
                   key={key}
                   className='flex items-center justify-between py-2 border-b border-border/50 last:border-0'
                 >
-                  <dt className='text-sm text-muted-foreground'>{commissionInfo[key]}</dt>
+                  <dt className='text-sm text-muted-foreground'>{COMMISSION_INFO[key]}</dt>
                   <dd className='text-sm font-medium'>{value()}</dd>
                 </div>
                 )

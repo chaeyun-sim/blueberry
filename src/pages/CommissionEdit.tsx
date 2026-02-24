@@ -12,39 +12,32 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@/components/ui/select';
 import { ArrowLeft, Calendar, Plus, X } from 'lucide-react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import { ALL_INSTRUMENTS } from '@/constants/instruments';
 import { COMMISSION_STATUS_TRANSLATE } from '@/constants/translate';
-import { CommissionStatus } from '@/components/StatusBadge';
 import { commissionQueries } from '@/api/commission/queries';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { commissionKeys } from '@/api/commission/queryKeys';
 import { commissionMutations } from '@/api/commission/mutations';
 import { DifficultyLevelType } from '@/types/commission';
-
-interface EditForm {
-  title: string;
-  composer: string;
-  instruments: string[];
-  version: DifficultyLevelType;
-  deadline: string;
-  notes: string;
-  status: CommissionStatus;
-}
+import { queryClient } from '@/utils/query-client';
+import { EditFormType } from '@/types/form';
+import { CommissionStatus } from '@/constants/status-config';
+import useRemoveInstrument from '@/hooks/use-remove-instrument';
 
 const CommissionEdit = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const dateInputRef = useRef<HTMLInputElement>(null);
-  const queryClient = useQueryClient();
 
-  const { data: commission, isLoading } = useQuery(commissionQueries.getCommission(id))
+  const { removeInstrument } = useRemoveInstrument();
 
+  const { data: commission, isLoading } = useQuery(commissionQueries.getCommission(id));
 
-  const [form, setForm] = useState<EditForm>({
+  const [form, setForm] = useState<EditFormType>({
     title: commission?.title ?? '',
     instruments: commission?.arrangement ? commission.arrangement.split(', ') : [],
     version: commission?.version ?? null,
@@ -54,12 +47,12 @@ const CommissionEdit = () => {
     composer: commission?.composer ?? '',
   });
 
-  const commissionStatuses = Object.keys(COMMISSION_STATUS_TRANSLATE) as CommissionStatus[];
+  const commissionStatuses = Object.keys(COMMISSION_STATUS_TRANSLATE);
   const currentStatusIndex = commissionStatuses.findIndex(s => s === commission?.status);
   const prevStatus = currentStatusIndex > 0 ? commissionStatuses[currentStatusIndex - 1] : null;
 
   useEffect(() => {
-    if (!commission) return
+    if (!commission) return;
     setForm({
       title: commission.title ?? '',
       composer: commission.composer ?? '',
@@ -68,8 +61,8 @@ const CommissionEdit = () => {
       deadline: commission.deadline ?? '',
       notes: commission.notes ?? '',
       status: commission.status,
-    })
-  }, [commission])
+    });
+  }, [commission]);
 
   const [instrumentInput, setInstrumentInput] = useState('');
   const [showInstrumentDropdown, setShowInstrumentDropdown] = useState(false);
@@ -91,70 +84,69 @@ const CommissionEdit = () => {
       const roman = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
       setForm(prev => ({
         ...prev,
-        instruments: [...prev.instruments, `${name} ${roman[sameBase.length] || sameBase.length + 1}`],
+        instruments: [
+          ...prev.instruments,
+          `${name} ${roman[sameBase.length] || sameBase.length + 1}`,
+        ],
       }));
     }
     setInstrumentInput('');
     setShowInstrumentDropdown(false);
   };
 
-  const removeInstrument = (index: number) => {
-    const removed = form.instruments[index];
-    const baseName = removed.replace(/ (I{1,3}V?|IV|V|VI{0,3})$/, '');
-    const remaining = form.instruments.filter((_, i) => i !== index);
-    const sameBase = remaining.filter(i => i.startsWith(baseName));
-    if (sameBase.length === 1 && sameBase[0].includes(' ')) {
-      setForm(prev => ({
-        ...prev,
-        instruments: remaining.map(i => (i.startsWith(baseName) ? baseName : i)),
-      }));
-    } else {
-      setForm(prev => ({ ...prev, instruments: remaining }));
-    }
-  };
-
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { mutate: updateCommission } = useMutation(commissionMutations.updateCommission())
+  const { mutate: updateCommission } = useMutation(commissionMutations.updateCommission());
 
   const handleSave = () => {
     setIsSubmitting(true);
-    
-    updateCommission({
-      commissionId: id,
-      input: {
-        title: form.title,
-        arrangement: form.instruments.join(', '),
-        version: form.version,
-        deadline: form.deadline,
-        notes: form.notes,
-        status: form.status,
-        composer: form.composer,
+
+    updateCommission(
+      {
+        commissionId: id,
+        input: {
+          title: form.title,
+          arrangement: form.instruments.join(', '),
+          version: form.version,
+          deadline: form.deadline,
+          notes: form.notes,
+          status: form.status,
+          composer: form.composer,
+        },
       },
-    }, {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: commissionKeys.detail(id) });
-        queryClient.invalidateQueries({ queryKey: commissionKeys.list() });
-        setIsSubmitting(false);
-        toast({ title: '의뢰가 수정되었습니다.' });
-        navigate(-1);
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: commissionKeys.detail(id) });
+          queryClient.invalidateQueries({ queryKey: commissionKeys.list() });
+          setIsSubmitting(false);
+          toast({ title: '의뢰가 수정되었습니다.' });
+          navigate(-1);
+        },
+        onError: e => {
+          setIsSubmitting(false);
+          toast({ title: '의뢰 수정에 실패했습니다.', description: e.message });
+        },
       },
-      onError: (e) => {
-        setIsSubmitting(false);
-        toast({ title: '의뢰 수정에 실패했습니다.', description: e.message });
-      }
-    })
+    );
   };
 
-  if (!id) return <Navigate to='/commissions' replace />;
+  if (!id)
+    return (
+      <Navigate
+        to='/commissions'
+        replace
+      />
+    );
 
-  if (isLoading || !commission) return null
+  if (isLoading || !commission) return null;
 
   return (
     <AppLayout
       bottomBar={
         <div className='border-t border-border bg-background/95 backdrop-blur-sm'>
-          <div className={`px-6 py-3 flex items-center ${prevStatus ? 'justify-between' : 'justify-end'}`}>
+          <div
+            className={`px-6 py-3 flex items-center ${prevStatus ? 'justify-between' : 'justify-end'}`}
+          >
             <div className='flex gap-2'>
               <Button
                 variant='ghost'
@@ -164,7 +156,11 @@ const CommissionEdit = () => {
               >
                 수정 취소
               </Button>
-              <Button onClick={handleSave} className='px-6' disabled={isSubmitting}>
+              <Button
+                onClick={handleSave}
+                className='px-6'
+                disabled={isSubmitting}
+              >
                 {isSubmitting ? '수정 중...' : '수정 저장'}
               </Button>
             </div>
@@ -188,7 +184,6 @@ const CommissionEdit = () => {
         <CardContent className='p-5'>
           <h2 className='font-display font-semibold mb-4'>의뢰 정보</h2>
           <div className='space-y-5'>
-
             <div className='space-y-2'>
               <Label>곡명</Label>
               <Input
@@ -213,7 +208,12 @@ const CommissionEdit = () => {
                 </SelectTrigger>
                 <SelectContent>
                   {commissionStatuses.map(status => (
-                    <SelectItem key={status} value={status}>{COMMISSION_STATUS_TRANSLATE[status]}</SelectItem>
+                    <SelectItem
+                      key={status}
+                      value={status}
+                    >
+                      {COMMISSION_STATUS_TRANSLATE[status]}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -276,13 +276,15 @@ const CommissionEdit = () => {
                       className='inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium bg-primary/15 text-primary border border-primary/20'
                     >
                       {inst}
-                      {!isSubmitting && <button
-                        type='button'
-                        onClick={() => removeInstrument(idx)}
-                        className='ml-0.5 hover:text-destructive transition-colors'
-                      >
-                        <X className='h-3 w-3' />
-                      </button>}
+                      {!isSubmitting && (
+                        <button
+                          type='button'
+                          onClick={() => setForm(prev => ({ ...prev, instruments: removeInstrument(prev.instruments, idx) }))}
+                          className='ml-0.5 hover:text-destructive transition-colors'
+                        >
+                          <X className='h-3 w-3' />
+                        </button>
+                      )}
                     </span>
                   ))}
                 </div>
@@ -295,7 +297,10 @@ const CommissionEdit = () => {
               <Select
                 value={form.version ?? 'normal'}
                 onValueChange={value =>
-                  setForm(prev => ({ ...prev, version: value === 'normal' ? null : value as DifficultyLevelType }))
+                  setForm(prev => ({
+                    ...prev,
+                    version: value === 'normal' ? null : (value as DifficultyLevelType),
+                  }))
                 }
                 disabled={isSubmitting}
               >
@@ -344,7 +349,6 @@ const CommissionEdit = () => {
                 disabled={isSubmitting}
               />
             </div>
-
           </div>
         </CardContent>
       </Card>

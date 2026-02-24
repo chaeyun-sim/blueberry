@@ -15,6 +15,22 @@ function MusicRecommend() {
   const availablePool = recommendationPool.filter(r => !workedSongs.has(r.id));
   const effectivePool = availablePool.length > 0 ? availablePool : recommendationPool;
 
+  const baseDayIdx = effectivePool.length > 0 ? dayjs().dayOfYear() % effectivePool.length : 0;
+  const dailyRec = effectivePool.length > 0 ? effectivePool[(baseDayIdx + refreshOffset) % effectivePool.length] : null;
+  const rec = selectedRec ?? dailyRec;
+
+  const handleMarkAsWorked = useCallback(() => {
+    if (!rec) return;
+    markAsWorked(rec.id);
+    setSelectedRec(null);
+    setRefreshOffset(0);
+  }, [markAsWorked, rec?.id]);
+
+  const handleRefresh = () => {
+    setSelectedRec(null);
+    setRefreshOffset(v => v + 1);
+  };
+
   if (effectivePool.length === 0) {
     return (
       <AppLayout>
@@ -25,22 +41,6 @@ function MusicRecommend() {
       </AppLayout>
     );
   }
-
-  const baseDayIdx = dayjs().dayOfYear() % effectivePool.length;
-
-  const dailyRec = effectivePool[(baseDayIdx + refreshOffset) % effectivePool.length];
-  const rec = selectedRec ?? dailyRec;
-
-  const handleMarkAsWorked = useCallback(() => {
-    markAsWorked(rec.id);
-    setSelectedRec(null);
-    setRefreshOffset(0);
-  }, [markAsWorked, rec.id]);
-
-  const handleRefresh = () => {
-    setSelectedRec(null);
-    setRefreshOffset(v => v + 1);
-  };
 
   return (
     <AppLayout>

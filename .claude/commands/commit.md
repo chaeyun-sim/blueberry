@@ -20,7 +20,7 @@ You are about to create a git commit.
 
    - type: `feat` | `fix` | `refactor` | `chore` | `docs` | `style` | `test`
    - scope: 변경된 파일/기능명 (선택)
-   - subject: 명령형, 소문자로 시작, 50자 이내
+   - subject: 명령형, 소문자로 시작, 50자 이내, 반드시 한글로
 
 6. **Stage files:** Stage only the relevant changed files using `git add <file>`. If the file is not relevant, ask for confirmation, and then unstage the file using `git restore --staged`
 7. **Create the Commit:** Use `git commit -m "$ARGUMENTS"`.
