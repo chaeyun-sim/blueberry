@@ -22,7 +22,6 @@ export const commissionMutations = {
   deleteCommission: () =>
     mutationOptions({
       mutationFn: ({ commissionId }: { commissionId: string }) => deleteCommission(commissionId),
-      retry: 1,
     }),
   uploadCommissionImage: () =>
     mutationOptions({
