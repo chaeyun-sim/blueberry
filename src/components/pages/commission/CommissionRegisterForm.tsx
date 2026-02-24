@@ -43,7 +43,9 @@ function CommissionRegisterForm({ form, setForm, imageFile, isAnalyzing }: Commi
   );
 
   const handleAddInstrument = (name: string) => {
-    setForm({ ...form, instruments: buildInstrumentList([...form.instruments, name]) });
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    setForm({ ...form, instruments: buildInstrumentList([...form.instruments, trimmed]) });
     setInstrumentInput('');
     setShowInstrumentDropdown(false);
   };
