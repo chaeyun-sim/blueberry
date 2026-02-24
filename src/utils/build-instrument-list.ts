@@ -9,7 +9,7 @@ export const buildInstrumentList = (names: string[]) => {
         result.push(name);
       } else if (sameBase.length === 1 && !hasRomanSuffix(sameBase[0])) {
         const idx = result.indexOf(sameBase[0]);
-        result[idx] = `${name} I`;
+        if (idx !== -1) result[idx] = `${name} I`;
         result.push(`${name} II`);
       } else {
         const nextNum = sameBase.length + 1;
