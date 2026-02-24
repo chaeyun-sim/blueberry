@@ -4,6 +4,9 @@ import { ExcelRow } from '@/components/ExcelUploadDialog'
 import { ExcelUpload, MonthlyCategoryData, MonthlySale, SalesSummary, TopArrangement, TopSong, TopSongMonthlySalesResult } from '@/types/stats'
 import { splitProduct } from '@/utils/split-product'
 
+// Supabase 기본 반환 한도(1,000행) 우회 — 집계 쿼리 전체에 적용
+const MAX_ROWS = 100_000
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function pctChange(current: number, prev: number): number {
@@ -62,11 +65,11 @@ export async function getSalesSummary(): Promise<SalesSummary> {
     { data: prevMonthRows, error: e3 },
     { data: prevPrevMonthRows, error: e4 },
   ] = await Promise.all([
-    supabase.from('sales').select('amount'),
-    supabase.from('sales').select('amount').gte('sold_at', thisYearRange.gte).lt('sold_at', thisYearRange.lt!),
-    supabase.from('sales').select('amount').gte('sold_at', lastYearRange.gte).lt('sold_at', lastYearRange.lt!),
-    supabase.from('sales').select('amount').gte('sold_at', prevMonthRange.gte).lt('sold_at', prevMonthRange.lt!),
-    supabase.from('sales').select('amount').gte('sold_at', prevPrevMonthRange.gte).lt('sold_at', prevPrevMonthRange.lt!),
+    supabase.from('sales').select('amount').limit(MAX_ROWS),
+    supabase.from('sales').select('amount').gte('sold_at', thisYearRange.gte).lt('sold_at', thisYearRange.lt!).limit(MAX_ROWS),
+    supabase.from('sales').select('amount').gte('sold_at', lastYearRange.gte).lt('sold_at', lastYearRange.lt!).limit(MAX_ROWS),
+    supabase.from('sales').select('amount').gte('sold_at', prevMonthRange.gte).lt('sold_at', prevMonthRange.lt!).limit(MAX_ROWS),
+    supabase.from('sales').select('amount').gte('sold_at', prevPrevMonthRange.gte).lt('sold_at', prevPrevMonthRange.lt!).limit(MAX_ROWS),
   ])
 
   if (e0) throw e0
@@ -103,8 +106,8 @@ export async function getSalesSummary(): Promise<SalesSummary> {
  */
 export async function getMonthlySales(year: number): Promise<MonthlySale[]> {
   const [{ data: thisYearData, error: e1 }, { data: lastYearData, error: e2 }] = await Promise.all([
-    supabase.from('sales').select('sold_at, amount').gte('sold_at', `${year}-01-01`).lt('sold_at', `${year + 1}-01-01`),
-    supabase.from('sales').select('sold_at, amount').gte('sold_at', `${year - 1}-01-01`).lt('sold_at', `${year}-01-01`),
+    supabase.from('sales').select('sold_at, amount').gte('sold_at', `${year}-01-01`).lt('sold_at', `${year + 1}-01-01`).limit(MAX_ROWS),
+    supabase.from('sales').select('sold_at, amount').gte('sold_at', `${year - 1}-01-01`).lt('sold_at', `${year}-01-01`).limit(MAX_ROWS),
   ])
 
   if (e1) throw e1
@@ -136,6 +139,7 @@ export async function getMonthlyCategoryBreakdown(year: number): Promise<Monthly
     .select('sold_at, amount, category')
     .gte('sold_at', `${year}-01-01`)
     .lt('sold_at', `${year + 1}-01-01`)
+    .limit(MAX_ROWS)
 
   if (error) throw error
 
@@ -176,7 +180,7 @@ export async function getMonthlyCategoryBreakdown(year: number): Promise<Monthly
 export async function getCategoryDistribution(
   year?: number,
 ): Promise<{ name: string; value: number; count: number; countShare: number; revenue: number }[]> {
-  let query = supabase.from('sales').select('amount, category')
+  let query = supabase.from('sales').select('amount, category').limit(MAX_ROWS)
   if (year) {
     query = query.gte('sold_at', `${year}-01-01`).lt('sold_at', `${year + 1}-01-01`)
   }
@@ -218,6 +222,7 @@ export async function getTopSongs(limit = 5): Promise<TopSong[]> {
   const { data, error } = await supabase
     .from('sales')
     .select('amount, category, product')
+    .limit(MAX_ROWS)
 
   if (error) throw error
 
@@ -248,6 +253,7 @@ export async function getTopArrangements(limit = 5): Promise<TopArrangement[]> {
   const { data, error } = await supabase
     .from('sales')
     .select('amount, product')
+    .limit(MAX_ROWS)
 
   if (error) throw error
 
@@ -282,6 +288,7 @@ export async function getTopSongMonthlySales(
     .select('sold_at, product')
     .gte('sold_at', `${year}-01-01`)
     .lt('sold_at', `${year + 1}-01-01`)
+    .limit(MAX_ROWS)
 
   if (error) throw error
 
@@ -375,6 +382,7 @@ export async function getSalesRowsByUploadId(uploadId: string): Promise<ExcelRow
     .select('id, sold_at, amount, category, product')
     .eq('upload_id', uploadId)
     .order('sold_at', { ascending: false })
+    .limit(MAX_ROWS)
 
   if (error) throw error
 
@@ -465,6 +473,7 @@ export async function getSalesRows(year?: number): Promise<ExcelRow[]> {
     .from('sales')
     .select('id, sold_at, amount, category, product')
     .order('sold_at', { ascending: false })
+    .limit(MAX_ROWS)
 
   if (year) {
     query = query.gte('sold_at', `${year}-01-01`).lt('sold_at', `${year + 1}-01-01`)
