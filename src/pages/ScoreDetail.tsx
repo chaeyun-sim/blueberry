@@ -123,6 +123,7 @@ const ScoreDetail = () => {
               <AlertDialogCancel>취소</AlertDialogCancel>
               <AlertDialogAction
                 onClick={handleDelete}
+                disabled={isDeleting}
                 className='bg-destructive text-destructive-foreground hover:bg-destructive/90'
               >
                 삭제
