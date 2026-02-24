@@ -17,10 +17,12 @@ export const commissionMutations = {
         commissionId: string;
         input: UpdateCommissionInput;
       }) => updateCommission(commissionId, input),
+      retry: 1,
     }),
   deleteCommission: () =>
     mutationOptions({
       mutationFn: ({ commissionId }: { commissionId: string }) => deleteCommission(commissionId),
+      retry: 1,
     }),
   uploadCommissionImage: () =>
     mutationOptions({
@@ -31,5 +33,6 @@ export const commissionMutations = {
     mutationOptions({
       mutationFn: ({ commissionId, status }: { commissionId: string; status: CommissionStatus }) =>
         updateCommissionStatus(commissionId, status),
+      retry: 1,
     }),
 };

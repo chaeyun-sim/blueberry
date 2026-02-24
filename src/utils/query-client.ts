@@ -11,8 +11,7 @@ export const queryClient = new QueryClient({
       },
     },
     mutations: {
-      retry: 1,
-      retryDelay: 1000,
+      retry: 0,
     },
   },
 });

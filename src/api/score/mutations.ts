@@ -20,10 +20,12 @@ export const scoreMutations = {
     mutationOptions({
       mutationFn: ({ id, input }: { id: string; input: UpdateSongInput }) =>
         updateSong(id, input),
+      retry: 1,
     }),
   deleteSong: () =>
     mutationOptions({
       mutationFn: ({ id }: { id: string }) => deleteSong(id),
+      retry: 1,
     }),
   createArrangement: () =>
     mutationOptions({
@@ -32,6 +34,7 @@ export const scoreMutations = {
   deleteArrangement: () =>
     mutationOptions({
       mutationFn: ({ id }: { id: string }) => deleteArrangement(id),
+      retry: 1,
     }),
   uploadArrangementFile: () =>
     mutationOptions({
@@ -50,6 +53,7 @@ export const scoreMutations = {
   deleteArrangementFile: () =>
     mutationOptions({
       mutationFn: ({ id }: { id: string }) => deleteArrangementFile(id),
+      retry: 1,
     }),
   findSongByTitle: () =>
     mutationOptions({
