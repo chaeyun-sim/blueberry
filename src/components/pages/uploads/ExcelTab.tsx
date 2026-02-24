@@ -17,6 +17,7 @@ import { statsMutations } from '@/api/stats/mutations';
 import { statsKeys } from '@/api/stats/queryKeys';
 import { useToast } from '@/hooks/use-toast';
 import { formatCurrency } from '@/utils/format-currency';
+import { splitProduct } from '@/utils/split-product';
 import dayjs from 'dayjs';
 import type { ExcelUpload } from '@/types/stats';
 
@@ -176,28 +177,31 @@ function ExcelTab({ onUploadRequest }: { onUploadRequest: () => void }) {
                   <TableHeader>
                     <TableRow>
                       <TableHead className='text-xs uppercase w-10'>#</TableHead>
-                      <TableHead className='text-xs uppercase'>주문일시</TableHead>
                       <TableHead className='text-xs uppercase'>대분류</TableHead>
-                      <TableHead className='text-xs uppercase'>주문상품</TableHead>
+                      <TableHead className='text-xs uppercase'>곡명</TableHead>
+                      <TableHead className='text-xs uppercase'>편성명</TableHead>
                       <TableHead className='text-xs uppercase text-right'>상품총액</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {rows.map((row, i) => (
-                      <TableRow key={i}>
-                        <TableCell className='text-muted-foreground text-xs'>{i + 1}</TableCell>
-                        <TableCell className='text-sm tabular-nums'>{row.orderDate}</TableCell>
-                        <TableCell>
-                          <span className='px-2 py-0.5 rounded-full text-xs bg-secondary text-secondary-foreground'>
-                            {row.category}
-                          </span>
-                        </TableCell>
-                        <TableCell className='font-medium text-sm'>{row.product}</TableCell>
-                        <TableCell className='text-right tabular-nums text-sm'>
-                          {formatCurrency(row.amount)}
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {rows.map((row, i) => {
+                      const { song, arrangement } = splitProduct(row.product);
+                      return (
+                        <TableRow key={i}>
+                          <TableCell className='text-muted-foreground text-xs'>{i + 1}</TableCell>
+                          <TableCell>
+                            <span className='px-2 py-0.5 rounded-full text-xs bg-secondary text-secondary-foreground'>
+                              {row.category}
+                            </span>
+                          </TableCell>
+                          <TableCell className='font-medium text-sm'>{song}</TableCell>
+                          <TableCell className='text-sm text-muted-foreground'>{arrangement}</TableCell>
+                          <TableCell className='text-right tabular-nums text-sm'>
+                            {formatCurrency(row.amount)}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </motion.div>

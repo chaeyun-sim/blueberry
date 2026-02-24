@@ -21,8 +21,9 @@ import { formatCurrency } from '@/utils/format-currency';
 import { Fragment, useMemo, useState } from 'react';
 import { statsQueries } from '@/api/stats/queries';
 import { useQuery } from '@tanstack/react-query';
+import { splitProduct } from '@/utils/split-product';
 
-type SortKey = 'orderDate' | 'category' | 'product' | 'amount';
+type SortKey = 'category' | 'product' | 'amount';
 type SortDir = 'asc' | 'desc';
 
 function SortIcon({ col, sortKey, sortDir }: { col: SortKey; sortKey: SortKey; sortDir: SortDir }) {
@@ -33,9 +34,9 @@ function SortIcon({ col, sortKey, sortDir }: { col: SortKey; sortKey: SortKey; s
 // 컬럼 flex 비율 — 헤더·바디에서 공유
 const COL = {
   idx: 'w-8 shrink-0',
-  date: 'flex-[1.5] min-w-0',
   cat: 'flex-[0.8] min-w-0',
-  product: 'flex-[4] min-w-0',
+  song: 'flex-[2.5] min-w-0',
+  arrangement: 'flex-[1.5] min-w-0',
   amount: 'flex-[1.2] min-w-0',
 } as const;
 
@@ -167,14 +168,6 @@ function SalesAll() {
           {/* ── Header ── */}
           <div className='flex items-center bg-muted/30 border-b border-border/40'>
             <div className={cn(COL.idx, HEAD_BASE)} />
-            <button
-              type='button'
-              className={cn(COL.date, HEAD_BASE, 'inline-flex items-center cursor-pointer hover:text-foreground transition-colors')}
-              onClick={() => toggleSort('orderDate')}
-            >
-              주문일시
-              <SortIcon col='orderDate' sortKey={sortKey} sortDir={sortDir} />
-            </button>
             {!groupByCategory && (
               <button
                 type='button'
@@ -187,12 +180,15 @@ function SalesAll() {
             )}
             <button
               type='button'
-              className={cn(COL.product, HEAD_BASE, 'inline-flex items-center cursor-pointer hover:text-foreground transition-colors')}
+              className={cn(COL.song, HEAD_BASE, 'inline-flex items-center cursor-pointer hover:text-foreground transition-colors')}
               onClick={() => toggleSort('product')}
             >
-              주문상품
+              곡명
               <SortIcon col='product' sortKey={sortKey} sortDir={sortDir} />
             </button>
+            <div className={cn(COL.arrangement, HEAD_BASE, 'text-xs uppercase text-muted-foreground')}>
+              편성명
+            </div>
             <button
               type='button'
               className={cn(COL.amount, HEAD_BASE, 'inline-flex items-center justify-end cursor-pointer hover:text-foreground transition-colors')}
@@ -227,29 +223,35 @@ function SalesAll() {
                   </div>
                   {/* Group rows */}
                   {!collapsedGroups.has(category) &&
-                    rows.map((row, i) => (
-                      <div key={row.id} className={ROW_BASE}>
-                        <div className={cn(COL.idx, 'px-3 py-2.5 text-xs text-muted-foreground')}>{i + 1}</div>
-                        <div className={cn(COL.date, 'px-3 py-2.5 text-sm tabular-nums truncate')}>{row.orderDate}</div>
-                        <div className={cn(COL.product, 'px-3 py-2.5 font-medium text-sm truncate')}>{row.product}</div>
-                        <div className={cn(COL.amount, 'px-3 py-2.5 text-right tabular-nums text-sm')}>{formatCurrency(row.amount)}</div>
-                      </div>
-                    ))}
+                    rows.map((row, i) => {
+                      const { song, arrangement } = splitProduct(row.product);
+                      return (
+                        <div key={row.id} className={ROW_BASE}>
+                          <div className={cn(COL.idx, 'px-3 py-2.5 text-xs text-muted-foreground')}>{i + 1}</div>
+                          <div className={cn(COL.song, 'px-3 py-2.5 font-medium text-sm truncate')}>{song}</div>
+                          <div className={cn(COL.arrangement, 'px-3 py-2.5 text-sm text-muted-foreground truncate')}>{arrangement}</div>
+                          <div className={cn(COL.amount, 'px-3 py-2.5 text-right tabular-nums text-sm')}>{formatCurrency(row.amount)}</div>
+                        </div>
+                      );
+                    })}
                 </Fragment>
               ))
-            : sortedData.map((row, i) => (
-                <div key={row.id} className={ROW_BASE}>
-                  <div className={cn(COL.idx, 'px-3 py-2.5 text-xs text-muted-foreground')}>{i + 1}</div>
-                  <div className={cn(COL.date, 'px-3 py-2.5 text-sm tabular-nums truncate')}>{row.orderDate}</div>
-                  <div className={cn(COL.cat, 'px-3 py-2.5')}>
-                    <span className='px-2 py-0.5 rounded-full text-xs bg-secondary text-secondary-foreground'>
-                      {row.category}
-                    </span>
+            : sortedData.map((row, i) => {
+                const { song, arrangement } = splitProduct(row.product);
+                return (
+                  <div key={row.id} className={ROW_BASE}>
+                    <div className={cn(COL.idx, 'px-3 py-2.5 text-xs text-muted-foreground')}>{i + 1}</div>
+                    <div className={cn(COL.cat, 'px-3 py-2.5')}>
+                      <span className='px-2 py-0.5 rounded-full text-xs bg-secondary text-secondary-foreground'>
+                        {row.category}
+                      </span>
+                    </div>
+                    <div className={cn(COL.song, 'px-3 py-2.5 font-medium text-sm truncate')}>{song}</div>
+                    <div className={cn(COL.arrangement, 'px-3 py-2.5 text-sm text-muted-foreground truncate')}>{arrangement}</div>
+                    <div className={cn(COL.amount, 'px-3 py-2.5 text-right tabular-nums text-sm')}>{formatCurrency(row.amount)}</div>
                   </div>
-                  <div className={cn(COL.product, 'px-3 py-2.5 font-medium text-sm truncate')}>{row.product}</div>
-                  <div className={cn(COL.amount, 'px-3 py-2.5 text-right tabular-nums text-sm')}>{formatCurrency(row.amount)}</div>
-                </div>
-              ))}
+                );
+              })}
         </div>
       </CardContent>
     </Card>
