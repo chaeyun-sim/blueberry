@@ -106,7 +106,7 @@ const SalesStats = () => {
               value={tab}
               className='space-y-6'
             >
-              <Component originData={originData} />
+              <Component {...(tab === 'raw' ? { originData } : {})} />
             </TabsContent>
           );
         })}
