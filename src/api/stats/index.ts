@@ -444,10 +444,9 @@ export async function saveSalesRows(rows: ExcelRow[], uploadName: string): Promi
   )
 
   const inserts = rows.map(row => {
-    const [songTitle, ...arrangementParts] = row.product.split(/\s+-/)
-    const arrangementStr = arrangementParts.join('-').trim()
+    const { song: songTitle, arrangement: arrangementStr } = splitProduct(row.product)
 
-    const song_id = songMap.get(norm(songTitle.trim())) ?? null
+    const song_id = songMap.get(norm(songTitle)) ?? null
     const arrangement_id = (song_id ? arrangementMap.get(`${song_id}:${norm(arrangementStr)}`) : undefined) ?? null
 
     return {
