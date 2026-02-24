@@ -16,7 +16,7 @@ import { Search, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { useQuery } from '@tanstack/react-query';
+import { useAppQuery as useQuery } from '@/hooks/useAppQuery';
 import { commissionQueries } from '@/api/commission/queries';
 import { abbreviateInstrument } from '@/utils/instrument';
 import ErrorBoundary from '@/components/ErrorBoundary';

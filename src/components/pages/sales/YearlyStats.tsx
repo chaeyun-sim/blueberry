@@ -8,12 +8,13 @@ import {
   SelectItem,
 } from '@/components/ui/select';
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useAppQuery as useQuery } from '@/hooks/useAppQuery';
 import { statsQueries } from '@/api/stats/queries';
 import GrowthRateChart from './charts/GrowthRateChart';
 import CategoryGrowthRateChart from './charts/CategoryGrowthRateChart';
 import MonthlyGrowthRateChart from './charts/MonthlyGrowthRateChart';
 import { MONEY_RATIO } from '@/constants/money-ratio';
+import { useAuth } from '@/components/AuthProvider';
 
 const categoryChartConfig: ChartConfig = {
   CLASSIC: { label: 'CLASSIC', color: 'hsl(var(--status-complete))' },
@@ -28,6 +29,8 @@ function YearlyStats() {
   const { data: yearRange } = useQuery(statsQueries.getSalesYearRange());
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
 
+  const { isGuest } = useAuth();
+
   const year = selectedYear ?? yearRange?.max ?? new Date().getFullYear();
   const yearOptions = yearRange
     ? Array.from({ length: yearRange.max - yearRange.min + 1 }, (_, i) => yearRange.max - i)
@@ -39,7 +42,7 @@ function YearlyStats() {
   const avgCount = salesData.length
     ? Math.round(salesData.reduce((sum, d) => sum + d.count, 0) / salesData.length)
     : 0;
-  const monthlySalesWithAvg = salesData.map(d => ({ ...d, revenue: d.revenue * MONEY_RATIO, prevRevenue: d.prevRevenue * MONEY_RATIO }));
+  const monthlySalesWithAvg = salesData.map(d => ({ ...d, revenue: isGuest ? d.revenue : d.revenue * MONEY_RATIO, prevRevenue: isGuest ? d.prevRevenue : d.prevRevenue * MONEY_RATIO }));
 
   const growthData = salesData.map(d => ({
     month: d.month,

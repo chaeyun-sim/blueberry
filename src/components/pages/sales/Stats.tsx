@@ -28,7 +28,7 @@ import { ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { Layers } from 'lucide-react';
 import { formatCurrency } from '@/utils/format-currency';
 import TopSongBar from './TopSongBar';
-import { useQuery } from '@tanstack/react-query';
+import { useAppQuery as useQuery } from '@/hooks/useAppQuery';
 import { statsQueries } from '@/api/stats/queries';
 import { MONEY_RATIO } from '@/constants/money-ratio';
 
@@ -145,7 +145,7 @@ function Stats() {
               className='w-full h-[280px]'
             >
               <BarChart
-                data={songKeysData}
+                data={songKeysData.slice(0, 5)}
                 layout='vertical'
                 barSize={18}
                 barCategoryGap={28}

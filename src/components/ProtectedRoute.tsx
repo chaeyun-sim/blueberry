@@ -2,7 +2,7 @@ import { Navigate } from 'react-router-dom'
 import { useAuth } from './AuthProvider'
 
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { session, loading } = useAuth()
+  const { session, loading, isGuest } = useAuth()
 
   if (loading) {
     return (
@@ -12,7 +12,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
     )
   }
 
-  if (!session) {
+  if (!session && !isGuest) {
     return <Navigate to="/login" replace />
   }
 

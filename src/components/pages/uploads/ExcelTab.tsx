@@ -11,7 +11,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAppQuery as useQuery } from '@/hooks/useAppQuery';
 import { statsQueries } from '@/api/stats/queries';
 import { statsMutations } from '@/api/stats/mutations';
 import { statsKeys } from '@/api/stats/queryKeys';

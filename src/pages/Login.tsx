@@ -12,14 +12,14 @@ import logoImg from '@/assets/logo.png';
 
 export default function Login() {
   const navigate = useNavigate();
-  const { session, loading: authLoading } = useAuth();
+  const { session, loading: authLoading, isGuest, enterGuestMode } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   if (authLoading) return null;
-  if (session)
+  if (session || isGuest)
     return (
       <Navigate
         to='/'
@@ -137,7 +137,10 @@ export default function Login() {
           <Button
             variant='ghost'
             className='w-full border border-transparent hover:bg-foreground/5'
-            onClick={() => navigate('/')}
+            onClick={() => {
+              enterGuestMode();
+              navigate('/');
+            }}
           >
             게스트로 둘러보기
           </Button>

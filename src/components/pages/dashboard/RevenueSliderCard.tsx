@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { DollarSign, TrendingDown, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useAppQuery as useQuery } from '@/hooks/useAppQuery';
 import { statsQueries } from '@/api/stats/queries';
 import { MONEY_RATIO } from '@/constants/money-ratio';
 

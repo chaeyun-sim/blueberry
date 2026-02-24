@@ -20,7 +20,7 @@ import SummaryCard from '@/components/pages/dashboard/SummaryCard';
 import RevenueSliderCard from '@/components/pages/dashboard/RevenueSliderCard';
 import CommissionSummaryBar from '@/components/pages/dashboard/CommissionSummaryBar';
 import MonthlyChart from '@/components/pages/dashboard/MonthlyChart';
-import { useQuery } from '@tanstack/react-query';
+import { useAppQuery as useQuery } from '@/hooks/useAppQuery';
 import { commissionQueries } from '@/api/commission/queries';
 import dayjs from 'dayjs';
 import { scoreQueries } from '@/api/score/queries';
@@ -99,7 +99,7 @@ const Dashboard = () => {
 
   const recentCommissions = [...commissions]
     .sort((a, b) => dayjs(b.created_at).valueOf() - dayjs(a.created_at).valueOf())
-    .slice(0, 5);
+    .slice(0, 3);
 
   const getGreeting = () => {
     const h = clock.hour();

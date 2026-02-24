@@ -24,7 +24,7 @@ export function AppSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
-  const { session, loading: authLoading } = useAuth();
+  const { session, loading: authLoading, isGuest, exitGuestMode } = useAuth();
 
 
   const isActive = (item: typeof navItems[0]) =>
@@ -62,14 +62,15 @@ export function AppSidebar() {
           ))}
         </div>
 
-        {/* 새 의뢰 버튼 */}
-        <button
-          onClick={() => navigate("/new")}
-          className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-semibold bg-primary text-primary-foreground hover:opacity-90 transition-opacity mt-3"
-        >
-          <PlusCircle className="h-4 w-4 shrink-0" />
-          <span>새 의뢰</span>
-        </button>
+        {!isGuest && (
+          <button
+            onClick={() => navigate("/new")}
+            className="flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-semibold bg-primary text-primary-foreground hover:opacity-90 transition-opacity mt-3"
+          >
+            <PlusCircle className="h-4 w-4 shrink-0" />
+            <span>새 의뢰</span>
+          </button>
+        )}
       </SidebarContent>
 
       <SidebarFooter className="px-3 pb-4">
@@ -83,13 +84,22 @@ export function AppSidebar() {
             <span>{theme === "dark" ? "라이트 모드" : "다크 모드"}</span>
           </button>
 
-          {/* 유저 정보 / 로그인 */}
           {session ? (
-            <button className="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-border bg-muted/30" onClick={logout} >
+            <button className="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-border bg-muted/30" onClick={logout}>
               <div className="text-muted-foreground hover:text-foreground transition-colors">
                 <LogOut className="h-3.5 w-3.5" />
               </div>
               <p className="flex-1 min-w-0 text-left text-sm md:text-xs text-muted-foreground truncate">{session?.user?.email}</p>
+            </button>
+          ) : isGuest ? (
+            <button
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-border bg-muted/30"
+              onClick={() => { exitGuestMode(); navigate('/login'); }}
+            >
+              <div className="text-muted-foreground hover:text-foreground transition-colors">
+                <LogOut className="h-3.5 w-3.5" />
+              </div>
+              <p className="flex-1 min-w-0 text-left text-sm md:text-xs text-muted-foreground truncate">게스트</p>
             </button>
           ) : (
             <button

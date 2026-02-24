@@ -15,7 +15,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Breadcrumb from './BreadCrumb';
 import FolderRow from './FolderRow';
-import { useQuery } from '@tanstack/react-query';
+import { useAppQuery as useQuery } from '@/hooks/useAppQuery';
 import { scoreQueries } from '@/api/score/queries';
 import dayjs from 'dayjs';
 
