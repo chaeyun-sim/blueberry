@@ -15,7 +15,7 @@ export function parseInstrumentsFromZipName(fileName: string): string[] {
     const trimmed = part.trim().toLowerCase();
     const match = trimmed.match(/^(\d+)(.+)$/);
     if (match) {
-      const instrument = ABBR_TO_INSTRUMENT[match[2]];
+      const instrument = ABBR_TO_INSTRUMENT[match[2].trim()];
       if (instrument) {
         const count = Math.min(parseInt(match[1]), 20);
         for (let i = 0; i < count; i++) result.push(instrument);
