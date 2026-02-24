@@ -43,7 +43,14 @@ const HEAD_BASE = 'text-xs uppercase text-muted-foreground select-none px-3 py-2
 const ROW_BASE = 'flex items-center border-b border-border/40 last:border-0 hover:bg-muted/30 transition-colors';
 
 function SalesAll() {
-  const { data: originData = [] } = useQuery(statsQueries.getSalesRows());
+  const { data: yearRange } = useQuery(statsQueries.getSalesYearRange());
+  const [selectedYear, setSelectedYear] = useState<number | null>(null);
+  const year = selectedYear ?? yearRange?.max ?? undefined;
+  const yearOptions = yearRange
+    ? Array.from({ length: yearRange.max - yearRange.min + 1 }, (_, i) => yearRange.max - i)
+    : [];
+
+  const { data: originData = [] } = useQuery(statsQueries.getSalesRows(year));
   const [sortKey, setSortKey] = useState<SortKey>('category');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
   const [filterCategory, setFilterCategory] = useState('ALL');
@@ -113,6 +120,19 @@ function SalesAll() {
             엑셀 데이터 전체 보기
           </CardTitle>
           <div className='flex items-center gap-2'>
+            <Select
+              value={year ? String(year) : ''}
+              onValueChange={v => setSelectedYear(Number(v))}
+            >
+              <SelectTrigger className='w-24 h-8 text-xs'>
+                <SelectValue placeholder='연도' />
+              </SelectTrigger>
+              <SelectContent>
+                {yearOptions.map(y => (
+                  <SelectItem key={y} value={String(y)}>{y}년</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Select value={filterCategory} onValueChange={setFilterCategory}>
               <SelectTrigger className='w-32 h-8 text-xs'>
                 <SelectValue />
@@ -199,7 +219,7 @@ function SalesAll() {
                         ) : (
                           <ChevronDown className='h-4 w-4 text-muted-foreground' />
                         ))}
-                      <span className='px-2 py-0.5 rounded-full text-xs bg-foreground text-background font-medium font-display font-bold'>
+                      <span className='px-2 py-0.5 rounded-full text-xs bg-foreground text-background font-bold font-display'>
                         {category}
                       </span>
                     </div>
