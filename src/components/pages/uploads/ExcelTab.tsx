@@ -41,11 +41,19 @@ function UploadFolderRow({
       transition={{ duration: 0.15 }}
     >
       <div className='w-full flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-muted/30 transition-colors group'>
-        <button type='button' onClick={onClick} className='flex items-center gap-4 flex-1 min-w-0 text-left cursor-pointer'>
+        <button
+          type='button'
+          onClick={onClick}
+          className='flex items-center gap-4 flex-1 min-w-0 text-left cursor-pointer'
+        >
           <FolderOpen className='h-5 w-5 text-primary/70 group-hover:text-primary shrink-0 transition-colors' />
           <span className='font-medium text-sm flex-1 truncate'>{upload.name}</span>
-          <span className='text-xs text-muted-foreground tabular-nums'>{upload.row_count.toLocaleString()}건</span>
-          <span className='text-xs text-muted-foreground tabular-nums'>{dayjs(upload.uploaded_at).format('YYYY-MM-DD')}</span>
+          <span className='text-xs text-muted-foreground tabular-nums'>
+            {upload.row_count.toLocaleString()}건
+          </span>
+          <span className='text-xs text-muted-foreground tabular-nums'>
+            {dayjs(upload.uploaded_at).format('YYYY-MM-DD')}
+          </span>
         </button>
         <Button
           variant='ghost'
@@ -66,17 +74,29 @@ function ExcelTab({ onUploadRequest }: { onUploadRequest: () => void }) {
   const queryClient = useQueryClient();
   const [openUploadId, setOpenUploadId] = useState<string | null>(null);
 
-  const { data: uploads = [], isLoading, isError, refetch } = useQuery(statsQueries.getExcelUploads());
+  const {
+    data: uploads = [],
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery(statsQueries.getExcelUploads());
 
   const { data: rows = [] } = useQuery({
     ...statsQueries.getSalesRowsByUploadId(openUploadId ?? ''),
     enabled: !!openUploadId,
   });
 
-  const { mutate: deleteUpload, isPending: isDeleting } = useMutation(statsMutations.deleteExcelUpload());
+  const { mutate: deleteUpload, isPending: isDeleting } = useMutation(
+    statsMutations.deleteExcelUpload(),
+  );
 
   const handleDelete = (upload: ExcelUpload) => {
-    if (!confirm(`"${upload.name}" 업로드를 삭제하시겠습니까?\n연결된 ${upload.row_count}건의 매출 데이터도 함께 삭제됩니다.`)) return;
+    if (
+      !confirm(
+        `"${upload.name}" 업로드를 삭제하시겠습니까?\n연결된 ${upload.row_count}건의 매출 데이터도 함께 삭제됩니다.`,
+      )
+    )
+      return;
     deleteUpload(upload.id, {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: statsKeys.all });
@@ -100,7 +120,10 @@ function ExcelTab({ onUploadRequest }: { onUploadRequest: () => void }) {
     return (
       <div className='space-y-4'>
         {[0, 1, 2].map(i => (
-          <div key={i} className='h-12 rounded-lg bg-muted animate-pulse' />
+          <div
+            key={i}
+            className='h-12 rounded-lg bg-muted animate-pulse'
+          />
         ))}
       </div>
     );
@@ -128,7 +151,10 @@ function ExcelTab({ onUploadRequest }: { onUploadRequest: () => void }) {
       {/* Breadcrumb */}
       <div className='flex items-center gap-1.5 text-sm'>
         {breadcrumb.map((item, i) => (
-          <span key={i} className='flex items-center gap-1.5'>
+          <span
+            key={i}
+            className='flex items-center gap-1.5'
+          >
             {i > 0 && <span className='text-muted-foreground/40'>/</span>}
             <button
               type='button'
@@ -161,7 +187,10 @@ function ExcelTab({ onUploadRequest }: { onUploadRequest: () => void }) {
                     key={upload.id}
                     upload={upload}
                     onClick={() => setOpenUploadId(upload.id)}
-                    onDelete={e => { e.stopPropagation(); handleDelete(upload); }}
+                    onDelete={e => {
+                      e.stopPropagation();
+                      handleDelete(upload);
+                    }}
                     isDeleting={isDeleting}
                   />
                 ))}
@@ -173,37 +202,41 @@ function ExcelTab({ onUploadRequest }: { onUploadRequest: () => void }) {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
               >
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className='text-xs uppercase w-10'>#</TableHead>
-                      <TableHead className='text-xs uppercase'>대분류</TableHead>
-                      <TableHead className='text-xs uppercase'>곡명</TableHead>
-                      <TableHead className='text-xs uppercase'>편성명</TableHead>
-                      <TableHead className='text-xs uppercase text-right'>상품총액</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {rows.map((row, i) => {
-                      const { song, arrangement } = splitProduct(row.product);
-                      return (
-                        <TableRow key={i}>
-                          <TableCell className='text-muted-foreground text-xs'>{i + 1}</TableCell>
-                          <TableCell>
-                            <span className='px-2 py-0.5 rounded-full text-xs bg-secondary text-secondary-foreground'>
-                              {row.category}
-                            </span>
-                          </TableCell>
-                          <TableCell className='font-medium text-sm'>{song}</TableCell>
-                          <TableCell className='text-sm text-muted-foreground'>{arrangement}</TableCell>
-                          <TableCell className='text-right tabular-nums text-sm'>
-                            {formatCurrency(row.amount)}
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
+                {rows.length > 0 && (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className='text-xs uppercase w-10'>#</TableHead>
+                        <TableHead className='text-xs uppercase'>대분류</TableHead>
+                        <TableHead className='text-xs uppercase'>곡명</TableHead>
+                        <TableHead className='text-xs uppercase'>편성명</TableHead>
+                        <TableHead className='text-xs uppercase text-right'>상품총액</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {rows.map((row, i) => {
+                        const { song, arrangement } = splitProduct(row.product);
+                        return (
+                          <TableRow key={i}>
+                            <TableCell className='text-muted-foreground text-xs'>{i + 1}</TableCell>
+                            <TableCell>
+                              <span className='px-2 py-0.5 rounded-full text-xs bg-secondary text-secondary-foreground'>
+                                {row.category}
+                              </span>
+                            </TableCell>
+                            <TableCell className='font-medium text-sm'>{song}</TableCell>
+                            <TableCell className='text-sm text-muted-foreground'>
+                              {arrangement}
+                            </TableCell>
+                            <TableCell className='text-right tabular-nums text-sm'>
+                              {formatCurrency(row.amount)}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                )}
               </motion.div>
             )}
           </AnimatePresence>
@@ -212,9 +245,12 @@ function ExcelTab({ onUploadRequest }: { onUploadRequest: () => void }) {
             <div className='flex flex-col items-center justify-center py-16 text-muted-foreground'>
               <Sheet className='h-12 w-12 mb-3 opacity-40' />
               <p className='text-sm'>아직 업로드된 엑셀 파일이 없습니다</p>
-              <Button variant='outline' className='mt-4 gap-2' onClick={onUploadRequest}>
-                <Upload className='h-4 w-4' />
-                첫 번째 업로드
+              <Button
+                variant='outline'
+                className='mt-4 gap-2'
+                onClick={onUploadRequest}
+              >
+                <Upload className='h-4 w-4' />첫 번째 업로드
               </Button>
             </div>
           )}
