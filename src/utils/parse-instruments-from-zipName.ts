@@ -17,7 +17,7 @@ export function parseInstrumentsFromZipName(fileName: string): string[] {
     if (match) {
       const instrument = ABBR_TO_INSTRUMENT[match[2]];
       if (instrument) {
-        const count = parseInt(match[1]);
+        const count = Math.min(parseInt(match[1]), 20);
         for (let i = 0; i < count; i++) result.push(instrument);
       }
     } else {
