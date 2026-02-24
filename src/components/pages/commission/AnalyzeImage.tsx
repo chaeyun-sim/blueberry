@@ -3,14 +3,15 @@ import { Button } from '@/components/ui/button';
 import { X, ImageIcon, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRef } from 'react';
-import { CommissionRegisterFormType } from '@/pages/CommissionRegister';
 import { analyzeCommissionImage } from '@/api/commission';
+
+type AnalyzeResult = Awaited<ReturnType<typeof analyzeCommissionImage>>
 
 interface AnalyzeImageProps {
   url: string | null;
   file: File | null;
-  setImage: ({ url, file }: { url: string; file: File }) => void;
-  setForm: (form: Omit<CommissionRegisterFormType, 'imagePreview'>) => void;
+  setImage: ({ url, file }: { url: string | null; file: File | null }) => void;
+  setForm: (form: AnalyzeResult) => void;
   isAnalyzing: boolean;
   setIsAnalyzing: (isAnalyzing: boolean) => void;
 }
