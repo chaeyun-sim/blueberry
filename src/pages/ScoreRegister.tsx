@@ -24,14 +24,15 @@ import { findSongByTitle } from '@/api/score';
 import { toast } from 'sonner';
 import JSZip from 'jszip';
 import { queryClient } from '@/utils/query-client';
-import { buildInstrumentList, hasRomanSuffix } from '@/utils/build-instrument-list';
+import { buildInstrumentList } from '@/utils/build-instrument-list';
 import { DifficultyLevelType } from '@/types/commission';
 import { parseInstrumentsFromZipName } from '@/utils/parse-instruments-from-zipName';
 import { formatFileSize } from '@/utils/format-file-size';
 import { detectFileType } from '@/utils/detect-file-type';
 import { fileTypeConfig, ALLOWED_EXTENSIONS } from '@/constants/file-types';
 import { FileEntry } from '@/types/form';
-
+import { MAX_DECOMPRESSED, MAX_FILE_COUNT, MAX_ZIP_SIZE } from '@/constants/file-size';
+import useRemoveInstrument from '@/hooks/use-remove-instrument';
 
 interface ScoreRegisterFormType {
   songTitle: string;
@@ -48,6 +49,8 @@ interface ScoreRegisterFormType {
 const ScoreRegister = () => {
   const navigate = useNavigate();
   const zipInputRef = useRef<HTMLInputElement>(null);
+
+  const { removeInstrument } = useRemoveInstrument();
 
   const { data: songs = [] } = useQuery(scoreQueries.getSongs());
 
@@ -81,23 +84,6 @@ const ScoreRegister = () => {
   const handleAddInstrument = (name: string) => {
     setForm(prev => ({ ...prev, instruments: buildInstrumentList([...prev.instruments, name]), instrumentInput: '', showInstrumentDropdown: false }));
   };
-
-  const removeInstrument = (index: number) => {
-    setForm(prev => {
-      const removed = prev.instruments[index];
-      const baseName = removed.replace(/ (I{1,3}V?|IV|V|VI{0,3})$/, '');
-      const remaining = prev.instruments.filter((_, i) => i !== index);
-      const sameBase = remaining.filter(i => i === baseName || i.startsWith(baseName + ' '));
-      const instruments = sameBase.length === 1 && hasRomanSuffix(sameBase[0])
-        ? remaining.map(i => (i === baseName || i.startsWith(baseName + ' ') ? baseName : i))
-        : remaining;
-      return { ...prev, instruments };
-    });
-  };
-
-  const MAX_ZIP_SIZE = 200 * 1024 * 1024; // 200MB
-  const MAX_DECOMPRESSED = 500 * 1024 * 1024; // 500MB
-  const MAX_FILE_COUNT = 100;
 
   const handleZipFile = async (file: File) => {
     if (!file.name.toLowerCase().endsWith('.zip')) {
@@ -475,7 +461,7 @@ const ScoreRegister = () => {
                         <button
                           type='button'
                           disabled={isSubmitting}
-                          onClick={() => removeInstrument(idx)}
+                          onClick={() => setForm(prev => ({ ...prev, instruments: removeInstrument(prev.instruments, idx) }))}
                           className='ml-0.5 hover:text-destructive transition-colors disabled:opacity-50 disabled:pointer-events-none'
                         >
                           <X className='h-3 w-3' />
