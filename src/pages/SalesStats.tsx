@@ -31,7 +31,6 @@ const SalesStats = () => {
   const [uploadOpen, setUploadOpen] = useState(false);
 
   const { data: salesSummary } = useQuery(statsQueries.getSalesSummary());
-  console.log(salesSummary)
   const { mutate: saveRows } = useMutation(statsMutations.saveSalesRows());
 
   const handleExcelUpload = useCallback(
