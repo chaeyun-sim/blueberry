@@ -438,7 +438,10 @@ const ScoreRegister = () => {
                     onFocus={() => setForm(prev => ({ ...prev, showInstrumentDropdown: true }))}
                     onBlur={() => setTimeout(() => setForm(prev => ({ ...prev, showInstrumentDropdown: false })), 200)}
                     onKeyDown={e => {
-                      if (e.key === 'Enter') handleAddInstrument(form.instrumentInput);
+                      if (e.key === 'Enter' && form.instrumentInput.trim() !== '') {
+                        e.preventDefault();
+                        handleAddInstrument(form.instrumentInput);
+                      };
                     }}
                     disabled={isSubmitting}
                   />
