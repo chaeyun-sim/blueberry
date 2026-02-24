@@ -23,6 +23,7 @@ export async function getSongs() {
     .from('songs')
     .select('*, arrangements(*), categories(name)')
     .is('deleted_at', null)
+    .is('arrangements.deleted_at', null)
     .order('created_at', { ascending: false })
 
   if (error) throw error
@@ -36,6 +37,7 @@ export async function getSong(id: string) {
     .select('*, arrangements(*), categories(name)')
     .eq('id', id)
     .is('deleted_at', null)
+    .is('arrangements.deleted_at', null)
     .single()
 
   if (error) throw error
