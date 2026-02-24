@@ -219,40 +219,22 @@ const ScoreRegister = () => {
       }
 
       // 2. Create arrangement
-      const newArrangement = await createArrangement(
-        {
-          song_id: songId,
-          arrangement: form.instruments.join(', '),
-          version: form.version ?? undefined,
-        },
-        {
-          onError: error => {
-            setIsSubmitting(false);
-            toast.error('편성 등록에 실패했습니다.', { description: (error as Error).message });
-          },
-        },
-      );
+      const newArrangement = await createArrangement({
+        song_id: songId,
+        arrangement: form.instruments.join(', '),
+        version: form.version ?? undefined,
+      });
 
       // 3. Upload files
       const failed: string[] = [];
       for (const entry of form.files) {
         try {
-          await uploadFile(
-            {
-              arrangementId: newArrangement.id,
-              file: entry.file,
-              label: entry.label,
-              fileType: entry.fileType,
-            },
-            {
-              onError: error => {
-                setIsSubmitting(false);
-                toast.error('파일 업로드에 실패했습니다.', {
-                  description: (error as Error).message,
-                });
-              },
-            },
-          );
+          await uploadFile({
+            arrangementId: newArrangement.id,
+            file: entry.file,
+            label: entry.label,
+            fileType: entry.fileType,
+          });
         } catch {
           failed.push(entry.label);
         }
