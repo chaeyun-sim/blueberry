@@ -2,6 +2,7 @@ import { supabase } from '@/lib/supabase'
 import { MONTH } from '@/constants/month'
 import { ExcelRow } from '@/components/ExcelUploadDialog'
 import { ExcelUpload, MonthlyCategoryData, MonthlySale, SalesSummary, TopArrangement, TopSong, TopSongMonthlySalesResult } from '@/types/stats'
+import { splitProduct } from '@/utils/split-product'
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -222,7 +223,7 @@ export async function getTopSongs(limit = 5): Promise<TopSong[]> {
 
   const songMap = new Map<string, { title: string; category: string; sales: number; revenue: number }>()
   for (const row of (data ?? [])) {
-    const title = row.product?.split(/\s+-/)[0]?.trim()
+    const title = row.product ? splitProduct(row.product).song : undefined
     const category = row.category
     if (!title || !category) continue
     const existing = songMap.get(title)
@@ -252,8 +253,7 @@ export async function getTopArrangements(limit = 5): Promise<TopArrangement[]> {
 
   const arrMap = new Map<string, { arrangement: string; sales: number; revenue: number }>()
   for (const row of (data ?? [])) {
-    const parts = row.product?.split(/\s+-/)
-    const arrangement = parts && parts.length > 1 ? parts.slice(1).join('-').trim() : undefined
+    const arrangement = row.product ? splitProduct(row.product).arrangement || undefined : undefined
     if (!arrangement) continue
     const existing = arrMap.get(arrangement)
     if (existing) {
@@ -287,7 +287,7 @@ export async function getTopSongMonthlySales(
 
   const titleCount = new Map<string, number>()
   for (const row of (data ?? [])) {
-    const title = row.product?.split(/\s+-/)[0]?.trim()
+    const title = row.product ? splitProduct(row.product).song : undefined
     if (!title) continue
     titleCount.set(title, (titleCount.get(title) ?? 0) + 1)
   }
@@ -312,7 +312,7 @@ export async function getTopSongMonthlySales(
     monthMap.set(m, entry)
   }
   for (const row of (data ?? [])) {
-    const title = row.product?.split(/\s+-/)[0]?.trim()
+    const title = row.product ? splitProduct(row.product).song : undefined
     const key = title ? keyMap.get(title) : undefined
     if (!key) continue
     const m = new Date(row.sold_at).getMonth() + 1
