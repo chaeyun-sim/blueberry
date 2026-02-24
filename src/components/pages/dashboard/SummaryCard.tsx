@@ -5,9 +5,9 @@ import { ForwardRefExoticComponent, RefAttributes } from 'react';
 
 interface SummaryCardProps {
   icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>;
-  value: number;
-	description: string;
-	colorStatus: 'primary' | 'complete' | 'success' | 'warning';
+  value: string | number;
+  description: string;
+  colorStatus: 'primary' | 'complete' | 'success' | 'warning';
 }
 
 const cardStyleMap: Record<'primary' | 'complete' | 'success' | 'warning', {

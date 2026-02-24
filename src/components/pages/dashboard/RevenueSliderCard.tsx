@@ -1,13 +1,29 @@
 import RollingNumber from '@/components/RollingNumber';
 import { AnimatePresence, motion } from 'framer-motion';
-import { DollarSign, TrendingUp } from 'lucide-react';
+import { DollarSign, TrendingDown, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { statsQueries } from '@/api/stats/queries';
 
 function RevenueSliderCard() {
+  const { data: summary } = useQuery(statsQueries.getSalesSummary());
+
   const revenueSlides = [
-    { label: '올해 총 매출', value: 28450000, sub: '전년 대비 +22.4%', up: true },
-    { label: '지난 달 매출', value: 2340000, sub: '전월 대비 +15.2%', up: true },
+    {
+      label: '전체 누적 매출',
+      value: summary?.totalRevenue ?? 0,
+      sub: null,
+      up: true,
+    },
+    {
+      label: '지난 달 매출',
+      value: summary?.lastMonthRevenue ?? 0,
+      sub: summary?.revenueVsLastMonth != null
+        ? `전월 대비 ${summary.revenueVsLastMonth >= 0 ? '+' : ''}${summary.revenueVsLastMonth}%`
+        : null,
+      up: (summary?.revenueVsLastMonth ?? 0) >= 0,
+    },
   ];
 
   const [slideIdx, setSlideIdx] = useState(0);
@@ -52,9 +68,16 @@ function RevenueSliderCard() {
           <p className='text-3xl font-display font-bold mb-0.5'>
             <RollingNumber value={revenueSlides[slideIdx].value} />
           </p>
-          <p className='text-xs text-[hsl(var(--success))] flex items-center gap-0.5'>
-            <TrendingUp className='h-3 w-3' /> {revenueSlides[slideIdx].sub}
-          </p>
+          {revenueSlides[slideIdx].sub ? (
+            <p className={`text-xs flex items-center gap-0.5 ${revenueSlides[slideIdx].up ? 'text-[hsl(var(--success))]' : 'text-destructive'}`}>
+              {revenueSlides[slideIdx].up
+                ? <TrendingUp className='h-3 w-3' />
+                : <TrendingDown className='h-3 w-3' />}
+              {revenueSlides[slideIdx].sub}
+            </p>
+          ) : (
+            <p className='text-xs text-muted-foreground'>누적 합계</p>
+          )}
         </motion.div>
       </AnimatePresence>
       <div className='flex gap-1.5 mt-6'>

@@ -24,6 +24,8 @@ import { useQuery } from '@tanstack/react-query';
 import { commissionQueries } from '@/api/commission/queries';
 import dayjs from 'dayjs';
 import { scoreQueries } from '@/api/score/queries';
+import { statsQueries } from '@/api/stats/queries';
+import { formatCurrency } from '@/utils/format-currency';
 
 const summary = [{
   icon: Music,
@@ -54,20 +56,29 @@ const Dashboard = () => {
 
   const { data: commissions = [], isLoading, isError } = useQuery(commissionQueries.getCommissions());
   const { data: scores = [] } = useQuery(scoreQueries.getSongs());
+  const { data: salesSummary } = useQuery(statsQueries.getSalesSummary());
+
   const totalScores = scores.reduce((acc, score) => acc + (score.arrangements?.length ?? 0), 0);
+  const totalCompleted = commissions.filter(c => c.status === 'complete' || c.status === 'delivered').length;
+  const avgPrice = salesSummary && salesSummary.totalCount > 0
+    ? formatCurrency(Math.round(salesSummary.totalRevenue / salesSummary.totalCount))
+    : '-';
+  const yoyGrowth = salesSummary
+    ? `${salesSummary.revenueVsLastYear >= 0 ? '+' : ''}${salesSummary.revenueVsLastYear}%`
+    : '-';
 
   const summaryValues = [{
     ...summary[0],
     value: totalScores,
   }, {
     ...summary[1],
-    value: 0,
+    value: totalCompleted,
   }, {
     ...summary[2],
-    value: 0,
+    value: yoyGrowth,
   }, {
     ...summary[3],
-    value: 0,
+    value: avgPrice,
   }]
 
   const thisMonthCommissions = commissions.filter(c =>
