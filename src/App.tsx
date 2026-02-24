@@ -10,7 +10,7 @@ import CommissionList from "./pages/CommissionList";
 import CommissionRegister from "./pages/CommissionRegister";
 import CommissionDetail from "./pages/CommissionDetail";
 import CommissionEdit from "./pages/CommissionEdit";
-import ScoreList from "./pages/ScoreList";
+import Files from "./pages/Files";
 import ScoreDetail from "./pages/ScoreDetail";
 import ScoreRegister from "./pages/ScoreRegister";
 import SalesStats from "./pages/SalesStats";
@@ -46,7 +46,7 @@ const App = () => (
                 <Route path="/new" element={<CommissionRegister />} />
                 <Route path="/commissions/:id" element={<CommissionDetail />} />
                 <Route path="/commissions/:id/edit" element={<CommissionEdit />} />
-                <Route path="/scores" element={<ScoreList />} />
+                <Route path="/files" element={<Files />} />
                 <Route path="/scores/:scoreId/arrangements/:arrangementId" element={<ScoreDetail />} />
                 <Route path="/scores/new" element={<ScoreRegister />} />
                 <Route path="/stats" element={<SalesStats />} />
