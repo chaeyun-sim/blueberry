@@ -60,11 +60,9 @@ export async function deleteCommission(id: string) {
   if (error) throw error
 }
 
-// 올해 1월부터 현재 달까지 월별 의뢰 접수 건수
+// 올해 1~12월 월별 의뢰 접수 건수 (미래 달은 0으로 반환)
 export async function getMonthlyCommissionCounts(): Promise<{ month: string; count: number }[]> {
-  const now = new Date()
-  const year = now.getFullYear()
-  const currentMonth = now.getMonth() + 1
+  const year = new Date().getFullYear()
 
   const { data, error } = await supabase
     .from('commissions')
