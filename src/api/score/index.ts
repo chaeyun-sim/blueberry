@@ -57,15 +57,29 @@ export async function getArrangement(arrangementId: string) {
   return data as Arrangement
 }
 
-// 악보 등록 (upsert — title unique 제약 기반)
+// 악보 등록 (insert or return existing — title unique 제약 기반)
 export async function createSong(input: CreateSongInput) {
   const { data, error } = await supabase
     .from('songs')
-    .upsert(input, { onConflict: 'title', ignoreDuplicates: false })
+    .upsert(input, { onConflict: 'title', ignoreDuplicates: true })
     .select()
-    .single()
+    .maybeSingle()
 
   if (error) throw error
+
+  // race condition으로 insert가 무시된 경우 기존 row 반환
+  if (!data) {
+    const { data: existing, error: fetchError } = await supabase
+      .from('songs')
+      .select()
+      .eq('title', input.title)
+      .is('deleted_at', null)
+      .single()
+
+    if (fetchError) throw fetchError
+    return existing as Song
+  }
+
   return data as Song
 }
 
