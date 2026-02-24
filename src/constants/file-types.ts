@@ -24,6 +24,12 @@ export const fileTypeConfig: Record<
     color: 'text-[hsl(var(--success))]',
     dot: 'hsl(var(--success))',
   },
+  finale: {
+    icon: FileText,
+    label: 'Finale',
+    color: 'text-[hsl(var(--accent))]',
+    dot: 'hsl(var(--accent))',
+  },
   pdf: {
     icon: FileIcon,
     label: 'PDF',
