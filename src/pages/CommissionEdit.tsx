@@ -26,11 +26,14 @@ import { DifficultyLevelType } from '@/types/commission';
 import { queryClient } from '@/utils/query-client';
 import { EditFormType } from '@/types/form';
 import { CommissionStatus } from '@/constants/status-config';
+import useRemoveInstrument from '@/hooks/use-remove-instrument';
 
 const CommissionEdit = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const dateInputRef = useRef<HTMLInputElement>(null);
+
+  const { removeInstrument } = useRemoveInstrument();
 
   const { data: commission, isLoading } = useQuery(commissionQueries.getCommission(id));
 
@@ -89,21 +92,6 @@ const CommissionEdit = () => {
     }
     setInstrumentInput('');
     setShowInstrumentDropdown(false);
-  };
-
-  const removeInstrument = (index: number) => {
-    const removed = form.instruments[index];
-    const baseName = removed.replace(/ (I{1,3}V?|IV|V|VI{0,3})$/, '');
-    const remaining = form.instruments.filter((_, i) => i !== index);
-    const sameBase = remaining.filter(i => i.startsWith(baseName));
-    if (sameBase.length === 1 && sameBase[0].includes(' ')) {
-      setForm(prev => ({
-        ...prev,
-        instruments: remaining.map(i => (i.startsWith(baseName) ? baseName : i)),
-      }));
-    } else {
-      setForm(prev => ({ ...prev, instruments: remaining }));
-    }
   };
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -291,7 +279,7 @@ const CommissionEdit = () => {
                       {!isSubmitting && (
                         <button
                           type='button'
-                          onClick={() => removeInstrument(idx)}
+                          onClick={() => setForm(prev => ({ ...prev, instruments: removeInstrument(prev.instruments, idx) }))}
                           className='ml-0.5 hover:text-destructive transition-colors'
                         >
                           <X className='h-3 w-3' />
