@@ -156,7 +156,7 @@ function CommissionRegisterForm({ form, setForm, imageFile, isAnalyzing }: Commi
                     handleAddInstrument(instrumentInput);
                   }
                 }}
-                readOnly={isSubmitting}
+                disabled={isAnalyzing || isSubmitting}
               />
               {showInstrumentDropdown && instrumentInput && filteredOptions.length > 0 && (
                 <div className='absolute z-10 top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg max-h-48 overflow-y-auto'>
