@@ -72,9 +72,8 @@ function CommissionRegisterForm({ form, setForm, imageFile, isAnalyzing }: Commi
   const composerSuggestions = [...new Set(songs.map(s => s.composer).filter(Boolean))] as string[];
 
   const handleSongSelect = (value: string) => {
-    setForm({ ...form, songTitle: value });
     const match = songs.find(s => s.title === value);
-    if (match) setForm({ ...form, composer: match.composer });
+    setForm({ ...form, songTitle: value, ...(match ? { composer: match.composer } : {}) });
   };
   
   const { mutateAsync: createSong } = useMutation(scoreMutations.createSong());
