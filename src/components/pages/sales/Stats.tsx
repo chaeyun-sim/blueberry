@@ -68,7 +68,7 @@ function Stats() {
     songKeys.map((key, i) => [key, { label: songConfig[key], color: topProductColors[i % topProductColors.length] }])
   );
 
-  const songKeysData = [...topSongs].sort((a, b) => a.title.localeCompare(b.title));
+  const songKeysData = [...topSongs].sort((a, b) => a.rank - b.rank);
   const maxSales = Math.max(...songKeysData.map(s => s.sales), 1);
   const salesStep = Math.ceil(maxSales / 5);
   const salesTicks = Array.from({ length: 6 }, (_, i) => i * salesStep);
