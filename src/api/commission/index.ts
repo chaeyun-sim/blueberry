@@ -76,7 +76,7 @@ export async function getMonthlyCommissionCounts(): Promise<{ month: string; cou
   for (let m = 1; m <= 12; m++) countMap.set(m, 0)
 
   for (const row of (data ?? [])) {
-    const m = new Date(row.created_at).getMonth() + 1
+    const m = new Date(row.created_at).getUTCMonth() + 1
     if (countMap.has(m)) countMap.set(m, (countMap.get(m) ?? 0) + 1)
   }
 

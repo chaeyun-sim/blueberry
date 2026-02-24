@@ -338,11 +338,16 @@ export async function getTopSongMonthlySales(
  * 판매 데이터의 연도 범위 조회 (드롭다운 옵션용)
  */
 export async function getSalesYearRange(): Promise<{ min: number; max: number } | null> {
-  const [{ data: minRow }, { data: maxRow }] = await Promise.all([
+  const [
+    { data: minRow, error: minError },
+    { data: maxRow, error: maxError },
+  ] = await Promise.all([
     supabase.from('sales').select('sold_at').order('sold_at', { ascending: true }).limit(1).maybeSingle(),
     supabase.from('sales').select('sold_at').order('sold_at', { ascending: false }).limit(1).maybeSingle(),
   ])
 
+  if (minError) throw minError
+  if (maxError) throw maxError
   if (!minRow || !maxRow) return null
   return {
     min: new Date(minRow.sold_at).getFullYear(),
