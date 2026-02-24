@@ -15,16 +15,16 @@ function MusicRecommend() {
   const availablePool = recommendationPool.filter(r => !workedSongs.has(r.id));
   const effectivePool = availablePool.length > 0 ? availablePool : recommendationPool;
 
-  const baseDayIdx = dayjs().dayOfYear() % effectivePool.length;
-
-  const dailyRec = effectivePool[(baseDayIdx + refreshOffset) % effectivePool.length];
+  const baseDayIdx = effectivePool.length > 0 ? dayjs().dayOfYear() % effectivePool.length : 0;
+  const dailyRec = effectivePool.length > 0 ? effectivePool[(baseDayIdx + refreshOffset) % effectivePool.length] : null;
   const rec = selectedRec ?? dailyRec;
 
   const handleMarkAsWorked = useCallback(() => {
+    if (!rec) return;
     markAsWorked(rec.id);
     setSelectedRec(null);
     setRefreshOffset(0);
-  }, [markAsWorked, rec.id]);
+  }, [markAsWorked, rec?.id]);
 
   const handleRefresh = () => {
     setSelectedRec(null);
