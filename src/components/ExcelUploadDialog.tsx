@@ -7,6 +7,8 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Upload, FileSpreadsheet, X, CheckCircle2 } from "lucide-react";
 import * as XLSX from "xlsx";
 
@@ -21,7 +23,12 @@ export type ExcelRow = {
 type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onUpload: (data: ExcelRow[]) => void;
+  onUpload: (data: ExcelRow[], name: string) => void;
+};
+
+const defaultUploadName = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
 };
 
 export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: Props) => {
@@ -29,11 +36,13 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: Props) => {
   const [fileName, setFileName] = useState<string | null>(null);
   const [preview, setPreview] = useState<ExcelRow[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [uploadName, setUploadName] = useState(defaultUploadName);
 
   const reset = () => {
     setFileName(null);
     setPreview([]);
     setError(null);
+    setUploadName(defaultUploadName());
   };
 
   const parseFile = useCallback((file: File) => {
@@ -85,13 +94,57 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: Props) => {
         const prodCol = findCol(["주문상품", "product", "상품명", "주문 상품", "상품"]);
         const amtCol = findCol(["상품총액", "amount", "금액", "총액", "상품 총액", "가격"]);
 
-        const parsed: ExcelRow[] = json.map((row, i) => ({
-          id: i + 1,
-          orderDate: String(dateCol ? row[dateCol] ?? "" : ""),
-          category: String(catCol ? row[catCol] ?? "" : ""),
-          product: String(prodCol ? row[prodCol] ?? "" : ""),
-          amount: Number(amtCol ? row[amtCol] ?? 0 : 0) || 0,
-        }));
+        let parsed: ExcelRow[];
+
+        if (!catCol && !prodCol && !amtCol) {
+          // 헤더 없는 파일: 컬럼 내용으로 자동 감지
+          const rawRows = XLSX.utils.sheet_to_json<string[]>(sheet, { header: 1, raw: false });
+          const knownCats = new Set(['CLASSIC', 'POP', 'K-POP', 'OST', 'ANI', 'ETC']);
+          const sample = rawRows.slice(0, Math.min(20, rawRows.length));
+          const colCount = Math.max(...rawRows.map(r => r.length), 0);
+
+          let catIdx = -1, prodIdx = -1, amtIdx = -1, dateIdx = -1;
+
+          for (let c = 0; c < colCount; c++) {
+            const vals = sample.map(r => String(r[c] ?? '')).filter(v => v !== '' && v !== 'null');
+            if (vals.length === 0) continue;
+            const catScore = vals.filter(v => knownCats.has(v)).length;
+            const numScore = vals.filter(v => v !== '' && !isNaN(Number(v.replace(/,/g, '')))).length;
+            const prodScore = vals.filter(v => /\s*-/.test(v) && v.length > 5).length;
+            const dateScore = vals.filter(v => /\d{4}[-/]\d{2}[-/]\d{2}/.test(v)).length;
+
+            if (dateScore > 0 && dateIdx === -1) dateIdx = c;
+            if (catScore > vals.length * 0.5 && catIdx === -1) catIdx = c;
+            else if (prodScore > vals.length * 0.5 && prodIdx === -1) prodIdx = c;
+            else if (numScore > vals.length * 0.7 && amtIdx === -1) amtIdx = c;
+          }
+
+          // 파일명에서 날짜 추출 (예: 202512_... → 2025-12-01)
+          const dateFromFile = (() => {
+            const m = file.name.match(/(\d{4})(\d{2})/);
+            return m ? `${m[1]}-${m[2]}-01 00:00:00` : '';
+          })();
+
+          const dataRows = rawRows.filter(r =>
+            (catIdx >= 0 && r[catIdx]) || (prodIdx >= 0 && r[prodIdx])
+          );
+
+          parsed = dataRows.map((row, i) => ({
+            id: i + 1,
+            orderDate: dateIdx >= 0 ? String(row[dateIdx] ?? '') : dateFromFile,
+            category: catIdx >= 0 ? String(row[catIdx] ?? '') : '',
+            product: prodIdx >= 0 ? String(row[prodIdx] ?? '') : '',
+            amount: amtIdx >= 0 ? Number(String(row[amtIdx] ?? '0').replace(/,/g, '')) || 0 : 0,
+          }));
+        } else {
+          parsed = json.map((row, i) => ({
+            id: i + 1,
+            orderDate: String(dateCol ? row[dateCol] ?? "" : ""),
+            category: String(catCol ? row[catCol] ?? "" : ""),
+            product: String(prodCol ? row[prodCol] ?? "" : ""),
+            amount: Number(amtCol ? row[amtCol] ?? 0 : 0) || 0,
+          }));
+        }
 
         setPreview(parsed);
       } catch {
@@ -120,8 +173,8 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: Props) => {
   );
 
   const handleConfirm = () => {
-    if (preview.length > 0) {
-      onUpload(preview);
+    if (preview.length > 0 && uploadName.trim()) {
+      onUpload(preview, uploadName.trim());
       reset();
       onOpenChange(false);
     }
@@ -145,6 +198,18 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: Props) => {
             매출 데이터가 포함된 엑셀 파일을 업로드하세요.
           </DialogDescription>
         </DialogHeader>
+
+        <div className="space-y-1">
+          <Label htmlFor="upload-name" className="text-sm">업로드 이름</Label>
+          <Input
+            id="upload-name"
+            value={uploadName}
+            onChange={e => setUploadName(e.target.value)}
+            placeholder="예: 2025-01"
+            className="h-9"
+          />
+          <p className="text-xs text-muted-foreground">이 이름으로 업로드가 폴더처럼 저장됩니다.</p>
+        </div>
 
         {!fileName ? (
           <div
@@ -245,7 +310,7 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: Props) => {
           >
             취소
           </Button>
-          <Button disabled={preview.length === 0} onClick={handleConfirm}>
+          <Button disabled={preview.length === 0 || !uploadName.trim()} onClick={handleConfirm}>
             <Upload className="h-4 w-4 mr-1.5" />
             {preview.length}건 업로드
           </Button>
