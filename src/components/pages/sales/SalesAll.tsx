@@ -51,7 +51,11 @@ function SalesAll() {
     ? Array.from({ length: yearRange.max - yearRange.min + 1 }, (_, i) => yearRange.max - i)
     : [];
 
-  const { data: originData = [] } = useQuery(statsQueries.getSalesRows(year));
+  const { data: originData = [] } = useQuery({
+    ...statsQueries.getSalesRows(year),
+    enabled: year !== undefined,
+  });
+
   const [sortKey, setSortKey] = useState<SortKey>('category');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
   const [filterCategory, setFilterCategory] = useState('ALL');
