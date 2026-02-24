@@ -1,8 +1,6 @@
+import { ALLOWED_EXTENSIONS, MAX_FILE_SIZE } from '@/constants/file-types'
 import { supabase } from '@/lib/supabase'
 import { Arrangement, ArrangementFile, CreateArrangementInput, CreateSongInput, Song, UpdateSongInput } from '@/types/score'
-
-const ALLOWED_EXTENSIONS = ['musicxml', 'mxl', 'wav', 'aiff', 'mid', 'midi', 'musx', 'xml', 'pdf']
-const MAX_FILE_SIZE = 50 * 1024 * 1024 // 50MB
 
 // 곡명으로 song 검색
 export async function findSongByTitle(title: string) {

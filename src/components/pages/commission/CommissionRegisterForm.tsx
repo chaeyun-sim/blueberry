@@ -16,7 +16,7 @@ import { buildInstrumentList, hasRomanSuffix } from '@/utils/build-instrument-li
 import { scoreMutations } from '@/api/score/mutations';
 import { toast } from 'sonner';
 import { commissionKeys } from '@/api/commission/queryKeys';
-import { CommissionRegisterFormType } from '@/pages/CommissionRegister';
+import { CommissionRegisterFormType } from '@/types/form';
 import { useNavigate } from 'react-router-dom';
 import { queryClient } from '@/utils/query-client';
 

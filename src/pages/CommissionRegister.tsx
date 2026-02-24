@@ -4,20 +4,10 @@ import { PageHeader } from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { DifficultyLevelType } from '@/types/commission';
 import AnalyzeImage from '@/components/pages/commission/AnalyzeImage';
 import CommissionRegisterForm from '@/components/pages/commission/CommissionRegisterForm';
 import { buildInstrumentList } from '@/utils/build-instrument-list';
-
-export interface CommissionRegisterFormType {
-  imagePreview: string | null;
-  instruments: string[];
-  songTitle: string;
-  composer: string;
-  version: DifficultyLevelType | null;
-  deadline: string;
-  notes?: string;
-}
+import { CommissionRegisterFormType } from '@/types/form';
 
 const CommissionRegister = () => {
   const navigate = useNavigate();

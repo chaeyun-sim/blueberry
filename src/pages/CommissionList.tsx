@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/PageHeader';
-import { StatusBadge, CommissionStatus } from '@/components/StatusBadge';
+import { StatusBadge } from '@/components/StatusBadge';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -15,12 +15,12 @@ import {
 import { Search, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { DifficultyLevelType } from '@/types/commission';
 import { cn } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import { commissionQueries } from '@/api/commission/queries';
-import { abbreviateInstrument } from '@/constants/instruments';
+import { abbreviateInstrument } from '@/utils/instrument';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import { CommissionStatus } from '@/constants/status-config';
 
 const tabs: { label: string; value: CommissionStatus | 'all' }[] = [
   { label: '전체', value: 'all' },
@@ -29,8 +29,6 @@ const tabs: { label: string; value: CommissionStatus | 'all' }[] = [
   { label: '완료', value: 'complete' },
   { label: '전달', value: 'delivered' },
 ];
-
-const versionLabel = (v: DifficultyLevelType) => v || '-';
 
 const CommissionListContent = () => {
   const navigate = useNavigate();
@@ -165,7 +163,7 @@ const CommissionListContent = () => {
                     <TableCell>
                       {item.version ? (
                         <span className='text-xs px-2 py-1 rounded-md bg-[hsl(var(--warning)/0.12)] text-[hsl(var(--warning))] font-medium capitalize'>
-                          {versionLabel(item.version)}
+                          {item.version || '-'}
                         </span>
                       ) : (
                         <span className='text-muted-foreground'>-</span>

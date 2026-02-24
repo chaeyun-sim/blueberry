@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase'
-import { CommissionStatus } from '@/components/StatusBadge'
+import { CommissionStatus } from '@/constants/status-config'
 import { Commission, CreateCommissionInput, UpdateCommissionInput } from '@/types/commission'
 
 // 의뢰 목록 조회

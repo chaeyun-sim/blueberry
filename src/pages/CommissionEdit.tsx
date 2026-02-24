@@ -18,23 +18,14 @@ import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 import { ALL_INSTRUMENTS } from '@/constants/instruments';
 import { COMMISSION_STATUS_TRANSLATE } from '@/constants/translate';
-import { CommissionStatus } from '@/components/StatusBadge';
 import { commissionQueries } from '@/api/commission/queries';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { commissionKeys } from '@/api/commission/queryKeys';
 import { commissionMutations } from '@/api/commission/mutations';
 import { DifficultyLevelType } from '@/types/commission';
 import { queryClient } from '@/utils/query-client';
-
-interface EditForm {
-  title: string;
-  composer: string;
-  instruments: string[];
-  version: DifficultyLevelType;
-  deadline: string;
-  notes: string;
-  status: CommissionStatus;
-}
+import { EditFormType } from '@/types/form';
+import { CommissionStatus } from '@/constants/status-config';
 
 const CommissionEdit = () => {
   const { id } = useParams();
@@ -43,7 +34,7 @@ const CommissionEdit = () => {
 
   const { data: commission, isLoading } = useQuery(commissionQueries.getCommission(id));
 
-  const [form, setForm] = useState<EditForm>({
+  const [form, setForm] = useState<EditFormType>({
     title: commission?.title ?? '',
     instruments: commission?.arrangement ? commission.arrangement.split(', ') : [],
     version: commission?.version ?? null,
@@ -53,7 +44,7 @@ const CommissionEdit = () => {
     composer: commission?.composer ?? '',
   });
 
-  const commissionStatuses = Object.keys(COMMISSION_STATUS_TRANSLATE) as CommissionStatus[];
+  const commissionStatuses = Object.keys(COMMISSION_STATUS_TRANSLATE);
   const currentStatusIndex = commissionStatuses.findIndex(s => s === commission?.status);
   const prevStatus = currentStatusIndex > 0 ? commissionStatuses[currentStatusIndex - 1] : null;
 

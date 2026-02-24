@@ -40,3 +40,11 @@ export type UpdateCommissionInput = {
   notes?: string
   status?: CommissionStatus
 }
+
+export const COMMISSION_INFO = {
+  composer: '작곡가',
+  arrangement: '편성',
+  version: '버전',
+  created_at: '등록일',
+  deadline: '마감일',
+};

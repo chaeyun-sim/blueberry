@@ -1,4 +1,4 @@
-import { ElementType, useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
@@ -12,20 +12,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  FileArchive,
-  X,
-  Plus,
-  ArrowLeft,
-  FileMusic,
-  FileAudio,
-  FileText,
-  File as FileIcon,
-  Loader2,
-} from 'lucide-react';
+import { FileArchive, X, Plus, ArrowLeft, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Autocomplete from '@/components/Autocomplete';
-import { ALL_INSTRUMENTS, INSTRUMENT_ABBREVIATIONS } from '@/constants/instruments';
+import { ALL_INSTRUMENTS } from '@/constants/instruments';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { scoreQueries } from '@/api/score/queries';
 import { scoreMutations } from '@/api/score/mutations';
@@ -35,86 +25,24 @@ import { toast } from 'sonner';
 import JSZip from 'jszip';
 import { queryClient } from '@/utils/query-client';
 import { buildInstrumentList, hasRomanSuffix } from '@/utils/build-instrument-list';
+import { DifficultyLevelType } from '@/types/commission';
+import { parseInstrumentsFromZipName } from '@/utils/parse-instruments-from-zipName';
+import { formatFileSize } from '@/utils/format-file-size';
+import { detectFileType } from '@/utils/detect-file-type';
+import { fileTypeConfig } from '@/constants/file-types';
+import { FileEntry } from '@/types/form';
 
-interface FileEntry {
-  file: File;
-  label: string;
-  fileType: string;
-}
 
-const fileTypeConfig: Record<
-  string,
-  { icon: ElementType; label: string; color: string; dot: string }
-> = {
-  score: { icon: FileMusic, label: '스코어', color: 'text-primary', dot: 'hsl(var(--primary))' },
-  part: {
-    icon: FileMusic,
-    label: '파트보',
-    color: 'text-[hsl(var(--status-working))]',
-    dot: 'hsl(var(--status-working))',
-  },
-  audio: {
-    icon: FileAudio,
-    label: '오디오',
-    color: 'text-[hsl(var(--warning))]',
-    dot: 'hsl(var(--warning))',
-  },
-  musicxml: {
-    icon: FileText,
-    label: 'MusicXML',
-    color: 'text-[hsl(var(--success))]',
-    dot: 'hsl(var(--success))',
-  },
-  pdf: {
-    icon: FileIcon,
-    label: 'PDF',
-    color: 'text-muted-foreground',
-    dot: 'hsl(var(--muted-foreground))',
-  },
-};
-
-// API의 ALLOWED_EXTENSIONS와 동기화 (src/api/score/index.ts)
-const SUPPORTED_EXTENSIONS = new Set(['musicxml', 'mxl', 'xml', 'pdf', 'mid', 'midi', 'musx'])
-
-function detectFileType(fileName: string): string {
-  const ext = fileName.split('.').pop()?.toLowerCase() ?? '';
-  if (['xml', 'musicxml', 'mxl'].includes(ext)) return 'musicxml';
-  if (ext === 'pdf') return 'pdf';
-  const nameWithoutExt = fileName.replace(/\.[^.]+$/, '');
-  if (nameWithoutExt.includes(' - ')) return 'part';
-  return 'score';
-}
-
-function formatFileSize(bytes: number) {
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-const ABBR_TO_INSTRUMENT = Object.fromEntries(
-  Object.entries(INSTRUMENT_ABBREVIATIONS).map(([full, abbr]) => [abbr.toLowerCase(), full]),
-);
-
-function parseInstrumentsFromZipName(fileName: string): string[] {
-  const name = fileName.replace(/\.zip$/i, '');
-  const lastSep = Math.max(name.lastIndexOf('-'), name.lastIndexOf('_'));
-  if (lastSep === -1) return [];
-
-  const result: string[] = [];
-  for (const part of name.slice(lastSep + 1).split(',')) {
-    const trimmed = part.trim().toLowerCase();
-    const match = trimmed.match(/^(\d+)(.+)$/);
-    if (match) {
-      const instrument = ABBR_TO_INSTRUMENT[match[2]];
-      if (instrument) {
-        const count = parseInt(match[1]);
-        for (let i = 0; i < count; i++) result.push(instrument);
-      }
-    } else {
-      const instrument = ABBR_TO_INSTRUMENT[trimmed];
-      if (instrument) result.push(instrument);
-    }
-  }
-  return result;
+interface ScoreRegisterFormType {
+  songTitle: string;
+  composer: string;
+  instruments: string[];
+  version: string | null;
+  zipName: string | null;
+  zipSize: number;
+  files: FileEntry[];
+  instrumentInput: string;
+  showInstrumentDropdown: boolean;
 }
 
 const ScoreRegister = () => {
@@ -123,15 +51,18 @@ const ScoreRegister = () => {
 
   const { data: songs = [] } = useQuery(scoreQueries.getSongs());
 
-  const [songTitle, setSongTitle] = useState('');
-  const [composer, setComposer] = useState('');
-  const [instruments, setInstruments] = useState<string[]>([]);
-  const [version, setVersion] = useState<string | null>(null);
-  const [zipName, setZipName] = useState<string | null>(null);
-  const [zipSize, setZipSize] = useState(0);
-  const [files, setFiles] = useState<FileEntry[]>([]);
-  const [instrumentInput, setInstrumentInput] = useState('');
-  const [showInstrumentDropdown, setShowInstrumentDropdown] = useState(false);
+  const [form, setForm] = useState<ScoreRegisterFormType>({
+    songTitle: '',
+    composer: '',
+    instruments: [],
+    version: null,
+    zipName: null,
+    zipSize: 0,
+    files: [],
+    instrumentInput: '',
+    showInstrumentDropdown: false,
+  })
+  
   const [isExtracting, setIsExtracting] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -139,33 +70,29 @@ const ScoreRegister = () => {
   const composerSuggestions = [...new Set(songs.map(s => s.composer).filter(Boolean))];
 
   const filteredInstruments = ALL_INSTRUMENTS.filter(opt =>
-    opt.toLowerCase().includes(instrumentInput.toLowerCase()),
+    opt.toLowerCase().includes(form.instrumentInput.toLowerCase()),
   );
 
   const handleSongSelect = (value: string) => {
-    setSongTitle(value);
     const match = songs.find(s => s.title === value);
-    if (match) setComposer(match.composer);
+    setForm(prev => ({ ...prev, songTitle: value, ...(match ? { composer: match.composer } : {}) }));
   };
 
   const handleAddInstrument = (name: string) => {
-    setInstruments(prev => buildInstrumentList([...prev, name]));
-    setInstrumentInput('');
-    setShowInstrumentDropdown(false);
+    setForm(prev => ({ ...prev, instruments: buildInstrumentList([...prev.instruments, name]), instrumentInput: '', showInstrumentDropdown: false }));
   };
 
   const removeInstrument = (index: number) => {
-    const removed = instruments[index];
-    const baseName = removed.replace(/ (I{1,3}V?|IV|V|VI{0,3})$/, '');
-    const remaining = instruments.filter((_, i) => i !== index);
-    const sameBase = remaining.filter(i => i === baseName || i.startsWith(baseName + ' '));
-    if (sameBase.length === 1 && hasRomanSuffix(sameBase[0])) {
-      setInstruments(
-        remaining.map(i => (i === baseName || i.startsWith(baseName + ' ') ? baseName : i)),
-      );
-    } else {
-      setInstruments(remaining);
-    }
+    setForm(prev => {
+      const removed = prev.instruments[index];
+      const baseName = removed.replace(/ (I{1,3}V?|IV|V|VI{0,3})$/, '');
+      const remaining = prev.instruments.filter((_, i) => i !== index);
+      const sameBase = remaining.filter(i => i === baseName || i.startsWith(baseName + ' '));
+      const instruments = sameBase.length === 1 && hasRomanSuffix(sameBase[0])
+        ? remaining.map(i => (i === baseName || i.startsWith(baseName + ' ') ? baseName : i))
+        : remaining;
+      return { ...prev, instruments };
+    });
   };
 
   const MAX_ZIP_SIZE = 200 * 1024 * 1024; // 200MB
@@ -184,9 +111,7 @@ const ScoreRegister = () => {
     }
 
     setIsExtracting(true);
-    setZipName(file.name);
-    setZipSize(file.size);
-    setFiles([]);
+    setForm(prev => ({ ...prev, zipName: file.name, zipSize: file.size, files: [] }));
 
     try {
       const buffer = await file.arrayBuffer();
@@ -201,8 +126,7 @@ const ScoreRegister = () => {
         if (entry.dir) continue;
         const fileName = path.split('/').pop() ?? path;
         if (fileName.startsWith('.') || path.startsWith('__MACOSX')) continue;
-        const ext = fileName.split('.').pop()?.toLowerCase() ?? '';
-        if (!SUPPORTED_EXTENSIONS.has(ext)) continue;
+        if (detectFileType(fileName) === 'audio') continue;
 
         fileCount++;
         if (fileCount > MAX_FILE_COUNT) {
@@ -228,20 +152,21 @@ const ScoreRegister = () => {
       }
 
       if (!aborted) {
-        setFiles(entries);
-
         const parsed = parseInstrumentsFromZipName(file.name);
-        if (parsed.length > 0) {
-          setInstruments(buildInstrumentList(parsed));
-        } else {
+        setForm(prev => ({
+          ...prev,
+          files: entries,
+          ...(parsed.length > 0 ? { instruments: buildInstrumentList(parsed) } : {}),
+        }));
+        if (parsed.length === 0) {
           toast.info('악기 정보를 자동으로 인식하지 못했습니다. 직접 입력해주세요.');
         }
       } else {
-        setZipName(null);
+        setForm(prev => ({ ...prev, zipName: null }));
       }
     } catch (e) {
       toast.error('ZIP 파일을 읽을 수 없습니다.', { description: (e as Error).message });
-      setZipName(null);
+      setForm(prev => ({ ...prev, zipName: null }));
     } finally {
       setIsExtracting(false);
     }
@@ -254,13 +179,7 @@ const ScoreRegister = () => {
   };
 
   const clearZip = () => {
-    setZipName(null);
-    setZipSize(0);
-    setFiles([]);
-    setInstruments([]);
-    setSongTitle('');
-    setComposer('');
-    setVersion(null);
+    setForm(prev => ({ ...prev, zipName: null, zipSize: 0, files: [], instruments: [], songTitle: '', composer: '', version: null }));
     if (zipInputRef.current) zipInputRef.current.value = '';
   };
 
@@ -269,28 +188,28 @@ const ScoreRegister = () => {
   const { mutateAsync: uploadFile } = useMutation(scoreMutations.uploadArrangementFile());
 
   const handleSubmit = async () => {
-    if (!songTitle.trim()) {
+    if (!form.songTitle.trim()) {
       toast.error('곡명을 입력해주세요.');
       return;
     }
-    if (instruments.length === 0) {
+    if (form.instruments.length === 0) {
       toast.error('악기 편성을 입력해주세요.');
       return;
     }
-    if (files.length === 0) {
+    if (form.files.length === 0) {
       toast.error('악보 파일이 없습니다. ZIP 파일을 먼저 업로드해주세요.');
       return;
     }
     setIsSubmitting(true);
     try {
       // 1. Find or create song
-      let songId: string;
+      let songId: string | undefined;
       try {
-        const existing = await findSongByTitle(songTitle);
+        const existing = await findSongByTitle(form.songTitle.trim());
         if (existing) {
           songId = existing.id;
         } else {
-          const newSong = await createSong({ title: songTitle.trim(), composer: composer.trim() });
+          const newSong = await createSong({ title: form.songTitle.trim(), composer: form.composer.trim() });
           songId = newSong.id;
         }
       } catch (e) {
@@ -303,8 +222,8 @@ const ScoreRegister = () => {
       const newArrangement = await createArrangement(
         {
           song_id: songId,
-          arrangement: instruments.join(', '),
-          version: version ?? undefined,
+          arrangement: form.instruments.join(', '),
+          version: form.version ?? undefined,
         },
         {
           onError: error => {
@@ -316,7 +235,7 @@ const ScoreRegister = () => {
 
       // 3. Upload files
       const failed: string[] = [];
-      for (const entry of files) {
+      for (const entry of form.files) {
         try {
           await uploadFile(
             {
@@ -385,7 +304,7 @@ const ScoreRegister = () => {
               }}
             />
 
-            {!zipName ? (
+            {!form.zipName ? (
               <div
                 onClick={() => zipInputRef.current?.click()}
                 onDragOver={e => e.preventDefault()}
@@ -409,10 +328,10 @@ const ScoreRegister = () => {
                   <div className='flex items-center gap-3'>
                     <FileArchive className='h-5 w-5 text-primary shrink-0' />
                     <div>
-                      <p className='text-sm font-medium truncate max-w-[200px]'>{zipName}</p>
+                      <p className='text-sm font-medium truncate max-w-[200px]'>{form.zipName}</p>
                       <p className='text-xs text-muted-foreground'>
-                        {formatFileSize(zipSize)}
-                        {files.length > 0 && ` · ${files.length}개 파일`}
+                        {formatFileSize(form.zipSize)}
+                        {form.files.length > 0 && ` · ${form.files.length}개 파일`}
                       </p>
                     </div>
                   </div>
@@ -433,7 +352,7 @@ const ScoreRegister = () => {
                   </div>
                 ) : (
                   <div className='space-y-1.5'>
-                    {files.map((entry, idx) => {
+                    {form.files.map((entry, idx) => {
                       const config = fileTypeConfig[entry.fileType] ?? fileTypeConfig.score;
                       const Icon = config.icon;
                       return (
@@ -446,11 +365,7 @@ const ScoreRegister = () => {
                             className='flex-1 min-w-0 text-sm bg-transparent outline-none border-b border-transparent hover:border-border focus:border-primary transition-colors'
                             value={entry.label}
                             onChange={e =>
-                              setFiles(prev =>
-                                prev.map((f, i) =>
-                                  i === idx ? { ...f, label: e.target.value } : f,
-                                ),
-                              )
+                              setForm(prev => ({ ...prev, files: prev.files.map((f, i) => i === idx ? { ...f, label: e.target.value } : f) }))
                             }
                             disabled={isSubmitting}
                           />
@@ -462,7 +377,7 @@ const ScoreRegister = () => {
                           </span>
                           <button
                             type='button'
-                            onClick={() => setFiles(prev => prev.filter((_, i) => i !== idx))}
+                            onClick={() => setForm(prev => ({ ...prev, files: prev.files.filter((_, i) => i !== idx) }))}
                             disabled={isSubmitting}
                             className='opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive disabled:pointer-events-none'
                           >
@@ -475,10 +390,10 @@ const ScoreRegister = () => {
                 )}
 
                 {/* File type summary */}
-                {files.length > 0 && (
+                {form.files.length > 0 && (
                   <div className='flex flex-wrap gap-2 pt-2 border-t border-border/50'>
                     {Object.entries(fileTypeConfig).map(([key, config]) => {
-                      const count = files.filter(f => f.fileType === key).length;
+                      const count = form.files.filter(f => f.fileType === key).length;
                       if (count === 0) return null;
                       return (
                         <span
@@ -508,7 +423,7 @@ const ScoreRegister = () => {
               <div className='space-y-2'>
                 <Label>곡명</Label>
                 <Autocomplete
-                  value={songTitle}
+                  value={form.songTitle}
                   onChange={handleSongSelect}
                   suggestions={songSuggestions}
                   placeholder='곡명을 입력하세요'
@@ -519,8 +434,8 @@ const ScoreRegister = () => {
               <div className='space-y-2'>
                 <Label>작곡가</Label>
                 <Autocomplete
-                  value={composer}
-                  onChange={setComposer}
+                  value={form.composer}
+                  onChange={value => setForm(prev => ({ ...prev, composer: value }))}
                   suggestions={composerSuggestions}
                   placeholder='작곡가를 입력하세요'
                   inputProps={{ disabled: isSubmitting }}
@@ -533,19 +448,18 @@ const ScoreRegister = () => {
                 <div className='relative'>
                   <Input
                     placeholder='악기를 검색하여 추가...'
-                    value={instrumentInput}
+                    value={form.instrumentInput}
                     onChange={e => {
-                      setInstrumentInput(e.target.value);
-                      setShowInstrumentDropdown(true);
+                      setForm(prev => ({ ...prev, instrumentInput: e.target.value, showInstrumentDropdown: true }));
                     }}
-                    onFocus={() => setShowInstrumentDropdown(true)}
-                    onBlur={() => setTimeout(() => setShowInstrumentDropdown(false), 200)}
+                    onFocus={() => setForm(prev => ({ ...prev, showInstrumentDropdown: true }))}
+                    onBlur={() => setTimeout(() => setForm(prev => ({ ...prev, showInstrumentDropdown: false })), 200)}
                     onKeyDown={e => {
-                      if (e.key === 'Enter') handleAddInstrument(instrumentInput);
+                      if (e.key === 'Enter') handleAddInstrument(form.instrumentInput);
                     }}
                     disabled={isSubmitting}
                   />
-                  {showInstrumentDropdown && instrumentInput && filteredInstruments.length > 0 && (
+                  {form.showInstrumentDropdown && form.instrumentInput && filteredInstruments.length > 0 && (
                     <div className='absolute z-10 top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg max-h-48 overflow-y-auto'>
                       {filteredInstruments.map(opt => (
                         <button
@@ -564,9 +478,9 @@ const ScoreRegister = () => {
                     </div>
                   )}
                 </div>
-                {instruments.length > 0 && (
+                {form.instruments.length > 0 && (
                   <div className='flex flex-wrap gap-2 mt-2'>
-                    {instruments.map((inst, idx) => (
+                    {form.instruments.map((inst, idx) => (
                       <span
                         key={idx}
                         className='inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium bg-primary/15 text-primary border border-primary/20'
@@ -589,8 +503,8 @@ const ScoreRegister = () => {
               <div className='space-y-2'>
                 <Label>버전</Label>
                 <Select
-                  value={version ?? 'normal'}
-                  onValueChange={v => setVersion(v === 'normal' ? null : v)}
+                  value={form.version ?? 'normal'}
+                  onValueChange={v => setForm(prev => ({ ...prev, version: v === 'normal' ? null : v as DifficultyLevelType }))}
                   disabled={isSubmitting}
                 >
                   <SelectTrigger>
@@ -609,7 +523,7 @@ const ScoreRegister = () => {
                 <Button
                   className='flex-1'
                   onClick={handleSubmit}
-                  disabled={isSubmitting || isExtracting || !songTitle.trim()}
+                  disabled={isSubmitting || isExtracting || !form.songTitle.trim()}
                 >
                   {isSubmitting ? '등록 중...' : '악보 등록'}
                 </Button>
