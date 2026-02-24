@@ -34,6 +34,7 @@ const ScoreDetail = () => {
   const { mutateAsync: deleteArrangement } = useMutation(scoreMutations.deleteArrangement());
 
   const handleDelete = async () => {
+    if (!arrangementId) return;
     setIsDeleting(true);
     try {
       await deleteArrangement({ id: arrangementId });

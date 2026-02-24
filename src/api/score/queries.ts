@@ -1,4 +1,4 @@
-import { queryOptions } from '@tanstack/react-query'
+import { queryOptions, skipToken } from '@tanstack/react-query'
 import { getArrangement, getSong, getSongs } from '.'
 import { scoreKeys } from './queryKeys'
 
@@ -14,10 +14,9 @@ export const scoreQueries = {
       queryFn: () => getSong(id),
       enabled: !!id,
     }),
-  getArrangement: (arrangementId: string) =>
+  getArrangement: (arrangementId: string | undefined) =>
     queryOptions({
-      queryKey: scoreKeys.arrangement(arrangementId),
-      queryFn: () => getArrangement(arrangementId),
-      enabled: !!arrangementId,
+      queryKey: scoreKeys.arrangement(arrangementId ?? ''),
+      queryFn: arrangementId ? () => getArrangement(arrangementId) : skipToken,
     }),
 }
