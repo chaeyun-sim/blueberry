@@ -17,6 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { queryClient } from '@/utils/query-client';
 import { statsQueries } from '@/api/stats/queries';
 import { ExcelRow } from '@/types/excel';
+import { MONEY_RATIO } from '@/constants/money-ratio';
 
 const tabItems = {
   all: { icon: BarChart3, label: '전체 분석', component: Stats },
@@ -80,7 +81,7 @@ const SalesStats = () => {
         <SalesSummaryCard
           icon={DollarSign}
           title='총 매출'
-          value={salesSummary?.totalRevenue ?? 0}
+          value={(salesSummary?.totalRevenue ?? 0) * MONEY_RATIO}
           isMoney
         />
         <SalesSummaryCard
@@ -91,7 +92,7 @@ const SalesStats = () => {
         <SalesSummaryCard
           icon={CalendarDays}
           title='지난달 매출'
-          value={salesSummary?.lastMonthRevenue ?? 0}
+          value={(salesSummary?.lastMonthRevenue ?? 0) * MONEY_RATIO}
           percentage={salesSummary?.revenueVsLastMonth ?? 0}
           compareKey='lastMonth'
           isMoney

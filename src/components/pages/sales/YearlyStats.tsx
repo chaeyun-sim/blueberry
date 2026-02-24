@@ -13,6 +13,7 @@ import { statsQueries } from '@/api/stats/queries';
 import GrowthRateChart from './charts/GrowthRateChart';
 import CategoryGrowthRateChart from './charts/CategoryGrowthRateChart';
 import MonthlyGrowthRateChart from './charts/MonthlyGrowthRateChart';
+import { MONEY_RATIO } from '@/constants/money-ratio';
 
 const categoryChartConfig: ChartConfig = {
   CLASSIC: { label: 'CLASSIC', color: 'hsl(var(--status-complete))' },
@@ -38,7 +39,7 @@ function YearlyStats() {
   const avgCount = salesData.length
     ? Math.round(salesData.reduce((sum, d) => sum + d.count, 0) / salesData.length)
     : 0;
-  const monthlySalesWithAvg = salesData.map(d => ({ ...d }));
+  const monthlySalesWithAvg = salesData.map(d => ({ ...d, revenue: d.revenue * MONEY_RATIO, prevRevenue: d.prevRevenue * MONEY_RATIO }));
 
   const growthData = salesData.map(d => ({
     month: d.month,

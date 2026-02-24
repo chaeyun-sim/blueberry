@@ -1,10 +1,11 @@
 import { ChartConfig, ChartContainer, ChartTooltip } from "@/components/ui/chart";
+import { MONEY_RATIO } from '@/constants/money-ratio';
+import { MonthlyCategoryData } from '@/types/stats';
 import { formatCurrency } from '@/utils/format-currency';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
-import { CategoricalChartProps } from 'recharts/types/chart/generateCategoricalChart';
 
 interface CategoryGrowthRateChartProps {
-	data: CategoricalChartProps['data'];
+	data: MonthlyCategoryData[];
 	config: ChartConfig;
 }
 
@@ -15,7 +16,13 @@ function CategoryGrowthRateChart({ data, config }: CategoryGrowthRateChartProps)
       className='w-full h-[220px]'
     >
       <BarChart
-        data={data}
+        data={data.map(d => ({
+          month: d.month,
+          CLASSIC: d.CLASSIC * MONEY_RATIO,
+          OST: d.OST * MONEY_RATIO,
+          ANI: d.ANI * MONEY_RATIO,
+          ETC: d.ETC * MONEY_RATIO,
+        }))}
         margin={{ left: -16, right: 8, top: 4, bottom: 4 }}
       >
         <CartesianGrid

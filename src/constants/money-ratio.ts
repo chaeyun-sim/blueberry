@@ -1,0 +1,1 @@
+export const MONEY_RATIO = import.meta.env.VITE_MONEY_RATIO;
