@@ -1,0 +1,488 @@
+import { supabase } from '@/lib/supabase'
+import { MONTH } from '@/constants/month'
+import { ExcelRow } from '@/components/ExcelUploadDialog'
+import { ExcelUpload, MonthlyCategoryData, MonthlySale, SalesSummary, TopArrangement, TopSong, TopSongMonthlySalesResult } from '@/types/stats'
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function pctChange(current: number, prev: number): number {
+  if (prev === 0) return 0
+  return parseFloat((((current - prev) / prev) * 100).toFixed(1))
+}
+
+function dateRange(year: number, month?: number) {
+  if (month !== undefined) {
+    const nextMonth = month === 12 ? 1 : month + 1
+    const nextMonthYear = month === 12 ? year + 1 : year
+    const mm = String(month).padStart(2, '0')
+    const nmm = String(nextMonth).padStart(2, '0')
+    return { gte: `${year}-${mm}-01`, lt: `${nextMonthYear}-${nmm}-01` }
+  }
+  return { gte: `${year}-01-01`, lt: `${year + 1}-01-01` }
+}
+
+function aggregateByMonth(rows: { sold_at: string; amount: number }[]) {
+  const map = new Map<number, { revenue: number; count: number }>()
+  for (let m = 1; m <= 12; m++) map.set(m, { revenue: 0, count: 0 })
+  for (const row of rows) {
+    const m = new Date(row.sold_at).getMonth() + 1
+    const agg = map.get(m)!
+    agg.revenue += row.amount
+    agg.count += 1
+  }
+  return map
+}
+
+// ─── API Functions ────────────────────────────────────────────────────────────
+
+/**
+ * 요약 통계 조회 (SalesSummaryCard 4개용)
+ * - 올해 총 매출 / 총 판매건 (vs 작년 비교)
+ * - 지난달 매출 / 판매건 (vs 전월 비교)
+ */
+export async function getSalesSummary(): Promise<SalesSummary> {
+  const now = new Date()
+  const thisYear = now.getFullYear()
+  const thisMonth = now.getMonth() + 1
+  const prevMonth = thisMonth === 1 ? 12 : thisMonth - 1
+  const prevMonthYear = thisMonth === 1 ? thisYear - 1 : thisYear
+  const prevPrevMonth = prevMonth === 1 ? 12 : prevMonth - 1
+  const prevPrevMonthYear = prevMonth === 1 ? prevMonthYear - 1 : prevMonthYear
+
+  const thisYearRange = dateRange(thisYear)
+  const lastYearRange = dateRange(thisYear - 1)
+  const prevMonthRange = dateRange(prevMonthYear, prevMonth)
+  const prevPrevMonthRange = dateRange(prevPrevMonthYear, prevPrevMonth)
+
+  const [
+    { data: allRows, error: e0 },
+    { data: thisYearRows, error: e1 },
+    { data: lastYearRows, error: e2 },
+    { data: prevMonthRows, error: e3 },
+    { data: prevPrevMonthRows, error: e4 },
+  ] = await Promise.all([
+    supabase.from('sales').select('amount'),
+    supabase.from('sales').select('amount').gte('sold_at', thisYearRange.gte).lt('sold_at', thisYearRange.lt!),
+    supabase.from('sales').select('amount').gte('sold_at', lastYearRange.gte).lt('sold_at', lastYearRange.lt!),
+    supabase.from('sales').select('amount').gte('sold_at', prevMonthRange.gte).lt('sold_at', prevMonthRange.lt!),
+    supabase.from('sales').select('amount').gte('sold_at', prevPrevMonthRange.gte).lt('sold_at', prevPrevMonthRange.lt!),
+  ])
+
+  if (e0) throw e0
+  if (e1) throw e1
+  if (e2) throw e2
+  if (e3) throw e3
+  if (e4) throw e4
+
+  const totalRevenue = (allRows ?? []).reduce((s, r) => s + r.amount, 0)
+  const totalCount = (allRows ?? []).length
+  const thisYearRevenue = (thisYearRows ?? []).reduce((s, r) => s + r.amount, 0)
+  const thisYearCount = (thisYearRows ?? []).length
+  const lastYearRevenue = (lastYearRows ?? []).reduce((s, r) => s + r.amount, 0)
+  const lastYearCount = (lastYearRows ?? []).length
+  const lastMonthRevenue = (prevMonthRows ?? []).reduce((s, r) => s + r.amount, 0)
+  const lastMonthCount = (prevMonthRows ?? []).length
+  const prevPrevRevenue = (prevPrevMonthRows ?? []).reduce((s, r) => s + r.amount, 0)
+  const prevPrevCount = (prevPrevMonthRows ?? []).length
+
+  return {
+    totalRevenue,
+    totalCount,
+    lastMonthRevenue,
+    lastMonthCount,
+    revenueVsLastYear: pctChange(thisYearRevenue, lastYearRevenue),
+    countVsLastYear: pctChange(thisYearCount, lastYearCount),
+    revenueVsLastMonth: pctChange(lastMonthRevenue, prevPrevRevenue),
+    countVsLastMonth: pctChange(lastMonthCount, prevPrevCount),
+  }
+}
+
+/**
+ * 월별 매출 추이 조회 (YearlyStats 월별 매출 추이 / 성장률 차트용)
+ */
+export async function getMonthlySales(year: number): Promise<MonthlySale[]> {
+  const [{ data: thisYearData, error: e1 }, { data: lastYearData, error: e2 }] = await Promise.all([
+    supabase.from('sales').select('sold_at, amount').gte('sold_at', `${year}-01-01`).lt('sold_at', `${year + 1}-01-01`),
+    supabase.from('sales').select('sold_at, amount').gte('sold_at', `${year - 1}-01-01`).lt('sold_at', `${year}-01-01`),
+  ])
+
+  if (e1) throw e1
+  if (e2) throw e2
+
+  const thisYearMap = aggregateByMonth(thisYearData ?? [])
+  const lastYearMap = aggregateByMonth(lastYearData ?? [])
+
+  return Array.from({ length: 12 }, (_, i) => {
+    const m = i + 1
+    const ty = thisYearMap.get(m)!
+    const ly = lastYearMap.get(m)!
+    return {
+      month: MONTH[m as keyof typeof MONTH],
+      revenue: ty.revenue,
+      count: ty.count,
+      prevRevenue: ly.revenue,
+      prevCount: ly.count,
+    }
+  })
+}
+
+/**
+ * 월별 카테고리 매출 분포 조회 (YearlyStats 카테고리 비중 차트용)
+ */
+export async function getMonthlyCategoryBreakdown(year: number): Promise<MonthlyCategoryData[]> {
+  const { data, error } = await supabase
+    .from('sales')
+    .select('sold_at, amount, category')
+    .gte('sold_at', `${year}-01-01`)
+    .lt('sold_at', `${year + 1}-01-01`)
+
+  if (error) throw error
+
+  const map = new Map<number, Record<string, number>>()
+  for (let m = 1; m <= 12; m++) {
+    map.set(m, { CLASSIC: 0, POP: 0, 'K-POP': 0, OST: 0, ANI: 0, ETC: 0 })
+  }
+  for (const row of (data ?? [])) {
+    const categoryName = row.category
+    if (!categoryName) continue
+    const m = new Date(row.sold_at).getMonth() + 1
+    const entry = map.get(m)!
+    entry[categoryName] = (entry[categoryName] ?? 0) + row.amount
+  }
+
+  return Array.from({ length: 12 }, (_, i) => {
+    const m = i + 1
+    const entry = map.get(m)!
+    return {
+      month: MONTH[m as keyof typeof MONTH],
+      CLASSIC: entry.CLASSIC,
+      POP: entry.POP,
+      'K-POP': entry['K-POP'],
+      OST: entry.OST,
+      ANI: entry.ANI,
+      ETC: entry.ETC,
+    }
+  })
+}
+
+/**
+ * 카테고리별 매출 비율 조회 (Stats 파이차트용)
+ * - value: 매출액 기준 퍼센테이지
+ * - count: 판매 건수
+ * - countShare: 건수 기준 퍼센테이지
+ * - revenue: 실제 매출액
+ */
+export async function getCategoryDistribution(
+  year?: number,
+): Promise<{ name: string; value: number; count: number; countShare: number; revenue: number }[]> {
+  let query = supabase.from('sales').select('amount, category')
+  if (year) {
+    query = query.gte('sold_at', `${year}-01-01`).lt('sold_at', `${year + 1}-01-01`)
+  }
+
+  const { data, error } = await query
+  if (error) throw error
+
+  const totals: Record<string, { revenue: number; count: number }> = {}
+  let grandRevenue = 0
+  let grandCount = 0
+
+  for (const row of (data ?? [])) {
+    const name = row.category
+    if (!name) continue
+    if (!totals[name]) totals[name] = { revenue: 0, count: 0 }
+    totals[name].revenue += row.amount
+    totals[name].count += 1
+    grandRevenue += row.amount
+    grandCount += 1
+  }
+
+  if (grandRevenue === 0) return []
+
+  return Object.entries(totals)
+    .map(([name, { revenue, count }]) => ({
+      name,
+      value: Math.round((revenue / grandRevenue) * 100),
+      count,
+      countShare: Math.round((count / grandCount) * 100),
+      revenue,
+    }))
+    .sort((a, b) => b.value - a.value)
+}
+
+/**
+ * 인기곡 TOP N 조회 (Stats 가로 막대 차트용)
+ */
+export async function getTopSongs(limit = 5): Promise<TopSong[]> {
+  const { data, error } = await supabase
+    .from('sales')
+    .select('amount, category, product')
+
+  if (error) throw error
+
+  const songMap = new Map<string, { title: string; category: string; sales: number; revenue: number }>()
+  for (const row of (data ?? [])) {
+    const title = row.product?.split(/\s+-/)[0]?.trim()
+    const category = row.category
+    if (!title || !category) continue
+    const existing = songMap.get(title)
+    if (existing) {
+      existing.sales += 1
+      existing.revenue += row.amount
+    } else {
+      songMap.set(title, { title, category, sales: 1, revenue: row.amount })
+    }
+  }
+
+  return [...songMap.values()]
+    .sort((a, b) => b.sales - a.sales)
+    .slice(0, limit)
+    .map((s, i) => ({ rank: i + 1, ...s }))
+}
+
+/**
+ * 인기 편성 TOP N 조회 (Stats 레이더 차트용)
+ */
+export async function getTopArrangements(limit = 5): Promise<TopArrangement[]> {
+  const { data, error } = await supabase
+    .from('sales')
+    .select('amount, product')
+
+  if (error) throw error
+
+  const arrMap = new Map<string, { arrangement: string; sales: number; revenue: number }>()
+  for (const row of (data ?? [])) {
+    const parts = row.product?.split(/\s+-/)
+    const arrangement = parts && parts.length > 1 ? parts.slice(1).join('-').trim() : undefined
+    if (!arrangement) continue
+    const existing = arrMap.get(arrangement)
+    if (existing) {
+      existing.sales += 1
+      existing.revenue += row.amount
+    } else {
+      arrMap.set(arrangement, { arrangement, sales: 1, revenue: row.amount })
+    }
+  }
+
+  return [...arrMap.values()]
+    .sort((a, b) => b.sales - a.sales)
+    .slice(0, limit)
+    .map((a, i) => ({ rank: i + 1, ...a }))
+}
+
+/**
+ * 인기곡 TOP N 월별 판매 추이 조회 (Stats 라인차트용)
+ */
+export async function getTopSongMonthlySales(
+  year: number,
+  limit = 5,
+): Promise<TopSongMonthlySalesResult> {
+  const { data, error } = await supabase
+    .from('sales')
+    .select('sold_at, product')
+    .gte('sold_at', `${year}-01-01`)
+    .lt('sold_at', `${year + 1}-01-01`)
+
+  if (error) throw error
+
+  const titleCount = new Map<string, number>()
+  for (const row of (data ?? [])) {
+    const title = row.product?.split(/\s+-/)[0]?.trim()
+    if (!title) continue
+    titleCount.set(title, (titleCount.get(title) ?? 0) + 1)
+  }
+
+  const topTitles = [...titleCount.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, limit)
+    .map(([t]) => t)
+
+  const config: Record<string, string> = {}
+  const keyMap = new Map<string, string>()
+  topTitles.forEach((title, i) => {
+    const key = `song${i + 1}`
+    keyMap.set(title, key)
+    config[key] = title
+  })
+
+  const monthMap = new Map<number, Record<string, number>>()
+  for (let m = 1; m <= 12; m++) {
+    const entry: Record<string, number> = {}
+    for (const key of Object.keys(config)) entry[key] = 0
+    monthMap.set(m, entry)
+  }
+  for (const row of (data ?? [])) {
+    const title = row.product?.split(/\s+-/)[0]?.trim()
+    const key = title ? keyMap.get(title) : undefined
+    if (!key) continue
+    const m = new Date(row.sold_at).getMonth() + 1
+    monthMap.get(m)![key] += 1
+  }
+
+  const chartData = Array.from({ length: 12 }, (_, i) => {
+    const m = i + 1
+    return { month: MONTH[m as keyof typeof MONTH], ...monthMap.get(m)! }
+  })
+
+  return { data: chartData, config }
+}
+
+/**
+ * 판매 데이터의 연도 범위 조회 (드롭다운 옵션용)
+ */
+export async function getSalesYearRange(): Promise<{ min: number; max: number } | null> {
+  const [{ data: minRow }, { data: maxRow }] = await Promise.all([
+    supabase.from('sales').select('sold_at').order('sold_at', { ascending: true }).limit(1).maybeSingle(),
+    supabase.from('sales').select('sold_at').order('sold_at', { ascending: false }).limit(1).maybeSingle(),
+  ])
+
+  if (!minRow || !maxRow) return null
+  return {
+    min: new Date(minRow.sold_at).getFullYear(),
+    max: new Date(maxRow.sold_at).getFullYear(),
+  }
+}
+
+// ─── Excel Upload Management ──────────────────────────────────────────────────
+
+/**
+ * 업로드 목록 조회
+ */
+export async function getExcelUploads(): Promise<ExcelUpload[]> {
+  const { data, error } = await supabase
+    .from('excel_uploads')
+    .select('id, name, row_count, uploaded_at')
+    .order('uploaded_at', { ascending: false })
+
+  if (error) throw error
+  return data ?? []
+}
+
+/**
+ * 업로드 삭제 (CASCADE로 연결된 sales 행도 삭제됨)
+ */
+export async function deleteExcelUpload(id: string): Promise<void> {
+  const { error } = await supabase.from('excel_uploads').delete().eq('id', id)
+  if (error) throw error
+}
+
+/**
+ * 특정 업로드의 판매 행 조회
+ */
+export async function getSalesRowsByUploadId(uploadId: string): Promise<ExcelRow[]> {
+  const { data, error } = await supabase
+    .from('sales')
+    .select('id, sold_at, amount, category, product')
+    .eq('upload_id', uploadId)
+    .order('sold_at', { ascending: false })
+
+  if (error) throw error
+
+  return (data ?? []).map((row, i) => ({
+    id: i + 1,
+    orderDate: row.sold_at.replace('T', ' ').slice(0, 16),
+    category: row.category ?? '미분류',
+    product: row.product ?? '',
+    amount: row.amount,
+  }))
+}
+
+/**
+ * 엑셀 데이터 저장 (ExcelRow[] → sales 테이블)
+ * - uploadName: 업로드 이름 (예: "2025-01"), excel_uploads 레코드로 저장
+ * - ExcelRow.product = "곡명 - 편성" 형태로 songs / arrangements 테이블에서 ID 조회
+ * - 매핑 실패해도 저장됨 (song_id / arrangement_id는 nullable)
+ */
+export async function saveSalesRows(rows: ExcelRow[], uploadName: string): Promise<void> {
+  if (rows.length === 0) return
+
+  // 공백·대소문자·구두점 차이를 무시하는 정규화 (Excel vs DB 포맷 차이 대응)
+  const norm = (s: string) => s.toLowerCase().replace(/\s*([(),])\s*/g, '$1').trim()
+
+  // AM/PM 날짜 포맷 → Supabase timestamptz 호환 형식으로 변환
+  const parseDate = (dateStr: string): string => {
+    const match = dateStr.match(/^(\d{4}-\d{2}-\d{2})\s+(\d{1,2}):(\d{2}):(\d{2})\s*(AM|PM)$/i)
+    if (match) {
+      let h = parseInt(match[2])
+      const [, date, , m, s, period] = match
+      if (period.toUpperCase() === 'PM' && h < 12) h += 12
+      if (period.toUpperCase() === 'AM' && h === 12) h = 0
+      return `${date} ${String(h).padStart(2, '0')}:${m}:${s}`
+    }
+    return dateStr
+  }
+
+  // excel_uploads 레코드 생성
+  const { data: uploadRecord, error: uploadError } = await supabase
+    .from('excel_uploads')
+    .insert({ name: uploadName, row_count: rows.length })
+    .select('id')
+    .single()
+
+  if (uploadError) throw uploadError
+
+  const uploadId = uploadRecord.id
+
+  // 룩업 테이블 병렬 조회
+  const [
+    { data: songs, error: se },
+    { data: arrangements, error: ae },
+  ] = await Promise.all([
+    supabase.from('songs').select('id, title').is('deleted_at', null),
+    supabase.from('arrangements').select('id, song_id, arrangement').is('deleted_at', null),
+  ])
+
+  if (se) throw se
+  if (ae) throw ae
+
+  const songMap = new Map((songs ?? []).map(s => [norm(s.title), s.id]))
+  const arrangementMap = new Map(
+    (arrangements ?? []).map(a => [`${a.song_id}:${norm(a.arrangement)}`, a.id])
+  )
+
+  const inserts = rows.map(row => {
+    const [songTitle, ...arrangementParts] = row.product.split(/\s+-/)
+    const arrangementStr = arrangementParts.join('-').trim()
+
+    const song_id = songMap.get(norm(songTitle.trim())) ?? null
+    const arrangement_id = (song_id ? arrangementMap.get(`${song_id}:${norm(arrangementStr)}`) : undefined) ?? null
+
+    return {
+      song_id,
+      arrangement_id,
+      upload_id: uploadId,
+      category: row.category,
+      product: row.product,
+      amount: row.amount,
+      sold_at: parseDate(row.orderDate),
+    }
+  })
+
+  const { error } = await supabase.from('sales').insert(inserts)
+  if (error) throw error
+}
+
+/**
+ * 전체 판매 목록 조회 (SalesAll 테이블용, ExcelRow 형태)
+ */
+export async function getSalesRows(year?: number): Promise<ExcelRow[]> {
+  let query = supabase
+    .from('sales')
+    .select('id, sold_at, amount, category, product')
+    .order('sold_at', { ascending: false })
+
+  if (year) {
+    query = query.gte('sold_at', `${year}-01-01`).lt('sold_at', `${year + 1}-01-01`)
+  }
+
+  const { data, error } = await query
+  if (error) throw error
+
+  return (data ?? []).map((row, i) => ({
+    id: i + 1,
+    orderDate: row.sold_at.replace('T', ' ').slice(0, 16),
+    category: row.category ?? '미분류',
+    product: row.product ?? '',
+    amount: row.amount,
+  }))
+}
