@@ -110,6 +110,11 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: Props) => {
             else if (numScore > vals.length * 0.7 && amtIdx === -1) amtIdx = c;
           }
 
+          if (prodIdx === -1 && amtIdx === -1) {
+            setError('필수 컬럼(상품명 또는 금액)을 자동으로 감지하지 못했습니다. 헤더가 있는 파일로 다시 시도해 주세요.')
+            return
+          }
+
           const dataRows = rawRows.filter(r =>
             (catIdx >= 0 && r[catIdx]) || (prodIdx >= 0 && r[prodIdx])
           );
