@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/PageHeader';
-import { ExcelUploadDialog, type ExcelRow } from '@/components/ExcelUploadDialog';
+import { ExcelUploadDialog } from '@/components/ExcelUploadDialog';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Upload, DollarSign, BarChart3, FileSpreadsheet, CalendarDays, List } from 'lucide-react';
@@ -16,6 +16,7 @@ import { statsKeys } from '@/api/stats/queryKeys';
 import { useToast } from '@/hooks/use-toast';
 import { queryClient } from '@/utils/query-client';
 import { statsQueries } from '@/api/stats/queries';
+import { ExcelRow } from '@/types/excel';
 
 const tabItems = {
   all: { icon: BarChart3, label: '전체 분석', component: Stats },

@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabase'
 import { MONTH } from '@/constants/month'
-import { ExcelRow } from '@/components/ExcelUploadDialog'
+import { ExcelRow } from '@/types/excel'
 import { ExcelUpload, MonthlyCategoryData, MonthlySale, SalesSummary, TopArrangement, TopSong, TopSongMonthlySalesResult } from '@/types/stats'
 import { splitProduct } from '@/utils/split-product'
 

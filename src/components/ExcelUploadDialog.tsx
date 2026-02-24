@@ -12,13 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Upload, FileSpreadsheet, X, CheckCircle2 } from "lucide-react";
 import * as XLSX from "xlsx";
 import { splitProduct } from "@/utils/split-product";
-
-export type ExcelRow = {
-  id: string | number;
-  category: string;
-  product: string;
-  amount: number;
-};
+import { ExcelRow } from '@/types/excel';
 
 type Props = {
   open: boolean;

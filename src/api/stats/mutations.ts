@@ -1,6 +1,6 @@
 import { mutationOptions } from '@tanstack/react-query'
 import { saveSalesRows, deleteExcelUpload } from '.'
-import { ExcelRow } from '@/components/ExcelUploadDialog'
+import { ExcelRow } from '@/types/excel'
 
 export const statsMutations = {
   saveSalesRows: () =>
