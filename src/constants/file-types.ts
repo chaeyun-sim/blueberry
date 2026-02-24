@@ -1,4 +1,4 @@
-import { FileMusic, FileAudio, FileText, FileIcon } from 'lucide-react';
+import { FileMusic, FileAudio, FileText, File as FileIcon } from 'lucide-react';
 import { ElementType } from 'react';
 
 export const fileTypeConfig: Record<
