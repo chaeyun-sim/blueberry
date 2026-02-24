@@ -4,7 +4,7 @@ import { PageHeader } from '@/components/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { PlusCircle, Search, FileMusic, Music } from 'lucide-react';
+import { PlusCircle, Search, FileMusic, Music, AlertCircle } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -26,7 +26,47 @@ const ScoreList = () => {
   const [openFolderId, setOpenFolderId] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const { data: songs = [] } = useQuery(scoreQueries.getSongs());
+  const scoresQuery = useQuery(scoreQueries.getSongs());
+  const { data: songs = [], isLoading, isError, refetch } = scoresQuery;
+
+  if (isLoading && !songs.length) {
+    return (
+      <AppLayout>
+        <PageHeader title='악보 관리' description='보유 중인 악보와 편성 버전을 관리합니다' />
+        <div className='space-y-4'>
+          {[0, 1, 2, 3].map(i => (
+            <div key={i} className='h-12 rounded-lg bg-muted animate-pulse' />
+          ))}
+        </div>
+      </AppLayout>
+    );
+  }
+
+  if (isError) {
+    return (
+      <AppLayout>
+        <PageHeader title='악보 관리' description='보유 중인 악보와 편성 버전을 관리합니다' />
+        <Card className='border-destructive/50'>
+          <CardContent className='p-6'>
+            <div className='flex items-center gap-4'>
+              <AlertCircle className='h-8 w-8 text-destructive flex-shrink-0' />
+              <div className='flex-1'>
+                <p className='font-medium text-destructive'>
+                  악보 목록을 불러올 수 없습니다
+                </p>
+                <p className='text-sm text-muted-foreground mt-1'>
+                  잠시 후 다시 시도해주세요.
+                </p>
+              </div>
+              <Button onClick={() => refetch()}>
+                다시 시도
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </AppLayout>
+    );
+  }
 
   const filteredSongs = songs.filter(song =>
     song.title.toLowerCase().includes(search.toLowerCase()),
