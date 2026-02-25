@@ -35,8 +35,13 @@ const CommissionRegister = () => {
         if (!res) return;
         const blob = await res.blob();
         const file = new File([blob], 'shared-image.jpg', { type: blob.type || 'image/jpeg' });
-        const url = URL.createObjectURL(blob);
-        setForm(prev => ({ ...prev, imagePreview: url }));
+        const dataUrl = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = e => resolve(e.target?.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+        setForm(prev => ({ ...prev, imagePreview: dataUrl }));
         setImageFile(file);
         await cache.delete('/shared-image');
       } catch { /* 무시 */ }
