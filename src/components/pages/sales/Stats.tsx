@@ -28,8 +28,9 @@ import { ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { Layers } from 'lucide-react';
 import { formatCurrency } from '@/utils/format-currency';
 import TopSongBar from './TopSongBar';
-import { useQuery } from '@tanstack/react-query';
+import { useAppQuery as useQuery } from '@/hooks/useAppQuery';
 import { statsQueries } from '@/api/stats/queries';
+import { MONEY_RATIO } from '@/constants/money-ratio';
 
 const categoryColors: Record<string, string> = {
   CLASSIC: 'hsl(var(--status-complete))',
@@ -144,7 +145,7 @@ function Stats() {
               className='w-full h-[280px]'
             >
               <BarChart
-                data={songKeysData}
+                data={songKeysData.slice(0, 5)}
                 layout='vertical'
                 barSize={18}
                 barCategoryGap={28}
@@ -208,7 +209,7 @@ function Stats() {
               config={{ sales: { label: '판매수', color: 'hsl(var(--primary))' } }}
               className='w-full h-[200px] lg:h-[260px]'
             >
-              <RadarChart data={topArrangements.map(arr => ({ subject: arr.arrangement, sales: arr.sales, revenue: arr.revenue }))} cx='50%' cy='50%'>
+              <RadarChart data={topArrangements.map(arr => ({ subject: arr.arrangement, sales: arr.sales, revenue: arr.revenue * MONEY_RATIO }))} cx='50%' cy='50%'>
                 <PolarGrid
                   strokeDasharray='3 3'
                   stroke='hsl(var(--foreground) / 0.15)'
@@ -253,7 +254,7 @@ function Stats() {
                         <div className='flex flex-col gap-0.5'>
                           <span className='font-medium'>{item.payload.subject}</span>
                           <span className='text-muted-foreground text-xs'>
-                            {item.payload.sales}건 · {formatCurrency(item.payload.revenue)}
+                            {formatCurrency(item.payload.revenue)}
                           </span>
                         </div>
                       )}
@@ -264,7 +265,7 @@ function Stats() {
             </ChartContainer>
 
             <div className='divide-y divide-border/50'>
-              {topArrangements?.map(arr => (
+              {[...(topArrangements ?? [])].sort((a, b) => b.revenue - a.revenue).map(arr => (
                 <div
                   key={arr.rank}
                   className='flex items-center gap-3 py-3'
@@ -276,7 +277,7 @@ function Stats() {
                     <p className='text-sm font-medium truncate'>
                       {arr.arrangement}
                       <span className='text-xs text-muted-foreground font-normal ml-2'>
-                        {arr.sales}건 · {formatCurrency(arr.revenue)}
+                        {arr.sales}건 · {formatCurrency(arr.revenue * MONEY_RATIO)}
                       </span>
                     </p>
                   </div>

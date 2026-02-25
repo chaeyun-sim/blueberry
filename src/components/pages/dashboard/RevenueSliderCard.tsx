@@ -3,8 +3,9 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { DollarSign, TrendingDown, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useAppQuery as useQuery } from '@/hooks/useAppQuery';
 import { statsQueries } from '@/api/stats/queries';
+import { MONEY_RATIO } from '@/constants/money-ratio';
 
 function RevenueSliderCard() {
   const { data: summary } = useQuery(statsQueries.getSalesSummary());
@@ -12,13 +13,13 @@ function RevenueSliderCard() {
   const revenueSlides = [
     {
       label: '전체 누적 매출',
-      value: summary?.totalRevenue ?? 0,
+      value: (summary?.totalRevenue ?? 0) * MONEY_RATIO,
       sub: null,
       up: true,
     },
     {
       label: '지난 달 매출',
-      value: summary?.lastMonthRevenue ?? 0,
+      value: (summary?.lastMonthRevenue ?? 0) * MONEY_RATIO,
       sub: summary?.revenueVsLastMonth != null
         ? `전월 대비 ${summary.revenueVsLastMonth >= 0 ? '+' : ''}${summary.revenueVsLastMonth}%`
         : null,

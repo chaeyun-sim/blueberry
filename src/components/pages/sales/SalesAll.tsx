@@ -20,7 +20,7 @@ import { cn } from '@/lib/utils';
 import { formatCurrency } from '@/utils/format-currency';
 import { Fragment, useMemo, useState } from 'react';
 import { statsQueries } from '@/api/stats/queries';
-import { useQuery } from '@tanstack/react-query';
+import { useAppQuery as useQuery } from '@/hooks/useAppQuery';
 import { splitProduct } from '@/utils/split-product';
 
 type SortKey = 'category' | 'product' | 'amount';

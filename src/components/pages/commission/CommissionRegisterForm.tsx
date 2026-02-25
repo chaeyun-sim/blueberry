@@ -8,7 +8,8 @@ import { Calendar, Plus, X } from 'lucide-react';
 import { DifficultyLevelType } from '@/types/commission';
 import { Button } from '@/components/ui/button';
 import { useRef, useState } from 'react';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
+import { useAppQuery as useQuery } from '@/hooks/useAppQuery';
 import { scoreQueries } from '@/api/score/queries';
 import { commissionMutations } from '@/api/commission/mutations';
 import { ALL_INSTRUMENTS } from '@/constants/instruments';
@@ -188,7 +189,7 @@ function CommissionRegisterForm({ form, setForm, imageFile, isAnalyzing }: Commi
                     <button
                       type='button'
                       disabled={isAnalyzing || isSubmitting}
-                      onClick={() => setForm(prev => ({ ...prev, instruments: removeInstrument(prev.instruments, idx) }))}
+                      onClick={() => setForm({ ...form, instruments: removeInstrument(form.instruments, idx) })}
                       className='ml-0.5 hover:text-destructive transition-colors disabled:opacity-50 disabled:pointer-events-none'
                     >
                       <X className='h-3 w-3' />

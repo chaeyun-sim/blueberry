@@ -17,7 +17,8 @@ import {
 } from '@/components/ui/alert-dialog';
 import { ArrowLeft, Music, Trash2 } from 'lucide-react';
 import { useNavigate, useParams, Navigate } from 'react-router-dom';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
+import { useAppQuery as useQuery } from '@/hooks/useAppQuery';
 import { scoreQueries } from '@/api/score/queries';
 import { scoreMutations } from '@/api/score/mutations';
 import { scoreKeys } from '@/api/score/queryKeys';

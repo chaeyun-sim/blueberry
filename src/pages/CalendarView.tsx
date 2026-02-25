@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { useQuery } from "@tanstack/react-query";
+import { useAppQuery as useQuery } from "@/hooks/useAppQuery";
 import { commissionQueries } from "@/api/commission/queries";
 
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
@@ -69,7 +69,7 @@ export default function CalendarView() {
   }
 
   // Stats
-  const monthCommissions = commissions.filter((c) => {
+  const monthCommissions = commissions?.filter((c) => {
     const d = dayjs(c.deadline);
     return d.year() === year && d.month() === month;
   });
