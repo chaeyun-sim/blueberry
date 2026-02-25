@@ -149,6 +149,11 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
         }
       }
 
+      if (failed.length === files.length) {
+        toast.error('모든 파일 업로드에 실패했습니다. 다시 시도해주세요.');
+        return;
+      }
+
       if (failed.length > 0) toast.warning(`일부 파일 업로드 실패: ${failed.join(', ')}`);
 
       queryClient.invalidateQueries({ queryKey: scoreKeys.list() });
