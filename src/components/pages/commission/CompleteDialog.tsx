@@ -280,7 +280,7 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
 
         <div className='flex justify-end gap-2 pt-2'>
           <Button variant='outline' onClick={() => { setZipName(null); setFiles([]); setZipSize(0); if (zipInputRef.current) zipInputRef.current.value = ''; close(); }} disabled={isSubmitting}>취소</Button>
-          <Button onClick={handleSubmit} disabled={isSubmitting || isExtracting || !zipName || !isZipTitleMatch} className='gap-2'>
+          <Button onClick={handleSubmit} disabled={isSubmitting || isExtracting || !zipName || files.length === 0 || !isZipTitleMatch} className='gap-2'>
             {isSubmitting ? <Loader2 className='h-4 w-4 animate-spin' /> : <FileCheck className='h-4 w-4' />}
             {isSubmitting ? '등록 중...' : '작업 완료'}
           </Button>
