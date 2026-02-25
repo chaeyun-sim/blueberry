@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
@@ -24,6 +24,24 @@ const CommissionRegister = () => {
 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+  // Share Target: 다른 앱에서 공유된 이미지 자동 로드
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('shared') !== 'true') return;
+    (async () => {
+      try {
+        const cache = await caches.open('blueberry-share');
+        const res = await cache.match('/shared-image');
+        if (!res) return;
+        const blob = await res.blob();
+        const file = new File([blob], 'shared-image.jpg', { type: blob.type || 'image/jpeg' });
+        const url = URL.createObjectURL(blob);
+        setForm(prev => ({ ...prev, imagePreview: url }));
+        setImageFile(file);
+        await cache.delete('/shared-image');
+      } catch { /* 무시 */ }
+    })();
+  }, []);
 
   return (
     <AppLayout>

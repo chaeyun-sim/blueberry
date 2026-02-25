@@ -1,11 +1,11 @@
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const APP_SHELL_CACHE = `blueberry-shell-${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `blueberry-dynamic-${CACHE_VERSION}`;
 
 // 앱 실행에 필요한 핵심 리소스
-const APP_SHELL_URLS = ['/', '/index.html', '/manifest.webmanifest'];
+const APP_SHELL_URLS = ['/', '/index.html', '/manifest.webmanifest', '/offline.html'];
 
-// ─── Push: 알림 표시 ────────────────────────────────────────────────────────
+// ─── Push: 알림 표시 + 뱃지 세팅 ────────────────────────────────────────────
 self.addEventListener('push', event => {
   let title = 'BlueBerry'
   let body = ''
@@ -20,9 +20,18 @@ self.addEventListener('push', event => {
     self.registration.showNotification(title, {
       body,
       icon: '/favicon.ico',
+    }).then(() => {
+      if ('setAppBadge' in navigator) navigator.setAppBadge();
     })
   )
 })
+
+// ─── Notification Click: 뱃지 제거 + 앱 열기 ────────────────────────────────
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  if ('clearAppBadge' in navigator) navigator.clearAppBadge();
+  event.waitUntil(clients.openWindow('/'));
+});
 
 // ─── Install: 앱 셸 사전 캐싱 ───────────────────────────────────────────────
 self.addEventListener('install', event => {
@@ -36,7 +45,7 @@ self.addEventListener('install', event => {
 
 // ─── Activate: 오래된 캐시 정리 ─────────────────────────────────────────────
 self.addEventListener('activate', event => {
-  const validCaches = [APP_SHELL_CACHE, DYNAMIC_CACHE];
+  const validCaches = [APP_SHELL_CACHE, DYNAMIC_CACHE, 'blueberry-share'];
   event.waitUntil(
     caches
       .keys()
@@ -52,11 +61,28 @@ self.addEventListener('activate', event => {
 // ─── Fetch: 요청 가로채기 ───────────────────────────────────────────────────
 self.addEventListener('fetch', event => {
   const { request } = event;
+  const url = new URL(request.url);
+
+  // ── Share Target: POST /share-target → 이미지 캐시 저장 후 /new로 리다이렉트
+  if (url.pathname === '/share-target' && request.method === 'POST') {
+    event.respondWith((async () => {
+      try {
+        const formData = await request.formData();
+        const image = formData.get('image');
+        if (image instanceof File) {
+          const cache = await caches.open('blueberry-share');
+          await cache.put('/shared-image', new Response(image, {
+            headers: { 'Content-Type': image.type },
+          }));
+        }
+      } catch { /* 저장 실패해도 /new로 이동 */ }
+      return Response.redirect('/new?shared=true', 303);
+    })());
+    return;
+  }
 
   // GET 이외의 요청(POST, PATCH 등)은 서비스 워커가 처리하지 않음
   if (request.method !== 'GET') return;
-
-  const url = new URL(request.url);
 
   // 개발 환경(localhost)에서는 캐시 사용 안 함
   if (url.hostname === 'localhost') return;
@@ -84,7 +110,11 @@ async function cacheFirst(request) {
     }
     return response;
   } catch {
-    // 오프라인 + 캐시 없음 → 앱 셸 반환
+    // 네비게이션 요청 오프라인 → offline.html
+    if (request.mode === 'navigate') {
+      const offline = await caches.match('/offline.html');
+      return offline ?? new Response('Offline', { status: 503 });
+    }
     const fallback = await caches.match('/');
     return fallback ?? new Response('Offline', { status: 503 });
   }
