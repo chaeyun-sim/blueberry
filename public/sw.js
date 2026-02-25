@@ -87,11 +87,8 @@ self.addEventListener('fetch', event => {
   // 개발 환경(localhost)에서는 캐시 사용 안 함
   if (url.hostname === 'localhost') return;
 
-  // Supabase API → Network First (최신 데이터 우선, 오프라인 시 캐시 폴백)
-  if (url.hostname.includes('supabase')) {
-    event.respondWith(networkFirst(request));
-    return;
-  }
+  // Supabase API → 캐시 없이 네트워크 직통 (인증된 사용자 데이터 캐시 방지)
+  if (url.hostname.includes('supabase')) return;
 
   // 앱 셸·정적 에셋 → Cache First (빠른 응답, 없으면 네트워크)
   event.respondWith(cacheFirst(request));
@@ -117,26 +114,5 @@ async function cacheFirst(request) {
     }
     const fallback = await caches.match('/');
     return fallback ?? new Response('Offline', { status: 503 });
-  }
-}
-
-// ─── 전략: Network First ────────────────────────────────────────────────────
-async function networkFirst(request) {
-  try {
-    const response = await fetch(request);
-    if (response.ok) {
-      const cache = await caches.open(DYNAMIC_CACHE);
-      cache.put(request, response.clone());
-    }
-    return response;
-  } catch {
-    const cached = await caches.match(request);
-    return (
-      cached ??
-      new Response(JSON.stringify({ error: 'offline' }), {
-        status: 503,
-        headers: { 'Content-Type': 'application/json' },
-      })
-    );
   }
 }
