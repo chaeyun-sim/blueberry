@@ -46,7 +46,10 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
   const composer = commission.composer ?? '';
 
   const zipBaseName = zipName?.replace(/\.zip$/i, '') ?? '';
-  const isZipTitleMatch = zipBaseName.length > 0 && songTitle.toLowerCase().includes(zipBaseName.toLowerCase());
+  const isZipTitleMatch = zipBaseName.length > 0 && (
+    songTitle.toLowerCase().includes(zipBaseName.toLowerCase()) ||
+    zipBaseName.toLowerCase().includes(songTitle.toLowerCase())
+  );
 
   const handleZipFile = async (file: File) => {
     if (!file.name.toLowerCase().endsWith('.zip')) {
