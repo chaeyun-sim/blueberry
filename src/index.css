@@ -111,6 +111,10 @@
     @apply border-border transition-colors duration-150;
   }
 
+  button, [role="button"] {
+    cursor: pointer;
+  }
+
   body {
     @apply bg-background text-foreground font-sans antialiased;
     transition: background-color 150ms ease, color 150ms ease;
