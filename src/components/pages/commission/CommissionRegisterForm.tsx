@@ -39,6 +39,7 @@ function CommissionRegisterForm({ form, setForm, imageFile, isAnalyzing }: Commi
   const [showInstrumentDropdown, setShowInstrumentDropdown] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [instrumentInput, setInstrumentInput] = useState('');
+  const startTimeRef = useRef(performance.now());
 
   const { data: songs = [] } = useQuery(scoreQueries.getSongs());
   const { mutateAsync: createCommission } = useMutation(commissionMutations.createCommission());
@@ -105,6 +106,8 @@ function CommissionRegisterForm({ form, setForm, imageFile, isAnalyzing }: Commi
       }
 
       queryClient.invalidateQueries({ queryKey: commissionKeys.list() });
+      const elapsed = ((performance.now() - startTimeRef.current) / 1000).toFixed(2);
+      toast.success(`등록 완료 (총 ${elapsed}초)`);
       navigate(`/commissions/${res?.id}`);
     } catch (e) {
       toast.error('의뢰 등록에 실패했습니다.', { description: (e as Error).message });

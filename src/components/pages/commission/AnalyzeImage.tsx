@@ -49,10 +49,13 @@ function AnalyzeImage({
   const handleAnalyze = async () => {
     if (!url || !file) return;
     setIsAnalyzing(true);
+    const start = performance.now();
     try {
       const base64 = url.split(',')[1];
       const result = await analyzeCommissionImage(base64, file.type);
       setForm(result);
+      const elapsed = ((performance.now() - start) / 1000).toFixed(2);
+      toast.success(`AI 분석 완료 (${elapsed}초)`);
     } catch (e) {
       toast.error('AI 분석에 실패했습니다.');
     } finally {
