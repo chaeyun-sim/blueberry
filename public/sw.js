@@ -5,6 +5,25 @@ const DYNAMIC_CACHE = `blueberry-dynamic-${CACHE_VERSION}`;
 // 앱 실행에 필요한 핵심 리소스
 const APP_SHELL_URLS = ['/', '/index.html', '/manifest.webmanifest'];
 
+// ─── Push: 알림 표시 ────────────────────────────────────────────────────────
+self.addEventListener('push', event => {
+  let title = 'BlueBerry'
+  let body = ''
+  try {
+    const data = event.data?.json()
+    title = data?.title ?? title
+    body = data?.body ?? body
+  } catch {
+    body = event.data?.text() ?? ''
+  }
+  event.waitUntil(
+    self.registration.showNotification(title, {
+      body,
+      icon: '/favicon.ico',
+    })
+  )
+})
+
 // ─── Install: 앱 셸 사전 캐싱 ───────────────────────────────────────────────
 self.addEventListener('install', event => {
   event.waitUntil(
@@ -38,6 +57,9 @@ self.addEventListener('fetch', event => {
   if (request.method !== 'GET') return;
 
   const url = new URL(request.url);
+
+  // 개발 환경(localhost)에서는 캐시 사용 안 함
+  if (url.hostname === 'localhost') return;
 
   // Supabase API → Network First (최신 데이터 우선, 오프라인 시 캐시 폴백)
   if (url.hostname.includes('supabase')) {

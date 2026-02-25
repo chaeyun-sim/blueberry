@@ -4,6 +4,11 @@
 @tailwind components;
 @tailwind utilities;
 
+button:not(:disabled),
+[role="button"]:not(:disabled) {
+  cursor: pointer;
+}
+
 @layer base {
   :root {
     --background: 38 18% 95%;
@@ -109,10 +114,6 @@
 @layer base {
   * {
     @apply border-border transition-colors duration-150;
-  }
-
-  button, [role="button"] {
-    cursor: pointer;
   }
 
   body {
