@@ -85,7 +85,7 @@ export function AppSidebar() {
           </button>
 
           {session ? (
-            <button className="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-border bg-muted/30" onClick={logout}>
+            <button className="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-border bg-muted/30" onClick={() => logout().catch(() => {})}>
               <div className="text-muted-foreground hover:text-foreground transition-colors">
                 <LogOut className="h-3.5 w-3.5" />
               </div>
