@@ -12,6 +12,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { useMutation } from '@tanstack/react-query';
 import { commissionMutations } from '@/api/commission/mutations';
+import { commissionKeys } from '@/api/commission/queryKeys';
+import { queryClient } from '@/utils/query-client';
 
 interface DeleteCommissionDialogProps extends OverlayProps {
   commissionId: string;
@@ -25,6 +27,7 @@ function DeleteCommissionDialog({ isOpen, close, commissionId }: DeleteCommissio
   const handleDelete = () => {
 		deleteCommission({ commissionId }, {
 			onSuccess: () => {
+				queryClient.invalidateQueries({ queryKey: commissionKeys.list() });
 				toast.success('의뢰가 삭제되었습니다.');
 				close();
 				navigate('/commissions');

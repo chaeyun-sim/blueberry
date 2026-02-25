@@ -218,7 +218,7 @@ const CommissionDetail = () => {
         </Button>
       </div>
 
-      <PageHeader title={commission?.title ?? ''} />
+      <PageHeader title={commission?.songs?.title ?? commission?.title ?? ''} />
 
       {/* Status Progress */}
       <Card className='mb-8 border-border/50'>
@@ -287,6 +287,9 @@ const CommissionDetail = () => {
                   }
                   if (key === 'created_at') {
                     return commission?.created_at ? dayjs(commission.created_at).format('YYYY-MM-DD HH:mm') : '-';
+                  }
+                  if (key === 'composer') {
+                    return commission?.songs?.composer ?? commission?.composer ?? '-';
                   }
                   return commission?.[key] ?? '-';
                 }
