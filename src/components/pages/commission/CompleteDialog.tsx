@@ -40,6 +40,7 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
 
   const { mutateAsync: createSong } = useMutation(scoreMutations.createSong());
   const { mutateAsync: createArrangement } = useMutation(scoreMutations.createArrangement());
+  const { mutateAsync: deleteArrangement } = useMutation(scoreMutations.deleteArrangement());
   const { mutateAsync: uploadFile } = useMutation(scoreMutations.uploadArrangementFile());
 
   const songTitle = commission.songs?.title ?? commission.title ?? '';
@@ -150,6 +151,7 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
       }
 
       if (failed.length === files.length) {
+        await deleteArrangement({ id: arrangement.id }).catch(() => {});
         toast.error('모든 파일 업로드에 실패했습니다. 다시 시도해주세요.');
         return;
       }
