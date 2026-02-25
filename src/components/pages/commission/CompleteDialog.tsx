@@ -44,7 +44,7 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
   const { mutateAsync: uploadFile } = useMutation(scoreMutations.uploadArrangementFile());
 
   const songTitle = commission.songs?.title ?? commission.title ?? '';
-  const composer = commission.composer ?? '';
+  const composer = commission.songs?.composer ?? commission.composer ?? '';
 
   const zipBaseName = zipName?.replace(/\.zip$/i, '') ?? '';
   const isZipTitleMatch = zipBaseName.length > 0 && (
