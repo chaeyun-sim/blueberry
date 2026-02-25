@@ -31,6 +31,7 @@ function FolderRow({ song, onClick, onDelete }: { song: Song; onClick: () => voi
           variant="ghost"
           size="icon"
           className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0"
+          aria-label="악보 삭제"
           onClick={e => { e.stopPropagation(); onDelete(); }}
         >
           <Trash2 className="h-3.5 w-3.5" />
