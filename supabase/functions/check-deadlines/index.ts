@@ -15,7 +15,8 @@ const supabase = createClient(
 const CRON_SECRET = Deno.env.get("CRON_SECRET")
 
 Deno.serve(async (req) => {
-  if (!CRON_SECRET || req.headers.get("x-cron-secret") !== CRON_SECRET) {
+  const authHeader = req.headers.get("Authorization")
+  if (!CRON_SECRET || authHeader !== `Bearer ${CRON_SECRET}`) {
     return new Response("Unauthorized", { status: 401 })
   }
   // 한국 시간(UTC+9) 기준 오늘/내일/모레 날짜 계산
