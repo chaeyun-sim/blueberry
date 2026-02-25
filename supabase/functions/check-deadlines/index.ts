@@ -12,7 +12,12 @@ const supabase = createClient(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
 )
 
-Deno.serve(async () => {
+const CRON_SECRET = Deno.env.get("CRON_SECRET")
+
+Deno.serve(async (req) => {
+  if (!CRON_SECRET || req.headers.get("x-cron-secret") !== CRON_SECRET) {
+    return new Response("Unauthorized", { status: 401 })
+  }
   // 한국 시간(UTC+9) 기준 오늘/내일/모레 날짜 계산
   const now = new Date(Date.now() + 9 * 60 * 60 * 1000)
   const targets = [0, 1, 2].map((d) => {
