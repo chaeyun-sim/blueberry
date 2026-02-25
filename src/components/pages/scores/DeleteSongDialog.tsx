@@ -27,8 +27,7 @@ function DeleteSongDialog({ isOpen, close, songTitle, arrangementCount, onConfir
         <DialogHeader>
           <DialogTitle>악보를 삭제하시겠습니까?</DialogTitle>
           <DialogDescription>
-            <strong>{songTitle}</strong>에 연결된 편성 {arrangementCount}개가 함께 삭제됩니다.
-            삭제된 데이터는 복구할 수 없습니다.
+            <strong>{songTitle}</strong>을(를) 삭제하면 연결된 편성 {arrangementCount}개도 함께 접근할 수 없게 됩니다.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
