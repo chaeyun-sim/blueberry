@@ -16,7 +16,16 @@ Deno.serve(async (req) => {
     return new Response('ok', { headers: corsHeaders })
   }
 
-  const { subscription, title, body } = await req.json()
+  if (req.method !== 'POST') {
+    return new Response("Method Not Allowed", { status: 405, headers: corsHeaders })
+  }
+
+  let subscription: unknown, title: unknown, body: unknown
+  try {
+    ({ subscription, title, body } = await req.json())
+  } catch {
+    return new Response("Invalid JSON", { status: 400, headers: corsHeaders })
+  }
 
   try {
     await webpush.sendNotification(
@@ -25,7 +34,7 @@ Deno.serve(async (req) => {
     )
 
     return new Response("sent", { status: 200, headers: corsHeaders })
-  } catch (e) {
-    return new Response(String(e), { status: 500, headers: corsHeaders })
+  } catch {
+    return new Response("Failed to send notification", { status: 500, headers: corsHeaders })
   }
 })
