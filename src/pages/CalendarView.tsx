@@ -41,7 +41,7 @@ export default function CalendarView() {
     setCurrentDate(currentDate.add(offset, 'month').startOf('month'));
 
   const getCommissionsForDate = (dateStr: string) =>
-    commissions.filter((c) => c.deadline === dateStr);
+    commissions.filter((c) => dayjs(c.deadline).format('YYYY-MM-DD') === dateStr);
 
   const formatDate = (d: number) => {
     const m = String(month + 1).padStart(2, "0");
