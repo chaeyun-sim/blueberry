@@ -30,7 +30,7 @@ export default function Settings() {
     try {
       if (checked) {
         const subscription = await createPushSubscription();
-        await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-push`, {
+        const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-push`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -42,6 +42,7 @@ export default function Settings() {
             body: '마감일 푸시 알림이 활성화됐어요 🎵',
           }),
         });
+        if (!res.ok) throw new Error(`푸시 서버 오류 (${res.status})`);
         setPushEnabled(true);
         toast({ title: '푸시 알림이 활성화됐어요' });
       } else {
