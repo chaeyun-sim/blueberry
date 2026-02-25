@@ -105,6 +105,7 @@ const CommissionDetail = () => {
         overlayProps => (
           <CompleteDialog
             {...overlayProps}
+            commission={commission}
             onConfirm={handleTransitionConfirm}
           />
         ),
