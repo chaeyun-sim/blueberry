@@ -218,7 +218,7 @@ const CommissionDetail = () => {
         </Button>
       </div>
 
-      <PageHeader title={commission?.songs?.title ?? commission?.title ?? ''} />
+      <PageHeader title={song?.title ?? commission?.songs?.title ?? commission?.title ?? ''} />
 
       {/* Status Progress */}
       <Card className='mb-8 border-border/50'>
