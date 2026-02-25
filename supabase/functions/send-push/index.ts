@@ -9,7 +9,11 @@ const publicKey = Deno.env.get("VAPID_PUBLIC_KEY")!
 const privateKey = Deno.env.get("VAPID_PRIVATE_KEY")!
 const email = Deno.env.get("VAPID_EMAIL")!
 
-webpush.setVapidDetails(email, publicKey, privateKey)
+webpush.setVapidDetails(
+  email.startsWith('mailto:') || email.startsWith('https:') ? email : `mailto:${email}`,
+  publicKey,
+  privateKey,
+)
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
