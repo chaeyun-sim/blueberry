@@ -265,7 +265,7 @@ function Stats() {
             </ChartContainer>
 
             <div className='divide-y divide-border/50'>
-              {topArrangements?.sort((a, b) => b.revenue - a.revenue).map(arr => (
+              {[...(topArrangements ?? [])].sort((a, b) => b.revenue - a.revenue).map(arr => (
                 <div
                   key={arr.rank}
                   className='flex items-center gap-3 py-3'
