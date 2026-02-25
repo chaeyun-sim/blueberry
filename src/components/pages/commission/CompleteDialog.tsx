@@ -253,7 +253,7 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
                 )}
                 {!isExtracting && zipBaseName && !isZipTitleMatch && (
                   <p className='text-xs text-destructive px-1'>
-                    작업하신 곡이 의뢰 곡과 다른 것 같습니다.
+                    ZIP 파일명에 의뢰 곡명이 포함되어야 합니다.
                   </p>
                 )}
               </div>
