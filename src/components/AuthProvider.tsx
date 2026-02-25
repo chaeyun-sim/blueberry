@@ -28,10 +28,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isGuest, setIsGuest] = useState(false)
 
   useEffect(() => {
-    getSession().then((s) => {
-      setSession(s)
-      setLoading(false)
-    })
+    getSession()
+      .then((s) => setSession(s))
+      .finally(() => setLoading(false))
 
     const { data: { subscription } } = onAuthStateChange((s) => {
       setSession(s)
