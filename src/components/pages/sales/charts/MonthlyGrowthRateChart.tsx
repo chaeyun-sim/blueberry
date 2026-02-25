@@ -34,8 +34,7 @@ function MonthlyGrowthRateChart({ data, avgCount }: MonthlyGrowthRateChartProps)
           tickLine={false}
           axisLine={false}
           fontSize={12}
-          ticks={[0, 100000, 300000, 500000, 700000]}
-          domain={[0, 700000]}
+          domain={[0, 'auto']}
           tickFormatter={(v) => `${v / 10000}만`}
         />
         <ChartTooltip
