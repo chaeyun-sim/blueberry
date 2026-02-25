@@ -192,18 +192,19 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
               onChange={e => { const f = e.target.files?.[0]; if (f) handleZipFile(f); }}
             />
             {!zipName ? (
-              <div
+              <button
+                type='button'
                 onClick={() => zipInputRef.current?.click()}
                 onDragOver={e => e.preventDefault()}
                 onDrop={e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleZipFile(f); }}
-                className='border-2 border-dashed border-border rounded-lg p-8 flex flex-col items-center gap-3 bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer'
+                className='w-full border-2 border-dashed border-border rounded-lg p-8 flex flex-col items-center gap-3 bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer'
               >
                 <FileArchive className='h-8 w-8 text-muted-foreground' />
                 <div className='text-center'>
                   <p className='text-sm font-medium'>ZIP 파일을 드래그하거나 클릭하여 업로드</p>
                   <p className='text-xs text-muted-foreground mt-1'>스코어, 파트보, MusicXML 파일이 담긴 ZIP</p>
                 </div>
-              </div>
+              </button>
             ) : (
               <div className='space-y-2'>
                 <div className='flex items-center justify-between p-3 rounded-lg bg-primary/5 border border-primary/15'>
@@ -217,6 +218,7 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
                     </div>
                   </div>
                   <button
+                    aria-label='파일 제거'
                     onClick={() => { setZipName(null); setFiles([]); if (zipInputRef.current) zipInputRef.current.value = ''; }}
                     disabled={isExtracting || isSubmitting}
                     className='p-1 rounded hover:bg-foreground/5 transition-colors disabled:pointer-events-none'
