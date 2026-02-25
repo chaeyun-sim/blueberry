@@ -53,12 +53,16 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
   );
 
   const handleZipFile = async (file: File) => {
+    const resetInput = () => { if (zipInputRef.current) zipInputRef.current.value = ''; };
+
     if (!file.name.toLowerCase().endsWith('.zip')) {
       toast.error('ZIP 파일만 업로드할 수 있습니다.');
+      resetInput();
       return;
     }
     if (file.size > MAX_ZIP_SIZE) {
       toast.error('ZIP 파일 크기는 200MB 이하여야 합니다.');
+      resetInput();
       return;
     }
 
@@ -105,10 +109,11 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
       }
 
       if (!aborted) setFiles(entries);
-      else setZipName(null);
+      else { setZipName(null); resetInput(); }
     } catch (e) {
       toast.error('ZIP 파일을 읽을 수 없습니다.', { description: (e as Error).message });
       setZipName(null);
+      resetInput();
     } finally {
       setIsExtracting(false);
     }
