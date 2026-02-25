@@ -56,8 +56,7 @@ const CommissionDetail = () => {
   const imslpQuery = [cleanTitle(rawTitle), commission?.songs?.composer ?? commission?.composer]
     .filter(Boolean)
     .join(' ')
-    .replace(/ /g, '%20')
-  const imslpUrl = `https://www.google.com/search?q=site:imslp.org+${imslpQuery}`
+  const imslpUrl = `https://www.google.com/search?q=${encodeURIComponent(`site:imslp.org ${imslpQuery}`)}`
 
   const commissionStatuses = Object.keys(COMMISSION_STATUS_TRANSLATE);
   const currentStatusIndex = commissionStatuses.findIndex(status => status === commission?.status);
