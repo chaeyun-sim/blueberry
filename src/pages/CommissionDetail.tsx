@@ -53,7 +53,7 @@ const CommissionDetail = () => {
       .trim()
 
   const rawTitle = song?.english_title ?? commission?.songs?.title ?? commission?.title ?? ''
-  const imslpQuery = [cleanTitle(rawTitle), commission?.composer]
+  const imslpQuery = [cleanTitle(rawTitle), commission?.songs?.composer ?? commission?.composer]
     .filter(Boolean)
     .join(' ')
     .replace(/ /g, '%20')
@@ -346,7 +346,7 @@ const CommissionDetail = () => {
               <div>
                 <p className='text-sm font-medium'>IMSLP에서 찾기</p>
                 <p className='text-xs text-muted-foreground'>
-                  {commission?.songs?.title ?? commission?.title} · {commission?.composer}
+                  {commission?.songs?.title ?? commission?.title} · {commission?.songs?.composer ?? commission?.composer}
                 </p>
               </div>
               <ExternalLink className='h-4 w-4 text-muted-foreground shrink-0' />
