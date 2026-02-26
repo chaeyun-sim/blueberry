@@ -176,8 +176,28 @@ export async function uploadArrangementFile(arrangementId: string, file: File, l
   return publicUrl;
 }
 
-// 악보 파일 삭제
+// 악보 파일 삭제 (hard delete - storage도 함께 삭제하므로 복구 불가)
 export async function deleteArrangementFile(id: string) {
+  // path 추출 용 URL 추적
+  const { data, error: fetchError } = await supabase
+    .from(ARRANGEMENT_FILES_TABLE)
+    .select('url')
+    .eq('id', id)
+    .single();
+
+  if (fetchError) throw fetchError;
+
+  // path 추출
+  const path = data.url.split(`/${ARRANGEMENT_FILES_BUCKET}/`)[1];
+
+  // storage 먼저 삭제
+  const { error: storageError } = await supabase.storage
+    .from(ARRANGEMENT_FILES_BUCKET)
+    .remove([path]);
+
+  if (storageError) throw storageError;
+
+  // 파일 테이블 삭제
   const { error } = await supabase.from(ARRANGEMENT_FILES_TABLE).delete().eq('id', id);
 
   if (error) throw error;
