@@ -39,6 +39,7 @@ export type UpdateCommissionInput = {
   deadline?: string
   notes?: string
   status?: CommissionStatus
+  image_url?: string | null 
 }
 
 export const COMMISSION_INFO = {

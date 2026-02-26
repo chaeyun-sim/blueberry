@@ -43,7 +43,7 @@ export async function createCommission(input: CreateCommissionInput) {
 }
 
 // 의뢰 정보 수정
-export async function updateCommission(id: string, input: UpdateCommissionInput) {
+export async function updateCommission(id: string, input: UpdateCommissionInput): Promise<Commission> {
   const { data, error } = await supabase
     .from(COMMISSIONS)
     .update(input)

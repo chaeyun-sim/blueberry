@@ -1,6 +1,7 @@
 import { mutationOptions } from '@tanstack/react-query'
 import {
   createArrangement,
+  createArrangementFile,
   createSong,
   deleteArrangement,
   deleteArrangementFile,
@@ -9,7 +10,7 @@ import {
   updateSong,
   uploadArrangementFile,
 } from '.'
-import { CreateArrangementInput, CreateSongInput, UpdateSongInput } from '@/types/score'
+import { CreateArrangementFileInput, CreateArrangementInput, CreateSongInput, UpdateSongInput } from '@/types/score'
 
 export const scoreMutations = {
   createSong: () =>
@@ -38,17 +39,15 @@ export const scoreMutations = {
     }),
   uploadArrangementFile: () =>
     mutationOptions({
-      mutationFn: ({
+      mutationFn: async ({
         arrangementId,
         file,
         label,
         fileType,
-      }: {
-        arrangementId: string
-        file: File
-        label: string
-        fileType: string
-      }) => uploadArrangementFile(arrangementId, file, label, fileType),
+      }: CreateArrangementFileInput) => {
+        const publicUrl = await uploadArrangementFile(arrangementId, file, label)
+        return createArrangementFile(arrangementId, label, fileType, publicUrl)
+      },
     }),
   deleteArrangementFile: () =>
     mutationOptions({
