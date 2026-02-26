@@ -4,6 +4,11 @@
 @tailwind components;
 @tailwind utilities;
 
+button:not(:disabled),
+[role="button"]:not(:disabled) {
+  cursor: pointer;
+}
+
 @layer base {
   :root {
     --background: 38 18% 95%;

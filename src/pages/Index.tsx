@@ -26,6 +26,7 @@ import dayjs from 'dayjs';
 import { scoreQueries } from '@/api/score/queries';
 import { statsQueries } from '@/api/stats/queries';
 import { formatCurrency } from '@/utils/format-currency';
+import { Button } from '@/components/ui/button';
 
 const summary = [{
   icon: Music,
@@ -146,7 +147,6 @@ const Dashboard = () => {
           </p>
         </div>
       </div>
-
       {/* Bento Grid */}
       <div className='flex flex-col gap-4'>
         <div className='rounded-3xl shadow-sm overflow-hidden h-[180px]'>

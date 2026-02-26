@@ -3,6 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Search, FileMusic, Music, AlertCircle } from 'lucide-react';
+import { toast } from 'sonner';
 import {
   Table,
   TableBody,
@@ -15,8 +16,14 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Breadcrumb from './BreadCrumb';
 import FolderRow from './FolderRow';
+import DeleteSongDialog from './DeleteSongDialog';
+import { overlay } from 'overlay-kit';
 import { useAppQuery as useQuery } from '@/hooks/useAppQuery';
 import { scoreQueries } from '@/api/score/queries';
+import { scoreMutations } from '@/api/score/mutations';
+import { scoreKeys } from '@/api/score/queryKeys';
+import { useMutation } from '@tanstack/react-query';
+import { queryClient } from '@/utils/query-client';
 import dayjs from 'dayjs';
 
 function ScoreTab() {
@@ -25,6 +32,11 @@ function ScoreTab() {
   const navigate = useNavigate();
 
   const { data: songs = [], isLoading, isError, refetch } = useQuery(scoreQueries.getSongs());
+  const { mutate: deleteSong } = useMutation({
+    ...scoreMutations.deleteSong(),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: scoreKeys.list() }),
+    onError: (e: Error) => toast.error('악보 삭제에 실패했습니다.', { description: e.message }),
+  });
 
   if (isLoading && !songs.length) {
     return (
@@ -95,6 +107,20 @@ function ScoreTab() {
                     key={song.id}
                     song={song}
                     onClick={() => setOpenFolderId(song.id)}
+                    onDelete={() => {
+                      if (song.arrangements.length > 0) {
+                        overlay.open(overlayProps => (
+                          <DeleteSongDialog
+                            {...overlayProps}
+                            songTitle={song.title}
+                            arrangementCount={song.arrangements.length}
+                            onConfirm={() => deleteSong({ id: song.id })}
+                          />
+                        ));
+                      } else {
+                        deleteSong({ id: song.id });
+                      }
+                    }}
                   />
                 ))}
               </motion.div>

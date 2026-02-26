@@ -19,6 +19,7 @@ import SalesStats from "./pages/SalesStats";
 import CalendarView from "./pages/CalendarView";
 import MusicRecommend from "./pages/MusicRecommend";
 import Login from "./pages/Login";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import { OverlayProvider } from 'overlay-kit';
 import { Analytics } from "@vercel/analytics/react"
@@ -60,6 +61,7 @@ const App = () => (
                     <Route path="/stats" element={<SalesStats />} />
                     <Route path="/calendar" element={<CalendarView />} />
                     <Route path="/recommend" element={<MusicRecommend />} />
+                    <Route path="/settings" element={<Settings />} />
                   </Route>
                   <Route path="*" element={<NotFound />} />
                 </Routes>

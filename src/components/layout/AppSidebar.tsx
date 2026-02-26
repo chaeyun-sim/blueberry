@@ -1,4 +1,5 @@
 import { LayoutDashboard, ClipboardList, Archive, PlusCircle, BarChart3, CalendarDays, Sparkles, Sun, Moon, LogIn, LogOut } from "lucide-react";
+
 import { useLocation, useNavigate } from "react-router-dom";
 import { useTheme } from "@/components/ThemeProvider";
 import {
@@ -31,6 +32,7 @@ export function AppSidebar() {
     item.exact ? location.pathname === item.url : location.pathname.startsWith(item.url);
 
   if (authLoading) return null;
+
 
   return (
     <Sidebar collapsible="offcanvas" className="border-r border-sidebar-border">
@@ -85,10 +87,11 @@ export function AppSidebar() {
           </button>
 
           {session ? (
-            <button className="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-border bg-muted/30" onClick={() => logout().catch(() => {})}>
-              <div className="text-muted-foreground hover:text-foreground transition-colors">
-                <LogOut className="h-3.5 w-3.5" />
-              </div>
+            <button
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-border bg-muted/30 hover:bg-muted/50 transition-colors"
+              onClick={() => navigate('/settings')}
+            >
+              <img src={logoImg} alt="logo" className="h-3.5 w-3.5 shrink-0 object-contain" />
               <p className="flex-1 min-w-0 text-left text-sm md:text-xs text-muted-foreground truncate">{session?.user?.email}</p>
             </button>
           ) : isGuest ? (

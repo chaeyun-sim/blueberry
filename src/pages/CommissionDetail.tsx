@@ -18,6 +18,7 @@ import { useAppQuery as useQuery } from '@/hooks/useAppQuery';
 import { commissionQueries } from '@/api/commission/queries';
 import { commissionMutations } from '@/api/commission/mutations';
 import { commissionKeys } from '@/api/commission/queryKeys';
+import { scoreQueries } from '@/api/score/queries';
 import DeleteCommissionDialog from '@/components/pages/commission/DeleteCommissionDialog';
 import NotFound from './NotFound';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -36,7 +37,26 @@ const CommissionDetail = () => {
   const navigate = useNavigate();
 
   const { data: commission, isLoading } = useQuery(commissionQueries.getCommission(id))
+  const { data: song } = useQuery(scoreQueries.getSong(commission?.song_id ?? ''))
   const { mutate: updateStatus } = useMutation(commissionMutations.updateCommissionStatus())
+
+  const matchedArrangements = song?.arrangements?.filter(
+    a => a.arrangement === commission?.arrangement
+  ) ?? []
+
+  const cleanTitle = (title: string) =>
+    title
+      .replace(/\d+\s*(악장|st|nd|rd|th)(\s*movement)?/gi, '')
+      .replace(/\b(allegro|andante|adagio|presto|vivace|moderato|largo|lento|grave|scherzo|finale)\b/gi, '')
+      .replace(/[-–—]\s*$/, '')
+      .replace(/\s+/g, ' ')
+      .trim()
+
+  const rawTitle = song?.english_title ?? commission?.songs?.title ?? commission?.title ?? ''
+  const imslpQuery = [cleanTitle(rawTitle), commission?.songs?.composer ?? commission?.composer]
+    .filter(Boolean)
+    .join(' ')
+  const imslpUrl = `https://www.google.com/search?q=${encodeURIComponent(`site:imslp.org ${imslpQuery}`)}`
 
   const commissionStatuses = Object.keys(COMMISSION_STATUS_TRANSLATE);
   const currentStatusIndex = commissionStatuses.findIndex(status => status === commission?.status);
@@ -84,6 +104,7 @@ const CommissionDetail = () => {
         overlayProps => (
           <CompleteDialog
             {...overlayProps}
+            commission={commission}
             onConfirm={handleTransitionConfirm}
           />
         ),
@@ -160,7 +181,7 @@ const CommissionDetail = () => {
       bottomBar={
         <div className='border-t border-border bg-background/95 backdrop-blur-sm'>
           <div className='px-6 py-3 flex items-center justify-between'>
-            <Button variant='ghost' className='gap-2 text-destructive hover:bg-destructive/10 hover:text-destructive' onClick={handleDelete}>
+            <Button variant='outline' className='gap-2 text-destructive border-destructive/40 hover:bg-destructive/10 hover:text-destructive hover:border-destructive' onClick={handleDelete}>
               <Trash2 className='h-4 w-4' /> 삭제
             </Button>
 
@@ -196,7 +217,7 @@ const CommissionDetail = () => {
         </Button>
       </div>
 
-      <PageHeader title={commission?.title ?? ''} />
+      <PageHeader title={song?.title ?? commission?.songs?.title ?? commission?.title ?? ''} />
 
       {/* Status Progress */}
       <Card className='mb-8 border-border/50'>
@@ -266,6 +287,9 @@ const CommissionDetail = () => {
                   if (key === 'created_at') {
                     return commission?.created_at ? dayjs(commission.created_at).format('YYYY-MM-DD HH:mm') : '-';
                   }
+                  if (key === 'composer') {
+                    return commission?.songs?.composer ?? commission?.composer ?? '-';
+                  }
                   return commission?.[key] ?? '-';
                 }
                 return (
@@ -289,29 +313,46 @@ const CommissionDetail = () => {
       </div>
 
       {/* Linked Scores */}
-      {commission?.song_id && <Card className='border-border/50'>
+      <Card className='border-border/50'>
         <CardContent className='p-5'>
-          <div className='flex items-center justify-between mb-4'>
-            <h2 className='font-display font-semibold'>연결된 악보</h2>
-          </div>
-          {/* TODO: score list 연결 */}
-          {/* {commission?.length > 0 ? (
-            <div className='space-y-3'>
-              {commission?.linkedScores.map(score => (
-                <div
-                  key={score.id}
-                  className='flex flex-col p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer'
+          <h2 className='font-display font-semibold mb-4'>연결된 악보</h2>
+          <div className='space-y-2'>
+            {matchedArrangements.length > 0 ? (
+              matchedArrangements.map(arrangement => (
+                <button
+                  key={arrangement.id}
+                  onClick={() => navigate(`/scores/${song?.id}/arrangements/${arrangement.id}`)}
+                  className='flex items-center justify-between w-full p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors text-left'
                 >
-                  <p className='font-medium'>{score.arrangement}</p>
-                  {score.version && <p className='text-sm text-muted-foreground'>{score.version} ver.</p>}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className='text-sm text-muted-foreground text-center py-8'>연결된 악보가 없습니다</p>
-          )} */}
+                  <div>
+                    <p className='text-sm font-medium'>{arrangement.arrangement}</p>
+                    {arrangement.version && (
+                      <p className='text-xs text-muted-foreground'>{arrangement.version} ver.</p>
+                    )}
+                  </div>
+                  <ChevronRight className='h-4 w-4 text-muted-foreground shrink-0' />
+                </button>
+              ))
+            ) : (
+              <p className='text-sm text-muted-foreground py-2'>같은 편성의 악보가 없습니다</p>
+            )}
+            <a
+              href={imslpUrl}
+              target='_blank'
+              rel='noopener noreferrer'
+              className='flex items-center justify-between w-full p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors'
+            >
+              <div>
+                <p className='text-sm font-medium'>IMSLP에서 찾기</p>
+                <p className='text-xs text-muted-foreground'>
+                  {commission?.songs?.title ?? commission?.title} · {commission?.songs?.composer ?? commission?.composer}
+                </p>
+              </div>
+              <ExternalLink className='h-4 w-4 text-muted-foreground shrink-0' />
+            </a>
+          </div>
         </CardContent>
-      </Card>}
+      </Card>
     </AppLayout>
   );
 };

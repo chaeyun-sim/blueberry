@@ -17,8 +17,14 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Breadcrumb from '@/components/pages/scores/BreadCrumb';
 import FolderRow from '@/components/pages/scores/FolderRow';
+import DeleteSongDialog from '@/components/pages/scores/DeleteSongDialog';
+import { overlay } from 'overlay-kit';
 import { useAppQuery as useQuery } from '@/hooks/useAppQuery';
 import { scoreQueries } from '@/api/score/queries';
+import { scoreMutations } from '@/api/score/mutations';
+import { scoreKeys } from '@/api/score/queryKeys';
+import { useMutation } from '@tanstack/react-query';
+import { queryClient } from '@/utils/query-client';
 import dayjs from 'dayjs';
 
 const ScoreList = () => {
@@ -28,6 +34,10 @@ const ScoreList = () => {
 
   const scoresQuery = useQuery(scoreQueries.getSongs());
   const { data: songs = [], isLoading, isError, refetch } = scoresQuery;
+  const { mutate: deleteSong } = useMutation({
+    ...scoreMutations.deleteSong(),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: scoreKeys.list() }),
+  });
 
   if (isLoading && !songs.length) {
     return (
@@ -133,6 +143,20 @@ const ScoreList = () => {
                     key={song.id}
                     song={song}
                     onClick={() => setOpenFolderId(song.id)}
+                    onDelete={() => {
+                      if (song.arrangements.length > 0) {
+                        overlay.open(overlayProps => (
+                          <DeleteSongDialog
+                            {...overlayProps}
+                            songTitle={song.title}
+                            arrangementCount={song.arrangements.length}
+                            onConfirm={() => deleteSong({ id: song.id })}
+                          />
+                        ));
+                      } else {
+                        deleteSong({ id: song.id });
+                      }
+                    }}
                   />
                 ))}
               </motion.div>

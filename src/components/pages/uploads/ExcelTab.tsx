@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Upload, FileSpreadsheet, Trash2, FolderOpen, AlertCircle, Sheet } from 'lucide-react';
+import { Upload, FileSpreadsheet, Trash2, AlertCircle, Sheet } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -47,7 +47,7 @@ function UploadFolderRow({
           onClick={onClick}
           className='flex items-center gap-4 flex-1 min-w-0 text-left cursor-pointer'
         >
-          <FolderOpen className='h-5 w-5 text-primary/70 group-hover:text-primary shrink-0 transition-colors' />
+          <FileSpreadsheet className='h-5 w-5 text-primary/70 group-hover:text-primary shrink-0 transition-colors' />
           <span className='font-medium text-sm flex-1 truncate'>{upload.name}</span>
           <span className='text-xs text-muted-foreground tabular-nums'>
             {upload.row_count.toLocaleString()}건
