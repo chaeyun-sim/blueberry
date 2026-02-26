@@ -1,3 +1,4 @@
+import logo from '@/assets/logo.png'
 import type { Commission } from '@/types/commission'
 import type {
   SalesSummary,
@@ -277,7 +278,6 @@ const demoSalesYearRange = { min: thisYear - 1, max: thisYear }
 
 const demoDataMap: Record<string, unknown> = {
   'commissions:list': demoCommissions,
-  'commissions:detail': demoCommissions[0],
   'commissions:monthlyCounts': demoMonthlyCommissionCounts,
   'stats:salesSummary': demoSalesSummary,
   'stats:monthlySales': demoMonthlySales,
@@ -291,11 +291,43 @@ const demoDataMap: Record<string, unknown> = {
   'stats:salesRowsByUpload': demoSalesRows,
   'stats:salesYearRange': demoSalesYearRange,
   'scores:list': demoSongs,
-  'scores:detail': demoSongs[0],
-  'scores:arrangement': demoSongs[0].arrangements[0],
 }
 
 export function getDemoData(queryKey: readonly unknown[]): unknown {
-  const key = `${queryKey[0]}:${queryKey[1]}`
+  const [domain, type, id] = queryKey as [string, string, string?]
+  const key = `${domain}:${type}`
+
+  if (id) {
+    if (key === 'commissions:detail') {
+      return demoCommissions.find(c => c.id === id) ?? demoCommissions[0]
+    }
+    if (key === 'scores:detail') {
+      return demoSongs.find(s => s.id === id) ?? demoSongs[0]
+    }
+    if (key === 'scores:arrangement') {
+      const demoFiles = [
+        { id: 'demo-file-score', arrangement_id: id, label: 'Score', file_type: 'score', url: logo, created_at: '' },
+        { id: 'demo-file-part1', arrangement_id: id, label: 'Part 1', file_type: 'part', url: logo, created_at: '' },
+        { id: 'demo-file-part2', arrangement_id: id, label: 'Part 2', file_type: 'part', url: logo, created_at: '' },
+      ]
+      for (const song of demoSongs) {
+        const arr = song.arrangements.find(a => a.id === id)
+        if (arr) {
+          return {
+            ...arr,
+            songs: { title: song.title, composer: song.composer, english_title: song.english_title },
+            arrangement_files: demoFiles,
+          }
+        }
+      }
+      const fallback = demoSongs[0]
+      return {
+        ...fallback.arrangements[0],
+        songs: { title: fallback.title, composer: fallback.composer, english_title: fallback.english_title },
+        arrangement_files: demoFiles,
+      }
+    }
+  }
+
   return demoDataMap[key] ?? []
 }

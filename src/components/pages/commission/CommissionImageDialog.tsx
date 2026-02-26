@@ -1,9 +1,10 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { OverlayProps } from '@/types/overlay';
+import logo from '@/assets/logo.png';
 
 interface CommissionImageDialogProps extends OverlayProps {
   date: string;
-  imageUrl: string;
+  imageUrl: string | null | undefined;
 }
 
 function CommissionImageDialog({
@@ -30,11 +31,18 @@ function CommissionImageDialog({
         </DialogHeader>
 
         <div className='h-full w-full rounded-lg border border-border overflow-hidden'>
-          <img
-            src={imageUrl}
-            alt='commission image'
-            className='w-full h-full object-cover'
-          />
+          {imageUrl ? (
+            <img
+              src={imageUrl}
+              alt='commission image'
+              className='w-full h-full object-cover'
+            />
+          ) : (
+            <div className='flex flex-col items-center justify-center gap-3 py-10 bg-muted/30'>
+              <img src={logo} alt='blueberry logo' className='w-20 h-20 opacity-60' />
+              <p className='text-xs text-muted-foreground'>이미지가 없습니다 🫐</p>
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>

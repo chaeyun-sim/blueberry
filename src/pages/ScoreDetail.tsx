@@ -12,10 +12,11 @@ import { overlay } from 'overlay-kit';
 import DeleteArrangementDialog from '@/components/pages/score/DeleteArrangementDialog';
 
 const ScoreDetail = () => {
-  const { scoreId: _scoreId, arrangementId } = useParams();
+  const { scoreId, arrangementId } = useParams();
   const navigate = useNavigate();
 
   const { data: arrangement, isLoading } = useQuery(scoreQueries.getArrangement(arrangementId));
+  const { data: song } = useQuery(scoreQueries.getSong(scoreId ?? ''));
 
   const handleDelete = () => {
     overlay.open(
@@ -62,7 +63,7 @@ const ScoreDetail = () => {
     );
   }
 
-  const songTitle = arrangement.songs?.title ?? '알 수 없는 곡';
+  const songTitle = arrangement.songs?.title ?? song?.title ?? '알 수 없는 곡';
   const files = arrangement.arrangement_files ?? [];
 
   return (
