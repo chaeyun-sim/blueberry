@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Upload, FileSpreadsheet, Trash2, AlertCircle, Sheet } from 'lucide-react';
+import { Upload, FileSpreadsheet, AlertCircle, Sheet } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -11,68 +11,19 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAppQuery as useQuery } from '@/hooks/useAppQuery';
+import { useMutation } from '@tanstack/react-query';
+import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 import { statsQueries } from '@/api/stats/queries';
 import { statsMutations } from '@/api/stats/mutations';
 import { statsKeys } from '@/api/stats/queryKeys';
-import { useToast } from '@/hooks/use-toast';
 import { formatCurrency } from '@/utils/format-currency';
 import { splitProduct } from '@/utils/split-product';
-import dayjs from 'dayjs';
 import type { ExcelUpload } from '@/types/stats';
-
-function UploadFolderRow({
-  upload,
-  onClick,
-  onDelete,
-  isDeleting,
-}: {
-  upload: ExcelUpload;
-  onClick: () => void;
-  onDelete: (e: React.MouseEvent) => void;
-  isDeleting: boolean;
-}) {
-  return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, y: 4 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -4 }}
-      transition={{ duration: 0.15 }}
-    >
-      <div className='w-full flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-muted/30 transition-colors group'>
-        <button
-          type='button'
-          onClick={onClick}
-          className='flex items-center gap-4 flex-1 min-w-0 text-left cursor-pointer'
-        >
-          <FileSpreadsheet className='h-5 w-5 text-primary/70 group-hover:text-primary shrink-0 transition-colors' />
-          <span className='font-medium text-sm flex-1 truncate'>{upload.name}</span>
-          <span className='text-xs text-muted-foreground tabular-nums'>
-            {upload.row_count.toLocaleString()}건
-          </span>
-          <span className='text-xs text-muted-foreground tabular-nums'>
-            {dayjs(upload.uploaded_at).format('YYYY-MM-DD')}
-          </span>
-        </button>
-        <Button
-          variant='ghost'
-          size='icon'
-          className='h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0'
-          onClick={onDelete}
-          disabled={isDeleting}
-        >
-          <Trash2 className='h-3.5 w-3.5' />
-        </Button>
-      </div>
-    </motion.div>
-  );
-}
+import UploadFolderRow from './UploadFolderRow';
+import { queryClient } from '@/utils/query-client';
+import { toast } from 'sonner';
 
 function ExcelTab({ onUploadRequest }: { onUploadRequest: () => void }) {
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
   const [openUploadId, setOpenUploadId] = useState<string | null>(null);
 
   const {
@@ -102,14 +53,10 @@ function ExcelTab({ onUploadRequest }: { onUploadRequest: () => void }) {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: statsKeys.all });
         if (openUploadId === upload.id) setOpenUploadId(null);
-        toast({ title: `"${upload.name}" 업로드가 삭제되었습니다.` });
+        toast.success(`"${upload.name}" 업로드가 삭제되었습니다.`);
       },
       onError: e =>
-        toast({
-          title: '삭제에 실패했습니다.',
-          description: e instanceof Error ? e.message : undefined,
-          variant: 'destructive',
-        }),
+        toast.error('삭제에 실패했습니다.', { description: e instanceof Error ? e.message : undefined }),
     });
   };
 
