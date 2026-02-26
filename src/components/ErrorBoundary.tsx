@@ -35,22 +35,9 @@ export class ErrorBoundary extends React.Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    const { onError, level = 'global' } = this.props;
-    const { errorId } = this.state;
-
-    // 에러 로깅
-    console.error(`[${level.toUpperCase()} ERROR ${errorId}]`, error, errorInfo);
-
-    // 사용자 정의 에러 핸들러 호출
-    if (onError) {
-      onError(error, errorInfo);
+    if (this.props.onError) {
+      this.props.onError(error, errorInfo);
     }
-
-    // TODO: 실제 환경에서는 여기서 에러 추적 서비스로 전송
-    // Sentry.captureException(error, {
-    //   tags: { level, errorId },
-    //   contexts: { react: { componentStack: errorInfo.componentStack } },
-    // });
   }
 
   handleReset = () => {

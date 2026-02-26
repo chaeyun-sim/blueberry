@@ -7,9 +7,9 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { useAppQuery as useQuery } from '@/hooks/useAppQuery';
+import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 import { commissionQueries } from '@/api/commission/queries';
-import { useAuth } from '@/components/AuthProvider';
+import { useAuth } from '@/provider/AuthProvider';
 import { demoMonthlyCategoryBreakdown } from '@/data/demo';
 
 interface TooltipProps {

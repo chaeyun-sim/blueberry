@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { PageHeader } from '@/components/PageHeader';
-import { StatusBadge } from '@/components/StatusBadge';
+import { PageHeader } from '@/components/layout/PageHeader';
+import { StatusBadge } from '@/components/pages/commission/StatusBadge';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -16,7 +16,7 @@ import { Search, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { useAppQuery as useQuery } from '@/hooks/useAppQuery';
+import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 import { commissionQueries } from '@/api/commission/queries';
 import { abbreviateInstrument } from '@/utils/instrument';
 import ErrorBoundary from '@/components/ErrorBoundary';

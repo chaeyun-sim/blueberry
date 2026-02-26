@@ -31,10 +31,10 @@ interface CompleteDialogProps extends OverlayProps {
 
 export function CompleteDialog({ isOpen, close, commission, onConfirm }: CompleteDialogProps) {
   const zipInputRef = useRef<HTMLInputElement>(null);
+  
   const [zipName, setZipName] = useState<string | null>(null);
   const [zipSize, setZipSize] = useState(0);
   const [files, setFiles] = useState<FileEntry[]>([]);
-  const version = commission.version ?? null;
   const [isExtracting, setIsExtracting] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -141,7 +141,7 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
       const arrangement = await createArrangement({
         song_id: songId,
         arrangement: commission.arrangement,
-        version: version ?? undefined,
+        version: commission.version,
         commission_id: commission.id,
       });
 

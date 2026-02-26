@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { PageHeader } from '@/components/PageHeader';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -20,31 +20,28 @@ const CommissionRegister = () => {
     version: null,
     deadline: '',
     notes: '',
+    imageFile: null,
   });
 
-  const [imageFile, setImageFile] = useState<File | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   // Share Target: 다른 앱에서 공유된 이미지 자동 로드
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get('shared') !== 'true') return;
     (async () => {
-      try {
-        const cache = await caches.open('blueberry-share');
-        const res = await cache.match('/shared-image');
-        if (!res) return;
-        const blob = await res.blob();
-        const file = new File([blob], 'shared-image.jpg', { type: blob.type || 'image/jpeg' });
-        const dataUrl = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = e => resolve(e.target?.result as string);
-          reader.onerror = reject;
-          reader.readAsDataURL(blob);
-        });
-        setForm(prev => ({ ...prev, imagePreview: dataUrl }));
-        setImageFile(file);
-        await cache.delete('/shared-image');
-      } catch { /* 무시 */ }
+      const cache = await caches.open('blueberry-share');
+      const res = await cache.match('/shared-image');
+      if (!res) return;
+      const blob = await res.blob();
+      const file = new File([blob], 'shared-image.jpg', { type: blob.type || 'image/jpeg' });
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => resolve(e.target?.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+      setForm(prev => ({ ...prev, imagePreview: dataUrl, imageFile: file }));
+      await cache.delete('/shared-image');
     })();
   }, []);
 
@@ -68,20 +65,15 @@ const CommissionRegister = () => {
         {/* Left: Image Upload */}
         <AnalyzeImage
           url={form.imagePreview}
-          file={imageFile}
+          file={form.imageFile}
           setImage={({ url, file }) => {
-            setForm(prev => ({ ...prev, imagePreview: url }));
-            setImageFile(file);
+            setForm(prev => ({ ...prev, imagePreview: url, imageFile: file }));
           }}
           setForm={res =>
             setForm(prev => ({
               ...prev,
-              songTitle: res.songTitle ?? '',
-              composer: res.composer ?? '',
               instruments: buildInstrumentList(res.instruments ?? []),
-              version: res.version ?? null,
-              deadline: res.deadline ?? '',
-              notes: res.notes ?? '',
+              ...res,
             }))
           }
           isAnalyzing={isAnalyzing}
@@ -92,7 +84,7 @@ const CommissionRegister = () => {
         <CommissionRegisterForm
           form={form}
           setForm={setForm}
-          imageFile={imageFile}
+          imageFile={form.imageFile}
           isAnalyzing={isAnalyzing}
         />
       </div>

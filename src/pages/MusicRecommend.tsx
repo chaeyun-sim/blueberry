@@ -1,9 +1,9 @@
 import { useState, useCallback } from 'react';
 import dayjs from 'dayjs';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { PageHeader } from '@/components/PageHeader';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { recommendationPool, type MusicRecommendation } from '@/mock/recommendations';
-import { useWorkedSongs } from '@/hooks/useWorkedSongs';
+import { useWorkedSongs } from '@/hooks/use-worked-songs';
 import { RecommendCard } from '@/components/pages/recommend/RecommendCard';
 import SidePanel from '@/components/pages/recommend/SidePanel';
 
@@ -24,7 +24,7 @@ function MusicRecommend() {
     markAsWorked(rec.id);
     setSelectedRec(null);
     setRefreshOffset(0);
-  }, [markAsWorked, rec?.id]);
+  }, [markAsWorked, rec]);
 
   const handleRefresh = () => {
     setSelectedRec(null);

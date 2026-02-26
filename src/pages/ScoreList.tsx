@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { PageHeader } from '@/components/PageHeader';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,24 +19,26 @@ import Breadcrumb from '@/components/pages/scores/BreadCrumb';
 import FolderRow from '@/components/pages/scores/FolderRow';
 import DeleteSongDialog from '@/components/pages/scores/DeleteSongDialog';
 import { overlay } from 'overlay-kit';
-import { useAppQuery as useQuery } from '@/hooks/useAppQuery';
+import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 import { scoreQueries } from '@/api/score/queries';
 import { scoreMutations } from '@/api/score/mutations';
 import { scoreKeys } from '@/api/score/queryKeys';
 import { useMutation } from '@tanstack/react-query';
 import { queryClient } from '@/utils/query-client';
 import dayjs from 'dayjs';
+import { toast } from 'sonner';
 
 const ScoreList = () => {
-  const [search, setSearch] = useState('');
-  const [openFolderId, setOpenFolderId] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const scoresQuery = useQuery(scoreQueries.getSongs());
-  const { data: songs = [], isLoading, isError, refetch } = scoresQuery;
+  const [search, setSearch] = useState('');
+  const [openFolderId, setOpenFolderId] = useState<string | null>(null);
+
+  const { data: songs = [], isLoading, isError, refetch } = useQuery(scoreQueries.getSongs());
   const { mutate: deleteSong } = useMutation({
     ...scoreMutations.deleteSong(),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: scoreKeys.list() }),
+    onError: (e: Error) => toast.error('악보 삭제에 실패했습니다.', { description: e.message }),
   });
 
   if (isLoading && !songs.length) {

@@ -1,5 +1,5 @@
 import { AppLayout } from '@/components/layout/AppLayout';
-import { StatusBadge } from '@/components/StatusBadge';
+import { StatusBadge } from '@/components/pages/commission/StatusBadge';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   ClipboardList,
@@ -20,13 +20,12 @@ import SummaryCard from '@/components/pages/dashboard/SummaryCard';
 import RevenueSliderCard from '@/components/pages/dashboard/RevenueSliderCard';
 import CommissionSummaryBar from '@/components/pages/dashboard/CommissionSummaryBar';
 import MonthlyChart from '@/components/pages/dashboard/MonthlyChart';
-import { useAppQuery as useQuery } from '@/hooks/useAppQuery';
+import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 import { commissionQueries } from '@/api/commission/queries';
 import dayjs from 'dayjs';
 import { scoreQueries } from '@/api/score/queries';
 import { statsQueries } from '@/api/stats/queries';
 import { formatCurrency } from '@/utils/format-currency';
-import { Button } from '@/components/ui/button';
 
 const summary = [{
   icon: Music,

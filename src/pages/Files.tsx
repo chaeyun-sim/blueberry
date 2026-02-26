@@ -1,24 +1,23 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { PageHeader } from '@/components/PageHeader';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TabsContent } from '@radix-ui/react-tabs';
 import { Music, Sheet, PlusCircle, Upload } from 'lucide-react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { ExcelUploadDialog } from '@/components/ExcelUploadDialog';
 import { ExcelRow } from '@/types/excel';
 import { statsMutations } from '@/api/stats/mutations';
 import { statsKeys } from '@/api/stats/queryKeys';
-import { useToast } from '@/hooks/use-toast';
 import ScoreTab from '@/components/pages/scores/ScoreTab';
 import ExcelTab from '@/components/pages/uploads/ExcelTab';
+import { queryClient } from '@/utils/query-client';
+import { toast } from 'sonner';
 
 const Files = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
 
   const [activeTab, setActiveTab] = useState('scores');
   const [uploadOpen, setUploadOpen] = useState(false);
@@ -32,18 +31,14 @@ const Files = () => {
         {
           onSuccess: (_, { rows }) => {
             queryClient.invalidateQueries({ queryKey: statsKeys.all });
-            toast({ title: `"${name}" — ${rows.length}건이 저장되었습니다.` });
+            toast.success(`"${name}" — ${rows.length}건이 저장되었습니다.`);
           },
           onError: e =>
-            toast({
-              title: '저장에 실패했습니다.',
-              description: e instanceof Error ? e.message : undefined,
-              variant: 'destructive',
-            }),
+            toast.error('저장에 실패했습니다.', { description: e instanceof Error ? e.message : undefined }),
         },
       );
     },
-    [saveRows, queryClient, toast],
+    [saveRows],
   );
 
   return (
