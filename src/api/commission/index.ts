@@ -1,12 +1,17 @@
 import { supabase } from '@/lib/supabase'
 import { CommissionStatus } from '@/constants/status-config'
-import { Commission, CreateCommissionInput, UpdateCommissionInput } from '@/types/commission'
+import { AnalyzeImageType, Commission, CreateCommissionInput, UpdateCommissionInput } from '@/types/commission'
+
+const COMMISSIONS = 'commissions'
+const COMMISSION_LIST_SELECT = '*, songs(title)'
+const COMMISSION_DETAIL_SELECT = '*, songs(title, composer)'
+const COMMISSION_IMAGES = 'commission-images'
 
 // 의뢰 목록 조회
 export async function getCommissions() {
   const { data, error } = await supabase
-    .from('commissions')
-    .select('*, songs(title, composer, category)')
+    .from(COMMISSIONS)
+    .select(COMMISSION_LIST_SELECT)
     .order('deadline', { ascending: true })
 
   if (error) throw error
@@ -16,8 +21,8 @@ export async function getCommissions() {
 // 의뢰 상세 조회
 export async function getCommission(id: string) {
   const { data, error } = await supabase
-    .from('commissions')
-    .select('*, songs(title, composer, category)')
+    .from(COMMISSIONS)
+    .select(COMMISSION_DETAIL_SELECT)
     .eq('id', id)
     .single()
 
@@ -28,7 +33,7 @@ export async function getCommission(id: string) {
 // 의뢰 등록
 export async function createCommission(input: CreateCommissionInput) {
   const { data, error } = await supabase
-    .from('commissions')
+    .from(COMMISSIONS)
     .insert(input)
     .select()
     .single()
@@ -38,9 +43,9 @@ export async function createCommission(input: CreateCommissionInput) {
 }
 
 // 의뢰 정보 수정
-export async function updateCommission(id: string, input: UpdateCommissionInput) {
+export async function updateCommission(id: string, input: UpdateCommissionInput): Promise<Commission> {
   const { data, error } = await supabase
-    .from('commissions')
+    .from(COMMISSIONS)
     .update(input)
     .eq('id', id)
     .select()
@@ -53,7 +58,7 @@ export async function updateCommission(id: string, input: UpdateCommissionInput)
 // 의뢰 삭제
 export async function deleteCommission(id: string) {
   const { error } = await supabase
-    .from('commissions')
+    .from(COMMISSIONS)
     .delete()
     .eq('id', id)
 
@@ -65,7 +70,7 @@ export async function getMonthlyCommissionCounts(): Promise<{ month: string; cou
   const year = new Date().getFullYear()
 
   const { data, error } = await supabase
-    .from('commissions')
+    .from(COMMISSIONS)
     .select('created_at')
     .gte('created_at', `${year}-01-01`)
     .lt('created_at', `${year + 1}-01-01`)
@@ -93,46 +98,34 @@ export async function analyzeCommissionImage(imageBase64: string, mediaType: str
   })
 
   if (error) throw error
-  return data as {
-    songTitle: string | null
-    composer: string | null
-    instruments: string[]
-    version: 'easy' | 'hard' | 'pro' | null
-    deadline: string | null
-    notes: string | null
-  }
+  return data as AnalyzeImageType
 }
 
-// 의뢰 이미지 업로드
-export async function uploadCommissionImage(commissionId: string, file: File) {
+// 의뢰 이미지 업로드 (Storage만 담당, URL 반환)
+export async function uploadCommissionImage(commissionId: string, file: File): Promise<string> {
   const ext = file.name.split('.').pop()
+
+  if (!ext) throw new Error('파일 확장자를 찾을 수 없습니다.')
+
   const path = `${commissionId}.${ext}`
 
-  const { error: uploadError } = await supabase.storage
-    .from('commission-images')
+  const { error } = await supabase.storage
+    .from(COMMISSION_IMAGES)
     .upload(path, file, { upsert: true })
 
-  if (uploadError) throw uploadError
+  if (error) throw error
 
   const { data: { publicUrl } } = supabase.storage
-    .from('commission-images')
+    .from(COMMISSION_IMAGES)
     .getPublicUrl(path)
 
-  const { data, error } = await supabase
-    .from('commissions')
-    .update({ image_url: publicUrl })
-    .eq('id', commissionId)
-    .select()
-    .single()
-
-  if (error) throw error
-  return data as Commission
+  return publicUrl
 }
 
 // 의뢰 상태 변경
 export async function updateCommissionStatus(id: string, status: CommissionStatus) {
   const { data, error } = await supabase
-    .from('commissions')
+    .from(COMMISSIONS)
     .update({ status })
     .eq('id', id)
     .select()

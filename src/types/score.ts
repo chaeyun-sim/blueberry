@@ -50,3 +50,10 @@ export type CreateArrangementInput = {
   version?: string | null
   commission_id?: string | null
 }
+
+export type CreateArrangementFileInput = {
+  arrangementId: string
+  file: File
+  label: string
+  fileType: string
+}

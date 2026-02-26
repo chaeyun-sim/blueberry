@@ -1,41 +1,71 @@
-import { supabase } from '@/lib/supabase'
-import { MONTH } from '@/constants/month'
-import { ExcelRow } from '@/types/excel'
-import { ExcelUpload, MonthlyCategoryData, MonthlySale, SalesSummary, TopArrangement, TopSong, TopSongMonthlySalesResult } from '@/types/stats'
-import { splitProduct } from '@/utils/split-product'
+import { supabase } from '@/lib/supabase';
+import { MONTH } from '@/constants/month';
+import { ExcelRow } from '@/types/excel';
+import {
+  CategoryDistributionItem,
+  ExcelUpload,
+  MonthlyCategoryData,
+  MonthlySale,
+  SalesSummary,
+  TopArrangement,
+  TopSong,
+  TopSongMonthlySalesResult,
+} from '@/types/stats';
+import { splitProduct } from '@/utils/split-product';
+
+const SALES = 'sales';
+const EXCEL_UPLOADS = 'excel_uploads';
+const SELECT_AMOUNT = 'amount';
+const SOLD_AT = 'sold_at';
+const MONTHLY_SALES_SELECT = 'sold_at, amount';
+const SALES_ROW_SELECT = 'id, sold_at, amount, category, product';
+const EXCEL_UPLOADS_SELECT = 'id, name, row_count, uploaded_at';
+const SONGS = 'songs';
+const ARRANGEMENTS = 'arrangements';
 
 // Supabase 기본 반환 한도(1,000행) 우회 — 집계 쿼리 전체에 적용
-const MAX_ROWS = 100_000
+const MAX_ROWS = 100_000;
+
+const CATEGORIES = new Set(['CLASSIC', 'POP', 'K-POP', 'OST', 'ANI', 'ETC']);
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
+const getUtcMonth = (iso: string) => new Date(iso).getUTCMonth() + 1;
+const getUtcYear = (iso: string) => new Date(iso).getUTCFullYear();
+
 function pctChange(current: number, prev: number): number {
-  if (prev === 0) return 0
-  return parseFloat((((current - prev) / prev) * 100).toFixed(1))
+  if (prev === 0) return 0;
+  return parseFloat((((current - prev) / prev) * 100).toFixed(1));
 }
 
 function dateRange(year: number, month?: number) {
   if (month !== undefined) {
-    const nextMonth = month === 12 ? 1 : month + 1
-    const nextMonthYear = month === 12 ? year + 1 : year
-    const mm = String(month).padStart(2, '0')
-    const nmm = String(nextMonth).padStart(2, '0')
-    return { gte: `${year}-${mm}-01`, lt: `${nextMonthYear}-${nmm}-01` }
+    const nextMonth = month === 12 ? 1 : month + 1;
+    const nextMonthYear = month === 12 ? year + 1 : year;
+    const mm = String(month).padStart(2, '0');
+    const nmm = String(nextMonth).padStart(2, '0');
+    return { gte: `${year}-${mm}-01`, lt: `${nextMonthYear}-${nmm}-01` };
   }
-  return { gte: `${year}-01-01`, lt: `${year + 1}-01-01` }
+  return { gte: `${year}-01-01`, lt: `${year + 1}-01-01` };
 }
 
 function aggregateByMonth(rows: { sold_at: string; amount: number }[]) {
-  const map = new Map<number, { revenue: number; count: number }>()
-  for (let m = 1; m <= 12; m++) map.set(m, { revenue: 0, count: 0 })
+  const map = new Map<number, { revenue: number; count: number }>();
+  for (let m = 1; m <= 12; m++) map.set(m, { revenue: 0, count: 0 });
   for (const row of rows) {
-    const m = new Date(row.sold_at).getMonth() + 1
-    const agg = map.get(m)!
-    agg.revenue += row.amount
-    agg.count += 1
+    const m = getUtcMonth(row.sold_at);
+    const agg = map.get(m)!;
+    agg.revenue += row.amount;
+    agg.count += 1;
   }
-  return map
+  return map;
 }
+
+const norm = (s: string) =>
+  s
+    .toLowerCase()
+    .replace(/\s*([(),])\s*/g, '$1')
+    .trim();
 
 // ─── API Functions ────────────────────────────────────────────────────────────
 
@@ -45,18 +75,18 @@ function aggregateByMonth(rows: { sold_at: string; amount: number }[]) {
  * - 지난달 매출 / 판매건 (vs 전월 비교)
  */
 export async function getSalesSummary(): Promise<SalesSummary> {
-  const now = new Date()
-  const thisYear = now.getFullYear()
-  const thisMonth = now.getMonth() + 1
-  const prevMonth = thisMonth === 1 ? 12 : thisMonth - 1
-  const prevMonthYear = thisMonth === 1 ? thisYear - 1 : thisYear
-  const prevPrevMonth = prevMonth === 1 ? 12 : prevMonth - 1
-  const prevPrevMonthYear = prevMonth === 1 ? prevMonthYear - 1 : prevMonthYear
+  const now = new Date();
+  const thisYear = getUtcYear(now.toISOString());
+  const thisMonth = getUtcMonth(now.toISOString());
+  const prevMonth = thisMonth === 1 ? 12 : thisMonth - 1;
+  const prevMonthYear = thisMonth === 1 ? thisYear - 1 : thisYear;
+  const prevPrevMonth = prevMonth === 1 ? 12 : prevMonth - 1;
+  const prevPrevMonthYear = prevMonth === 1 ? prevMonthYear - 1 : prevMonthYear;
 
-  const thisYearRange = dateRange(thisYear)
-  const lastYearRange = dateRange(thisYear - 1)
-  const prevMonthRange = dateRange(prevMonthYear, prevMonth)
-  const prevPrevMonthRange = dateRange(prevPrevMonthYear, prevPrevMonth)
+  const thisYearRange = dateRange(thisYear);
+  const lastYearRange = dateRange(thisYear - 1);
+  const prevMonthRange = dateRange(prevMonthYear, prevMonth);
+  const prevPrevMonthRange = dateRange(prevPrevMonthYear, prevPrevMonth);
 
   const [
     { data: allRows, error: e0 },
@@ -65,29 +95,49 @@ export async function getSalesSummary(): Promise<SalesSummary> {
     { data: prevMonthRows, error: e3 },
     { data: prevPrevMonthRows, error: e4 },
   ] = await Promise.all([
-    supabase.from('sales').select('amount').limit(MAX_ROWS),
-    supabase.from('sales').select('amount').gte('sold_at', thisYearRange.gte).lt('sold_at', thisYearRange.lt!).limit(MAX_ROWS),
-    supabase.from('sales').select('amount').gte('sold_at', lastYearRange.gte).lt('sold_at', lastYearRange.lt!).limit(MAX_ROWS),
-    supabase.from('sales').select('amount').gte('sold_at', prevMonthRange.gte).lt('sold_at', prevMonthRange.lt!).limit(MAX_ROWS),
-    supabase.from('sales').select('amount').gte('sold_at', prevPrevMonthRange.gte).lt('sold_at', prevPrevMonthRange.lt!).limit(MAX_ROWS),
-  ])
+    supabase.from(SALES).select(SELECT_AMOUNT).limit(MAX_ROWS),
+    supabase
+      .from(SALES)
+      .select(SELECT_AMOUNT)
+      .gte(SOLD_AT, thisYearRange.gte)
+      .lt(SOLD_AT, thisYearRange.lt!)
+      .limit(MAX_ROWS),
+    supabase
+      .from(SALES)
+      .select(SELECT_AMOUNT)
+      .gte(SOLD_AT, lastYearRange.gte)
+      .lt(SOLD_AT, lastYearRange.lt!)
+      .limit(MAX_ROWS),
+    supabase
+      .from(SALES)
+      .select(SELECT_AMOUNT)
+      .gte(SOLD_AT, prevMonthRange.gte)
+      .lt(SOLD_AT, prevMonthRange.lt!)
+      .limit(MAX_ROWS),
+    supabase
+      .from(SALES)
+      .select(SELECT_AMOUNT)
+      .gte(SOLD_AT, prevPrevMonthRange.gte)
+      .lt(SOLD_AT, prevPrevMonthRange.lt!)
+      .limit(MAX_ROWS),
+  ]);
 
-  if (e0) throw e0
-  if (e1) throw e1
-  if (e2) throw e2
-  if (e3) throw e3
-  if (e4) throw e4
+  if (e0) throw e0;
+  if (e1) throw e1;
+  if (e2) throw e2;
+  if (e3) throw e3;
+  if (e4) throw e4;
 
-  const totalRevenue = (allRows ?? []).reduce((s, r) => s + r.amount, 0)
-  const totalCount = (allRows ?? []).length
-  const thisYearRevenue = (thisYearRows ?? []).reduce((s, r) => s + r.amount, 0)
-  const thisYearCount = (thisYearRows ?? []).length
-  const lastYearRevenue = (lastYearRows ?? []).reduce((s, r) => s + r.amount, 0)
-  const lastYearCount = (lastYearRows ?? []).length
-  const lastMonthRevenue = (prevMonthRows ?? []).reduce((s, r) => s + r.amount, 0)
-  const lastMonthCount = (prevMonthRows ?? []).length
-  const prevPrevRevenue = (prevPrevMonthRows ?? []).reduce((s, r) => s + r.amount, 0)
-  const prevPrevCount = (prevPrevMonthRows ?? []).length
+  const totalRevenue = (allRows ?? []).reduce((s, r) => s + r.amount, 0);
+  const totalCount = (allRows ?? []).length;
+  const thisYearRevenue = (thisYearRows ?? []).reduce((s, r) => s + r.amount, 0);
+  const thisYearCount = (thisYearRows ?? []).length;
+  const lastYearRevenue = (lastYearRows ?? []).reduce((s, r) => s + r.amount, 0);
+  const lastYearCount = (lastYearRows ?? []).length;
+  const lastMonthRevenue = (prevMonthRows ?? []).reduce((s, r) => s + r.amount, 0);
+  const lastMonthCount = (prevMonthRows ?? []).length;
+  const prevPrevRevenue = (prevPrevMonthRows ?? []).reduce((s, r) => s + r.amount, 0);
+  const prevPrevCount = (prevPrevMonthRows ?? []).length;
 
   return {
     totalRevenue,
@@ -98,7 +148,7 @@ export async function getSalesSummary(): Promise<SalesSummary> {
     countVsLastYear: pctChange(thisYearCount, lastYearCount),
     revenueVsLastMonth: pctChange(lastMonthRevenue, prevPrevRevenue),
     countVsLastMonth: pctChange(lastMonthCount, prevPrevCount),
-  }
+  };
 }
 
 /**
@@ -106,28 +156,38 @@ export async function getSalesSummary(): Promise<SalesSummary> {
  */
 export async function getMonthlySales(year: number): Promise<MonthlySale[]> {
   const [{ data: thisYearData, error: e1 }, { data: lastYearData, error: e2 }] = await Promise.all([
-    supabase.from('sales').select('sold_at, amount').gte('sold_at', `${year}-01-01`).lt('sold_at', `${year + 1}-01-01`).limit(MAX_ROWS),
-    supabase.from('sales').select('sold_at, amount').gte('sold_at', `${year - 1}-01-01`).lt('sold_at', `${year}-01-01`).limit(MAX_ROWS),
-  ])
+    supabase
+      .from(SALES)
+      .select(MONTHLY_SALES_SELECT)
+      .gte(SOLD_AT, dateRange(year).gte)
+      .lt(SOLD_AT, dateRange(year).lt)
+      .limit(MAX_ROWS),
+    supabase
+      .from(SALES)
+      .select(MONTHLY_SALES_SELECT)
+      .gte(SOLD_AT, dateRange(year - 1).gte)
+      .lt(SOLD_AT, dateRange(year - 1).lt)
+      .limit(MAX_ROWS),
+  ]);
 
-  if (e1) throw e1
-  if (e2) throw e2
+  if (e1) throw e1;
+  if (e2) throw e2;
 
-  const thisYearMap = aggregateByMonth(thisYearData ?? [])
-  const lastYearMap = aggregateByMonth(lastYearData ?? [])
+  const thisYearMap = aggregateByMonth(thisYearData ?? []);
+  const lastYearMap = aggregateByMonth(lastYearData ?? []);
 
   return Array.from({ length: 12 }, (_, i) => {
-    const m = i + 1
-    const ty = thisYearMap.get(m)!
-    const ly = lastYearMap.get(m)!
+    const m = i + 1;
+    const ty = thisYearMap.get(m)!;
+    const ly = lastYearMap.get(m)!;
     return {
       month: MONTH[m as keyof typeof MONTH],
       revenue: ty.revenue,
       count: ty.count,
       prevRevenue: ly.revenue,
       prevCount: ly.count,
-    }
-  })
+    };
+  });
 }
 
 /**
@@ -135,29 +195,28 @@ export async function getMonthlySales(year: number): Promise<MonthlySale[]> {
  */
 export async function getMonthlyCategoryBreakdown(year: number): Promise<MonthlyCategoryData[]> {
   const { data, error } = await supabase
-    .from('sales')
-    .select('sold_at, amount, category')
-    .gte('sold_at', `${year}-01-01`)
-    .lt('sold_at', `${year + 1}-01-01`)
-    .limit(MAX_ROWS)
+    .from(SALES)
+    .select(`${MONTHLY_SALES_SELECT}, category`)
+    .gte(SOLD_AT, dateRange(year).gte)
+    .lt(SOLD_AT, dateRange(year).lt)
+    .limit(MAX_ROWS);
 
-  if (error) throw error
+  if (error) throw error;
 
-  const map = new Map<number, Record<string, number>>()
+  const map = new Map<number, Record<string, number>>();
   for (let m = 1; m <= 12; m++) {
-    map.set(m, { CLASSIC: 0, POP: 0, 'K-POP': 0, OST: 0, ANI: 0, ETC: 0 })
+    map.set(m, { CLASSIC: 0, POP: 0, 'K-POP': 0, OST: 0, ANI: 0, ETC: 0 });
   }
-  for (const row of (data ?? [])) {
-    const categoryName = row.category
-    if (!categoryName) continue
-    const m = new Date(row.sold_at).getMonth() + 1
-    const entry = map.get(m)!
-    entry[categoryName] = (entry[categoryName] ?? 0) + row.amount
+  for (const row of data ?? []) {
+    const categoryName = row.category && CATEGORIES.has(row.category) ? row.category : 'ETC';
+    const m = getUtcMonth(row.sold_at);
+    const entry = map.get(m)!;
+    entry[categoryName] = (entry[categoryName] ?? 0) + row.amount;
   }
 
   return Array.from({ length: 12 }, (_, i) => {
-    const m = i + 1
-    const entry = map.get(m)!
+    const m = i + 1;
+    const entry = map.get(m)!;
     return {
       month: MONTH[m as keyof typeof MONTH],
       CLASSIC: entry.CLASSIC,
@@ -166,8 +225,8 @@ export async function getMonthlyCategoryBreakdown(year: number): Promise<Monthly
       OST: entry.OST,
       ANI: entry.ANI,
       ETC: entry.ETC,
-    }
-  })
+    };
+  });
 }
 
 /**
@@ -179,30 +238,29 @@ export async function getMonthlyCategoryBreakdown(year: number): Promise<Monthly
  */
 export async function getCategoryDistribution(
   year?: number,
-): Promise<{ name: string; value: number; count: number; countShare: number; revenue: number }[]> {
-  let query = supabase.from('sales').select('amount, category').limit(MAX_ROWS)
+): Promise<CategoryDistributionItem[]> {
+  let query = supabase.from(SALES).select(`${SELECT_AMOUNT}, category`).limit(MAX_ROWS);
   if (year) {
-    query = query.gte('sold_at', `${year}-01-01`).lt('sold_at', `${year + 1}-01-01`)
+    query = query.gte(SOLD_AT, dateRange(year).gte).lt(SOLD_AT, dateRange(year).lt);
   }
 
-  const { data, error } = await query
-  if (error) throw error
+  const { data, error } = await query;
+  if (error) throw error;
 
-  const totals: Record<string, { revenue: number; count: number }> = {}
-  let grandRevenue = 0
-  let grandCount = 0
+  const totals: Record<string, { revenue: number; count: number }> = {};
+  let grandRevenue = 0;
+  let grandCount = 0;
 
-  for (const row of (data ?? [])) {
-    const name = row.category
-    if (!name) continue
-    if (!totals[name]) totals[name] = { revenue: 0, count: 0 }
-    totals[name].revenue += row.amount
-    totals[name].count += 1
-    grandRevenue += row.amount
-    grandCount += 1
+  for (const row of data ?? []) {
+    const name = row.category && CATEGORIES.has(row.category) ? row.category : 'ETC';
+    if (!totals[name]) totals[name] = { revenue: 0, count: 0 };
+    totals[name].revenue += row.amount;
+    totals[name].count += 1;
+    grandRevenue += row.amount;
+    grandCount += 1;
   }
 
-  if (grandRevenue === 0) return []
+  if (grandRevenue === 0) return [];
 
   return Object.entries(totals)
     .map(([name, { revenue, count }]) => ({
@@ -212,68 +270,73 @@ export async function getCategoryDistribution(
       countShare: Math.round((count / grandCount) * 100),
       revenue,
     }))
-    .sort((a, b) => b.value - a.value)
+    .sort((a, b) => b.value - a.value);
 }
 
 /**
  * 인기곡 TOP N 조회 (Stats 가로 막대 차트용)
  */
-export async function getTopSongs(limit = 5): Promise<TopSong[]> {
+export async function getTopSongs(topN = 5): Promise<TopSong[]> {
   const { data, error } = await supabase
-    .from('sales')
-    .select('amount, category, product')
-    .limit(MAX_ROWS)
+    .from(SALES)
+    .select(`${SELECT_AMOUNT}, category, product`)
+    .limit(MAX_ROWS);
 
-  if (error) throw error
+  if (error) throw error;
 
-  const songMap = new Map<string, { title: string; category: string; sales: number; revenue: number }>()
-  for (const row of (data ?? [])) {
-    const title = row.product ? splitProduct(row.product).song : undefined
-    const category = row.category
-    if (!title || !category) continue
-    const existing = songMap.get(title)
+  const songMap = new Map<
+    string,
+    { title: string; category: string; sales: number; revenue: number }
+  >();
+  for (const row of data ?? []) {
+    const title = row.product ? splitProduct(row.product).song : undefined;
+    const category = row.category && CATEGORIES.has(row.category) ? row.category : 'ETC';
+    if (!title) continue;
+    const existing = songMap.get(title);
     if (existing) {
-      existing.sales += 1
-      existing.revenue += row.amount
+      existing.sales += 1;
+      existing.revenue += row.amount;
     } else {
-      songMap.set(title, { title, category, sales: 1, revenue: row.amount })
+      songMap.set(title, { title, category, sales: 1, revenue: row.amount });
     }
   }
 
   return [...songMap.values()]
     .sort((a, b) => b.sales - a.sales)
-    .slice(0, limit)
-    .map((s, i) => ({ rank: i + 1, ...s }))
+    .slice(0, topN)
+    .map((s, i) => ({ rank: i + 1, ...s }));
 }
 
 /**
  * 인기 편성 TOP N 조회 (Stats 레이더 차트용)
  */
-export async function getTopArrangements(limit = 5): Promise<TopArrangement[]> {
+export async function getTopArrangements(topN = 5): Promise<TopArrangement[]> {
   const { data, error } = await supabase
-    .from('sales')
-    .select('amount, product')
-    .limit(MAX_ROWS)
+    .from(SALES)
+    .select(`${SELECT_AMOUNT}, product`)
+    .limit(MAX_ROWS);
 
-  if (error) throw error
+  if (error) throw error;
 
-  const arrMap = new Map<string, { arrangement: string; sales: number; revenue: number }>()
-  for (const row of (data ?? [])) {
-    const arrangement = row.product ? splitProduct(row.product).arrangement || undefined : undefined
-    if (!arrangement) continue
-    const existing = arrMap.get(arrangement)
+  const arrMap = new Map<string, { arrangement: string; sales: number; revenue: number }>();
+  for (const row of data ?? []) {
+    const arrangement = row.product
+      ? splitProduct(row.product).arrangement || undefined
+      : undefined;
+    if (!arrangement) continue;
+    const existing = arrMap.get(arrangement);
     if (existing) {
-      existing.sales += 1
-      existing.revenue += row.amount
+      existing.sales += 1;
+      existing.revenue += row.amount;
     } else {
-      arrMap.set(arrangement, { arrangement, sales: 1, revenue: row.amount })
+      arrMap.set(arrangement, { arrangement, sales: 1, revenue: row.amount });
     }
   }
 
   return [...arrMap.values()]
     .sort((a, b) => b.sales - a.sales)
-    .slice(0, limit)
-    .map((a, i) => ({ rank: i + 1, ...a }))
+    .slice(0, topN)
+    .map((a, i) => ({ rank: i + 1, ...a }));
 }
 
 /**
@@ -281,78 +344,80 @@ export async function getTopArrangements(limit = 5): Promise<TopArrangement[]> {
  */
 export async function getTopSongMonthlySales(
   year: number,
-  limit = 5,
+  topN = 5,
 ): Promise<TopSongMonthlySalesResult> {
   const { data, error } = await supabase
-    .from('sales')
-    .select('sold_at, product')
-    .gte('sold_at', `${year}-01-01`)
-    .lt('sold_at', `${year + 1}-01-01`)
-    .limit(MAX_ROWS)
+    .from(SALES)
+    .select(`${SOLD_AT}, product`)
+    .gte(SOLD_AT, dateRange(year).gte)
+    .lt(SOLD_AT, dateRange(year).lt)
+    .limit(MAX_ROWS);
 
-  if (error) throw error
+  if (error) throw error;
 
-  const titleCount = new Map<string, number>()
-  for (const row of (data ?? [])) {
-    const title = row.product ? splitProduct(row.product).song : undefined
-    if (!title) continue
-    titleCount.set(title, (titleCount.get(title) ?? 0) + 1)
+  const titleCount = new Map<string, number>();
+  for (const row of data ?? []) {
+    const title = row.product ? splitProduct(row.product).song : undefined;
+    if (!title) continue;
+    titleCount.set(title, (titleCount.get(title) ?? 0) + 1);
   }
 
   const topTitles = [...titleCount.entries()]
     .sort((a, b) => b[1] - a[1])
-    .slice(0, limit)
-    .map(([t]) => t)
+    .slice(0, topN)
+    .map(([t]) => t);
 
-  const config: Record<string, string> = {}
-  const keyMap = new Map<string, string>()
+  const config: Record<string, string> = {};
+  const keyMap = new Map<string, string>();
   topTitles.forEach((title, i) => {
-    const key = `song${i + 1}`
-    keyMap.set(title, key)
-    config[key] = title
-  })
+    const key = `song${i + 1}`;
+    keyMap.set(title, key);
+    config[key] = title;
+  });
 
-  const monthMap = new Map<number, Record<string, number>>()
+  const monthMap = new Map<number, Record<string, number>>();
   for (let m = 1; m <= 12; m++) {
-    const entry: Record<string, number> = {}
-    for (const key of Object.keys(config)) entry[key] = 0
-    monthMap.set(m, entry)
+    const entry: Record<string, number> = {};
+    for (const key of Object.keys(config)) entry[key] = 0;
+    monthMap.set(m, entry);
   }
-  for (const row of (data ?? [])) {
-    const title = row.product ? splitProduct(row.product).song : undefined
-    const key = title ? keyMap.get(title) : undefined
-    if (!key) continue
-    const m = new Date(row.sold_at).getMonth() + 1
-    monthMap.get(m)![key] += 1
+  for (const row of data ?? []) {
+    const title = row.product ? splitProduct(row.product).song : undefined;
+    const key = title ? keyMap.get(title) : undefined;
+    if (!key) continue;
+    const m = new Date(row.sold_at).getMonth() + 1;
+    monthMap.get(m)![key] += 1;
   }
 
   const chartData = Array.from({ length: 12 }, (_, i) => {
-    const m = i + 1
-    return { month: MONTH[m as keyof typeof MONTH], ...monthMap.get(m)! }
-  })
+    const m = i + 1;
+    return { month: MONTH[m as keyof typeof MONTH], ...monthMap.get(m)! };
+  });
 
-  return { data: chartData, config }
+  return { data: chartData, config };
 }
 
 /**
  * 판매 데이터의 연도 범위 조회 (드롭다운 옵션용)
  */
 export async function getSalesYearRange(): Promise<{ min: number; max: number } | null> {
-  const [
-    { data: minRow, error: minError },
-    { data: maxRow, error: maxError },
-  ] = await Promise.all([
-    supabase.from('sales').select('sold_at').order('sold_at', { ascending: true }).limit(1).maybeSingle(),
-    supabase.from('sales').select('sold_at').order('sold_at', { ascending: false }).limit(1).maybeSingle(),
-  ])
+  const [{ data: minRow, error: minError }, { data: maxRow, error: maxError }] = await Promise.all([
+    supabase.from(SALES).select(SOLD_AT).order(SOLD_AT, { ascending: true }).limit(1).maybeSingle(),
+    supabase
+      .from(SALES)
+      .select(SOLD_AT)
+      .order(SOLD_AT, { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+  ]);
 
-  if (minError) throw minError
-  if (maxError) throw maxError
-  if (!minRow || !maxRow) return null
+  if (minError) throw minError;
+  if (maxError) throw maxError;
+  if (!minRow || !maxRow) return null;
   return {
-    min: new Date(minRow.sold_at).getFullYear(),
-    max: new Date(maxRow.sold_at).getFullYear(),
-  }
+    min: getUtcYear(minRow.sold_at),
+    max: getUtcYear(maxRow.sold_at),
+  };
 }
 
 // ─── Excel Upload Management ──────────────────────────────────────────────────
@@ -362,20 +427,20 @@ export async function getSalesYearRange(): Promise<{ min: number; max: number } 
  */
 export async function getExcelUploads(): Promise<ExcelUpload[]> {
   const { data, error } = await supabase
-    .from('excel_uploads')
-    .select('id, name, row_count, uploaded_at')
-    .order('uploaded_at', { ascending: false })
+    .from(EXCEL_UPLOADS)
+    .select(EXCEL_UPLOADS_SELECT)
+    .order('uploaded_at', { ascending: false });
 
-  if (error) throw error
-  return data ?? []
+  if (error) throw error;
+  return data ?? [];
 }
 
 /**
  * 업로드 삭제 (CASCADE로 연결된 sales 행도 삭제됨)
  */
 export async function deleteExcelUpload(id: string): Promise<void> {
-  const { error } = await supabase.from('excel_uploads').delete().eq('id', id)
-  if (error) throw error
+  const { error } = await supabase.from(EXCEL_UPLOADS).delete().eq('id', id);
+  if (error) throw error;
 }
 
 /**
@@ -383,20 +448,20 @@ export async function deleteExcelUpload(id: string): Promise<void> {
  */
 export async function getSalesRowsByUploadId(uploadId: string): Promise<ExcelRow[]> {
   const { data, error } = await supabase
-    .from('sales')
-    .select('id, sold_at, amount, category, product')
+    .from(SALES)
+    .select(SALES_ROW_SELECT)
     .eq('upload_id', uploadId)
-    .order('sold_at', { ascending: false })
-    .limit(MAX_ROWS)
+    .order(SOLD_AT, { ascending: false })
+    .limit(MAX_ROWS);
 
-  if (error) throw error
+  if (error) throw error;
 
   return (data ?? []).map(row => ({
     id: row.id,
-    category: row.category ?? '미분류',
+    category: row.category && CATEGORIES.has(row.category) ? row.category : 'ETC',
     product: row.product ?? '',
     amount: row.amount,
-  }))
+  }));
 }
 
 /**
@@ -406,76 +471,71 @@ export async function getSalesRowsByUploadId(uploadId: string): Promise<ExcelRow
  * - 매핑 실패해도 저장됨 (song_id / arrangement_id는 nullable)
  */
 export async function saveSalesRows(rows: ExcelRow[], uploadName: string): Promise<void> {
-  if (rows.length === 0) return
-
-  // 공백·대소문자·구두점 차이를 무시하는 정규화 (Excel vs DB 포맷 차이 대응)
-  const norm = (s: string) => s.toLowerCase().replace(/\s*([(),])\s*/g, '$1').trim()
+  if (rows.length === 0) return;
 
   // 업로드 이름에서 sold_at 유도 (예: "2025-12" 또는 "202512" → "2025-12-01 00:00:00")
   const uploadDate = (() => {
-    const m1 = uploadName.match(/(\d{4})[^\d](\d{2})/)
-    if (m1) return `${m1[1]}-${m1[2]}-01 00:00:00`
-    const m2 = uploadName.match(/(\d{4})(\d{2})/)
-    if (m2) return `${m2[1]}-${m2[2]}-01 00:00:00`
-    return new Date().toISOString().slice(0, 10) + ' 00:00:00'
-  })()
+    const m1 = uploadName.match(/(\d{4})[^\d](\d{2})/);
+    if (m1) return `${m1[1]}-${m1[2]}-01 00:00:00`;
+    const m2 = uploadName.match(/(\d{4})(\d{2})/);
+    if (m2) return `${m2[1]}-${m2[2]}-01 00:00:00`;
+    return new Date().toISOString().slice(0, 10) + ' 00:00:00';
+  })();
 
   // excel_uploads 레코드 생성
   const { data: uploadRecord, error: uploadError } = await supabase
-    .from('excel_uploads')
+    .from(EXCEL_UPLOADS)
     .insert({ name: uploadName, row_count: rows.length })
     .select('id')
-    .single()
+    .single();
 
-  if (uploadError) throw uploadError
+  if (uploadError) throw uploadError;
 
-  const uploadId = uploadRecord.id
+  const uploadId = uploadRecord.id;
 
   // 룩업 테이블 병렬 조회
-  const [
-    { data: songs, error: se },
-    { data: arrangements, error: ae },
-  ] = await Promise.all([
-    supabase.from('songs').select('id, title').is('deleted_at', null),
-    supabase.from('arrangements').select('id, song_id, arrangement').is('deleted_at', null),
-  ])
+  const [{ data: songs, error: se }, { data: arrangements, error: ae }] = await Promise.all([
+    supabase.from(SONGS).select('id, title').is('deleted_at', null),
+    supabase.from(ARRANGEMENTS).select('id, song_id, arrangement').is('deleted_at', null),
+  ]);
 
-  if (se) throw se
-  if (ae) throw ae
+  if (se) throw se;
+  if (ae) throw ae;
 
-  const songMap = new Map((songs ?? []).map(s => [norm(s.title), s.id]))
+  const songMap = new Map((songs ?? []).map(s => [norm(s.title), s.id]));
   const arrangementMap = new Map(
-    (arrangements ?? []).map(a => [`${a.song_id}:${norm(a.arrangement)}`, a.id])
-  )
+    (arrangements ?? []).map(a => [`${a.song_id}:${norm(a.arrangement)}`, a.id]),
+  );
 
   const inserts = rows.map(row => {
-    const { song: songTitle, arrangement: arrangementStr } = splitProduct(row.product)
+    const { song: songTitle, arrangement: arrangementStr } = splitProduct(row.product);
 
-    const song_id = songMap.get(norm(songTitle)) ?? null
-    const arrangement_id = (song_id ? arrangementMap.get(`${song_id}:${norm(arrangementStr)}`) : undefined) ?? null
+    const song_id = songMap.get(norm(songTitle)) ?? null;
+    const arrangement_id =
+      (song_id ? arrangementMap.get(`${song_id}:${norm(arrangementStr)}`) : undefined) ?? null;
 
     return {
       song_id,
       arrangement_id,
       upload_id: uploadId,
-      category: row.category,
+      category: row.category && CATEGORIES.has(row.category) ? row.category : 'ETC',
       product: row.product,
       amount: row.amount,
       sold_at: uploadDate,
-    }
-  })
+    };
+  });
 
   // 500행 단위로 청크 insert (페이로드 크기 제한 대응)
-  const CHUNK_SIZE = 500
+  const CHUNK_SIZE = 500;
   try {
     for (let i = 0; i < inserts.length; i += CHUNK_SIZE) {
-      const { error } = await supabase.from('sales').insert(inserts.slice(i, i + CHUNK_SIZE))
-      if (error) throw error
+      const { error } = await supabase.from(SALES).insert(inserts.slice(i, i + CHUNK_SIZE));
+      if (error) throw error;
     }
   } catch (err) {
     // sales insert 실패 시 고아 upload 레코드 제거
-    await supabase.from('excel_uploads').delete().eq('id', uploadId)
-    throw err
+    await supabase.from(EXCEL_UPLOADS).delete().eq('id', uploadId);
+    throw err;
   }
 }
 
@@ -484,22 +544,22 @@ export async function saveSalesRows(rows: ExcelRow[], uploadName: string): Promi
  */
 export async function getSalesRows(year?: number): Promise<ExcelRow[]> {
   let query = supabase
-    .from('sales')
-    .select('id, sold_at, amount, category, product')
-    .order('sold_at', { ascending: false })
-    .limit(MAX_ROWS)
+    .from(SALES)
+    .select(SALES_ROW_SELECT)
+    .order(SOLD_AT, { ascending: false })
+    .limit(MAX_ROWS);
 
   if (year) {
-    query = query.gte('sold_at', `${year}-01-01`).lt('sold_at', `${year + 1}-01-01`)
+    query = query.gte(SOLD_AT, dateRange(year).gte).lt(SOLD_AT, dateRange(year).lt);
   }
 
-  const { data, error } = await query
-  if (error) throw error
+  const { data, error } = await query;
+  if (error) throw error;
 
   return (data ?? []).map(row => ({
     id: row.id,
-    category: row.category ?? '미분류',
+    category: row.category && CATEGORIES.has(row.category) ? row.category : 'ETC',
     product: row.product ?? '',
     amount: row.amount,
-  }))
+  }));
 }

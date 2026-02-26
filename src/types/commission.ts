@@ -1,4 +1,4 @@
-import { CommissionStatus } from '@/components/StatusBadge';
+import { CommissionStatus } from '@/constants/status-config';
 
 export type DifficultyLevelType = "hard" | "easy" | "pro" | null;
 
@@ -39,6 +39,7 @@ export type UpdateCommissionInput = {
   deadline?: string
   notes?: string
   status?: CommissionStatus
+  image_url?: string | null 
 }
 
 export const COMMISSION_INFO = {
@@ -48,3 +49,12 @@ export const COMMISSION_INFO = {
   created_at: '등록일',
   deadline: '마감일',
 };
+
+export interface AnalyzeImageType {
+  songTitle: string
+  composer: string
+  instruments: string[]
+  version?: DifficultyLevelType
+  deadline: string
+  notes?: string
+}
