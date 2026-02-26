@@ -54,7 +54,7 @@ function Stats() {
     songKeys.map((key, i) => [key, { label: songConfig[key], color: topProductColors[i % topProductColors.length] }])
   );
 
-  const songKeysData = [...topSongs].sort((a, b) => a.rank - b.rank);
+  const songKeysData = [...(topSongs ?? [])].sort((a, b) => a.rank - b.rank);
   const maxSales = Math.max(...songKeysData.map(s => s.sales), 1);
   const salesStep = Math.ceil(maxSales / 5);
   const salesTicks = Array.from({ length: 6 }, (_, i) => i * salesStep);
@@ -195,7 +195,7 @@ function Stats() {
               config={{ sales: { label: '판매수', color: 'hsl(var(--primary))' } }}
               className='w-full h-[200px] lg:h-[260px]'
             >
-              <RadarChart data={topArrangements.map(arr => ({ subject: arr.arrangement, sales: arr.sales, revenue: arr.revenue * MONEY_RATIO }))} cx='50%' cy='50%'>
+              <RadarChart data={(topArrangements ?? []).map(arr => ({ subject: arr.arrangement, sales: arr.sales, revenue: arr.revenue * MONEY_RATIO }))} cx='50%' cy='50%'>
                 <PolarGrid
                   strokeDasharray='3 3'
                   stroke='hsl(var(--foreground) / 0.15)'
