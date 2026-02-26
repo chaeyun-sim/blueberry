@@ -26,7 +26,12 @@ const ARRANGEMENTS = 'arrangements';
 // Supabase 기본 반환 한도(1,000행) 우회 — 집계 쿼리 전체에 적용
 const MAX_ROWS = 100_000;
 
+const CATEGORIES = new Set(['CLASSIC', 'POP', 'K-POP', 'OST', 'ANI', 'ETC']);
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
+
+const getUtcMonth = (iso: string) => new Date(iso).getUTCMonth() + 1;
+const getUtcYear = (iso: string) => new Date(iso).getUTCFullYear();
 
 function pctChange(current: number, prev: number): number {
   if (prev === 0) return 0;
@@ -48,7 +53,7 @@ function aggregateByMonth(rows: { sold_at: string; amount: number }[]) {
   const map = new Map<number, { revenue: number; count: number }>();
   for (let m = 1; m <= 12; m++) map.set(m, { revenue: 0, count: 0 });
   for (const row of rows) {
-    const m = new Date(row.sold_at).getMonth() + 1;
+    const m = getUtcMonth(row.sold_at);
     const agg = map.get(m)!;
     agg.revenue += row.amount;
     agg.count += 1;
@@ -71,8 +76,8 @@ const norm = (s: string) =>
  */
 export async function getSalesSummary(): Promise<SalesSummary> {
   const now = new Date();
-  const thisYear = now.getFullYear();
-  const thisMonth = now.getMonth() + 1;
+  const thisYear = getUtcYear(now.toISOString());
+  const thisMonth = getUtcMonth(now.toISOString());
   const prevMonth = thisMonth === 1 ? 12 : thisMonth - 1;
   const prevMonthYear = thisMonth === 1 ? thisYear - 1 : thisYear;
   const prevPrevMonth = prevMonth === 1 ? 12 : prevMonth - 1;
@@ -203,9 +208,8 @@ export async function getMonthlyCategoryBreakdown(year: number): Promise<Monthly
     map.set(m, { CLASSIC: 0, POP: 0, 'K-POP': 0, OST: 0, ANI: 0, ETC: 0 });
   }
   for (const row of data ?? []) {
-    const categoryName = row.category;
-    if (!categoryName) continue;
-    const m = new Date(row.sold_at).getMonth() + 1;
+    const categoryName = row.category && CATEGORIES.has(row.category) ? row.category : 'ETC';
+    const m = getUtcMonth(row.sold_at);
     const entry = map.get(m)!;
     entry[categoryName] = (entry[categoryName] ?? 0) + row.amount;
   }
@@ -248,8 +252,7 @@ export async function getCategoryDistribution(
   let grandCount = 0;
 
   for (const row of data ?? []) {
-    const name = row.category;
-    if (!name) continue;
+    const name = row.category && CATEGORIES.has(row.category) ? row.category : 'ETC';
     if (!totals[name]) totals[name] = { revenue: 0, count: 0 };
     totals[name].revenue += row.amount;
     totals[name].count += 1;
@@ -287,8 +290,8 @@ export async function getTopSongs(topN = 5): Promise<TopSong[]> {
   >();
   for (const row of data ?? []) {
     const title = row.product ? splitProduct(row.product).song : undefined;
-    const category = row.category;
-    if (!title || !category) continue;
+    const category = row.category && CATEGORIES.has(row.category) ? row.category : 'ETC';
+    if (!title) continue;
     const existing = songMap.get(title);
     if (existing) {
       existing.sales += 1;
@@ -412,8 +415,8 @@ export async function getSalesYearRange(): Promise<{ min: number; max: number } 
   if (maxError) throw maxError;
   if (!minRow || !maxRow) return null;
   return {
-    min: new Date(minRow.sold_at).getFullYear(),
-    max: new Date(maxRow.sold_at).getFullYear(),
+    min: getUtcYear(minRow.sold_at),
+    max: getUtcYear(maxRow.sold_at),
   };
 }
 
@@ -455,7 +458,7 @@ export async function getSalesRowsByUploadId(uploadId: string): Promise<ExcelRow
 
   return (data ?? []).map(row => ({
     id: row.id,
-    category: row.category ?? '미분류',
+    category: row.category && CATEGORIES.has(row.category) ? row.category : 'ETC',
     product: row.product ?? '',
     amount: row.amount,
   }));
@@ -515,7 +518,7 @@ export async function saveSalesRows(rows: ExcelRow[], uploadName: string): Promi
       song_id,
       arrangement_id,
       upload_id: uploadId,
-      category: row.category,
+      category: row.category && CATEGORIES.has(row.category) ? row.category : 'ETC',
       product: row.product,
       amount: row.amount,
       sold_at: uploadDate,
@@ -555,7 +558,7 @@ export async function getSalesRows(year?: number): Promise<ExcelRow[]> {
 
   return (data ?? []).map(row => ({
     id: row.id,
-    category: row.category ?? '미분류',
+    category: row.category && CATEGORIES.has(row.category) ? row.category : 'ETC',
     product: row.product ?? '',
     amount: row.amount,
   }));

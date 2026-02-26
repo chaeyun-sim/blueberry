@@ -190,6 +190,8 @@ export async function deleteArrangementFile(id: string) {
   // path 추출
   const path = data.url.split(`/${ARRANGEMENT_FILES_BUCKET}/`)[1];
 
+  if (!path) throw new Error(`Storage 경로를 추출할 수 없습니다: ${data.url}`);
+
   // storage 먼저 삭제
   const { error: storageError } = await supabase.storage
     .from(ARRANGEMENT_FILES_BUCKET)
