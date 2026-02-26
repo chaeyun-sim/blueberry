@@ -42,8 +42,7 @@ const CommissionListContent = () => {
   const [filter, setFilter] = useState<CommissionStatus | 'all'>(initialStatus || 'all');
   const [search, setSearch] = useState('');
 
-  const commissionsQuery = useQuery(commissionQueries.getCommissions());
-  const { data: commissions = [], isLoading, isError, refetch } = commissionsQuery;
+  const { data: commissions = [], isLoading, isError, refetch } = useQuery(commissionQueries.getCommissions());
 
   // L1: 로딩 상태
   if (isLoading && !commissions.length) {
