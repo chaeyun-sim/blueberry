@@ -45,6 +45,7 @@ function detectColsByContent(sheet: XLSX.WorkSheet): {
 
 export function parseExcelSheet(data: Uint8Array): { rows: ExcelRow[]; error: string | null } {
   const workbook = XLSX.read(data, { type: 'array' });
+  if (!workbook.SheetNames.length) return { rows: [], error: '시트가 없는 파일입니다.' };
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
   const json = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { raw: false });
 
