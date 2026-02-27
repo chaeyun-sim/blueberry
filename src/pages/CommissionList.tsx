@@ -154,8 +154,8 @@ const CommissionListContent = () => {
                     onClick={() => navigate(`/commissions/${item.id}`)}
                   >
                     <TableCell className='text-foreground'>{item.deadline}</TableCell>
-                    <TableCell className='font-medium truncate'>{item.songs?.title ?? item.title}</TableCell>
-                    <TableCell className='text-foreground truncate'>{item.songs?.composer ?? item.composer}</TableCell>
+                    <TableCell className='font-medium truncate'>{item.songs?.title ?? item.title ?? '-'}</TableCell>
+                    <TableCell className='text-foreground truncate'>{item.songs?.composer ?? item.composer ?? '-'}</TableCell>
                     <TableCell className='text-foreground'>
                       {(item.arrangement ?? '').split(', ').map(abbreviateInstrument).join(', ')}
                     </TableCell>
