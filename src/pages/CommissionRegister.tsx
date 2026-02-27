@@ -72,8 +72,8 @@ const CommissionRegister = () => {
           setForm={res =>
             setForm(prev => ({
               ...prev,
-              instruments: buildInstrumentList(res.instruments ?? []),
               ...res,
+              instruments: buildInstrumentList(res.instruments ?? []),
             }))
           }
           isAnalyzing={isAnalyzing}
