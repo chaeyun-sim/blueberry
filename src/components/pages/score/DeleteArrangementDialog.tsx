@@ -38,7 +38,7 @@ function DeleteArrangementDialog({
         queryClient.invalidateQueries({ queryKey: scoreKeys.list() });
         toast.success('편성이 삭제되었습니다.');
         close();
-        navigate('/scores', { replace: true });
+        navigate('/files', { replace: true });
       },
       onError: (e) => {
         toast.error('삭제에 실패했습니다.', { description: e.message });
