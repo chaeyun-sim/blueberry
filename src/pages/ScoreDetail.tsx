@@ -24,7 +24,7 @@ const ScoreDetail = () => {
         <DeleteArrangementDialog
           {...overlayProps}
           arrangementId={arrangementId!}
-          songTitle={arrangement?.songs?.title ?? '알 수 없는 곡'}
+          songTitle={arrangement?.songs?.title ?? song?.title ?? '알 수 없는 곡'}
           arrangement={arrangement?.arrangement ?? ''}
         />
       ),
