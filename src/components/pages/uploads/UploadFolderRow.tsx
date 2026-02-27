@@ -46,6 +46,7 @@ function UploadFolderRow({
           className='h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0'
           onClick={onDelete}
           disabled={isDeleting}
+          aria-label='업로드 삭제'
         >
           <Trash2 className='h-3.5 w-3.5' />
         </Button>
