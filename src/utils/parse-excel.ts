@@ -70,7 +70,7 @@ export function parseExcelSheet(data: Uint8Array): { rows: ExcelRow[]; error: st
       const rawRows = XLSX.utils.sheet_to_json<string[]>(sheet, { header: 1, raw: false });
       // row 0 is the (unrecognized) header — skip it to avoid including header text as data
       const dataRows = rawRows.slice(1).filter(
-        (r) => (catIdx >= 0 && r[catIdx]) || (prodIdx >= 0 && r[prodIdx]),
+        (r) => (catIdx >= 0 && r[catIdx]) || (prodIdx >= 0 && r[prodIdx]) || (amtIdx >= 0 && r[amtIdx]),
       );
 
       return {
