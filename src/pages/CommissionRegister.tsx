@@ -29,19 +29,23 @@ const CommissionRegister = () => {
   useEffect(() => {
     if (new URLSearchParams(window.location.search).get('shared') !== 'true') return;
     (async () => {
-      const cache = await caches.open('blueberry-share');
-      const res = await cache.match('/shared-image');
-      if (!res) return;
-      const blob = await res.blob();
-      const file = new File([blob], 'shared-image.jpg', { type: blob.type || 'image/jpeg' });
-      const dataUrl = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = e => resolve(e.target?.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      });
-      setForm(prev => ({ ...prev, imagePreview: dataUrl, imageFile: file }));
-      await cache.delete('/shared-image');
+      try {
+        const cache = await caches.open('blueberry-share');
+        const res = await cache.match('/shared-image');
+        if (!res) return;
+        const blob = await res.blob();
+        const file = new File([blob], 'shared-image.jpg', { type: blob.type || 'image/jpeg' });
+        const dataUrl = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = e => resolve(e.target?.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+        setForm(prev => ({ ...prev, imagePreview: dataUrl, imageFile: file }));
+        await cache.delete('/shared-image');
+      } catch {
+        // Cache API unavailable (insecure context, private browsing) or FileReader error — skip preload
+      }
     })();
   }, []);
 
