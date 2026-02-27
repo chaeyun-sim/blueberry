@@ -24,7 +24,7 @@ function detectColsByContent(sheet: XLSX.WorkSheet): {
 } {
   const rawRows = XLSX.utils.sheet_to_json<string[]>(sheet, { header: 1, raw: false });
   const sample = rawRows.slice(0, Math.min(20, rawRows.length));
-  const colCount = Math.max(...rawRows.map((r) => r.length), 0);
+  const colCount = sample.reduce((max, r) => Math.max(max, r.length), 0);
 
   let catIdx = -1, prodIdx = -1, amtIdx = -1;
 
