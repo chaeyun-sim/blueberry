@@ -23,6 +23,9 @@ import { FileEntry } from '@/types/form';
 import { MAX_DECOMPRESSED, MAX_FILE_COUNT, MAX_ZIP_SIZE } from '@/constants/file-size';
 import { detectFileType } from '@/utils/detect-file-type';
 import { formatFileSize } from '@/utils/format-file-size';
+import { compressAudioToMp3 } from '@/utils/compress-wav';
+
+const COMPRESS_EXTS = new Set(['wav', 'aif', 'aiff', 'aifc']);
 
 interface CompleteDialogProps extends OverlayProps {
   commission: Commission;
@@ -48,11 +51,12 @@ const isNum = (s: string) => /^\d+$/.test(s);
 
 export function CompleteDialog({ isOpen, close, commission, onConfirm }: CompleteDialogProps) {
   const zipInputRef = useRef<HTMLInputElement>(null);
-  
+
   const [zipName, setZipName] = useState<string | null>(null);
   const [zipSize, setZipSize] = useState(0);
   const [files, setFiles] = useState<FileEntry[]>([]);
   const [isExtracting, setIsExtracting] = useState(false);
+  const [isCompressing, setIsCompressing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { mutateAsync: createSong } = useMutation(scoreMutations.createSong());
@@ -64,7 +68,6 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
   const composer = commission.songs?.composer ?? commission.composer ?? '';
 
   const zipBaseName = zipName?.replace(/\.zip$/i, '') ?? '';
-
   const zipTokenSet = zipBaseName.length > 0 ? expandTokens(tokenize(zipBaseName)) : new Set<string>();
   const composerLastName = composer.trim().split(/\s+/).pop()?.toLowerCase() ?? '';
   const composerMatch = composerLastName.length > 1 && zipTokenSet.has(composerLastName);
@@ -73,17 +76,22 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
   const titleOverlapCount = significantTitleTokens.filter(t => zipTokenSet.has(t)).length;
   const isZipTitleMatch = zipBaseName.length > 0 && (composerMatch || titleOverlapCount >= 2);
 
-  const handleZipFile = async (file: File) => {
-    const resetInput = () => { if (zipInputRef.current) zipInputRef.current.value = ''; };
+  const resetZip = () => {
+    setZipName(null);
+    setZipSize(0);
+    setFiles([]);
+    if (zipInputRef.current) zipInputRef.current.value = '';
+  };
 
+  const handleZipFile = async (file: File) => {
     if (!file.name.toLowerCase().endsWith('.zip')) {
       toast.error('ZIP 파일만 업로드할 수 있습니다.');
-      resetInput();
+      if (zipInputRef.current) zipInputRef.current.value = '';
       return;
     }
     if (file.size > MAX_ZIP_SIZE) {
       toast.error('ZIP 파일 크기는 200MB 이하여야 합니다.');
-      resetInput();
+      if (zipInputRef.current) zipInputRef.current.value = '';
       return;
     }
 
@@ -92,13 +100,14 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
     setZipSize(file.size);
     setFiles([]);
 
+    const rawEntries: FileEntry[] = [];
+    let aborted = false;
+
     try {
       const buffer = await file.arrayBuffer();
       const zip = await JSZip.loadAsync(buffer);
-      const entries: FileEntry[] = [];
       let totalSize = 0;
       let fileCount = 0;
-      let aborted = false;
 
       for (const [path, entry] of Object.entries(zip.files)) {
         if (entry.dir) continue;
@@ -122,21 +131,54 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
           break;
         }
 
-        entries.push({
+        rawEntries.push({
           file: new File([blob], fileName),
           label: fileName.replace(/\.[^.]+$/, ''),
           fileType: detectFileType(fileName),
         });
       }
-
-      if (!aborted) setFiles(entries);
-      else { setZipName(null); resetInput(); }
     } catch (e) {
       toast.error('ZIP 파일을 읽을 수 없습니다.', { description: (e as Error).message });
-      setZipName(null);
-      resetInput();
-    } finally {
+      resetZip();
       setIsExtracting(false);
+      return;
+    }
+
+    setIsExtracting(false);
+
+    if (aborted) {
+      resetZip();
+      return;
+    }
+
+    const hasAudio = rawEntries.some(e =>
+      COMPRESS_EXTS.has(e.file.name.split('.').pop()?.toLowerCase() ?? '')
+    );
+
+    if (hasAudio) {
+      setIsCompressing(true);
+      const processed: FileEntry[] = [];
+      for (const entry of rawEntries) {
+        const ext = entry.file.name.split('.').pop()?.toLowerCase() ?? '';
+        if (COMPRESS_EXTS.has(ext)) {
+          try {
+            const mp3 = await compressAudioToMp3(entry.file);
+            processed.push({ file: mp3, label: entry.label, fileType: 'audio' });
+          } catch (e) {
+            console.error('[compress] 실패:', entry.file.name, e);
+            toast.error(`오디오 변환 실패: ${entry.label}`, { description: (e as Error).message });
+            resetZip();
+            setIsCompressing(false);
+            return;
+          }
+        } else {
+          processed.push(entry);
+        }
+      }
+      setIsCompressing(false);
+      setFiles(processed);
+    } else {
+      setFiles(rawEntries);
     }
   };
 
@@ -166,12 +208,15 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
         commission_id: commission.id,
       });
 
-      // 3. 파일 업로드
+      // 3. 파일 업로드 (악보 + MP3로 변환된 오디오 포함)
       const failed: string[] = [];
       for (const entry of files) {
         try {
+          console.log('[upload] 업로드 시작:', entry.file.name, `${(entry.file.size / 1024 / 1024).toFixed(1)}MB`, entry.fileType);
           await uploadFile({ arrangementId: arrangement.id, file: entry.file, label: entry.label, fileType: entry.fileType });
-        } catch {
+          console.log('[upload] 업로드 완료:', entry.file.name);
+        } catch (e) {
+          console.error('[upload] 업로드 실패:', entry.file.name, e);
           failed.push(entry.label);
         }
       }
@@ -182,11 +227,10 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
         return;
       }
 
-      if (failed.length > 0) toast.warning(`일부 파일 업로드 실패: ${failed.join(', ')}`);
+      if (failed.length > 0) toast.error(`업로드 실패: ${failed.join(', ')}`, { description: '실패한 파일은 메일에 포함되지 않아요.' });
 
       queryClient.invalidateQueries({ queryKey: scoreKeys.list() });
 
-      // 4. 의뢰 상태 완료로 변경
       onConfirm();
       close();
     } catch (e) {
@@ -196,18 +240,20 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
     }
   };
 
+  const isProcessing = isExtracting || isCompressing;
+  const processingLabel = isCompressing ? '오디오 MP3 변환 중...' : '압축 해제 중...';
+
   return (
     <Dialog open={isOpen} onOpenChange={open => { if (!open) close(); }}>
       <DialogContent className='sm:max-w-xl'>
         <DialogHeader>
           <DialogTitle className='font-display'>작업 완료</DialogTitle>
           <DialogDescription>
-            완성된 악보 ZIP 파일을 업로드하면 악보 목록에도 자동으로 등록돼요.
+            완성된 악보 ZIP 파일을 업로드하면 악보 목록에 자동 등록돼요. AIFF/WAV는 MP3로 변환 후 저장됩니다.
           </DialogDescription>
         </DialogHeader>
 
         <div className='space-y-4'>
-          {/* ZIP 업로드 */}
           <div>
             <Label className='mb-2 block'>악보 파일 (ZIP)</Label>
             <input
@@ -228,7 +274,7 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
                 <FileArchive className='h-8 w-8 text-muted-foreground' />
                 <div className='text-center'>
                   <p className='text-sm font-medium'>ZIP 파일을 드래그하거나 클릭하여 업로드</p>
-                  <p className='text-xs text-muted-foreground mt-1'>스코어, 파트보, MusicXML 파일이 담긴 ZIP</p>
+                  <p className='text-xs text-muted-foreground mt-1'>스코어, 파트보, MusicXML, AIFF/WAV 파일이 담긴 ZIP</p>
                 </div>
               </button>
             ) : (
@@ -245,17 +291,18 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
                   </div>
                   <button
                     aria-label='파일 제거'
-                    onClick={() => { setZipName(null); setFiles([]); if (zipInputRef.current) zipInputRef.current.value = ''; }}
-                    disabled={isExtracting || isSubmitting}
+                    onClick={resetZip}
+                    disabled={isProcessing || isSubmitting}
                     className='p-1 rounded hover:bg-foreground/5 transition-colors disabled:pointer-events-none'
                   >
                     <X className='h-4 w-4 text-muted-foreground' />
                   </button>
                 </div>
-                {isExtracting ? (
+
+                {isProcessing ? (
                   <div className='flex items-center justify-center gap-2 py-4 text-muted-foreground'>
                     <Loader2 className='h-4 w-4 animate-spin' />
-                    <span className='text-sm'>압축 해제 중...</span>
+                    <span className='text-sm'>{processingLabel}</span>
                   </div>
                 ) : (
                   <div className='space-y-1 max-h-36 overflow-y-auto'>
@@ -272,7 +319,8 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
                     })}
                   </div>
                 )}
-                {!isExtracting && zipBaseName && !isZipTitleMatch && (
+
+                {!isProcessing && zipBaseName && !isZipTitleMatch && (
                   <p className='text-xs text-destructive px-1'>
                     ZIP 파일명이 곡명 또는 작곡가명과 일치하지 않습니다.
                   </p>
@@ -281,7 +329,6 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
             )}
           </div>
 
-          {/* 악보 정보 (미리 채워짐) */}
           <div className='grid grid-cols-2 gap-3 p-3 rounded-lg bg-muted/30 text-sm'>
             <div>
               <p className='text-xs text-muted-foreground mb-0.5'>곡명</p>
@@ -296,12 +343,21 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
               <p className='font-medium'>{commission.arrangement}</p>
             </div>
           </div>
-
         </div>
 
         <div className='flex justify-end gap-2 pt-2'>
-          <Button variant='outline' onClick={() => { setZipName(null); setFiles([]); setZipSize(0); if (zipInputRef.current) zipInputRef.current.value = ''; close(); }} disabled={isSubmitting}>취소</Button>
-          <Button onClick={handleSubmit} disabled={isSubmitting || isExtracting || !zipName || files.length === 0 || !isZipTitleMatch} className='gap-2'>
+          <Button
+            variant='outline'
+            onClick={() => { resetZip(); close(); }}
+            disabled={isSubmitting}
+          >
+            취소
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            disabled={isSubmitting || isProcessing || !zipName || files.length === 0 || !isZipTitleMatch}
+            className='gap-2'
+          >
             {isSubmitting ? <Loader2 className='h-4 w-4 animate-spin' /> : <FileCheck className='h-4 w-4' />}
             {isSubmitting ? '등록 중...' : '작업 완료'}
           </Button>

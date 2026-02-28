@@ -20,6 +20,9 @@ export default defineConfig(({ mode }) => ({
     },
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
+  optimizeDeps: {
+    include: ['lamejs'],
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

@@ -1,0 +1,157 @@
+import JSZip from 'npm:jszip'
+import { createClient } from 'npm:@supabase/supabase-js@2'
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
+const supabase = createClient(
+  Deno.env.get('SUPABASE_URL')!,
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+)
+
+const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!
+const MANAGER_EMAIL = Deno.env.get('MANAGER_EMAIL')!
+
+function toBase64(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer)
+  let binary = ''
+  const chunkSize = 8192
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize))
+  }
+  return btoa(binary)
+}
+
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
+
+  try {
+    const { commissionId, tempAudioPath, audioFileName } = await req.json()
+
+    if (!commissionId) {
+      return new Response(
+        JSON.stringify({ error: 'commissionId가 필요해요' }),
+        { status: 400, headers: corsHeaders },
+      )
+    }
+
+    // 1. 의뢰 + 곡 제목 조회
+    const { data: commission, error: commErr } = await supabase
+      .from('commissions')
+      .select('*, songs(title)')
+      .eq('id', commissionId)
+      .single()
+
+    if (commErr || !commission) {
+      return new Response(
+        JSON.stringify({ error: '의뢰를 찾을 수 없어요' }),
+        { status: 404, headers: corsHeaders },
+      )
+    }
+
+    const songTitle = commission.songs?.title ?? commission.title ?? '신청곡'
+
+    // 2. arrangement 조회
+    const { data: arrangements, error: arrErr } = await supabase
+      .from('arrangements')
+      .select('id')
+      .eq('commission_id', commissionId)
+
+    if (arrErr || !arrangements || arrangements.length === 0) {
+      return new Response(
+        JSON.stringify({ error: '연결된 악보가 없어요' }),
+        { status: 404, headers: corsHeaders },
+      )
+    }
+
+    const arrangementId = arrangements[0].id
+
+    // 3. arrangement_files 조회
+    const { data: files, error: filesErr } = await supabase
+      .from('arrangement_files')
+      .select('*')
+      .eq('arrangement_id', arrangementId)
+
+    if (filesErr || !files || files.length === 0) {
+      return new Response(
+        JSON.stringify({ error: '첨부할 파일이 없어요' }),
+        { status: 404, headers: corsHeaders },
+      )
+    }
+
+    // 4. 파일 다운로드 + ZIP 빌드
+    const zip = new JSZip()
+    const usedNames = new Set<string>()
+
+    for (const file of files) {
+      const response = await fetch(file.url)
+      if (!response.ok) continue
+
+      const buffer = await response.arrayBuffer()
+      const ext = file.url.split('.').pop()?.split('?')[0] ?? 'bin'
+
+      let name = `${file.label}.${ext}`
+      if (usedNames.has(name)) {
+        let i = 2
+        while (usedNames.has(`${file.label}_${i}.${ext}`)) i++
+        name = `${file.label}_${i}.${ext}`
+      }
+      usedNames.add(name)
+      zip.file(name, buffer)
+    }
+
+    // 5. 오디오 파일이 있으면 ZIP에 추가
+    if (tempAudioPath && audioFileName) {
+      const { data: audioBlob } = await supabase.storage
+        .from('arrangement-files')
+        .download(tempAudioPath)
+      if (audioBlob) {
+        zip.file(audioFileName, await audioBlob.arrayBuffer())
+      }
+    }
+
+    const zipUint8 = await zip.generateAsync({ type: 'uint8array' })
+    const zipBase64 = toBase64(zipUint8.buffer)
+
+    // 6. Resend로 이메일 발송
+    const emailRes = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: 'onboarding@resend.dev',
+        to: MANAGER_EMAIL,
+        subject: `[신청곡] ${songTitle}`,
+        text: `안녕하세요!\n${songTitle} 신청곡 보내드립니다.\n이상 있으면 알려주세요!\n감사합니다. :)`,
+        attachments: [
+          { filename: `${songTitle}.zip`, content: zipBase64 },
+        ],
+      }),
+    })
+
+    if (!emailRes.ok) {
+      const errText = await emailRes.text()
+      return new Response(
+        JSON.stringify({ error: `Resend 오류: ${errText}` }),
+        { status: 500, headers: corsHeaders },
+      )
+    }
+
+    return new Response(
+      JSON.stringify({ success: true }),
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+    )
+  } catch (e) {
+    const message = e instanceof Error ? e.message : '알 수 없는 오류'
+    return new Response(
+      JSON.stringify({ error: message }),
+      { status: 500, headers: corsHeaders },
+    )
+  }
+})

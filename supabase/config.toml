@@ -1,4 +1,10 @@
 
+[functions.send-score-email]
+enabled = true
+verify_jwt = false
+import_map = "./functions/send-score-email/deno.json"
+entrypoint = "./functions/send-score-email/index.ts"
+
 [functions.generate-recommendation]
 enabled = true
 verify_jwt = false
