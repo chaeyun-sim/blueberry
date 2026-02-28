@@ -1,4 +1,10 @@
 
+[functions.generate-recommendation]
+enabled = true
+verify_jwt = false
+import_map = "./functions/generate-recommendation/deno.json"
+entrypoint = "./functions/generate-recommendation/index.ts"
+
 [functions.check-deadlines]
 enabled = true
 verify_jwt = false
