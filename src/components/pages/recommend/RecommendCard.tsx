@@ -7,7 +7,7 @@ import { type MusicRecommendation } from '@/mock/recommendations';
 import { formatDate } from '@/utils/format-date';
 import { SoundpostBadge } from './SoundpostBadge';
 import { SoundpostLinks } from './SoundpostLinks';
-import { useSoundpostCheck } from '@/hooks/useSoundpostCheck';
+import { useSoundpostCheck } from '@/hooks/use-soundpost-check';
 
 interface Props {
   rec: MusicRecommendation;

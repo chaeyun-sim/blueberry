@@ -7,43 +7,42 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Mail, Lock, Eye, EyeOff, Loader2, Loader } from 'lucide-react';
 import { toast } from 'sonner';
 import { login } from '@/api/auth';
-import { useAuth } from '@/components/AuthProvider';
+import { useAuth } from '@/provider/AuthProvider';
 import logoImg from '@/assets/logo.png';
+
+interface LoginFormType {
+  email: string;
+  password: string;
+}
 
 export default function Login() {
   const navigate = useNavigate();
   const { session, loading: authLoading, isGuest, enterGuestMode } = useAuth();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+
+  const [form, setForm] = useState<LoginFormType>({
+    email: '',
+    password: '',
+  });
+
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   if (authLoading) return null;
-  if (session || isGuest)
-    return (
-      <Navigate
-        to='/'
-        replace
-      />
-    );
+  if (session || isGuest) return <Navigate to='/' replace />;
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!email || !password) {
+    if (!form.email || !form.password) {
       toast.error('이메일과 비밀번호를 입력해주세요.');
       return;
     }
 
     setLoading(true);
-    try {
-      await login(email, password);
-      navigate('/');
-    } catch {
-      toast.error('로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.');
-    } finally {
-      setLoading(false);
-    }
+    login(form.email, form.password)
+      .then(() => navigate('/'))
+      .catch(() => toast.error('로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.'))
+      .finally(() => setLoading(false));
   };
 
   return (
@@ -80,8 +79,8 @@ export default function Login() {
                   id='email'
                   type='email'
                   placeholder='example@email.com'
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
+                  value={form.email}
+                  onChange={e => setForm(prev => ({ ...prev, email: e.target.value }))}
                   className='pl-10'
                   disabled={loading}
                 />
@@ -101,8 +100,8 @@ export default function Login() {
                   id='password'
                   type={showPassword ? 'text' : 'password'}
                   placeholder='••••••••'
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
+                  value={form.password}
+                  onChange={e => setForm(prev => ({ ...prev, password: e.target.value }))}
                   className='pl-10 pr-10'
                   disabled={loading}
                 />

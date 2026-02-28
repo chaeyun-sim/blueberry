@@ -1,50 +1,35 @@
-import { useState } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { PageHeader } from '@/components/PageHeader';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
 import { ArrowLeft, Music, Trash2 } from 'lucide-react';
 import { useNavigate, useParams, Navigate } from 'react-router-dom';
-import { useMutation } from '@tanstack/react-query';
-import { useAppQuery as useQuery } from '@/hooks/useAppQuery';
+import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 import { scoreQueries } from '@/api/score/queries';
-import { scoreMutations } from '@/api/score/mutations';
-import { scoreKeys } from '@/api/score/queryKeys';
-import { toast } from 'sonner';
-import { queryClient } from '@/utils/query-client';
 import { fileTypeConfig } from '@/constants/file-types';
+import { overlay } from 'overlay-kit';
+import DeleteArrangementDialog from '@/components/pages/score/DeleteArrangementDialog';
 
 const ScoreDetail = () => {
-  const { scoreId: _scoreId, arrangementId } = useParams();
+  const { scoreId, arrangementId } = useParams();
   const navigate = useNavigate();
-  const [isDeleting, setIsDeleting] = useState(false);
 
   const { data: arrangement, isLoading } = useQuery(scoreQueries.getArrangement(arrangementId));
-  const { mutateAsync: deleteArrangement } = useMutation(scoreMutations.deleteArrangement());
+  const { data: song } = useQuery(scoreQueries.getSong(scoreId ?? ''));
 
-  const handleDelete = async () => {
-    if (!arrangementId) return;
-    setIsDeleting(true);
-    try {
-      await deleteArrangement({ id: arrangementId });
-      queryClient.invalidateQueries({ queryKey: scoreKeys.list() });
-      navigate('/scores', { replace: true });
-    } catch (e) {
-      toast.error('삭제에 실패했습니다.', { description: (e as Error).message });
-      setIsDeleting(false);
-    }
+  const handleDelete = () => {
+    overlay.open(
+      overlayProps => (
+        <DeleteArrangementDialog
+          {...overlayProps}
+          arrangementId={arrangementId!}
+          songTitle={arrangement?.songs?.title ?? song?.title ?? '알 수 없는 곡'}
+          arrangement={arrangement?.arrangement ?? ''}
+        />
+      ),
+      { overlayId: 'delete-arrangement-dialog' },
+    );
   };
 
   if (!arrangementId) return <Navigate to='/scores' replace />;
@@ -78,9 +63,7 @@ const ScoreDetail = () => {
     );
   }
 
-
-
-  const songTitle = arrangement.songs?.title ?? '알 수 없는 곡';
+  const songTitle = arrangement.songs?.title ?? song?.title ?? '알 수 없는 곡';
   const files = arrangement.arrangement_files ?? [];
 
   return (
@@ -94,38 +77,15 @@ const ScoreDetail = () => {
           <ArrowLeft className='h-4 w-4' /> 뒤로
         </Button>
 
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button
-              variant='ghost'
-              size='sm'
-              className='gap-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10'
-              disabled={isDeleting}
-            >
-              <Trash2 className='h-4 w-4' />
-              악보 삭제
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>이 편성을 삭제할까요?</AlertDialogTitle>
-              <AlertDialogDescription>
-                <span className='font-medium text-foreground'>{songTitle} — {arrangement.arrangement}</span>
-                {' '}편성과 모든 파일이 삭제됩니다. 이 작업은 되돌릴 수 없습니다.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>취소</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={handleDelete}
-                disabled={isDeleting}
-                className='bg-destructive text-destructive-foreground hover:bg-destructive/90'
-              >
-                삭제
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        <Button
+          variant='ghost'
+          size='sm'
+          className='gap-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10'
+          onClick={handleDelete}
+        >
+          <Trash2 className='h-4 w-4' />
+          악보 삭제
+        </Button>
       </div>
 
       <PageHeader title={songTitle} description={arrangement.arrangement} />

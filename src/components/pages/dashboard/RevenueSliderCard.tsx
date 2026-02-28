@@ -1,9 +1,9 @@
-import RollingNumber from '@/components/RollingNumber';
+import RollingNumber from '@/components/pages/dashboard/RollingNumber';
 import { AnimatePresence, motion } from 'framer-motion';
 import { DollarSign, TrendingDown, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { useAppQuery as useQuery } from '@/hooks/useAppQuery';
+import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 import { statsQueries } from '@/api/stats/queries';
 import { MONEY_RATIO } from '@/constants/money-ratio';
 

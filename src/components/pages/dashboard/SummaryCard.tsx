@@ -3,14 +3,16 @@ import { cn } from '@/lib/utils';
 import { LucideProps } from 'lucide-react';
 import { ForwardRefExoticComponent, RefAttributes } from 'react';
 
+type ColorStatus = 'primary' | 'complete' | 'success' | 'warning';
+
 interface SummaryCardProps {
   icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>;
   value: string | number;
   description: string;
-  colorStatus: 'primary' | 'complete' | 'success' | 'warning';
+  colorStatus: ColorStatus;
 }
 
-const cardStyleMap: Record<'primary' | 'complete' | 'success' | 'warning', {
+const cardStyleMap: Record<ColorStatus, {
   card: string;
   iconWrap: string;
   icon: string;
@@ -49,16 +51,16 @@ const cardStyleMap: Record<'primary' | 'complete' | 'success' | 'warning', {
 
 function SummaryCard({ icon, value, description, colorStatus }: SummaryCardProps) {
   const Icon = icon as React.ElementType;
-  const s = cardStyleMap[colorStatus];
+  const status = cardStyleMap[colorStatus];
 
   return (
-    <Card className={cn('rounded-[var(--radius)]', s.card)}>
+    <Card className={cn('rounded-[var(--radius)]', status.card)}>
       <CardContent className='p-4 flex flex-col items-center text-center'>
-        <div className={`w-9 h-9 rounded-2xl flex items-center justify-center mb-3 ${s.iconWrap}`}>
-          <Icon className={`h-4 w-4 ${s.icon}`} />
+        <div className={`w-9 h-9 rounded-2xl flex items-center justify-center mb-3 ${status.iconWrap}`}>
+          <Icon className={`h-4 w-4 ${status.icon}`} />
         </div>
-        <p className={`text-2xl font-display font-bold ${s.value}`}>{value}</p>
-        <p className={`text-[11px] mt-0.5 ${s.desc}`}>{description}</p>
+        <p className={`text-2xl font-display font-bold ${status.value}`}>{value}</p>
+        <p className={`text-[11px] mt-0.5 ${status.desc}`}>{description}</p>
       </CardContent>
     </Card>
   );

@@ -28,34 +28,19 @@ import { ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { Layers } from 'lucide-react';
 import { formatCurrency } from '@/utils/format-currency';
 import TopSongBar from './TopSongBar';
-import { useAppQuery as useQuery } from '@/hooks/useAppQuery';
+import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 import { statsQueries } from '@/api/stats/queries';
 import { MONEY_RATIO } from '@/constants/money-ratio';
-
-const categoryColors: Record<string, string> = {
-  CLASSIC: 'hsl(var(--status-complete))',
-  POP: 'hsl(var(--primary))',
-  'K-POP': 'hsl(var(--accent))',
-  OST: 'hsl(var(--status-received))',
-  ANI: 'hsl(220 70% 55%)',
-  ETC: 'hsl(var(--muted-foreground))',
-}
-
-const topProductColors = [
-  'hsl(var(--primary))',
-  'hsl(var(--status-complete))',
-  'hsl(var(--accent))',
-  'hsl(var(--status-received))',
-  'hsl(220 70% 55%)',
-];
+import { categoryColors, topProductColors } from '@/constants/status-config';
 
 function Stats() {
   const { data: categoryDistribution } = useQuery(statsQueries.getCategoryDistribution());
-  const { data: topSongs = [] } = useQuery(statsQueries.getTopSongs());
-  const { data: topArrangements = [] } = useQuery(statsQueries.getTopArrangements());
+  const { data: topSongs } = useQuery(statsQueries.getTopSongs());
+  const { data: topArrangements } = useQuery(statsQueries.getTopArrangements());
   const { data: yearRange } = useQuery(statsQueries.getSalesYearRange());
 
   const [monthlySalesYear, setMonthlySalesYear] = useState<number | null>(null);
+  
   const selectedYear = monthlySalesYear ?? yearRange?.max ?? new Date().getFullYear();
   const yearOptions = yearRange
     ? Array.from({ length: yearRange.max - yearRange.min + 1 }, (_, i) => yearRange.max - i)
@@ -69,10 +54,11 @@ function Stats() {
     songKeys.map((key, i) => [key, { label: songConfig[key], color: topProductColors[i % topProductColors.length] }])
   );
 
-  const songKeysData = [...topSongs].sort((a, b) => a.rank - b.rank);
+  const songKeysData = [...(topSongs ?? [])].sort((a, b) => a.rank - b.rank);
   const maxSales = Math.max(...songKeysData.map(s => s.sales), 1);
   const salesStep = Math.ceil(maxSales / 5);
   const salesTicks = Array.from({ length: 6 }, (_, i) => i * salesStep);
+  
   return (
     <>
       <div className='grid lg:grid-cols-3 gap-6 min-w-0'>
@@ -209,7 +195,7 @@ function Stats() {
               config={{ sales: { label: '판매수', color: 'hsl(var(--primary))' } }}
               className='w-full h-[200px] lg:h-[260px]'
             >
-              <RadarChart data={topArrangements.map(arr => ({ subject: arr.arrangement, sales: arr.sales, revenue: arr.revenue * MONEY_RATIO }))} cx='50%' cy='50%'>
+              <RadarChart data={(topArrangements ?? []).map(arr => ({ subject: arr.arrangement, sales: arr.sales, revenue: arr.revenue * MONEY_RATIO }))} cx='50%' cy='50%'>
                 <PolarGrid
                   strokeDasharray='3 3'
                   stroke='hsl(var(--foreground) / 0.15)'

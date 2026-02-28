@@ -5,7 +5,7 @@ import {
   type QueryKey,
   type DefaultError,
 } from '@tanstack/react-query'
-import { useAuth } from '@/components/AuthProvider'
+import { useAuth } from '@/provider/AuthProvider'
 import { getDemoData } from '@/data/demo'
 
 export function useAppQuery<

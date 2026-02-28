@@ -3,7 +3,7 @@ import { CommissionStatus } from '@/constants/status-config'
 import { AnalyzeImageType, Commission, CreateCommissionInput, UpdateCommissionInput } from '@/types/commission'
 
 const COMMISSIONS = 'commissions'
-const COMMISSION_LIST_SELECT = '*, songs(title)'
+const COMMISSION_LIST_SELECT = '*, songs(title, composer)'
 const COMMISSION_DETAIL_SELECT = '*, songs(title, composer)'
 const COMMISSION_IMAGES = 'commission-images'
 

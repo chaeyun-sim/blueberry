@@ -1,4 +1,4 @@
-import { CommissionStatus } from "@/components/StatusBadge";
+import { CommissionStatus } from "@/constants/status-config";
 import {
   Dialog,
   DialogContent,

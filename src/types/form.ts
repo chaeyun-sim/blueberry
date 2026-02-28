@@ -9,6 +9,7 @@ export interface CommissionRegisterFormType {
   version: DifficultyLevelType | null;
   deadline: string;
   notes?: string;
+  imageFile: File | null;
 }
 
 export interface FileEntry {

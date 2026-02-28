@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { PageHeader } from '@/components/PageHeader';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { ExcelUploadDialog } from '@/components/ExcelUploadDialog';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -12,13 +12,13 @@ import SalesAll from '@/components/pages/sales/SalesAll';
 import { TabsContent } from '@radix-ui/react-tabs';
 import { statsMutations } from '@/api/stats/mutations';
 import { useMutation } from '@tanstack/react-query';
-import { useAppQuery as useQuery } from '@/hooks/useAppQuery';
+import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 import { statsKeys } from '@/api/stats/queryKeys';
-import { useToast } from '@/hooks/use-toast';
 import { queryClient } from '@/utils/query-client';
 import { statsQueries } from '@/api/stats/queries';
 import { ExcelRow } from '@/types/excel';
 import { MONEY_RATIO } from '@/constants/money-ratio';
+import { toast } from 'sonner';
 
 const tabItems = {
   all: { icon: BarChart3, label: '전체 분석', component: Stats },
@@ -30,7 +30,6 @@ const tabItems = {
 >;
 
 const SalesStats = () => {
-  const { toast } = useToast();
   const [uploadOpen, setUploadOpen] = useState(false);
 
   const { data: salesSummary } = useQuery(statsQueries.getSalesSummary());
@@ -43,18 +42,14 @@ const SalesStats = () => {
         {
           onSuccess: (_, { rows }) => {
             queryClient.invalidateQueries({ queryKey: statsKeys.all });
-            toast({ title: `${rows.length}건이 저장되었습니다.` });
+            toast.success(`${rows.length}건이 저장되었습니다.`);
           },
           onError: e =>
-            toast({
-              title: '저장에 실패했습니다.',
-              description: e instanceof Error ? e.message : undefined,
-              variant: 'destructive',
-            }),
+            toast.error('저장에 실패했습니다.', { description: e instanceof Error ? e.message : undefined }),
         },
       );
     },
-    [saveRows, toast],
+    [saveRows],
   );
 
   return (

@@ -1,16 +1,15 @@
 import { useState } from "react";
 import dayjs from "dayjs";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { PageHeader } from "@/components/PageHeader";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { useAppQuery as useQuery } from "@/hooks/useAppQuery";
+import { useAppQuery as useQuery } from "@/hooks/use-app-query";
 import { commissionQueries } from "@/api/commission/queries";
-
-const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
+import { WEEK_KOR } from '@/constants/week';
 
 const getDateColorClass = (deadline: string) => {
   const today = dayjs().startOf('day');
@@ -26,6 +25,7 @@ const getDateColorClass = (deadline: string) => {
 export default function CalendarView() {
   const navigate = useNavigate();
   const today = dayjs();
+
   const [currentDate, setCurrentDate] = useState(dayjs().startOf('month'));
 
   const { data: commissions = [] } = useQuery(commissionQueries.getCommissions());
@@ -53,7 +53,6 @@ export default function CalendarView() {
     return year === today.year() && month === today.month() && d === today.date();
   };
 
-  // Build calendar grid
   const cells: { day: number; currentMonth: boolean }[] = [];
   for (let i = firstDay - 1; i >= 0; i--) {
     cells.push({ day: prevMonthDays - i, currentMonth: false });
@@ -107,7 +106,7 @@ export default function CalendarView() {
         <CardContent className="p-0">
           {/* Weekday Headers */}
           <div className="grid grid-cols-7 border-b border-border">
-            {WEEKDAYS.map((w, i) => (
+            {WEEK_KOR.map((w, i) => (
               <div
                 key={w}
                 className={cn(

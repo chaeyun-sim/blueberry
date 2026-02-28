@@ -10,33 +10,35 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Upload, FileSpreadsheet, X, CheckCircle2 } from "lucide-react";
-import * as XLSX from "xlsx";
 import { splitProduct } from "@/utils/split-product";
 import { ExcelRow } from '@/types/excel';
+import { parseExcelSheet } from '@/utils/parse-excel';
 
-type Props = {
+interface ExcelUploadDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onUpload: (data: ExcelRow[], name: string) => void;
 };
 
-const defaultUploadName = () => {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-};
 
-export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: Props) => {
+export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: ExcelUploadDialogProps) => {
+  const defaultUploadName = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+  };
+
+  const [form, setForm] = useState({
+    fileName: '',
+    preview: [] as ExcelRow[],
+    uploadName: defaultUploadName(),
+  })
+  
   const [dragOver, setDragOver] = useState(false);
-  const [fileName, setFileName] = useState<string | null>(null);
-  const [preview, setPreview] = useState<ExcelRow[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [uploadName, setUploadName] = useState(defaultUploadName);
 
   const reset = () => {
-    setFileName(null);
-    setPreview([]);
+    setForm(prev => ({...prev, fileName: '', preview: [], uploadName: defaultUploadName()}));
     setError(null);
-    setUploadName(defaultUploadName());
   };
 
   const parseFile = useCallback((file: File) => {
@@ -50,91 +52,15 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: Props) => {
       return;
     }
 
-    setFileName(file.name);
+    setForm(prev => ({ ...prev, fileName: file.name }));
+    
     const reader = new FileReader();
     reader.onload = (e) => {
       try {
         const data = new Uint8Array(e.target?.result as ArrayBuffer);
-        const workbook = XLSX.read(data, { type: "array" });
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        const json = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { raw: false });
-
-        if (json.length === 0) {
-          setError("데이터가 없습니다.");
-          return;
-        }
-
-        // Get actual header keys from the first row
-        const headers = Object.keys(json[0]);
-
-        // Fuzzy column finder
-        const findCol = (aliases: string[]): string | null => {
-          const normalized = aliases.map((a) => a.toLowerCase().replace(/[\s_]+/g, ""));
-          for (const h of headers) {
-            const nh = h.toLowerCase().replace(/[\s_]+/g, "");
-            if (normalized.includes(nh)) return h;
-          }
-          for (const h of headers) {
-            const nh = h.toLowerCase().replace(/[\s_]+/g, "");
-            for (const n of normalized) {
-              if (nh.includes(n) || n.includes(nh)) return h;
-            }
-          }
-          return null;
-        };
-
-        const catCol = findCol(["대분류", "category", "카테고리", "분류", "대 분류"]);
-        const prodCol = findCol(["주문상품", "product", "상품명", "주문 상품", "상품"]);
-        const amtCol = findCol(["상품총액", "amount", "금액", "총액", "상품 총액", "가격"]);
-
-        let parsed: ExcelRow[];
-
-        if (!catCol && !prodCol && !amtCol) {
-          // 헤더 없는 파일: 컬럼 내용으로 자동 감지
-          const rawRows = XLSX.utils.sheet_to_json<string[]>(sheet, { header: 1, raw: false });
-          const knownCats = new Set(['CLASSIC', 'POP', 'K-POP', 'OST', 'ANI', 'ETC']);
-          const sample = rawRows.slice(0, Math.min(20, rawRows.length));
-          const colCount = Math.max(...rawRows.map(r => r.length), 0);
-
-          let catIdx = -1, prodIdx = -1, amtIdx = -1;
-
-          for (let c = 0; c < colCount; c++) {
-            const vals = sample.map(r => String(r[c] ?? '')).filter(v => v !== '' && v !== 'null');
-            if (vals.length === 0) continue;
-            const catScore = vals.filter(v => knownCats.has(v)).length;
-            const numScore = vals.filter(v => v !== '' && !isNaN(Number(v.replace(/,/g, '')))).length;
-            const prodScore = vals.filter(v => /\s*-/.test(v) && v.length > 5).length;
-
-            if (catScore > vals.length * 0.5 && catIdx === -1) catIdx = c;
-            else if (prodScore > vals.length * 0.5 && prodIdx === -1) prodIdx = c;
-            else if (numScore > vals.length * 0.7 && amtIdx === -1) amtIdx = c;
-          }
-
-          if (prodIdx === -1 && amtIdx === -1) {
-            setError('필수 컬럼(상품명 또는 금액)을 자동으로 감지하지 못했습니다. 헤더가 있는 파일로 다시 시도해 주세요.')
-            return
-          }
-
-          const dataRows = rawRows.filter(r =>
-            (catIdx >= 0 && r[catIdx]) || (prodIdx >= 0 && r[prodIdx])
-          );
-
-          parsed = dataRows.map((row, i) => ({
-            id: i + 1,
-            category: catIdx >= 0 ? String(row[catIdx] ?? '') : '',
-            product: prodIdx >= 0 ? String(row[prodIdx] ?? '') : '',
-            amount: amtIdx >= 0 ? Number(String(row[amtIdx] ?? '0').replace(/,/g, '')) || 0 : 0,
-          }));
-        } else {
-          parsed = json.map((row, i) => ({
-            id: i + 1,
-            category: String(catCol ? row[catCol] ?? "" : ""),
-            product: String(prodCol ? row[prodCol] ?? "" : ""),
-            amount: Number(amtCol ? String(row[amtCol] ?? '0').replace(/,/g, '') : '0') || 0,
-          }));
-        }
-
-        setPreview(parsed);
+        const { rows, error: parseError } = parseExcelSheet(data);
+        if (parseError) { setError(parseError); return; }
+        setForm(prev => ({ ...prev, preview: rows }));
       } catch {
         setError("파일을 파싱하는 중 오류가 발생했습니다.");
       }
@@ -161,8 +87,8 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: Props) => {
   );
 
   const handleConfirm = () => {
-    if (preview.length > 0 && uploadName.trim()) {
-      onUpload(preview, uploadName.trim());
+    if (form.preview.length > 0 && form.uploadName.trim()) {
+      onUpload(form.preview, form.uploadName.trim());
       reset();
       onOpenChange(false);
     }
@@ -191,15 +117,15 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: Props) => {
           <Label htmlFor="upload-name" className="text-sm">업로드 이름</Label>
           <Input
             id="upload-name"
-            value={uploadName}
-            onChange={e => setUploadName(e.target.value)}
+            value={form.uploadName}
+            onChange={e => setForm(prev => ({...prev, uploadName: e.target.value}))}
             placeholder="예: 2025-01"
             className="h-9"
           />
           <p className="text-xs text-muted-foreground">이 이름으로 업로드가 폴더처럼 저장됩니다.</p>
         </div>
 
-        {!fileName ? (
+        {!form.fileName ? (
           <div
             className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer ${
               dragOver
@@ -236,17 +162,17 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: Props) => {
             <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-[hsl(var(--status-complete))]" />
-                <span className="text-sm font-medium">{fileName}</span>
+                <span className="text-sm font-medium">{form.fileName}</span>
               </div>
               <Button variant="ghost" size="sm" onClick={reset}>
                 <X className="h-4 w-4" />
               </Button>
             </div>
 
-            {preview.length > 0 && (
+            {form.preview.length > 0 && (
               <div className="text-sm">
                 <p className="text-muted-foreground mb-2">
-                  미리보기 ({preview.length}건 감지)
+                  미리보기 ({form.preview.length}건 감지)
                 </p>
                 <div className="rounded-md border border-border/50 overflow-auto max-h-48">
                   <table className="w-full text-xs">
@@ -259,7 +185,7 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: Props) => {
                       </tr>
                     </thead>
                     <tbody>
-                      {preview.slice(0, 5).map((row) => {
+                      {form.preview.slice(0, 5).map((row) => {
                         const { song, arrangement } = splitProduct(row.product);
                         return (
                           <tr key={row.id} className="border-b last:border-0">
@@ -275,9 +201,9 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: Props) => {
                     </tbody>
                   </table>
                 </div>
-                {preview.length > 5 && (
+                {form.preview.length > 5 && (
                   <p className="text-xs text-muted-foreground mt-1">
-                    외 {preview.length - 5}건...
+                    외 {form.preview.length - 5}건...
                   </p>
                 )}
               </div>
@@ -299,9 +225,9 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: Props) => {
           >
             취소
           </Button>
-          <Button disabled={preview.length === 0 || !uploadName.trim()} onClick={handleConfirm}>
+          <Button disabled={form.preview.length === 0 || !form.uploadName.trim()} onClick={handleConfirm}>
             <Upload className="h-4 w-4 mr-1.5" />
-            {preview.length}건 업로드
+            {form.preview.length}건 업로드
           </Button>
         </div>
       </DialogContent>

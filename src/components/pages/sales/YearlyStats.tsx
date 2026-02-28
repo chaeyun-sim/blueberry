@@ -8,28 +8,21 @@ import {
   SelectItem,
 } from '@/components/ui/select';
 import { useState } from 'react';
-import { useAppQuery as useQuery } from '@/hooks/useAppQuery';
+import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 import { statsQueries } from '@/api/stats/queries';
 import GrowthRateChart from './charts/GrowthRateChart';
 import CategoryGrowthRateChart from './charts/CategoryGrowthRateChart';
 import MonthlyGrowthRateChart from './charts/MonthlyGrowthRateChart';
 import { MONEY_RATIO } from '@/constants/money-ratio';
-import { useAuth } from '@/components/AuthProvider';
-
-const categoryChartConfig: ChartConfig = {
-  CLASSIC: { label: 'CLASSIC', color: 'hsl(var(--status-complete))' },
-  POP:     { label: 'POP',     color: 'hsl(var(--primary))' },
-  'K-POP': { label: 'K-POP',  color: 'hsl(var(--accent))' },
-  OST:     { label: 'OST',     color: 'hsl(var(--status-received))' },
-  ANI:     { label: 'ANI',     color: 'hsl(220 70% 55%)' },
-  ETC:     { label: 'ETC',     color: 'hsl(var(--muted-foreground))' },
-};
+import { useAuth } from '@/provider/AuthProvider';
+import { categoryChartConfig } from '@/constants/status-config';
 
 function YearlyStats() {
-  const { data: yearRange } = useQuery(statsQueries.getSalesYearRange());
-  const [selectedYear, setSelectedYear] = useState<number | null>(null);
-
   const { isGuest } = useAuth();
+
+  const { data: yearRange } = useQuery(statsQueries.getSalesYearRange());
+
+  const [selectedYear, setSelectedYear] = useState<number | null>(null);
 
   const year = selectedYear ?? yearRange?.max ?? new Date().getFullYear();
   const yearOptions = yearRange
@@ -57,10 +50,10 @@ function YearlyStats() {
   const range = maxGrowth - minGrowth;
   const zeroOffset = range === 0 ? '50%' : `${((maxGrowth / range) * 100).toFixed(1)}%`;
 
-  // 실제 데이터에 존재하는 카테고리만 범례에 표시
   const activeCategories = Object.keys(categoryChartConfig).filter(key =>
     categoryData.some(d => (d as Record<string, unknown>)[key])
   );
+
   const activeCategoryConfig: ChartConfig = Object.fromEntries(
     activeCategories.map(k => [k, categoryChartConfig[k]])
   );

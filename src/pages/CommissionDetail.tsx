@@ -1,20 +1,19 @@
 import dayjs from 'dayjs';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { PageHeader } from '@/components/PageHeader';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, CheckCircle, ChevronRight, ExternalLink, LucideProps, Music2, Package2, Pencil, Trash2, Truck } from 'lucide-react';
+import { ArrowLeft, CheckCircle, ChevronRight, ExternalLink, LucideIcon, Music2, Package2, Pencil, Trash2, Truck } from 'lucide-react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { COMMISSION_STATUS_TRANSLATE } from '@/constants/translate';
 import { overlay } from 'overlay-kit';
 import ReceiveAndSendDialog from '@/components/pages/commission/ReceiveAndSendDialog';
 import { CompleteDialog } from '@/components/pages/commission/CompleteDialog';
-import { toast } from '@/hooks/use-toast';
 import CommissionImageDialog from '@/components/pages/commission/CommissionImageDialog';
 import { CommissionStatus } from '@/constants/status-config';
 import { useMutation } from '@tanstack/react-query';
-import { useAppQuery as useQuery } from '@/hooks/useAppQuery';
+import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 import { commissionQueries } from '@/api/commission/queries';
 import { commissionMutations } from '@/api/commission/mutations';
 import { commissionKeys } from '@/api/commission/queryKeys';
@@ -24,13 +23,28 @@ import NotFound from './NotFound';
 import { Skeleton } from '@/components/ui/skeleton';
 import { queryClient } from '@/utils/query-client';
 import { COMMISSION_INFO } from '@/types/commission';
+import { toast } from 'sonner';
 
-const statusProgress: Record<CommissionStatus, React.ForwardRefExoticComponent<Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>>> = {
+const statusProgress: Record<CommissionStatus, LucideIcon>  = {
   received: Package2,
   working: Music2,
   complete: CheckCircle,
   delivered: Truck,
 }
+
+const toastMessages: Partial<Record<CommissionStatus, string>> = {
+  working: '작업을 시작합니다.',
+  complete: '작업이 완료되었습니다.',
+  delivered: '의뢰인에게 전달되었습니다.',
+};
+
+const cleanTitle = (title: string) =>
+  title
+    .replace(/\d+\s*(악장|st|nd|rd|th)(\s*movement)?/gi, '')
+    .replace(/\b(allegro|andante|adagio|presto|vivace|moderato|largo|lento|grave|scherzo|finale)\b/gi, '')
+    .replace(/[-–—]\s*$/, '')
+    .replace(/\s+/g, ' ')
+    .trim()
 
 const CommissionDetail = () => {
   const { id } = useParams();
@@ -43,14 +57,6 @@ const CommissionDetail = () => {
   const matchedArrangements = song?.arrangements?.filter(
     a => a.arrangement === commission?.arrangement
   ) ?? []
-
-  const cleanTitle = (title: string) =>
-    title
-      .replace(/\d+\s*(악장|st|nd|rd|th)(\s*movement)?/gi, '')
-      .replace(/\b(allegro|andante|adagio|presto|vivace|moderato|largo|lento|grave|scherzo|finale)\b/gi, '')
-      .replace(/[-–—]\s*$/, '')
-      .replace(/\s+/g, ' ')
-      .trim()
 
   const rawTitle = song?.english_title ?? commission?.songs?.title ?? commission?.title ?? ''
   const imslpQuery = [cleanTitle(rawTitle), commission?.songs?.composer ?? commission?.composer]
@@ -66,22 +72,16 @@ const CommissionDetail = () => {
       ? commissionStatuses[currentStatusIndex + 1]
       : null;
 
-  const toastMessages: Partial<Record<CommissionStatus, string>> = {
-    working: '작업을 시작합니다.',
-    complete: '작업이 완료되었습니다.',
-    delivered: '의뢰인에게 전달되었습니다.',
-  };
-
   const handleTransitionConfirm = () => {
     if (!nextStatus) return
     updateStatus({ commissionId: id, status: nextStatus as CommissionStatus }, {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: commissionKeys.detail(id) })
         queryClient.invalidateQueries({ queryKey: commissionKeys.list() })
-        toast({ title: toastMessages[nextStatus as CommissionStatus] ?? '상태가 변경되었습니다.' })
+        toast.success(toastMessages[nextStatus as CommissionStatus] ?? '상태가 변경되었습니다.')
       },
       onError: (e) => {
-        toast({ title: '상태 변경에 실패했습니다.', description: e.message })
+        toast.error('상태 변경에 실패했습니다.', { description: e.message })
       },
     })
   };
@@ -217,7 +217,7 @@ const CommissionDetail = () => {
         </Button>
       </div>
 
-      <PageHeader title={song?.title ?? commission?.songs?.title ?? commission?.title ?? ''} />
+      <PageHeader title={song?.title ?? commission.songs?.title ?? commission.title ?? ''} />
 
       {/* Status Progress */}
       <Card className='mb-8 border-border/50'>
@@ -230,7 +230,7 @@ const CommissionDetail = () => {
                   key={status}
                   className={cn(
                     'flex items-center',
-                    i < Object.keys(originArray).length - 1 ? 'flex-1' : '',
+                    i < originArray.length - 1 ? 'flex-1' : '',
                   )}
                 >
                   <div className='flex flex-col items-center'>
@@ -282,15 +282,15 @@ const CommissionDetail = () => {
               {Object.keys(COMMISSION_INFO).map(key => {
                 const value = () => {
                   if (key === 'version') {
-                    return commission?.version ? `${commission?.version} ver.` : '-';
+                    return commission.version ? `${commission.version} ver.` : '-';
                   }
                   if (key === 'created_at') {
-                    return commission?.created_at ? dayjs(commission.created_at).format('YYYY-MM-DD HH:mm') : '-';
+                    return commission.created_at ? dayjs(commission.created_at).format('YYYY-MM-DD HH:mm') : '-';
                   }
                   if (key === 'composer') {
-                    return commission?.songs?.composer ?? commission?.composer ?? '-';
+                    return commission.songs?.composer ?? commission.composer ?? '-';
                   }
-                  return commission?.[key] ?? '-';
+                  return commission[key] ?? '-';
                 }
                 return (
                   <div
@@ -303,9 +303,9 @@ const CommissionDetail = () => {
                 )
               })}
             </dl>
-            {commission?.notes && (
+            {commission.notes && (
               <div className='mt-4 p-3 rounded-lg bg-muted/50'>
-                <p className='text-sm text-muted-foreground'>{commission?.notes}</p>
+                <p className='text-sm text-muted-foreground'>{commission.notes}</p>
               </div>
             )}
           </CardContent>
@@ -345,7 +345,7 @@ const CommissionDetail = () => {
               <div>
                 <p className='text-sm font-medium'>IMSLP에서 찾기</p>
                 <p className='text-xs text-muted-foreground'>
-                  {commission?.songs?.title ?? commission?.title} · {commission?.songs?.composer ?? commission?.composer}
+                  {commission.songs?.title ?? commission.title} · {commission.songs?.composer ?? commission.composer}
                 </p>
               </div>
               <ExternalLink className='h-4 w-4 text-muted-foreground shrink-0' />

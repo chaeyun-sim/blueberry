@@ -18,7 +18,7 @@ import Breadcrumb from './BreadCrumb';
 import FolderRow from './FolderRow';
 import DeleteSongDialog from './DeleteSongDialog';
 import { overlay } from 'overlay-kit';
-import { useAppQuery as useQuery } from '@/hooks/useAppQuery';
+import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 import { scoreQueries } from '@/api/score/queries';
 import { scoreMutations } from '@/api/score/mutations';
 import { scoreKeys } from '@/api/score/queryKeys';

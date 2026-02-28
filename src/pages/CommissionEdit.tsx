@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { PageHeader } from '@/components/PageHeader';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,44 +13,37 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ArrowLeft, Calendar, Plus, X } from 'lucide-react';
+import { ArrowLeft, Calendar } from 'lucide-react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
-import { toast } from '@/hooks/use-toast';
-import { ALL_INSTRUMENTS } from '@/constants/instruments';
 import { COMMISSION_STATUS_TRANSLATE } from '@/constants/translate';
 import { commissionQueries } from '@/api/commission/queries';
 import { useMutation } from '@tanstack/react-query';
-import { useAppQuery as useQuery } from '@/hooks/useAppQuery';
+import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 import { commissionKeys } from '@/api/commission/queryKeys';
 import { commissionMutations } from '@/api/commission/mutations';
 import { DifficultyLevelType } from '@/types/commission';
 import { queryClient } from '@/utils/query-client';
 import { EditFormType } from '@/types/form';
 import { CommissionStatus } from '@/constants/status-config';
-import useRemoveInstrument from '@/hooks/use-remove-instrument';
+import { toast } from 'sonner';
+import { InstrumentPicker } from '@/components/InstrumentPicker';
 
 const CommissionEdit = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const dateInputRef = useRef<HTMLInputElement>(null);
 
-  const { removeInstrument } = useRemoveInstrument();
-
-  const { data: commission, isLoading } = useQuery(commissionQueries.getCommission(id));
-
   const [form, setForm] = useState<EditFormType>({
-    title: commission?.title ?? '',
-    instruments: commission?.arrangement ? commission.arrangement.split(', ') : [],
-    version: commission?.version ?? null,
-    deadline: commission?.deadline ?? '',
-    notes: commission?.notes ?? '',
-    status: commission?.status ?? null,
-    composer: commission?.composer ?? '',
+    title: '',
+    instruments: [],
+    version: null,
+    deadline: '',
+    notes: '',
+    status: null,
+    composer: '',
   });
 
-  const commissionStatuses = Object.keys(COMMISSION_STATUS_TRANSLATE);
-  const currentStatusIndex = commissionStatuses.findIndex(s => s === commission?.status);
-  const prevStatus = currentStatusIndex > 0 ? commissionStatuses[currentStatusIndex - 1] : null;
+  const { data: commission, isLoading } = useQuery(commissionQueries.getCommission(id));
 
   useEffect(() => {
     if (!commission) return;
@@ -65,35 +58,9 @@ const CommissionEdit = () => {
     });
   }, [commission]);
 
-  const [instrumentInput, setInstrumentInput] = useState('');
-  const [showInstrumentDropdown, setShowInstrumentDropdown] = useState(false);
-
-  const filteredOptions = ALL_INSTRUMENTS.filter(opt =>
-    opt.toLowerCase().includes(instrumentInput.toLowerCase()),
-  );
-
-  const handleAddInstrument = (name: string) => {
-    const sameBase = form.instruments.filter(i => i.startsWith(name));
-    if (sameBase.length === 0) {
-      setForm(prev => ({ ...prev, instruments: [...prev.instruments, name] }));
-    } else if (sameBase.length === 1 && !sameBase[0].includes(' ')) {
-      setForm(prev => ({
-        ...prev,
-        instruments: [...prev.instruments.map(i => (i === name ? `${name} I` : i)), `${name} II`],
-      }));
-    } else {
-      const roman = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
-      setForm(prev => ({
-        ...prev,
-        instruments: [
-          ...prev.instruments,
-          `${name} ${roman[sameBase.length] || sameBase.length + 1}`,
-        ],
-      }));
-    }
-    setInstrumentInput('');
-    setShowInstrumentDropdown(false);
-  };
+  const commissionStatuses = Object.keys(COMMISSION_STATUS_TRANSLATE);
+  const currentStatusIndex = commissionStatuses.findIndex(s => s === commission?.status);
+  const prevStatus = currentStatusIndex > 0 ? commissionStatuses[currentStatusIndex - 1] : null;
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -105,39 +72,25 @@ const CommissionEdit = () => {
     updateCommission(
       {
         commissionId: id,
-        input: {
-          title: form.title,
-          arrangement: form.instruments.join(', '),
-          version: form.version,
-          deadline: form.deadline,
-          notes: form.notes,
-          status: form.status,
-          composer: form.composer,
-        },
+        input: { ...form, arrangement: form.instruments.join(', ')},
       },
       {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: commissionKeys.detail(id) });
           queryClient.invalidateQueries({ queryKey: commissionKeys.list() });
           setIsSubmitting(false);
-          toast({ title: '의뢰가 수정되었습니다.' });
+          toast.success('의뢰가 수정되었습니다.');
           navigate(-1);
         },
         onError: e => {
           setIsSubmitting(false);
-          toast({ title: '의뢰 수정에 실패했습니다.', description: e.message });
+          toast.error('의뢰 수정에 실패했습니다.', { description: e.message });
         },
       },
     );
   };
 
-  if (!id)
-    return (
-      <Navigate
-        to='/commissions'
-        replace
-      />
-    );
+  if (!id) return <Navigate to='/commissions' replace />;
 
   if (isLoading || !commission) return null;
 
@@ -233,64 +186,11 @@ const CommissionEdit = () => {
             </div>
 
             {/* 편성 */}
-            <div className='space-y-2'>
-              <Label>편성</Label>
-              <div className='relative'>
-                <Input
-                  placeholder='악기를 검색하여 추가...'
-                  value={instrumentInput}
-                  onChange={e => {
-                    setInstrumentInput(e.target.value);
-                    setShowInstrumentDropdown(true);
-                  }}
-                  onFocus={() => setShowInstrumentDropdown(true)}
-                  onBlur={() => setTimeout(() => setShowInstrumentDropdown(false), 200)}
-                  onKeyDown={e => {
-                    if (e.key === 'Enter') handleAddInstrument(instrumentInput);
-                  }}
-                  disabled={isSubmitting}
-                />
-                {showInstrumentDropdown && instrumentInput && filteredOptions.length > 0 && (
-                  <div className='absolute z-10 top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg max-h-48 overflow-y-auto'>
-                    {filteredOptions.map(opt => (
-                      <button
-                        key={opt}
-                        type='button'
-                        className='w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors flex items-center gap-2'
-                        onMouseDown={e => {
-                          e.preventDefault();
-                          handleAddInstrument(opt);
-                        }}
-                      >
-                        <Plus className='h-3 w-3 text-muted-foreground' />
-                        {opt}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-              {form.instruments.length > 0 && (
-                <div className='flex flex-wrap gap-2 m-2'>
-                  {form.instruments.map((inst, idx) => (
-                    <span
-                      key={idx}
-                      className='inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium bg-primary/15 text-primary border border-primary/20'
-                    >
-                      {inst}
-                      {!isSubmitting && (
-                        <button
-                          type='button'
-                          onClick={() => setForm(prev => ({ ...prev, instruments: removeInstrument(prev.instruments, idx) }))}
-                          className='ml-0.5 hover:text-destructive transition-colors'
-                        >
-                          <X className='h-3 w-3' />
-                        </button>
-                      )}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
+            <InstrumentPicker
+              instruments={form.instruments}
+              onChange={instruments => setForm(prev => ({ ...prev, instruments }))}
+              disabled={isSubmitting}
+            />
 
             {/* 버전 */}
             <div className='space-y-2'>

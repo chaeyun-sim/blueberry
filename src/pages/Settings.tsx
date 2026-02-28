@@ -1,20 +1,20 @@
 import { AppLayout } from '@/components/layout/AppLayout';
-import { useAuth } from '@/components/AuthProvider';
+import { useAuth } from '@/provider/AuthProvider';
 import { logout } from '@/api/auth';
 import { createPushSubscription } from '@/hooks/use-push';
 import { Switch } from '@/components/ui/switch';
 import { Bell, LogOut, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useToast } from '@/hooks/use-toast';
 import { useEffect, useState } from 'react';
 import logoImg from '@/assets/logo.png';
 import { Button } from '@/components/ui/button';
-import { PageHeader } from '@/components/PageHeader';
+import { PageHeader } from '@/components/layout/PageHeader';
+import { toast } from 'sonner';
 
 export default function Settings() {
   const { session } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
+
   const [pushEnabled, setPushEnabled] = useState(false);
   const [pushLoading, setPushLoading] = useState(false);
 
@@ -44,17 +44,16 @@ export default function Settings() {
         });
         if (!res.ok) throw new Error(`푸시 서버 오류 (${res.status})`);
         setPushEnabled(true);
-        toast({ title: '푸시 알림이 활성화됐어요' });
+        toast.success('푸시 알림이 활성화됐어요');
       } else {
         const reg = await navigator.serviceWorker.ready;
         const sub = await reg.pushManager.getSubscription();
         await sub?.unsubscribe();
         setPushEnabled(false);
-        toast({ title: '푸시 알림이 비활성화됐어요' });
+        toast.success('푸시 알림이 비활성화됐어요');
       }
     } catch (e) {
-      console.error('push toggle error:', e);
-      toast({ title: '알림 설정에 실패했어요', description: e instanceof Error ? e.message : String(e), variant: 'destructive' });
+      toast.error('알림 설정에 실패했어요', { description: e instanceof Error ? e.message : String(e) });
     } finally {
       setPushLoading(false);
     }
