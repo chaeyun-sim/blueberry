@@ -26,6 +26,7 @@ import {
 } from 'recharts';
 import { ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { Layers } from 'lucide-react';
+import { MOBILE_BREAKPOINT } from '@/constants/breakpoints';
 import { formatCurrency } from '@/utils/format-currency';
 import TopSongBar from './TopSongBar';
 import { useAppQuery as useQuery } from '@/hooks/use-app-query';
@@ -193,7 +194,7 @@ function Stats() {
           <div className='grid lg:grid-cols-2 gap-2 lg:gap-8 items-center'>
             <ChartContainer
               config={{ sales: { label: '판매수', color: 'hsl(var(--primary))' } }}
-              className='w-full h-[200px] lg:h-[260px]'
+              className='w-full -ml-8 md:ml-0 h-[200px] lg:h-[260px]'
             >
               <RadarChart data={(topArrangements ?? []).map(arr => ({ subject: arr.arrangement, sales: arr.sales, revenue: arr.revenue * MONEY_RATIO }))} cx='50%' cy='50%'>
                 <PolarGrid
@@ -206,9 +207,12 @@ function Stats() {
                   tick={({ x, y, payload, textAnchor }: { x: number; y: number; payload: { value: string }; textAnchor: string }) => {
                     const text = payload.value;
                     const parenIdx = text.indexOf('(');
-                    const lines = text.length > 16 && parenIdx > 0
-                      ? [text.slice(0, parenIdx).trim(), text.slice(parenIdx).trim()]
-                      : [text];
+                    const isMobile = window.innerWidth < MOBILE_BREAKPOINT;
+                    const lines = isMobile
+                      ? [parenIdx > 0 ? text.slice(0, parenIdx).trim() : text]
+                      : text.length > 16 && parenIdx > 0
+                        ? [text.slice(0, parenIdx).trim(), text.slice(parenIdx).trim()]
+                        : [text];
                     return (
                       <text
                         x={x}
@@ -324,16 +328,16 @@ function Stats() {
                       {songKeys.map(key => (
                         <div
                           key={key}
-                          className='flex items-center justify-between gap-4'
+                          className='flex items-center justify-between gap-4 '
                         >
-                          <span className='flex items-center gap-1.5'>
+                          <span className='flex items-center gap-1.5 min-w-0'>
                             <span
-                              className='w-2 h-2 rounded-full'
+                              className='w-2 h-2 rounded-full truncate'
                               style={{ backgroundColor: topProductConfig[key].color }}
                             />
                             {topProductConfig[key].label}
                           </span>
-                          <span className='tabular-nums text-muted-foreground'>{d[key]}건</span>
+                          <span className='tabular-nums text-muted-foreground shrink-0'>{d[key]}건</span>
                         </div>
                       ))}
                     </div>

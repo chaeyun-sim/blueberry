@@ -126,13 +126,56 @@ const CommissionListContent = () => {
             placeholder='곡명 검색...'
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className='pl-9'
+            className='text-sm md:text-base pl-9'
           />
         </div>
       </div>
 
-      {/* Table View */}
-      <Card>
+      {/* Mobile: 세로 카드 뷰 */}
+      <div className='md:hidden space-y-3'>
+        {filtered.length === 0 ? (
+          <p className='text-sm text-muted-foreground text-center py-8'>의뢰가 없습니다.</p>
+        ) : (
+          filtered.map(item => (
+            <Card
+              key={item.id}
+              className='cursor-pointer active:bg-muted/50 transition-colors'
+              onClick={() => navigate(`/commissions/${item.id}`)}
+            >
+              <CardContent className='p-0 divide-y'>
+                {([
+                  { label: '마감일', value: item.deadline },
+                  { label: '곡명', value: item.songs?.title ?? item.title ?? '-', bold: true },
+                  { label: '작곡가', value: item.songs?.composer ?? item.composer ?? '-' },
+                  { label: '편성', value: (item.arrangement ?? '').split(', ').map(abbreviateInstrument).join(', ') },
+                ] as const).map(({ label, value }) => (
+                  <div key={label} className='flex items-center gap-4 px-4 py-3'>
+                    <span className='text-sm text-muted-foreground w-14 shrink-0'>{label}</span>
+                    <span className={cn('text-sm truncate', label === '곡명' && 'font-medium')}>{value}</span>
+                  </div>
+                ))}
+                <div className='flex items-center gap-4 px-4 py-3'>
+                  <span className='text-sm text-muted-foreground w-14 shrink-0'>버전</span>
+                  {item.version ? (
+                    <span className='text-xs px-2 py-1 rounded-md bg-[hsl(var(--warning)/0.12)] text-[hsl(var(--warning))] font-medium capitalize'>
+                      {item.version}
+                    </span>
+                  ) : (
+                    <span className='text-sm text-muted-foreground'>-</span>
+                  )}
+                </div>
+                <div className='flex items-center gap-4 px-4 py-3'>
+                  <span className='text-sm text-muted-foreground w-14 shrink-0'>상태</span>
+                  <StatusBadge status={item.status} />
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </div>
+
+      {/* Desktop: 가로 테이블 뷰 */}
+      <Card className='hidden md:block'>
         <CardContent className='p-0'>
           <Table className='table-fixed'>
             <TableHeader className={cn(filtered.length === 0 && 'border-none')}>

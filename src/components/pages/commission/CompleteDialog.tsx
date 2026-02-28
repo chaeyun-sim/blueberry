@@ -29,6 +29,23 @@ interface CompleteDialogProps extends OverlayProps {
   onConfirm: () => void;
 }
 
+function tokenize(s: string): string[] {
+  return s.toLowerCase().replace(/[_\-.,;:()\[\]]/g, ' ').split(/\s+/).filter(Boolean);
+}
+
+function expandTokens(tokens: string[]): Set<string> {
+  const result = new Set<string>();
+  for (const t of tokens) {
+    result.add(t);
+    const nums = t.match(/\d+/g);
+    if (nums) nums.forEach(n => result.add(n));
+  }
+  return result;
+}
+
+const STOP_WORDS = new Set(['in', 'of', 'the', 'a', 'an', 'and', 'for', 'with', 'no']);
+const isNum = (s: string) => /^\d+$/.test(s);
+
 export function CompleteDialog({ isOpen, close, commission, onConfirm }: CompleteDialogProps) {
   const zipInputRef = useRef<HTMLInputElement>(null);
   
@@ -47,10 +64,14 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
   const composer = commission.songs?.composer ?? commission.composer ?? '';
 
   const zipBaseName = zipName?.replace(/\.zip$/i, '') ?? '';
-  const isZipTitleMatch = zipBaseName.length > 0 && (
-    songTitle.toLowerCase().includes(zipBaseName.toLowerCase()) ||
-    zipBaseName.toLowerCase().includes(songTitle.toLowerCase())
-  );
+
+  const zipTokenSet = zipBaseName.length > 0 ? expandTokens(tokenize(zipBaseName)) : new Set<string>();
+  const composerLastName = composer.trim().split(/\s+/).pop()?.toLowerCase() ?? '';
+  const composerMatch = composerLastName.length > 1 && zipTokenSet.has(composerLastName);
+  const titleTokenSet = expandTokens(tokenize(songTitle));
+  const significantTitleTokens = [...titleTokenSet].filter(t => isNum(t) || (t.length > 2 && !STOP_WORDS.has(t)));
+  const titleOverlapCount = significantTitleTokens.filter(t => zipTokenSet.has(t)).length;
+  const isZipTitleMatch = zipBaseName.length > 0 && (composerMatch || titleOverlapCount >= 2);
 
   const handleZipFile = async (file: File) => {
     const resetInput = () => { if (zipInputRef.current) zipInputRef.current.value = ''; };
@@ -253,7 +274,7 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
                 )}
                 {!isExtracting && zipBaseName && !isZipTitleMatch && (
                   <p className='text-xs text-destructive px-1'>
-                    ZIP 파일명에 의뢰 곡명이 포함되어야 합니다.
+                    ZIP 파일명이 곡명 또는 작곡가명과 일치하지 않습니다.
                   </p>
                 )}
               </div>

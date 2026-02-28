@@ -120,7 +120,7 @@ const Dashboard = () => {
           <h1 className='text-3xl font-display font-bold tracking-tight'>
             {getGreeting()}
           </h1>
-          <div className='flex items-center gap-5 mt-2 text-sm text-muted-foreground'>
+          <div className='flex flex-col md:flex-row md:items-center gap-2 md:gap-5 mt-2 text-sm text-muted-foreground'>
             <span className='flex items-center gap-1.5'>
               <Sun className='h-3.5 w-3.5 text-[hsl(var(--warning))]' />
               맑음 · 4°C
@@ -223,14 +223,14 @@ const Dashboard = () => {
                   recentCommissions.map(c => (
                     <div
                       key={c.id}
-                      className='flex items-center justify-between p-3.5 rounded-2xl bg-muted/30 cursor-pointer hover:bg-muted/60 transition-colors'
+                      className='flex items-center justify-between gap-3 p-3.5 rounded-2xl bg-muted/30 cursor-pointer hover:bg-muted/60 transition-colors'
                       onClick={() => navigate(`/commissions/${c.id}`)}
                     >
-                      <div>
-                        <p className='font-semibold text-sm'>{c.songs?.title ?? c.title}</p>
-                        <p className='text-xs text-muted-foreground mt-0.5'>{c.arrangement}</p>
+                      <div className='min-w-0'>
+                        <p className='font-semibold text-sm truncate'>{c.songs?.title ?? c.title}</p>
+                        <p className='hidden md:block text-xs text-muted-foreground mt-0.5'>{c.arrangement}</p>
                       </div>
-                      <div className='flex items-center gap-2'>
+                      <div className='flex items-center gap-2 shrink-0'>
                         <StatusBadge status={c.status} />
                         <span className='text-[10px] text-muted-foreground'>{c.deadline ? `${dayjs(c.deadline).format('MM/DD')} 마감` : '-'}</span>
                       </div>

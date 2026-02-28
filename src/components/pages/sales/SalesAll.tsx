@@ -1,9 +1,11 @@
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { MOBILE_BREAKPOINT } from '@/constants/breakpoints';
 import {
   ChevronDown,
   ChevronRight,
   FileSpreadsheet,
   Layers,
+  Monitor,
 } from 'lucide-react';
 import {
   Select,
@@ -99,15 +101,18 @@ function SalesAll() {
     return data;
   }, [sortKey, sortDir, filterCategory, groupByCategory, originData]);
 
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < MOBILE_BREAKPOINT;
+  const displayData = isMobile ? sortedData.slice(0, 6) : sortedData;
+
   const groupedData = useMemo(() => {
     if (!groupByCategory) return null;
     const groups: Record<string, typeof originData> = {};
-    sortedData.forEach(row => {
+    displayData.forEach(row => {
       if (!groups[row.category]) groups[row.category] = [];
       groups[row.category].push(row);
     });
     return groups;
-  }, [sortedData, groupByCategory]);
+  }, [displayData, groupByCategory]);
 
   return (
     <Card className='border-border/50'>
@@ -117,7 +122,7 @@ function SalesAll() {
             <FileSpreadsheet className='h-4 w-4' />
             엑셀 데이터 전체 보기
           </CardTitle>
-          <div className='flex items-center gap-2'>
+          <div className='hidden md:flex items-center gap-2'>
             <Select
               value={year ? String(year) : ''}
               onValueChange={v => setSelectedYear(Number(v))}
@@ -160,7 +165,13 @@ function SalesAll() {
         </div>
       </CardHeader>
 
-      <CardContent>
+      <CardContent className='relative'>
+        {/* 모바일 블러 오버레이 */}
+        <div className='md:hidden absolute inset-0 z-10 backdrop-blur-sm bg-background/80 rounded-b-xl flex flex-col items-center justify-center gap-3 pointer-events-none'>
+          <Monitor className='h-8 w-8 text-muted-foreground' />
+          <p className='text-sm font-medium text-foreground'>PC에서 확인해주세요</p>
+          <p className='text-xs text-muted-foreground'>표 데이터는 넓은 화면에서 더 잘 보여요</p>
+        </div>
         <div className='rounded-md border border-border/50 overflow-auto'>
           {/* ── Header ── */}
           <div className='flex items-center bg-muted/30 border-b border-border/40'>
@@ -233,7 +244,7 @@ function SalesAll() {
                     })}
                 </Fragment>
               ))
-            : sortedData.map((row, i) => {
+            : displayData.map((row, i) => {
                 const { song, arrangement } = splitProduct(row.product);
                 return (
                   <div key={row.id} className={ROW_BASE}>

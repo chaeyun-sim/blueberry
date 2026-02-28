@@ -76,7 +76,7 @@ function YearlyStats() {
         </Select>
       </div>
 
-      <Card className='border-border/50'>
+      <Card className='border-border/50 overflow-hidden'>
         <CardHeader className='pb-4'>
           <div className='flex items-center justify-between'>
             <CardTitle className='text-base font-display'>월별 매출 추이</CardTitle>
@@ -100,11 +100,11 @@ function YearlyStats() {
       </Card>
 
       <div className='grid lg:grid-cols-2 gap-6'>
-        <Card className='border-border/50'>
+        <Card className='border-border/50 overflow-hidden'>
           <CardHeader className='pb-2'>
             <div className='flex items-center justify-between'>
-              <CardTitle className='text-base font-display'>카테고리별 월 매출 비중</CardTitle>
-              <div className='flex items-center gap-3'>
+              <CardTitle className='text-base font-display shrink-0'>카테고리별 월 매출 비중</CardTitle>
+              <div className='hidden md:flex items-center gap-3'>
                 {Object.entries(activeCategoryConfig).map(([key, cfg]) => (
                   <span
                     key={key}
@@ -128,7 +128,7 @@ function YearlyStats() {
           </CardContent>
         </Card>
 
-        <Card className='border-border/50'>
+        <Card className='border-border/50 overflow-hidden'>
           <CardHeader className='pb-2'>
             <CardTitle className='text-base font-display'>전년 대비 월별 성장률</CardTitle>
           </CardHeader>

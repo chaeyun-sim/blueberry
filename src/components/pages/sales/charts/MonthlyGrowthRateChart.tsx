@@ -17,9 +17,9 @@ function MonthlyGrowthRateChart({ data, avgCount }: MonthlyGrowthRateChartProps)
   return (
     <ChartContainer
       config={chartConfig}
-      className='aspect-[2/1] w-full max-h-[300px]'
+      className='w-full h-[260px]'
     >
-      <BarChart data={data}>
+      <BarChart data={data} margin={{ left: -8, right: 8, top: 8, bottom: 4 }}>
         <CartesianGrid
           vertical={false}
           strokeDasharray='3 3'
