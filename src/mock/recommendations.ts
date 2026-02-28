@@ -4,7 +4,7 @@ import dayOfYear from 'dayjs/plugin/dayOfYear';
 dayjs.extend(dayOfYear);
 
 export interface MusicRecommendation {
-  id: number;
+  id: string;
   title: string;
   englishTitle: string;
   composer: string;
