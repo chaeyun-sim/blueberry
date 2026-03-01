@@ -58,6 +58,7 @@ function ReceiveAndSendDialog({
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const wasSendingRef = useRef(false);
+  const isSendingRef = useRef(false);
 
   useEffect(() => {
     if (isSending) {
@@ -98,6 +99,8 @@ function ReceiveAndSendDialog({
   };
 
   const handleEmailConfirm = async () => {
+    if (isSendingRef.current) return;
+
     if (!commissionId) {
       toast.error('의뢰를 찾을 수 없어 메일을 보낼 수 없어요.');
       return;
@@ -109,6 +112,7 @@ function ReceiveAndSendDialog({
       return;
     }
 
+    isSendingRef.current = true;
     setIsSending(true);
     try {
       const { error } = await supabase.functions.invoke('send-score-email', {
@@ -124,6 +128,7 @@ function ReceiveAndSendDialog({
       const message = e instanceof Error ? e.message : '알 수 없는 오류';
       toast.error('메일 발송에 실패했어요', { description: message });
     } finally {
+      isSendingRef.current = false;
       setIsSending(false);
     }
   };
