@@ -94,7 +94,7 @@ ${recentList}
   const { data: inserted, error } = await supabase
     .from('recommendations')
     .upsert(
-      rec,
+      { ...rec, recommended_date: todayStr },
       { onConflict: 'recommended_date', ignoreDuplicates: true },
     )
     .select()
