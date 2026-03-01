@@ -1,6 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { OverlayProps } from '@/types/overlay';
 import logo from '@/assets/logo.png';
+import dayjs from 'dayjs';
 
 interface CommissionImageDialogProps extends OverlayProps {
   date: string;
@@ -26,11 +27,11 @@ function CommissionImageDialog({
             의뢰 캡쳐 이미지
           </DialogTitle>
           <DialogDescription>
-						{date}
+						{date ? dayjs(date).format('YYYY-MM-DD HH:mm') : '-'}
           </DialogDescription>
         </DialogHeader>
 
-        <div className='h-full w-full rounded-lg border border-border overflow-hidden'>
+        <div className='h-full w-full rounded-md border border-border overflow-hidden'>
           {imageUrl ? (
             <img
               src={imageUrl}

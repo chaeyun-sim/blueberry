@@ -83,6 +83,12 @@ function GrowthRateChart({ data, offset }: GrowthRateChartProps) {
           axisLine={false}
           fontSize={11}
           tickFormatter={v => `${v}%`}
+          domain={([dataMin, dataMax]: [number, number]) => {
+            if (!isFinite(dataMin) || !isFinite(dataMax) || isNaN(dataMin) || isNaN(dataMax)) return [-10, 10];
+            if (dataMin === 0 && dataMax === 0) return [-10, 10];
+            const pad = Math.abs(dataMax - dataMin) * 0.1;
+            return [Math.floor(dataMin - pad), Math.ceil(dataMax + pad)];
+          }}
         />
         <ReferenceLine
           y={0}

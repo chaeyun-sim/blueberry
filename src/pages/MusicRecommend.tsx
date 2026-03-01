@@ -1,42 +1,40 @@
-import { useState, useCallback } from 'react';
-import dayjs from 'dayjs';
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
-import { recommendationPool, type MusicRecommendation } from '@/mock/recommendations';
+import { type MusicRecommendation } from '@/mock/recommendations';
 import { useWorkedSongs } from '@/hooks/use-worked-songs';
 import { RecommendCard } from '@/components/pages/recommend/RecommendCard';
 import SidePanel from '@/components/pages/recommend/SidePanel';
+import { recommendationQueries } from '@/api/recommendation/queries';
 
 function MusicRecommend() {
   const { workedSongs, markAsWorked, unmarkAsWorked } = useWorkedSongs();
-  const [refreshOffset, setRefreshOffset] = useState(0);
   const [selectedRec, setSelectedRec] = useState<MusicRecommendation | null>(null);
 
-  const availablePool = recommendationPool.filter(r => !workedSongs.has(r.id));
-  const effectivePool = availablePool.length > 0 ? availablePool : recommendationPool;
+  const { data: todayRec, isPending, isError } = useQuery(recommendationQueries.today());
 
-  const baseDayIdx = effectivePool.length > 0 ? dayjs().dayOfYear() % effectivePool.length : 0;
-  const dailyRec = effectivePool.length > 0 ? effectivePool[(baseDayIdx + refreshOffset) % effectivePool.length] : null;
-  const rec = selectedRec ?? dailyRec;
+  const rec = selectedRec ?? todayRec;
 
-  const handleMarkAsWorked = useCallback(() => {
-    if (!rec) return;
-    markAsWorked(rec.id);
-    setSelectedRec(null);
-    setRefreshOffset(0);
-  }, [markAsWorked, rec]);
-
-  const handleRefresh = () => {
-    setSelectedRec(null);
-    setRefreshOffset(v => v + 1);
-  };
-
-  if (effectivePool.length === 0) {
+  if (isPending) {
     return (
       <AppLayout>
         <div className='h-full overflow-auto'>
           <PageHeader title='음악 추천' description='클래식 & 연주곡 편곡 추천' />
-          <p className='text-sm text-muted-foreground'>추천 가능한 곡이 없습니다.</p>
+          <p className='text-sm text-muted-foreground animate-pulse'>오늘의 추천곡을 불러오는 중...</p>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  if (isError || !rec) {
+    return (
+      <AppLayout>
+        <div className='h-full overflow-auto'>
+          <PageHeader title='음악 추천' description='클래식 & 연주곡 편곡 추천' />
+          <p className='text-sm text-muted-foreground'>
+            {isError ? '추천곡을 불러오지 못했습니다.' : '오늘의 추천곡이 아직 준비되지 않았어요. 잠시 후 다시 확인해줘요!'}
+          </p>
         </div>
       </AppLayout>
     );
@@ -57,8 +55,8 @@ function MusicRecommend() {
               isSelectedRec={!!selectedRec}
               isWorked={workedSongs.has(rec.id)}
               onResetSelection={() => setSelectedRec(null)}
-              onRefresh={handleRefresh}
-              onMarkAsWorked={handleMarkAsWorked}
+              onRefresh={() => setSelectedRec(null)}
+              onMarkAsWorked={() => { markAsWorked(rec.id); setSelectedRec(null); }}
               onUnmarkAsWorked={() => unmarkAsWorked(rec.id)}
             />
           </div>

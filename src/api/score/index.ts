@@ -16,12 +16,13 @@ const ARRANGEMENT_FILES_TABLE = 'arrangement_files';
 const ARRANGEMENT_FILES_BUCKET = 'arrangement-files';
 const ARRANGEMENT_SELECT = `*, ${ARRANGEMENT_FILES_TABLE}(*), songs(title, composer, english_title)`;
 
-// 곡명으로 song 검색
-export async function findSongByTitle(title: string) {
+// 곡명 + 작곡가로 song 검색
+export async function findSongByTitle(title: string, composer: string) {
   const { data, error } = await supabase
     .from(SONGS)
     .select('id, title, composer')
     .ilike('title', title)
+    .ilike('composer', composer)
     .is('deleted_at', null)
     .maybeSingle();
   if (error) throw error;
@@ -72,7 +73,7 @@ export async function getArrangement(arrangementId: string) {
 export async function createSong(input: CreateSongInput) {
   const { data, error } = await supabase
     .from(SONGS)
-    .upsert(input, { onConflict: 'title', ignoreDuplicates: true })
+    .upsert(input, { onConflict: 'title,composer', ignoreDuplicates: true })
     .select()
     .maybeSingle();
 
@@ -84,6 +85,7 @@ export async function createSong(input: CreateSongInput) {
       .from(SONGS)
       .select()
       .eq('title', input.title)
+      .eq('composer', input.composer)
       .is('deleted_at', null)
       .single();
 

@@ -22,7 +22,7 @@ function SalesSummaryCard({ icon, title, value, percentage, compareKey, isMoney 
           <Icon className='h-5 w-5 text-foreground' />
           <span className='text-xs text-muted-foreground font-medium'>{title}</span>
         </div>
-        <p className='text-2xl font-display font-bold'>{isMoney ? formatCurrency(value) : value.toLocaleString()}</p>
+        <p className='text-lg md:text-2xl font-display font-bold'>{isMoney ? formatCurrency(value) : value.toLocaleString()}</p>
         {percentage !== undefined && compareKey ? (
           <p className={`text-xs mt-1 flex items-center gap-1 ${percentage >= 0 ? 'text-[hsl(var(--status-complete))]' : 'text-destructive'}`}>
             {percentage >= 0 ? <TrendingUp className='h-3 w-3' /> : <TrendingDown className='h-3 w-3' />}

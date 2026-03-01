@@ -58,7 +58,7 @@ function CommissionRegisterForm({ form, setForm, imageFile, isAnalyzing }: Commi
       let songId: string | undefined;
 
       if (form.songTitle) {
-        const existing = await findSongByTitle({ title: form.songTitle });
+        const existing = await findSongByTitle({ title: form.songTitle, composer: form.composer });
         if (existing) {
           songId = existing.id;
         } else {

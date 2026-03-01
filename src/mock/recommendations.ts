@@ -4,7 +4,7 @@ import dayOfYear from 'dayjs/plugin/dayOfYear';
 dayjs.extend(dayOfYear);
 
 export interface MusicRecommendation {
-  id: number;
+  id: string;
   title: string;
   englishTitle: string;
   composer: string;
@@ -17,7 +17,7 @@ export interface MusicRecommendation {
 
 export const recommendationPool: MusicRecommendation[] = [
   {
-    id: 1,
+    id: '1',
     title: 'Clair de Lune',
     englishTitle: 'Moonlight',
     composer: 'Claude Debussy',
@@ -28,7 +28,7 @@ export const recommendationPool: MusicRecommendation[] = [
     youtubeQuery: 'Clair de Lune Debussy piano',
   },
   {
-    id: 2,
+    id: '2',
     title: 'Nocturne Op. 9 No. 2',
     englishTitle: 'Nocturne Op. 9 No. 2',
     composer: 'Frédéric Chopin',
@@ -39,7 +39,7 @@ export const recommendationPool: MusicRecommendation[] = [
     youtubeQuery: 'Chopin Nocturne Op 9 No 2 piano',
   },
   {
-    id: 3,
+    id: '3',
     title: 'Air on the G String',
     englishTitle: 'Air on the G String',
     composer: 'J.S. Bach',
@@ -50,7 +50,7 @@ export const recommendationPool: MusicRecommendation[] = [
     youtubeQuery: 'Bach Air on the G String orchestra',
   },
   {
-    id: 4,
+    id: '4',
     title: 'Gymnopédie No. 1',
     englishTitle: 'Gymnopedie No. 1',
     composer: 'Erik Satie',
@@ -61,7 +61,7 @@ export const recommendationPool: MusicRecommendation[] = [
     youtubeQuery: 'Satie Gymnopédie No 1 piano',
   },
   {
-    id: 5,
+    id: '5',
     title: 'Moonlight Sonata 1악장',
     englishTitle: 'Moonlight Sonata',
     composer: 'Ludwig van Beethoven',
@@ -72,7 +72,7 @@ export const recommendationPool: MusicRecommendation[] = [
     youtubeQuery: 'Beethoven Moonlight Sonata 1st movement piano',
   },
   {
-    id: 6,
+    id: '6',
     title: 'Liebestraum No. 3',
     englishTitle: "Love Dream No. 3",
     composer: 'Franz Liszt',
@@ -83,7 +83,7 @@ export const recommendationPool: MusicRecommendation[] = [
     youtubeQuery: 'Liszt Liebestraum No 3 piano',
   },
   {
-    id: 7,
+    id: '7',
     title: 'The Swan (Le Cygne)',
     englishTitle: 'The Swan',
     composer: 'Camille Saint-Saëns',
@@ -94,7 +94,7 @@ export const recommendationPool: MusicRecommendation[] = [
     youtubeQuery: 'Saint-Saëns The Swan cello piano',
   },
   {
-    id: 8,
+    id: '8',
     title: 'Méditation from Thaïs',
     englishTitle: 'Meditation from Thais',
     composer: 'Jules Massenet',
@@ -105,7 +105,7 @@ export const recommendationPool: MusicRecommendation[] = [
     youtubeQuery: 'Massenet Meditation Thais violin piano',
   },
   {
-    id: 9,
+    id: '9',
     title: 'Summer',
     englishTitle: 'Summer',
     composer: 'Joe Hisaishi',
@@ -116,7 +116,7 @@ export const recommendationPool: MusicRecommendation[] = [
     youtubeQuery: 'Joe Hisaishi Summer piano',
   },
   {
-    id: 10,
+    id: '10',
     title: "La Valse d'Amélie",
     englishTitle: "Amelie Waltz",
     composer: 'Yann Tiersen',
@@ -127,7 +127,7 @@ export const recommendationPool: MusicRecommendation[] = [
     youtubeQuery: 'Yann Tiersen Amelie Waltz piano',
   },
   {
-    id: 11,
+    id: '11',
     title: 'Cinema Paradiso Love Theme',
     englishTitle: 'Cinema Paradiso',
     composer: 'Ennio Morricone',
@@ -138,7 +138,7 @@ export const recommendationPool: MusicRecommendation[] = [
     youtubeQuery: 'Ennio Morricone Cinema Paradiso love theme violin',
   },
   {
-    id: 12,
+    id: '12'      ,
     title: 'Time',
     englishTitle: 'Time (Inception OST)',
     composer: 'Hans Zimmer',
@@ -149,7 +149,7 @@ export const recommendationPool: MusicRecommendation[] = [
     youtubeQuery: 'Hans Zimmer Time Inception piano',
   },
   {
-    id: 13,
+    id: '13',
     title: 'いつも何度でも',
     englishTitle: 'Always With Me',
     composer: 'Youmi Kimura',
@@ -160,7 +160,7 @@ export const recommendationPool: MusicRecommendation[] = [
     youtubeQuery: 'いつも何度でも 千と千尋 피아노',
   },
   {
-    id: 14,
+    id: '14',
     title: '人生のメリーゴーランド',
     englishTitle: 'Merry-Go-Round of Life',
     composer: 'Joe Hisaishi',
@@ -171,7 +171,7 @@ export const recommendationPool: MusicRecommendation[] = [
     youtubeQuery: '인생의 메리고라운드 하울 피아노',
   },
   {
-    id: 15,
+    id: '15',
     title: 'Merry Christmas, Mr. Lawrence',
     englishTitle: 'Merry Christmas Mr. Lawrence',
     composer: 'Ryuichi Sakamoto',
@@ -182,7 +182,7 @@ export const recommendationPool: MusicRecommendation[] = [
     youtubeQuery: 'Sakamoto Merry Christmas Mr Lawrence piano',
   },
   {
-    id: 16,
+    id: '16',
     title: "Schindler's List Main Theme",
     englishTitle: "Schindler's List",
     composer: 'John Williams',
@@ -193,7 +193,7 @@ export const recommendationPool: MusicRecommendation[] = [
     youtubeQuery: 'Schindlers List main theme violin',
   },
   {
-    id: 17,
+    id: '17',
     title: 'Pavane Op. 50',
     englishTitle: 'Pavane',
     composer: 'Gabriel Fauré',
@@ -204,7 +204,7 @@ export const recommendationPool: MusicRecommendation[] = [
     youtubeQuery: 'Fauré Pavane orchestra',
   },
   {
-    id: 18,
+    id: '18',
     title: "Salut d'Amour",
     englishTitle: "Love's Greeting",
     composer: 'Edward Elgar',
@@ -215,7 +215,7 @@ export const recommendationPool: MusicRecommendation[] = [
     youtubeQuery: "Elgar Salut d'Amour violin piano",
   },
   {
-    id: 19,
+    id: '19',
     title: 'Hungarian Dance No. 5',
     englishTitle: 'Hungarian Dance No. 5',
     composer: 'Johannes Brahms',
@@ -226,7 +226,7 @@ export const recommendationPool: MusicRecommendation[] = [
     youtubeQuery: 'Brahms Hungarian Dance No 5 orchestra',
   },
   {
-    id: 20,
+    id: '20',
     title: 'Adagio in G minor',
     englishTitle: 'Adagio in G Minor',
     composer: 'Tomaso Albinoni',

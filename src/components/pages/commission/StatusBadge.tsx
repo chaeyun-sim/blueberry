@@ -9,7 +9,7 @@ interface StatusBadgeProps {
 export function StatusBadge({ status, className }: StatusBadgeProps) {
   const { label, badgeClass } = statusConfig[status];
   return (
-    <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium", badgeClass, className)}>
+    <span className={cn("shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium", badgeClass, className)}>
       {label}
     </span>
   );
