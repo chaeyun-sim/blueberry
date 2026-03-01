@@ -114,34 +114,43 @@ function toInt16Samples(buffer: ArrayBuffer, info: AudioInfo): Int16Array {
   throw new Error(`지원하지 않는 비트 깊이: ${bitsPerSample}bit`);
 }
 
-function getLamejs(): Promise<{ Mp3Encoder: new (channels: number, sampleRate: number, kbps: number) => { encodeBuffer: (...args: Int16Array[]) => Int16Array; flush: () => Int16Array } }> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  if ((window as any).lamejs) return Promise.resolve((window as any).lamejs);
+interface LameModule {
+  Mp3Encoder: new (channels: number, sampleRate: number, kbps: number) => {
+    encodeBuffer: (...args: Int16Array[]) => Int16Array;
+    flush: () => Int16Array;
+  };
+}
+
+declare global {
+  interface Window { lamejs?: LameModule }
+}
+
+function getLamejs(): Promise<LameModule> {
+  if (window.lamejs) return Promise.resolve(window.lamejs);
   return new Promise((resolve, reject) => {
     const script = document.createElement('script');
     script.src = '/lame.min.js';
-    script.onload = () => resolve((window as any).lamejs);
+    script.onload = () => resolve(window.lamejs!);
     script.onerror = () => reject(new Error('lame.min.js 로드 실패'));
     document.head.appendChild(script);
   });
 }
 
 export async function compressAudioToMp3(file: File, kbps = 192): Promise<File> {
-  console.log('[compress] 시작:', file.name, `${(file.size / 1024 / 1024).toFixed(1)}MB`);
   const { Mp3Encoder } = await getLamejs();
 
   const buffer = await file.arrayBuffer();
-  console.log('[compress] ArrayBuffer 로드 완료, byteLength:', buffer.byteLength);
 
-  // 확장자가 아닌 실제 파일 헤더로 포맷 감지
   const view = new DataView(buffer);
   const tag = String.fromCharCode(view.getUint8(0), view.getUint8(1), view.getUint8(2), view.getUint8(3));
-  console.log('[compress] 파일 헤더:', tag);
 
   const info = tag === 'FORM' ? parseAiff(buffer) : parseWav(buffer);
-  console.log('[compress] 파싱 완료:', info);
 
   const { channels, sampleRate } = info;
+  if (channels !== 1 && channels !== 2) {
+   throw new Error(`지원하지 않는 채널 수: ${channels}ch (mono/stereo만 지원)`);
+  }
+
   const samples = toInt16Samples(buffer, info);
 
   const encoder = new Mp3Encoder(channels, sampleRate, kbps);
@@ -155,7 +164,7 @@ export async function compressAudioToMp3(file: File, kbps = 192): Promise<File> 
     }
   } else {
     for (let i = 0; i < samples.length; i += blockSize * 2) {
-      const count = Math.min(blockSize, (samples.length - i) / 2);
+      const count = Math.min(blockSize, Math.floor((samples.length - i) / 2));
       const left = new Int16Array(count);
       const right = new Int16Array(count);
       for (let j = 0; j < count; j++) {
@@ -170,8 +179,7 @@ export async function compressAudioToMp3(file: File, kbps = 192): Promise<File> 
   const tail = encoder.flush();
   if (tail.length > 0) chunks.push(new Uint8Array(tail));
 
-  const mp3Blob = new Blob(chunks, { type: 'audio/mpeg' });
+  const mp3Blob = new Blob(chunks as BlobPart[], { type: 'audio/mpeg' });
   const mp3File = new File([mp3Blob], file.name.replace(/\.(wav|aif|aiff|aifc)$/i, '.mp3'), { type: 'audio/mpeg' });
-  console.log('[compress] 완료:', mp3File.name, `${(mp3File.size / 1024 / 1024).toFixed(1)}MB`);
   return mp3File;
 }
