@@ -39,7 +39,7 @@ function MonthlyChart() {
       {/* Header */}
       <div className='flex items-center justify-between mb-5'>
         <div className='flex items-center gap-2.5'>
-          <h3 className='font-display font-bold text-white text-base'>월별 의뢰 처리량</h3>
+          <h2 className='font-display font-bold text-white text-base'>월별 의뢰 처리량</h2>
           {growth !== null && (
             <span className='text-xs font-semibold bg-white/20 text-white px-2.5 py-1 rounded-full'>
               {growth > 0 ? `+${growth}%` : `${growth}%`} 이번 달
