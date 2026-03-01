@@ -121,6 +121,8 @@ async function networkFirst(request) {
   } catch {
     const cached = await caches.match(request);
     if (cached) return cached;
+    const appShell = await caches.match('/index.html');
+    if (appShell) return appShell;
     const offline = await caches.match('/offline.html');
     return offline ?? new Response('Offline', { status: 503 });
   }
