@@ -97,7 +97,7 @@ const ScoreRegister = () => {
     try {
       let songId: string | undefined;
       try {
-        const existing = await findSongByTitle(form.songTitle.trim());
+        const existing = await findSongByTitle(form.songTitle.trim(), form.composer.trim());
         if (existing) {
           songId = existing.id;
         } else {

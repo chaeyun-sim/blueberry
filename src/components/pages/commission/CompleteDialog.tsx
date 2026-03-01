@@ -31,7 +31,7 @@ async function findOrCreateSong(
   composer: string,
   createSong: (params: { title: string; composer: string }) => Promise<{ id: string }>,
 ): Promise<string> {
-  const existing = await findSongByTitle(title);
+  const existing = await findSongByTitle(title, composer);
   if (existing) return existing.id;
   const newSong = await createSong({ title, composer });
   return newSong.id;

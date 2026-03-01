@@ -56,6 +56,6 @@ export const scoreMutations = {
     }),
   findSongByTitle: () =>
     mutationOptions({
-      mutationFn: ({ title }: {title: string}) => findSongByTitle(title),
+      mutationFn: ({ title, composer }: { title: string; composer: string }) => findSongByTitle(title, composer),
     }),
 }

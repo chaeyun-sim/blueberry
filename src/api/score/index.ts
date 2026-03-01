@@ -16,12 +16,13 @@ const ARRANGEMENT_FILES_TABLE = 'arrangement_files';
 const ARRANGEMENT_FILES_BUCKET = 'arrangement-files';
 const ARRANGEMENT_SELECT = `*, ${ARRANGEMENT_FILES_TABLE}(*), songs(title, composer, english_title)`;
 
-// 곡명으로 song 검색
-export async function findSongByTitle(title: string) {
+// 곡명 + 작곡가로 song 검색
+export async function findSongByTitle(title: string, composer: string) {
   const { data, error } = await supabase
     .from(SONGS)
     .select('id, title, composer')
     .ilike('title', title)
+    .ilike('composer', composer)
     .is('deleted_at', null)
     .maybeSingle();
   if (error) throw error;
