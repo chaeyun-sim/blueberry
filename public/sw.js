@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v2';
+const CACHE_VERSION = 'v3';
 const APP_SHELL_CACHE = `blueberry-shell-${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `blueberry-dynamic-${CACHE_VERSION}`;
 
@@ -7,24 +7,26 @@ const APP_SHELL_URLS = ['/', '/index.html', '/manifest.webmanifest', '/offline.h
 
 // ─── Push: 알림 표시 + 뱃지 세팅 ────────────────────────────────────────────
 self.addEventListener('push', event => {
-  let title = 'BlueBerry'
-  let body = ''
+  let title = 'BlueBerry';
+  let body = '';
   try {
-    const data = event.data?.json()
-    title = data?.title ?? title
-    body = data?.body ?? body
+    const data = event.data?.json();
+    title = data?.title ?? title;
+    body = data?.body ?? body;
   } catch {
-    body = event.data?.text() ?? ''
+    body = event.data?.text() ?? '';
   }
   event.waitUntil(
-    self.registration.showNotification(title, {
-      body,
-      icon: '/favicon.ico',
-    }).then(() => {
-      if ('setAppBadge' in navigator) navigator.setAppBadge();
-    })
-  )
-})
+    self.registration
+      .showNotification(title, {
+        body,
+        icon: '/favicon.ico',
+      })
+      .then(() => {
+        if ('setAppBadge' in navigator) navigator.setAppBadge();
+      }),
+  );
+});
 
 // ─── Notification Click: 뱃지 제거 + 앱 열기 ────────────────────────────────
 self.addEventListener('notificationclick', event => {
@@ -65,19 +67,26 @@ self.addEventListener('fetch', event => {
 
   // ── Share Target: POST /share-target → 이미지 캐시 저장 후 /new로 리다이렉트
   if (url.pathname === '/share-target' && request.method === 'POST') {
-    event.respondWith((async () => {
-      try {
-        const formData = await request.formData();
-        const image = formData.get('image');
-        if (image instanceof File) {
-          const cache = await caches.open('blueberry-share');
-          await cache.put('/shared-image', new Response(image, {
-            headers: { 'Content-Type': image.type },
-          }));
+    event.respondWith(
+      (async () => {
+        try {
+          const formData = await request.formData();
+          const image = formData.get('image');
+          if (image instanceof File) {
+            const cache = await caches.open('blueberry-share');
+            await cache.put(
+              '/shared-image',
+              new Response(image, {
+                headers: { 'Content-Type': image.type },
+              }),
+            );
+          }
+        } catch {
+          /* 저장 실패해도 /new로 이동 */
         }
-      } catch { /* 저장 실패해도 /new로 이동 */ }
-      return Response.redirect('/new?shared=true', 303);
-    })());
+        return Response.redirect('/new?shared=true', 303);
+      })(),
+    );
     return;
   }
 
@@ -90,9 +99,32 @@ self.addEventListener('fetch', event => {
   // Supabase API → 캐시 없이 네트워크 직통 (인증된 사용자 데이터 캐시 방지)
   if (url.hostname.includes('supabase')) return;
 
-  // 앱 셸·정적 에셋 → Cache First (빠른 응답, 없으면 네트워크)
+  // HTML 문서(navigate) → Network First (배포 후 항상 최신 index.html 보장)
+  if (request.mode === 'navigate') {
+    event.respondWith(networkFirst(request));
+    return;
+  }
+
+  // 정적 에셋(JS, CSS 등) → Cache First (빠른 응답, 없으면 네트워크)
   event.respondWith(cacheFirst(request));
 });
+
+// ─── 전략: Network First (HTML 문서용) ─────────────────────────────────────
+async function networkFirst(request) {
+  try {
+    const response = await fetch(request);
+    if (response.ok) {
+      const cache = await caches.open(APP_SHELL_CACHE);
+      cache.put(request, response.clone());
+    }
+    return response;
+  } catch {
+    const cached = await caches.match(request);
+    if (cached) return cached;
+    const offline = await caches.match('/offline.html');
+    return offline ?? new Response('Offline', { status: 503 });
+  }
+}
 
 // ─── 전략: Cache First ──────────────────────────────────────────────────────
 async function cacheFirst(request) {
