@@ -100,12 +100,17 @@ function ReceiveAndSendDialog({
       return;
     }
 
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      toast.error('로그인이 필요해요.');
+      return;
+    }
+
     setIsSending(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
       const { error } = await supabase.functions.invoke('send-score-email', {
         body: { commissionId, toEmail: toEmail || undefined },
-        headers: session ? { Authorization: `Bearer ${session.access_token}` } : undefined,
+        headers: { Authorization: `Bearer ${session.access_token}` },
       });
       if (error) throw error;
 
