@@ -69,7 +69,7 @@ ${recentList}
   }
 
   // Claude가 ```json ... ``` 형태로 감싸서 줄 때 벗겨내기
-  let rec: MusicRecommendation
+  let rec: Record<string, unknown>
   try {
     const jsonText = message.content[0].text.trim().replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '')
     rec = JSON.parse(jsonText)
