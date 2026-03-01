@@ -4,7 +4,6 @@ import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { buildInstrumentList } from '@/utils/build-instrument-list';
 import { parseInstrumentsFromZipName } from '@/utils/parse-instruments-from-zipName';
-import { fileTypeConfig } from '@/constants/file-types';
 import { MAX_ZIP_SIZE } from '@/constants/file-size';
 import { FileEntry } from '@/types/form';
 import { extractZipEntries, ZipExtractionError } from '@/utils/extract-zip-entries';

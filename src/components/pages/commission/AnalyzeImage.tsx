@@ -56,7 +56,7 @@ function AnalyzeImage({
       setForm(result);
       const elapsed = ((performance.now() - start) / 1000).toFixed(2);
       toast.success(`AI 분석 완료 (${elapsed}초)`);
-    } catch (e) {
+    } catch {
       toast.error('AI 분석에 실패했습니다.');
     } finally {
       setIsAnalyzing(false);

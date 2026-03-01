@@ -10,7 +10,6 @@ import { cn } from "@/lib/utils";
 import { useAppQuery as useQuery } from "@/hooks/use-app-query";
 import { commissionQueries } from "@/api/commission/queries";
 import { WEEK_KOR } from '@/constants/week';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 const getDateColorClass = (deadline: string) => {
   const today = dayjs().startOf('day');

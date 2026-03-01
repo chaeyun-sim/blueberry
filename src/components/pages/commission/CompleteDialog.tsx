@@ -17,7 +17,6 @@ import { scoreKeys } from '@/api/score/queryKeys';
 import { findSongByTitle } from '@/api/score';
 import { queryClient } from '@/utils/query-client';
 import { toast } from 'sonner';
-import { fileTypeConfig } from '@/constants/file-types';
 import { FileEntry } from '@/types/form';
 import { MAX_ZIP_SIZE } from '@/constants/file-size';
 import { extractZipEntries, ZipExtractionError } from '@/utils/extract-zip-entries';
