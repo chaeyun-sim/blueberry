@@ -57,9 +57,11 @@ function ReceiveAndSendDialog({
 
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const wasSendingRef = useRef(false);
 
   useEffect(() => {
     if (isSending) {
+      wasSendingRef.current = true;
       setProgress(0);
       intervalRef.current = setInterval(() => {
         setProgress(p => {
@@ -72,9 +74,10 @@ function ReceiveAndSendDialog({
       }, 400);
     } else {
       if (intervalRef.current) clearInterval(intervalRef.current);
-      if (progress > 0) {
+      if (wasSendingRef.current) {
+        wasSendingRef.current = false;
         setProgress(100);
-        timeoutRef.current = setTimeout(() => setProgress(0), 600)
+        timeoutRef.current = setTimeout(() => setProgress(0), 600);
       }
     }
 
@@ -82,7 +85,7 @@ function ReceiveAndSendDialog({
       if (intervalRef.current) clearInterval(intervalRef.current);
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
-  }, [isSending, progress]);
+  }, [isSending]);
 
   const config = transitionConfigs[toStatus];
   if (!config) return null;
