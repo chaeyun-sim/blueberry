@@ -26,22 +26,6 @@ Deno.serve(async (req) => {
   const kstNow = new Date(Date.now() + 9 * 60 * 60 * 1000)
   const todayStr = kstNow.toISOString().split('T')[0] // "2026-02-28"
 
-  // 오늘 이미 추천곡이 있으면 중복 생성 방지
-  const { data: existing, error: existingErr } = await supabase
-    .from('recommendations')
-    .select('id')
-    .eq('recommended_date', todayStr)
-    .maybeSingle()
-
-  if (existingErr) throw new Error(`추천곡 중복 확인 실패: ${existingErr.message}`)
-
-  if (existing) {
-    return new Response(JSON.stringify({ message: '오늘 추천곡이 이미 있어요', date: todayStr }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    })
-  }
-
   // 최근 30곡 조회 (중복 추천 방지용)
   const { data: recentRecs, error: recentErr } = await supabase
     .from('recommendations')
@@ -80,32 +64,50 @@ ${recentList}
     ],
   })
 
-  const content = message.content[0]
-  if (content.type !== 'text') {
+  if (!message.content.length || message.content[0].type !== 'text') {
     throw new Error('Claude 응답 형식이 올바르지 않아요')
   }
 
   // Claude가 ```json ... ``` 형태로 감싸서 줄 때 벗겨내기
-  const jsonText = content.text.trim().replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '')
-  const rec = JSON.parse(jsonText)
+  let rec: MusicRecommendation
+  try {
+    const jsonText = message.content[0].text.trim().replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '')
+    rec = JSON.parse(jsonText)
+  } catch {
+    throw new Error('Claude 응답 JSON 파싱 실패')
+  }
 
+  // 스키마 검증
+  const VALID_CATEGORIES = ['CLASSIC', 'OST', 'ANI', 'ETC']
+  const VALID_DIFFICULTIES = ['쉬움', '보통', '어려움']
+  if (
+    typeof rec.title !== 'string' || !rec.title ||
+    typeof rec.composer !== 'string' || !rec.composer ||
+    !VALID_CATEGORIES.includes(rec.category as string) ||
+    !VALID_DIFFICULTIES.includes(rec.difficulty as string) ||
+    !Array.isArray(rec.mood)
+  ) {
+    throw new Error('Claude 응답 스키마가 올바르지 않아요')
+  }
+
+  // upsert로 TOCTOU 방지 (recommended_date unique 제약 활용)
   const { data: inserted, error } = await supabase
     .from('recommendations')
-    .insert({
-      title: rec.title,
-      english_title: rec.english_title,
-      composer: rec.composer,
-      category: rec.category,
-      mood: rec.mood,
-      description: rec.description,
-      difficulty: rec.difficulty,
-      youtube_query: rec.youtube_query,
-      recommended_date: todayStr,
-    })
+    .upsert(
+      rec,
+      { onConflict: 'recommended_date', ignoreDuplicates: true },
+    )
     .select()
-    .single()
+    .maybeSingle()
 
   if (error) throw error
+
+  if (!inserted) {
+    return new Response(JSON.stringify({ message: '오늘 추천곡이 이미 있어요', date: todayStr }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
 
   return new Response(JSON.stringify({ success: true, recommendation: inserted }), {
     status: 200,
