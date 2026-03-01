@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, ExternalLink, CheckCircle, PenLine, RotateCcw } from 'lucide-react';
+import { RefreshCw, ExternalLink, SkipForward, PenLine, RotateCcw } from 'lucide-react';
 import { type MusicRecommendation } from '@/mock/recommendations';
 import { formatDate } from '@/utils/format-date';
 import { SoundpostBadge } from './SoundpostBadge';
@@ -42,7 +42,7 @@ export function RecommendCard({
           <CardTitle className='text-base font-display'>
             {isSelectedRec ? '선택한 추천곡' : `오늘의 추천 · ${formatDate(today)}`}
           </CardTitle>
-          {isSelectedRec ? (
+          {isSelectedRec && (
             <Button
               variant='ghost'
               size='sm'
@@ -51,16 +51,6 @@ export function RecommendCard({
             >
               <RefreshCw className='h-3.5 w-3.5' />
               오늘의 추천으로
-            </Button>
-          ) : (
-            <Button
-              variant='ghost'
-              size='sm'
-              className='gap-1.5 text-xs h-8 text-muted-foreground hover:text-foreground hover:bg-muted'
-              onClick={onRefresh}
-            >
-              <RefreshCw className='h-3.5 w-3.5' />
-              다른 곡
             </Button>
           )}
         </div>
@@ -124,7 +114,7 @@ export function RecommendCard({
                 onClick={onUnmarkAsWorked}
               >
                 <RotateCcw className='h-3.5 w-3.5' />
-                작업완료 취소
+                건너뛰기 취소
               </Button>
             ) : (
               <Button
@@ -133,8 +123,8 @@ export function RecommendCard({
                 className='gap-1.5 flex-1 hover:bg-muted'
                 onClick={onMarkAsWorked}
               >
-                <CheckCircle className='h-3.5 w-3.5' />
-                이미 작업한 곡입니다
+                <SkipForward className='h-3.5 w-3.5' />
+                건너뛰기
               </Button>
             )}
             <Button
@@ -148,13 +138,10 @@ export function RecommendCard({
           </div>
         </div>
 
-        {/* Soundpost 검색 링크 (arranged일 때) */}
-        {soundpostStatus === 'arranged' && (
-          <SoundpostLinks
-            titleUrl={titleUrl}
-            composerUrl={composerUrl}
-          />
-        )}
+        <SoundpostLinks
+          titleUrl={titleUrl}
+          composerUrl={composerUrl}
+        />
       </CardContent>
     </Card>
   );
