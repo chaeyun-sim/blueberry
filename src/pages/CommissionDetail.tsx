@@ -25,6 +25,7 @@ import CommissionImageDialog from '@/components/pages/commission/CommissionImage
 import { CommissionStatus } from '@/constants/status-config';
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 import { commissionQueries } from '@/api/commission/queries';
 import { commissionMutations } from '@/api/commission/mutations';
@@ -61,7 +62,7 @@ const cleanTitle = (title: string) =>
     .replace(/\s+/g, ' ')
     .trim();
 
-const CommissionDetail = () => {
+const CommissionDetailContent = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { data: commission, isLoading } = useQuery(commissionQueries.getCommission(id));
@@ -388,5 +389,11 @@ const CommissionDetail = () => {
     </AppLayout>
   );
 };
+
+const CommissionDetail = () => (
+  <ErrorBoundary level='page'>
+    <CommissionDetailContent />
+  </ErrorBoundary>
+);
 
 export default CommissionDetail;

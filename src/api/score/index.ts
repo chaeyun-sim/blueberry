@@ -42,6 +42,18 @@ export async function getSongs() {
   return data as Song[];
 }
 
+// 악보 편성 수 집계용 경량 조회 (Dashboard 전용)
+export async function getSongsSummary() {
+  const { data, error } = await supabase
+    .from(SONGS)
+    .select('id, arrangements(id)')
+    .is('deleted_at', null)
+    .is('arrangements.deleted_at', null);
+
+  if (error) throw error;
+  return (data ?? []) as { id: string; arrangements: { id: string }[] }[];
+}
+
 // 악보 상세 조회 (song + arrangements)
 export async function getSong(id: string) {
   const { data, error } = await supabase

@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -16,7 +17,7 @@ import ExcelTab from '@/components/pages/uploads/ExcelTab';
 import { queryClient } from '@/utils/query-client';
 import { toast } from 'sonner';
 
-const Files = () => {
+const FilesContent = () => {
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState('scores');
@@ -92,5 +93,11 @@ const Files = () => {
     </AppLayout>
   );
 };
+
+const Files = () => (
+  <ErrorBoundary level='page'>
+    <FilesContent />
+  </ErrorBoundary>
+);
 
 export default Files;

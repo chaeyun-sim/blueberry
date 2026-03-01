@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ExcelUploadDialog } from '@/components/ExcelUploadDialog';
@@ -29,7 +30,7 @@ const tabItems = {
   { icon: React.ElementType; label: string; component: React.ElementType }
 >;
 
-const SalesStats = () => {
+const SalesStatsContent = () => {
   const [uploadOpen, setUploadOpen] = useState(false);
 
   const { data: salesSummary } = useQuery(statsQueries.getSalesSummary());
@@ -138,5 +139,11 @@ const SalesStats = () => {
     </AppLayout>
   );
 };
+
+const SalesStats = () => (
+  <ErrorBoundary level='page'>
+    <SalesStatsContent />
+  </ErrorBoundary>
+);
 
 export default SalesStats;

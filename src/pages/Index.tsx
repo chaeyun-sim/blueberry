@@ -21,6 +21,7 @@ import RevenueSliderCard from '@/components/pages/dashboard/RevenueSliderCard';
 import CommissionSummaryBar from '@/components/pages/dashboard/CommissionSummaryBar';
 import MonthlyChart from '@/components/pages/dashboard/MonthlyChart';
 import { useAppQuery as useQuery } from '@/hooks/use-app-query';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import { commissionQueries } from '@/api/commission/queries';
 import dayjs from 'dayjs';
 import { scoreQueries } from '@/api/score/queries';
@@ -50,15 +51,15 @@ const summary = [{
 }];
 
 
-const Dashboard = () => {
+const DashboardContent = () => {
   const navigate = useNavigate();
   const clock = useLiveClock();
 
   const { data: commissions = [], isLoading, isError } = useQuery(commissionQueries.getCommissions());
-  const { data: scores = [] } = useQuery(scoreQueries.getSongs());
+  const { data: songsSummary = [] } = useQuery(scoreQueries.getSongsSummary());
   const { data: salesSummary } = useQuery(statsQueries.getSalesSummary());
 
-  const totalScores = scores.reduce((acc, score) => acc + (score.arrangements?.length ?? 0), 0);
+  const totalScores = songsSummary.reduce((acc, s) => acc + (s.arrangements?.length ?? 0), 0);
   const totalCompleted = commissions.filter(c => c.status === 'complete' || c.status === 'delivered').length;
   const avgPrice = salesSummary && salesSummary.totalCount > 0
     ? formatCurrency(Math.round(salesSummary.totalRevenue / salesSummary.totalCount))
@@ -261,5 +262,11 @@ const Dashboard = () => {
     </AppLayout>
   );
 };
+
+const Dashboard = () => (
+  <ErrorBoundary level='page'>
+    <DashboardContent />
+  </ErrorBoundary>
+);
 
 export default Dashboard;
