@@ -25,7 +25,7 @@ import { matchesZipTitle } from '@/utils/match-zip-title';
 import { hasCompressibleAudio, compressAudioEntries } from '@/utils/compress-audio-entries';
 import DropZone from './Dropzone';
 import ZipFileHeader from './ZipFileHeader';
-import ReadOnlyFileList from './ReadonlyFileList';
+import ReadOnlyFileList from './ReadOnlyFileList';
 
 async function findOrCreateSong(
   title: string,
