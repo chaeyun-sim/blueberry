@@ -7,13 +7,19 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+function requireEnv(key: string): string {
+  const value = Deno.env.get(key)
+  if (!value) throw new Error(`환경변수 누락: ${key}`)
+  return value
+}
+
 const supabase = createClient(
-  Deno.env.get('SUPABASE_URL')!,
-  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+  requireEnv('SUPABASE_URL'),
+  requireEnv('SUPABASE_SERVICE_ROLE_KEY'),
 )
 
-const NAVER_EMAIL = Deno.env.get('NAVER_EMAIL')!
-const NAVER_PASSWORD = Deno.env.get('NAVER_PASSWORD')!
+const NAVER_EMAIL = requireEnv('NAVER_EMAIL')
+const NAVER_PASSWORD = requireEnv('NAVER_PASSWORD')
 
 const transporter = nodemailer.createTransport({
   host: 'smtp.naver.com',

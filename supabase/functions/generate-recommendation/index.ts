@@ -1,13 +1,19 @@
 import Anthropic from 'npm:@anthropic-ai/sdk'
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
-const anthropic = new Anthropic({ apiKey: Deno.env.get('ANTHROPIC_API_KEY')! })
+function requireEnv(key: string): string {
+  const value = Deno.env.get(key)
+  if (!value) throw new Error(`환경변수 누락: ${key}`)
+  return value
+}
+
+const anthropic = new Anthropic({ apiKey: requireEnv('ANTHROPIC_API_KEY') })
 const supabase = createClient(
-  Deno.env.get('SUPABASE_URL')!,
-  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+  requireEnv('SUPABASE_URL'),
+  requireEnv('SUPABASE_SERVICE_ROLE_KEY'),
 )
 
-const CRON_SECRET = Deno.env.get('CRON_SECRET')
+const CRON_SECRET = requireEnv('CRON_SECRET')
 
 Deno.serve(async (req) => {
   // 인증 확인 (cron에서만 호출 가능하게)
