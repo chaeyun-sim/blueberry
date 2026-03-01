@@ -89,7 +89,10 @@ function ReceiveAndSendDialog({
   };
 
   const handleEmailConfirm = async () => {
-    if (!commissionId) return;
+    if (!commissionId) {
+      toast.error('의뢰를 찾을 수 없어 메일을 보낼 수 없어요.');
+      return;
+    }
 
     setIsSending(true);
     try {
@@ -151,7 +154,7 @@ function ReceiveAndSendDialog({
           <Button
             onClick={toStatus === 'delivered' ? handleEmailConfirm : handleConfirm}
             className='gap-2'
-            disabled={isSending}
+            disabled={isSending || (toStatus === 'delivered' && !commissionId)}
           >
             {isSending ? <Loader2 className='h-4 w-4 animate-spin' /> : Icon && <Icon className='h-4 w-4' />}
             {isSending ? '발송 중...' : config.acceptLabel}
