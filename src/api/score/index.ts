@@ -73,7 +73,7 @@ export async function getArrangement(arrangementId: string) {
 export async function createSong(input: CreateSongInput) {
   const { data, error } = await supabase
     .from(SONGS)
-    .upsert(input, { onConflict: 'title', ignoreDuplicates: true })
+    .upsert(input, { onConflict: 'title,composer', ignoreDuplicates: true })
     .select()
     .maybeSingle();
 
@@ -85,6 +85,7 @@ export async function createSong(input: CreateSongInput) {
       .from(SONGS)
       .select()
       .eq('title', input.title)
+      .eq('composer', input.composer)
       .is('deleted_at', null)
       .single();
 
