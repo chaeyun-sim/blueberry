@@ -9,7 +9,9 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Image, Mail, CheckCircle } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Image, Mail, CheckCircle, Loader2 } from 'lucide-react';
 import { OverlayProps } from '@/types/overlay';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
@@ -50,6 +52,7 @@ function ReceiveAndSendDialog({
   onConfirm,
 }: ReceiveAndSendDialogProps) {
   const [isSending, setIsSending] = useState(false);
+  const [toEmail, setToEmail] = useState('');
 
   const config = transitionConfigs[toStatus];
   if (!config) return null;
@@ -67,7 +70,7 @@ function ReceiveAndSendDialog({
     setIsSending(true);
     try {
       const { error } = await supabase.functions.invoke('send-score-email', {
-        body: { commissionId },
+        body: { commissionId, toEmail: toEmail || undefined },
       });
       if (error) throw error;
 
@@ -92,13 +95,27 @@ function ReceiveAndSendDialog({
           <DialogDescription>{config.description}</DialogDescription>
         </DialogHeader>
 
+        {toStatus === 'delivered' && (
+          <div className='space-y-1.5'>
+            <Label htmlFor='recipient-email'>수신자 이메일</Label>
+            <Input
+              id='recipient-email'
+              type='email'
+              placeholder='example@email.com'
+              value={toEmail}
+              onChange={e => setToEmail(e.target.value)}
+              disabled={isSending}
+            />
+          </div>
+        )}
+
         <DialogFooter className='gap-2 sm:gap-0'>
           <Button
             onClick={toStatus === 'delivered' ? handleEmailConfirm : handleConfirm}
             className='gap-2'
             disabled={isSending}
           >
-            {Icon && <Icon className='h-4 w-4' />}
+            {isSending ? <Loader2 className='h-4 w-4 animate-spin' /> : Icon && <Icon className='h-4 w-4' />}
             {isSending ? '발송 중...' : config.acceptLabel}
           </Button>
         </DialogFooter>

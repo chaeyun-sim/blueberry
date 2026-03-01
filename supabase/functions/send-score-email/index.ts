@@ -1,5 +1,6 @@
 import JSZip from 'npm:jszip'
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import nodemailer from 'npm:nodemailer'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -11,18 +12,18 @@ const supabase = createClient(
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
 )
 
-const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!
-const MANAGER_EMAIL = Deno.env.get('MANAGER_EMAIL')!
+const NAVER_EMAIL = Deno.env.get('NAVER_EMAIL')!
+const NAVER_PASSWORD = Deno.env.get('NAVER_PASSWORD')!
 
-function toBase64(buffer: ArrayBuffer): string {
-  const bytes = new Uint8Array(buffer)
-  let binary = ''
-  const chunkSize = 8192
-  for (let i = 0; i < bytes.length; i += chunkSize) {
-    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize))
-  }
-  return btoa(binary)
-}
+const transporter = nodemailer.createTransport({
+  host: 'smtp.naver.com',
+  port: 465,
+  secure: true,
+  auth: {
+    user: NAVER_EMAIL,
+    pass: NAVER_PASSWORD,
+  },
+})
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -30,7 +31,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { commissionId, tempAudioPath, audioFileName } = await req.json()
+    const { commissionId, toEmail } = await req.json()
 
     if (!commissionId) {
       return new Response(
@@ -104,44 +105,22 @@ Deno.serve(async (req) => {
       zip.file(name, buffer)
     }
 
-    // 5. 오디오 파일이 있으면 ZIP에 추가
-    if (tempAudioPath && audioFileName) {
-      const { data: audioBlob } = await supabase.storage
-        .from('arrangement-files')
-        .download(tempAudioPath)
-      if (audioBlob) {
-        zip.file(audioFileName, await audioBlob.arrayBuffer())
-      }
-    }
-
     const zipUint8 = await zip.generateAsync({ type: 'uint8array' })
-    const zipBase64 = toBase64(zipUint8.buffer)
 
-    // 6. Resend로 이메일 발송
-    const emailRes = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${RESEND_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: 'onboarding@resend.dev',
-        to: MANAGER_EMAIL,
-        subject: `[신청곡] ${songTitle}`,
-        text: `안녕하세요!\n${songTitle} 신청곡 보내드립니다.\n이상 있으면 알려주세요!\n감사합니다. :)`,
-        attachments: [
-          { filename: `${songTitle}.zip`, content: zipBase64 },
-        ],
-      }),
+    // 5. Naver SMTP로 이메일 발송
+    await transporter.sendMail({
+      from: `"${Deno.env.get('SENDER_NAME') ?? '심채윤'}" <${NAVER_EMAIL}>`,
+      to: toEmail || NAVER_EMAIL,
+      subject: `[신청곡] ${songTitle}`,
+      text: `안녕하세요, 심채윤입니다!\n${songTitle} 신청곡 보내드립니다.\n이상 있으면 알려주세요!\n감사합니다. :)`,
+      attachments: [
+        {
+          filename: `${songTitle}.zip`,
+          content: zipUint8,
+          contentType: 'application/zip',
+        },
+      ],
     })
-
-    if (!emailRes.ok) {
-      const errText = await emailRes.text()
-      return new Response(
-        JSON.stringify({ error: `Resend 오류: ${errText}` }),
-        { status: 500, headers: corsHeaders },
-      )
-    }
 
     return new Response(
       JSON.stringify({ success: true }),
