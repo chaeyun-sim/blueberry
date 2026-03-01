@@ -32,7 +32,7 @@ button:not(:disabled),
     --accent: 64 36% 50%;
     --accent-foreground: 28 22% 14%;
 
-    --destructive: 0 70% 50%;
+    --destructive: 0 70% 42%;
     --destructive-foreground: 38 22% 97%;
 
     --border: 38 18% 84%;
@@ -88,7 +88,7 @@ button:not(:disabled),
     --accent: 64 32% 52%;
     --accent-foreground: 28 22% 14%;
 
-    --destructive: 0 65% 52%;
+    --destructive: 0 65% 62%;
     --destructive-foreground: 38 22% 97%;
 
     --border: 28 15% 22%;
