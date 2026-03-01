@@ -110,8 +110,8 @@ function AnalyzeImage({
                 <ImageIcon className='h-8 w-8 text-muted-foreground' />
               </div>
               <div className='text-center'>
-                <p className='font-medium'>이미지를 드래그하거나 클릭하여 업로드</p>
-                <p className='text-sm text-muted-foreground mt-1'>
+                <p className='font-medium text-sm md:text-base'>이미지를 드래그하거나 클릭하여 업로드</p>
+                <p className='text-xs md:text-base text-muted-foreground mt-1'>
                   카카오톡 캡처 이미지를 붙여넣을 수도 있습니다
                 </p>
               </div>

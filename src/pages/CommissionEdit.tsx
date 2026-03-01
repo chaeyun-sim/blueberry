@@ -72,7 +72,7 @@ const CommissionEdit = () => {
     updateCommission(
       {
         commissionId: id,
-        input: { ...form, arrangement: form.instruments.join(', ')},
+        input: (({ instruments, ...rest }) => ({ ...rest, arrangement: instruments.join(', ') }))(form),
       },
       {
         onSuccess: () => {
