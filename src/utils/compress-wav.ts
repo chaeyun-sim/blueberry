@@ -125,15 +125,24 @@ declare global {
   interface Window { lamejs?: LameModule }
 }
 
+let lamePromise: Promise<LameModule> | null = null;
+
 function getLamejs(): Promise<LameModule> {
   if (window.lamejs) return Promise.resolve(window.lamejs);
-  return new Promise((resolve, reject) => {
+  if (lamePromise) return lamePromise;
+  lamePromise = new Promise((resolve, reject) => {
     const script = document.createElement('script');
     script.src = '/lame.min.js';
-    script.onload = () => resolve(window.lamejs!);
-    script.onerror = () => reject(new Error('lame.min.js 로드 실패'));
+    script.onload = () => {
+      resolve(window.lamejs!)
+    };
+    script.onerror = () => {
+      lamePromise = null;
+      reject(new Error('lame.min.js 로드 실패'))
+    };
     document.head.appendChild(script);
   });
+  return lamePromise;
 }
 
 export async function compressAudioToMp3(file: File, kbps = 192): Promise<File> {
