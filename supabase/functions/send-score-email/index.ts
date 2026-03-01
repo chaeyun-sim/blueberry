@@ -5,6 +5,7 @@ import nodemailer from 'npm:nodemailer'
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
 function requireEnv(key: string): string {
@@ -63,6 +64,15 @@ Deno.serve(async (req) => {
       )
     }
 
+    // toEmail 형식 검증
+    const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (toEmail && !EMAIL_RE.test(toEmail)) {
+      return new Response(
+        JSON.stringify({ error: '올바른 이메일 형식이 아닙니다' }),
+        { status: 400, headers: corsHeaders },
+      )
+    }
+
     // 1. 의뢰 + 곡 제목 조회
     const { data: commission, error: commErr } = await supabase
       .from('commissions')
@@ -74,6 +84,14 @@ Deno.serve(async (req) => {
       return new Response(
         JSON.stringify({ error: '의뢰를 찾을 수 없어요' }),
         { status: 404, headers: corsHeaders },
+      )
+    }
+
+    // 의뢰 소유자 검증 (commissions에 user_id가 있는 경우)
+    if ('user_id' in commission && commission.user_id && commission.user_id !== user.id) {
+      return new Response(
+        JSON.stringify({ error: '이 의뢰에 접근할 권한이 없습니다' }),
+        { status: 403, headers: corsHeaders },
       )
     }
 
@@ -110,22 +128,33 @@ Deno.serve(async (req) => {
     // 4. 파일 다운로드 + ZIP 빌드
     const zip = new JSZip()
     const usedNames = new Set<string>()
+    const downloadFailed: string[] = []
 
     for (const file of files) {
       const response = await fetch(file.url)
-      if (!response.ok) continue
+      if (!response.ok) {
+        downloadFailed.push(file.label)
+        continue
+      }
 
       const buffer = await response.arrayBuffer()
       const ext = file.url.split('.').pop()?.split('?')[0] ?? 'bin'
 
-      let name = `${file.label}.${ext}`
+      // 경로 순회 방지를 위해 label 내 위험 문자 치환
+      const safeLabel = file.label.replace(/[/\\.:*?"<>|]/g, '_').replace(/^\.+/, '_')
+
+      let name = `${safeLabel}.${ext}`
       if (usedNames.has(name)) {
         let i = 2
-        while (usedNames.has(`${file.label}_${i}.${ext}`)) i++
-        name = `${file.label}_${i}.${ext}`
+        while (usedNames.has(`${safeLabel}_${i}.${ext}`)) i++
+        name = `${safeLabel}_${i}.${ext}`
       }
       usedNames.add(name)
       zip.file(name, buffer)
+    }
+
+    if (downloadFailed.length === files.length) {
+      throw new Error('모든 파일 다운로드에 실패했습니다')
     }
 
     const zipUint8 = await zip.generateAsync({ type: 'uint8array' })
