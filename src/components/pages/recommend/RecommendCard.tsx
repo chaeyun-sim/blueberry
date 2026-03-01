@@ -24,7 +24,7 @@ export function RecommendCard({
   isSelectedRec,
   isWorked,
   onResetSelection,
-  onRefresh,
+  onRefresh: _onRefresh,
   onMarkAsWorked,
   onUnmarkAsWorked,
 }: Props) {

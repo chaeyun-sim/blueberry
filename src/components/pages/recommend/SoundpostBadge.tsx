@@ -1,17 +1,13 @@
-import { Loader2, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { SoundpostStatus } from '@/types/recommend';
 import { categoryStyle, difficultyStyle } from '@/styles/recommend.styles';
 import { type MusicRecommendation } from '@/mock/recommendations';
 
 interface Props {
-  status: SoundpostStatus;
-  titleUrl: string;
   category: MusicRecommendation['category'];
   difficulty: MusicRecommendation['difficulty'];
 }
 
-export function SoundpostBadge({ status, titleUrl, category, difficulty }: Props) {
+export function SoundpostBadge({ category, difficulty }: Props) {
   return (
     <div className='flex items-center gap-2 flex-wrap'>
       <span
