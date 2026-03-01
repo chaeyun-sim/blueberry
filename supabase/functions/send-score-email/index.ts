@@ -30,6 +30,23 @@ Deno.serve(async (req) => {
     return new Response('ok', { headers: corsHeaders })
   }
 
+  // JWT 인증 검증
+  const authHeader = req.headers.get('Authorization')
+  if (!authHeader?.startsWith('Bearer ')) {
+    return new Response(
+      JSON.stringify({ error: '인증이 필요합니다' }),
+      { status: 401, headers: corsHeaders },
+    )
+  }
+  const token = authHeader.replace('Bearer ', '')
+  const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+  if (authError || !user) {
+    return new Response(
+      JSON.stringify({ error: '유효하지 않은 인증 정보입니다' }),
+      { status: 401, headers: corsHeaders },
+    )
+  }
+
   try {
     const { commissionId, toEmail } = await req.json()
 

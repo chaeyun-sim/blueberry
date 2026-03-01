@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { CommissionStatus } from '@/constants/status-config';
 import {
   Dialog,
@@ -53,6 +53,30 @@ function ReceiveAndSendDialog({
 }: ReceiveAndSendDialogProps) {
   const [isSending, setIsSending] = useState(false);
   const [toEmail, setToEmail] = useState('');
+  const [progress, setProgress] = useState(0);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    if (isSending) {
+      setProgress(0);
+      intervalRef.current = setInterval(() => {
+        setProgress(p => {
+          if (p >= 85) {
+            clearInterval(intervalRef.current!);
+            return 85;
+          }
+          return p + Math.random() * 8;
+        });
+      }, 400);
+    } else {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      if (progress > 0) {
+        setProgress(100);
+        setTimeout(() => setProgress(0), 600);
+      }
+    }
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, [isSending]);
 
   const config = transitionConfigs[toStatus];
   if (!config) return null;
@@ -69,8 +93,10 @@ function ReceiveAndSendDialog({
 
     setIsSending(true);
     try {
+      const { data: { session } } = await supabase.auth.getSession();
       const { error } = await supabase.functions.invoke('send-score-email', {
         body: { commissionId, toEmail: toEmail || undefined },
+        headers: session ? { Authorization: `Bearer ${session.access_token}` } : undefined,
       });
       if (error) throw error;
 
@@ -95,7 +121,7 @@ function ReceiveAndSendDialog({
           <DialogDescription>{config.description}</DialogDescription>
         </DialogHeader>
 
-        {toStatus === 'delivered' && (
+        {toStatus === 'delivered' && !isSending && (
           <div className='space-y-1.5'>
             <Label htmlFor='recipient-email'>수신자 이메일</Label>
             <Input
@@ -106,6 +132,18 @@ function ReceiveAndSendDialog({
               onChange={e => setToEmail(e.target.value)}
               disabled={isSending}
             />
+          </div>
+        )}
+
+        {isSending && (
+          <div className='space-y-1.5'>
+            <div className='h-1.5 w-full rounded-full bg-muted overflow-hidden'>
+              <div
+                className='h-full bg-primary rounded-full transition-all duration-500 ease-out'
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+            <p className='text-xs text-muted-foreground text-center'>파일을 ZIP으로 압축하고 메일을 발송하고 있어요...</p>
           </div>
         )}
 
