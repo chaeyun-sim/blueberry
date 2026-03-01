@@ -27,11 +27,13 @@ Deno.serve(async (req) => {
   const todayStr = kstNow.toISOString().split('T')[0] // "2026-02-28"
 
   // 오늘 이미 추천곡이 있으면 중복 생성 방지
-  const { data: existing } = await supabase
+  const { data: existing, error: existingErr } = await supabase
     .from('recommendations')
     .select('id')
     .eq('recommended_date', todayStr)
     .maybeSingle()
+
+  if (existingErr) throw new Error(`추천곡 중복 확인 실패: ${existingErr.message}`)
 
   if (existing) {
     return new Response(JSON.stringify({ message: '오늘 추천곡이 이미 있어요', date: todayStr }), {
@@ -41,11 +43,13 @@ Deno.serve(async (req) => {
   }
 
   // 최근 30곡 조회 (중복 추천 방지용)
-  const { data: recentRecs } = await supabase
+  const { data: recentRecs, error: recentErr } = await supabase
     .from('recommendations')
     .select('title, composer')
     .order('recommended_date', { ascending: false })
     .limit(30)
+
+  if (recentErr) throw new Error(`최근 추천곡 조회 실패: ${recentErr.message}`)
 
   const recentList = recentRecs?.map((r) => `- ${r.title} (${r.composer})`).join('\n') ?? '없음'
 
