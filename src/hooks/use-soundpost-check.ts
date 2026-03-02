@@ -10,7 +10,8 @@ import {
 export function useSoundpostCheck(rec: MusicRecommendation) {
   const [status, setStatus] = useState<SoundpostStatus>('loading');
 
-  const titleSearchStr = rec.englishTitle
+  const isLatinTitle = /^[a-zA-Z0-9\s.,!?'"()\-#/.]+$/.test(rec.title);
+  const titleSearchStr = (isLatinTitle ? rec.title : rec.englishTitle)
     .toLowerCase()
     .replace(/[^a-z0-9 ]/g, '')
     .trim();
