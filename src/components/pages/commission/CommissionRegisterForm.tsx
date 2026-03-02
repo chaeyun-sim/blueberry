@@ -185,7 +185,7 @@ function CommissionRegisterForm({ form, setForm, imageFile, isAnalyzing }: Commi
               <div className='flex flex-wrap gap-2 m-2'>
                 {form.instruments.map((inst, idx) => (
                   <span
-                    key={idx}
+                    key={inst}
                     className='inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium bg-primary/15 text-primary border border-primary/20'
                   >
                     {inst}
@@ -194,6 +194,7 @@ function CommissionRegisterForm({ form, setForm, imageFile, isAnalyzing }: Commi
                       disabled={isAnalyzing || isSubmitting}
                       onClick={() => setForm({ ...form, instruments: removeInstrument(form.instruments, idx) })}
                       className='ml-0.5 hover:text-destructive transition-colors disabled:opacity-50 disabled:pointer-events-none'
+                      aria-label={`${inst} 제거`}
                     >
                       <X className='h-3 w-3' />
                     </button>
