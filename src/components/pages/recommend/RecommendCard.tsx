@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { RefreshCw, ExternalLink, SkipForward, PenLine, RotateCcw } from 'lucide-react';
 import { type MusicRecommendation } from '@/mock/recommendations';
 import { formatDate } from '@/utils/format-date';
-import { SoundpostBadge } from './SoundpostBadge';
 import { SoundpostLinks } from './SoundpostLinks';
 import { useSoundpostCheck } from '@/hooks/use-soundpost-check';
 import { useAuth } from '@/provider/AuthProvider';
@@ -32,7 +31,7 @@ export function RecommendCard({
   const navigate = useNavigate();
   const { isGuest } = useAuth();
 
-  const { status: soundpostStatus, titleUrl, composerUrl } = useSoundpostCheck(rec);
+  const { titleUrl, composerUrl } = useSoundpostCheck(rec);
 
   const today = dayjs();
   const youtubeUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(rec.youtubeQuery)}`;
@@ -59,14 +58,6 @@ export function RecommendCard({
       </CardHeader>
 
       <CardContent className='space-y-5'>
-        {/* 뱃지 행 */}
-        <SoundpostBadge
-          status={soundpostStatus}
-          titleUrl={titleUrl}
-          category={rec.category}
-          difficulty={rec.difficulty}
-        />
-
         {/* 제목 */}
         <div>
           <h1 className='text-2xl font-display font-bold leading-tight'>

@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { type MusicRecommendation } from '@/mock/recommendations';
-import { SoundpostStatus } from '@/types/recommend';
 import {
   makeSoundpostUrl,
   makeSoundpostExternalUrl,
@@ -8,8 +7,6 @@ import {
 } from '@/utils/soundpost';
 
 export function useSoundpostCheck(rec: MusicRecommendation) {
-  const [status, setStatus] = useState<SoundpostStatus>('loading');
-
   const isLatinTitle = /^[a-zA-Z0-9\s.,!?'"()\-#/.]+$/.test(rec.title);
   const titleSearchStr = (isLatinTitle ? rec.title : rec.englishTitle)
     .toLowerCase()
@@ -18,24 +15,11 @@ export function useSoundpostCheck(rec: MusicRecommendation) {
   const composerSearchStr = rec.composer.split(' ').filter(Boolean).at(-1) ?? rec.composer;
 
   useEffect(() => {
-    setStatus('loading');
     let cancelled = false;
 
     (async () => {
-      try {
-        const titleHas = await fetchHasResults(makeSoundpostUrl(titleSearchStr));
-        if (cancelled) return;
-        if (titleHas) {
-          setStatus('arranged');
-          return;
-        }
-
-        const composerHas = await fetchHasResults(makeSoundpostUrl(composerSearchStr, true));
-        if (cancelled) return;
-        setStatus(composerHas ? 'arranged' : 'not-arranged');
-      } catch {
-        if (!cancelled) setStatus('error');
-      }
+      const titleHas = await fetchHasResults(makeSoundpostUrl(titleSearchStr));
+      if (titleHas || cancelled) return;
     })();
 
     return () => {
@@ -44,7 +28,6 @@ export function useSoundpostCheck(rec: MusicRecommendation) {
   }, [rec.id, titleSearchStr, composerSearchStr]);
 
   return {
-    status,
     titleUrl: makeSoundpostExternalUrl(titleSearchStr),
     composerUrl: makeSoundpostExternalUrl(composerSearchStr, true),
   };

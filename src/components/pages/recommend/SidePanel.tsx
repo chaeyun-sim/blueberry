@@ -6,7 +6,7 @@ import { recommendationQueries } from '@/api/recommendation/queries';
 import { categoryStyle } from '@/styles/recommend.styles';
 import { formatDate } from '@/utils/format-date';
 import { Search, X } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import dayjs from 'dayjs';
 import { useAuth } from '@/provider/AuthProvider';
 
@@ -30,6 +30,10 @@ function SidePanel({ selectedRec, workedSongs, setSelectedRec }: SidePanelProps)
 
   const allRecs = isGuest ? recommendationPool : apiAllRecs;
   const recentRecs = isGuest ? mockRecentRecs : apiRecentRecs;
+
+  useEffect(() => {
+    if (isGuest) setQuery('');
+  }, [isGuest]);
 
   const searchResults = query.trim()
     ? allRecs.filter((r) => {
