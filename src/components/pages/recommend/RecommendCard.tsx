@@ -8,6 +8,7 @@ import { formatDate } from '@/utils/format-date';
 import { SoundpostBadge } from './SoundpostBadge';
 import { SoundpostLinks } from './SoundpostLinks';
 import { useSoundpostCheck } from '@/hooks/use-soundpost-check';
+import { useAuth } from '@/provider/AuthProvider';
 
 interface Props {
   rec: MusicRecommendation;
@@ -29,6 +30,7 @@ export function RecommendCard({
   onUnmarkAsWorked,
 }: Props) {
   const navigate = useNavigate();
+  const { isGuest } = useAuth();
 
   const { status: soundpostStatus, titleUrl, composerUrl } = useSoundpostCheck(rec);
 
@@ -112,6 +114,7 @@ export function RecommendCard({
                 size='sm'
                 className='gap-1.5 flex-1 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30'
                 onClick={onUnmarkAsWorked}
+                disabled={isGuest}
               >
                 <RotateCcw className='h-3.5 w-3.5' />
                 건너뛰기 취소
@@ -122,6 +125,7 @@ export function RecommendCard({
                 size='sm'
                 className='gap-1.5 flex-1 hover:bg-muted'
                 onClick={onMarkAsWorked}
+                disabled={isGuest}
               >
                 <SkipForward className='h-3.5 w-3.5' />
                 건너뛰기
@@ -131,6 +135,7 @@ export function RecommendCard({
               size='sm'
               className='gap-1.5 flex-1'
               onClick={() => navigate('/new')}
+              disabled={isGuest}
             >
               <PenLine className='h-3.5 w-3.5' />
               지금 작업하기

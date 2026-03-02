@@ -1,13 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { MusicRecommendation } from '@/mock/recommendations';
+import { MusicRecommendation, recommendationPool, getRecentRecommendations as getMockRecentRecs } from '@/mock/recommendations';
 import { recommendationQueries } from '@/api/recommendation/queries';
 import { categoryStyle } from '@/styles/recommend.styles';
 import { formatDate } from '@/utils/format-date';
 import { Search, X } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import dayjs from 'dayjs';
+import { useAuth } from '@/provider/AuthProvider';
 
 interface SidePanelProps {
   selectedRec: MusicRecommendation | null;
@@ -16,10 +17,19 @@ interface SidePanelProps {
 }
 
 function SidePanel({ selectedRec, workedSongs, setSelectedRec }: SidePanelProps) {
+  const { isGuest } = useAuth();
   const [query, setQuery] = useState('');
 
-  const { data: allRecs = [] } = useQuery(recommendationQueries.list());
-  const { data: recentRecs = [] } = useQuery(recommendationQueries.recent(5));
+  const mockRecentRecs = useMemo(
+    () => getMockRecentRecs(5).map(({ date, rec }) => ({ date: date.toISOString(), rec })),
+    [],
+  );
+
+  const { data: apiAllRecs = [] } = useQuery({ ...recommendationQueries.list(), enabled: !isGuest });
+  const { data: apiRecentRecs = [] } = useQuery({ ...recommendationQueries.recent(5), enabled: !isGuest });
+
+  const allRecs = isGuest ? recommendationPool : apiAllRecs;
+  const recentRecs = isGuest ? mockRecentRecs : apiRecentRecs;
 
   const searchResults = query.trim()
     ? allRecs.filter((r) => {
@@ -44,10 +54,11 @@ function SidePanel({ selectedRec, workedSongs, setSelectedRec }: SidePanelProps)
         <Search className='absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none' />
         <input
           type='text'
-          placeholder='곡명 또는 작곡가 검색'
+          placeholder={isGuest ? '로그인 후 검색할 수 있어요' : '곡명 또는 작곡가 검색'}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className='w-full pl-8 pr-8 py-2 text-sm rounded-md border border-border/50 bg-background focus:outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground'
+          disabled={isGuest}
+          className='w-full pl-8 pr-8 py-2 text-sm rounded-md border border-border/50 bg-background focus:outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50'
           aria-label='곡명 또는 작곡가 검색'
         />
         {query && (
