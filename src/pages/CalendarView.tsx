@@ -19,7 +19,7 @@ const getDateColorClass = (deadline: string) => {
     return 'bg-[hsl(var(--status-delivered)/0.12)] text-[hsl(var(--status-delivered))] border-[hsl(var(--status-delivered)/0.25)]';
   }
   // Today or future: orange
-  return 'bg-[hsl(var(--warning)/0.12)]/5 text-[hsl(var(--warning))] border-[hsl(var(--warning)/0.25)]';
+  return 'bg-[hsl(var(--warning)/0.12)] text-[hsl(var(--warning))] border-[hsl(var(--warning)/0.25)]';
 };
 
 export default function CalendarView() {
