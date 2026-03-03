@@ -3,15 +3,17 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import AnalyzeImage from '@/components/pages/commission/AnalyzeImage';
 import CommissionRegisterForm from '@/components/pages/commission/CommissionRegisterForm';
 import { buildInstrumentList } from '@/utils/build-instrument-list';
 import { CommissionRegisterFormType } from '@/types/form';
+import { useAuth } from '@/provider/AuthProvider';
 
 const CommissionRegister = () => {
   const navigate = useNavigate();
-
+  const { isGuest } = useAuth();
+  
   const [form, setForm] = useState<CommissionRegisterFormType>({
     imagePreview: null,
     instruments: [],
@@ -48,6 +50,8 @@ const CommissionRegister = () => {
       }
     })();
   }, []);
+
+  if (isGuest) return <Navigate to='/not-found' replace />;
 
   return (
     <AppLayout>
