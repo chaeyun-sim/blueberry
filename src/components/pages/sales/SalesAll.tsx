@@ -126,6 +126,7 @@ function SalesAll() {
             <Select
               value={year ? String(year) : ''}
               onValueChange={v => setSelectedYear(Number(v))}
+              aria-label='연도 선택'
             >
               <SelectTrigger className='w-24 h-8 text-xs'>
                 <SelectValue placeholder='연도' />
@@ -136,7 +137,7 @@ function SalesAll() {
                 ))}
               </SelectContent>
             </Select>
-            <Select value={filterCategory} onValueChange={setFilterCategory}>
+            <Select value={filterCategory} onValueChange={setFilterCategory} aria-label='대분류 필터 선택'>
               <SelectTrigger className='w-32 h-8 text-xs'>
                 <SelectValue />
               </SelectTrigger>
@@ -156,6 +157,7 @@ function SalesAll() {
                 groupByCategory ? 'hover:bg-primary' : 'hover:bg-primary/10',
               )}
               onClick={() => setGroupByCategory(v => !v)}
+              aria-label='그룹핑 토글'
             >
               <Layers className='h-3 w-3' />
               그룹핑

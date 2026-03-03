@@ -27,12 +27,12 @@ button:not(:disabled),
     --secondary-foreground: 28 22% 14%;
 
     --muted: 38 16% 91%;
-    --muted-foreground: 28 14% 46%;
+    --muted-foreground: 28 14% 38%;
 
     --accent: 64 36% 50%;
     --accent-foreground: 28 22% 14%;
 
-    --destructive: 0 70% 50%;
+    --destructive: 0 70% 42%;
     --destructive-foreground: 38 22% 97%;
 
     --border: 38 18% 84%;
@@ -42,9 +42,14 @@ button:not(:disabled),
     --radius: 1.5rem;
 
     --status-received: 0 65% 54%;
-    --status-working: 64 38% 42%;
-    --status-delivered: 345 42% 46%;
+    --status-working: 210 70% 45%;
+    --status-delivered: 265 55% 50%;
     --status-complete: 150 45% 40%;
+
+    --badge-received-text: 0 65% 30%;
+    --badge-working-text: 210 70% 28%;
+    --badge-delivered-text: 265 55% 30%;
+    --badge-complete-text: 150 45% 26%;
 
     --warning: 35 88% 50%;
     --warning-foreground: 38 22% 97%;
@@ -83,7 +88,7 @@ button:not(:disabled),
     --accent: 64 32% 52%;
     --accent-foreground: 28 22% 14%;
 
-    --destructive: 0 65% 52%;
+    --destructive: 0 65% 62%;
     --destructive-foreground: 38 22% 97%;
 
     --border: 28 15% 22%;
@@ -91,9 +96,14 @@ button:not(:disabled),
     --ring: 345 42% 55%;
 
     --status-received: 0 65% 60%;
-    --status-working: 64 38% 52%;
-    --status-delivered: 345 42% 58%;
+    --status-working: 210 70% 58%;
+    --status-delivered: 265 55% 62%;
     --status-complete: 150 45% 50%;
+
+    --badge-received-text: 0 65% 70%;
+    --badge-working-text: 210 70% 72%;
+    --badge-delivered-text: 265 55% 74%;
+    --badge-complete-text: 150 45% 68%;
 
     --warning: 35 88% 55%;
     --warning-foreground: 38 22% 97%;
@@ -155,18 +165,18 @@ button:not(:disabled),
 
   .badge-received {
     background-color: hsl(var(--status-received) / 0.15);
-    color: hsl(var(--status-received));
+    color: hsl(var(--badge-received-text));
   }
   .badge-working {
     background-color: hsl(var(--status-working) / 0.15);
-    color: hsl(var(--status-working));
+    color: hsl(var(--badge-working-text));
   }
   .badge-delivered {
     background-color: hsl(var(--status-delivered) / 0.15);
-    color: hsl(var(--status-delivered));
+    color: hsl(var(--badge-delivered-text));
   }
   .badge-complete {
     background-color: hsl(var(--status-complete) / 0.15);
-    color: hsl(var(--status-complete));
+    color: hsl(var(--badge-complete-text));
   }
 }

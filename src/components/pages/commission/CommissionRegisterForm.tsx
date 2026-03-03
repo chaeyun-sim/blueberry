@@ -4,7 +4,7 @@ import Autocomplete from '@/components/Autocomplete';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Calendar } from 'lucide-react';
+import { Calendar, Plus, X } from 'lucide-react';
 import { DifficultyLevelType } from '@/types/commission';
 import { Button } from '@/components/ui/button';
 import { useRef, useState } from 'react';
@@ -12,13 +12,15 @@ import { useMutation } from '@tanstack/react-query';
 import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 import { scoreQueries } from '@/api/score/queries';
 import { commissionMutations } from '@/api/commission/mutations';
-import { InstrumentPicker } from '@/components/InstrumentPicker';
+import { ALL_INSTRUMENTS } from '@/constants/instruments';
+import { buildInstrumentList, hasRomanSuffix } from '@/utils/build-instrument-list';
 import { scoreMutations } from '@/api/score/mutations';
 import { toast } from 'sonner';
 import { commissionKeys } from '@/api/commission/queryKeys';
 import { CommissionRegisterFormType } from '@/types/form';
 import { useNavigate } from 'react-router-dom';
 import { queryClient } from '@/utils/query-client';
+import useRemoveInstrument from '@/hooks/use-remove-instrument';
 
 interface CommissionRegisterFormProps {
   form: CommissionRegisterFormType
@@ -32,13 +34,29 @@ function CommissionRegisterForm({ form, setForm, imageFile, isAnalyzing }: Commi
   const navigate = useNavigate();
   const dateInputRef = useRef<HTMLInputElement>(null);
 
+  const { removeInstrument } = useRemoveInstrument();
+
+  const [showInstrumentDropdown, setShowInstrumentDropdown] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [instrumentInput, setInstrumentInput] = useState('');
   const startTimeRef = useRef(performance.now());
 
   const { data: songs = [] } = useQuery(scoreQueries.getSongs());
   const { mutateAsync: createCommission } = useMutation(commissionMutations.createCommission());
   const { mutateAsync: uploadCommissionImage } = useMutation(
     commissionMutations.uploadCommissionImage(),
+  );
+
+  const handleAddInstrument = (name: string) => {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    setForm({ ...form, instruments: buildInstrumentList([...form.instruments, trimmed]) });
+    setInstrumentInput('');
+    setShowInstrumentDropdown(false);
+  };
+
+  const filteredOptions = ALL_INSTRUMENTS.filter(opt =>
+    opt.toLowerCase().includes(instrumentInput.toLowerCase()),
   );
 
   const songSuggestions = songs.map(s => s.title);
@@ -125,11 +143,79 @@ function CommissionRegisterForm({ form, setForm, imageFile, isAnalyzing }: Commi
           </div>
 
           {/* Instrument Chips */}
-          <InstrumentPicker
-            instruments={form.instruments}
-            onChange={instruments => setForm({ ...form, instruments })}
-            disabled={isAnalyzing || isSubmitting}
-          />
+          <div className='space-y-2'>
+            <Label htmlFor='instrument-input'>편성</Label>
+            <div className='relative'>
+              <Input
+                id='instrument-input'
+                role='combobox'
+                aria-expanded={showInstrumentDropdown && !!instrumentInput && filteredOptions.length > 0}
+                aria-haspopup='listbox'
+                aria-controls='instrument-listbox'
+                aria-autocomplete='list'
+                placeholder='악기를 검색하여 추가...'
+                value={instrumentInput}
+                onChange={e => {
+                  setInstrumentInput(e.target.value);
+                  setShowInstrumentDropdown(true);
+                }}
+                onFocus={() => setShowInstrumentDropdown(true)}
+                onBlur={() => setTimeout(() => setShowInstrumentDropdown(false), 200)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    handleAddInstrument(instrumentInput);
+                  }
+                }}
+                disabled={isAnalyzing || isSubmitting}
+              />
+              {showInstrumentDropdown && instrumentInput && filteredOptions.length > 0 && (
+                <div
+                  id='instrument-listbox'
+                  role='listbox'
+                  aria-label='악기 목록'
+                  className='absolute z-10 top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg max-h-48 overflow-y-auto'
+                >
+                  {filteredOptions.map(opt => (
+                    <button
+                      key={opt}
+                      type='button'
+                      role='option'
+                      aria-selected={false}
+                      className='w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors flex items-center gap-2'
+                      onMouseDown={e => {
+                        e.preventDefault();
+                        handleAddInstrument(opt);
+                      }}
+                    >
+                      <Plus className='h-3 w-3 text-muted-foreground' />
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            {form.instruments.length > 0 && (
+              <div className='flex flex-wrap gap-2 m-2'>
+                {form.instruments.map((inst, idx) => (
+                  <span
+                    key={inst}
+                    className='inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium bg-primary/15 text-primary border border-primary/20'
+                  >
+                    {inst}
+                    <button
+                      type='button'
+                      disabled={isAnalyzing || isSubmitting}
+                      onClick={() => setForm({ ...form, instruments: removeInstrument(form.instruments, idx) })}
+                      className='ml-0.5 hover:text-destructive transition-colors disabled:opacity-50 disabled:pointer-events-none'
+                      aria-label={`${inst} 제거`}
+                    >
+                      <X className='h-3 w-3' />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
 
           <div className='space-y-2'>
             <Label htmlFor='version'>버전</Label>
@@ -142,6 +228,7 @@ function CommissionRegisterForm({ form, setForm, imageFile, isAnalyzing }: Commi
                 })
               }
               disabled={isAnalyzing || isSubmitting}
+              aria-label='버전 선택'
             >
               <SelectTrigger>
                 <SelectValue placeholder='버전을 선택하세요' />
@@ -172,6 +259,7 @@ function CommissionRegisterForm({ form, setForm, imageFile, isAnalyzing }: Commi
                 disabled={isAnalyzing || isSubmitting}
                 onClick={() => dateInputRef.current?.showPicker()}
                 className='absolute right-0 top-0 bottom-0 px-3 flex items-center text-muted-foreground hover:text-foreground transition-colors'
+                aria-label='마감일 선택'
               >
                 <Calendar className='h-4 w-4' />
               </button>

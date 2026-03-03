@@ -104,7 +104,7 @@ export default function Settings() {
                 <p className="text-sm font-medium">마감일 푸시 알림</p>
                 <p className="text-xs text-muted-foreground">당일·1일·2일 전 자동 알림</p>
               </div>
-              <Switch checked={pushEnabled} onCheckedChange={handlePushToggle} disabled={pushLoading} />
+              <Switch checked={pushEnabled} onCheckedChange={handlePushToggle} disabled={pushLoading} aria-label='마감일 푸시 알림 토글' />
             </div>
           </section>
 
