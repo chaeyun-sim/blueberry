@@ -1,6 +1,6 @@
 import { PlusCircle, Sun, Moon, LogIn, LogOut } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useTheme } from "@/provider/ThemeProvider";
+import { useTheme } from '@/hooks/use-theme';
 import {
   Sidebar,
   SidebarContent,
