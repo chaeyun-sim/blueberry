@@ -105,6 +105,7 @@ export function AppSidebar() {
           <button
             onClick={toggleTheme}
             className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-sidebar-foreground/70 hover:bg-foreground/5 border border-transparent transition-all duration-150"
+            aria-label="테마 변경"
           >
             {theme === "dark" ? <Sun className="h-4 w-4 shrink-0" /> : <Moon className="h-4 w-4 shrink-0" />}
             <span>{theme === "dark" ? "라이트 모드" : "다크 모드"}</span>
