@@ -36,6 +36,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { queryClient } from '@/utils/query-client';
 import { COMMISSION_INFO } from '@/types/commission';
 import { toast } from 'sonner';
+import { useAuth } from '@/provider/AuthProvider';
 
 const statusProgress: Record<CommissionStatus, LucideIcon> = {
   received: Package2,
@@ -64,6 +65,8 @@ const cleanTitle = (title: string) =>
 const CommissionDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { isGuest } = useAuth();
+
   const { data: commission, isLoading } = useQuery(commissionQueries.getCommission(id));
   const { data: song } = useQuery(scoreQueries.getSong(commission?.song_id ?? ''));
   const { mutate: updateStatus } = useMutation(commissionMutations.updateCommissionStatus());
@@ -143,6 +146,11 @@ const CommissionDetail = () => {
   };
 
   const handleDelete = () => {
+    if (isGuest) {
+      toast.error('게스트 모드에서는 의뢰를 삭제할 수 없습니다.');
+      return;
+    }
+
     overlay.open(
       overlayProps => (
         <DeleteCommissionDialog

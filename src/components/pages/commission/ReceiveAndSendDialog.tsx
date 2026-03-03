@@ -15,6 +15,7 @@ import { Image, Mail, CheckCircle, Loader2 } from 'lucide-react';
 import { OverlayProps } from '@/types/overlay';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
+import { useAuth } from '@/provider/AuthProvider';
 
 interface TransitionConfig {
   title: string;
@@ -51,6 +52,8 @@ function ReceiveAndSendDialog({
   toStatus,
   onConfirm,
 }: ReceiveAndSendDialogProps) {
+  const { isGuest } = useAuth();
+
   const [isSending, setIsSending] = useState(false);
   const [toEmail, setToEmail] = useState('');
   const [progress, setProgress] = useState(0);
@@ -173,7 +176,7 @@ function ReceiveAndSendDialog({
           <Button
             onClick={toStatus === 'delivered' ? handleEmailConfirm : handleConfirm}
             className='gap-2'
-            disabled={isSending || (toStatus === 'delivered' && !commissionId)}
+            disabled={isSending || (toStatus === 'delivered' && !commissionId) || isGuest}
           >
             {isSending ? <Loader2 className='h-4 w-4 animate-spin' /> : Icon && <Icon className='h-4 w-4' />}
             {isSending ? '발송 중...' : config.acceptLabel}
