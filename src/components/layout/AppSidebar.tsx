@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import logoImg from "@/assets/logo.png";
-import { useAuth } from '@/provider/AuthProvider';
+import { useAuth } from '@/hooks/use-auth';
 import { navItems } from '@/constants/nav-items';
 
 export function AppSidebar() {

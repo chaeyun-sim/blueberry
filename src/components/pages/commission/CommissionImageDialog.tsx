@@ -35,7 +35,7 @@ function CommissionImageDialog({
           {imageUrl ? (
             <img
               src={imageUrl}
-              alt='commission image'
+              alt='commission kakao talk'
               className='w-full h-full object-cover'
             />
           ) : (

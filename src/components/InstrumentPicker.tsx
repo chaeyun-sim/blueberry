@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Plus, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import Label from '@/components/ui/label';
 import { ALL_INSTRUMENTS } from '@/constants/instruments';
 import { buildInstrumentList } from '@/utils/build-instrument-list';
 import useRemoveInstrument from '@/hooks/use-remove-instrument';

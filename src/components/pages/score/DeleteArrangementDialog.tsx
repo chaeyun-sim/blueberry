@@ -9,12 +9,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+import Button from '@/components/ui/button';
 import { useMutation } from '@tanstack/react-query';
 import { scoreMutations } from '@/api/score/mutations';
 import { scoreKeys } from '@/api/score/queryKeys';
 import { queryClient } from '@/utils/query-client';
-import { useAuth } from '@/provider/AuthProvider';
+import { useAuth } from '@/hooks/use-auth';
 
 interface DeleteArrangementDialogProps extends OverlayProps {
   arrangementId: string;

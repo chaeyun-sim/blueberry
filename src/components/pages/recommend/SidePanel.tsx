@@ -8,7 +8,7 @@ import { formatDate } from '@/utils/format-date';
 import { Search, X } from 'lucide-react';
 import { useState, useMemo, useEffect } from 'react';
 import dayjs from 'dayjs';
-import { useAuth } from '@/provider/AuthProvider';
+import { useAuth } from '@/hooks/use-auth';
 
 interface SidePanelProps {
   selectedRec: MusicRecommendation | null;

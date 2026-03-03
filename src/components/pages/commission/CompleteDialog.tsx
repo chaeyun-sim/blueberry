@@ -6,8 +6,8 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+import Button from '@/components/ui/button';
+import Label from '@/components/ui/label';
 import { Loader2, FileCheck } from 'lucide-react';
 import { OverlayProps } from '@/types/overlay';
 import { Commission } from '@/types/commission';
@@ -25,7 +25,7 @@ import { hasCompressibleAudio, compressAudioEntries } from '@/utils/compress-aud
 import DropZone from './Dropzone';
 import ZipFileHeader from './ZipFileHeader';
 import ReadOnlyFileList from './ReadOnlyFileList';
-import { useAuth } from '@/provider/AuthProvider';
+import { useAuth } from '@/hooks/use-auth';
 
 async function findOrCreateSong(
   title: string,

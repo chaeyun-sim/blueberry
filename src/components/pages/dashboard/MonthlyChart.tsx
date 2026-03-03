@@ -9,7 +9,7 @@ import {
 } from 'recharts';
 import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 import { commissionQueries } from '@/api/commission/queries';
-import { useAuth } from '@/provider/AuthProvider';
+import { useAuth } from '@/hooks/use-auth';
 import { demoMonthlyCategoryBreakdown } from '@/data/demo';
 
 interface TooltipProps {

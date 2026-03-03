@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react'
+import { createContext, useEffect, useState, useCallback, type ReactNode } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import { getSession, onAuthStateChange, logout } from '@/api/auth'
 import { useQueryClient } from '@tanstack/react-query'
@@ -11,17 +11,13 @@ interface AuthContextValue {
   exitGuestMode: () => void
 }
 
-const AuthContext = createContext<AuthContextValue>({
+export const AuthContext = createContext<AuthContextValue>({
   session: null,
   loading: true,
   isGuest: false,
   enterGuestMode: () => {},
   exitGuestMode: () => {},
 })
-
-export function useAuth() {
-  return useContext(AuthContext)
-}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)

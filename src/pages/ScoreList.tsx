@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import Button from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PlusCircle, Search, FileMusic, Music, AlertCircle } from 'lucide-react';
 import {
@@ -27,7 +27,7 @@ import { useMutation } from '@tanstack/react-query';
 import { queryClient } from '@/utils/query-client';
 import dayjs from 'dayjs';
 import { toast } from 'sonner';
-import { useAuth } from '@/provider/AuthProvider';
+import { useAuth } from '@/hooks/use-auth';
 
 const ScoreList = () => {
   const navigate = useNavigate();

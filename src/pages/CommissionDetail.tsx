@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import Button from '@/components/ui/button';
 import {
   ArrowLeft,
   CheckCircle,
@@ -36,7 +36,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { queryClient } from '@/utils/query-client';
 import { COMMISSION_INFO } from '@/types/commission';
 import { toast } from 'sonner';
-import { useAuth } from '@/provider/AuthProvider';
+import { useAuth } from '@/hooks/use-auth';
 
 const statusProgress: Record<CommissionStatus, LucideIcon> = {
   received: Package2,

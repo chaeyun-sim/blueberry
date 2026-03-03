@@ -1,12 +1,12 @@
 import { Card, CardContent } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
+import Label from '@/components/ui/label';
 import Autocomplete from '@/components/Autocomplete';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Calendar, Plus, X } from 'lucide-react';
 import { DifficultyLevelType } from '@/types/commission';
-import { Button } from '@/components/ui/button';
+import Button from '@/components/ui/button';
 import { useRef, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useAppQuery as useQuery } from '@/hooks/use-app-query';
@@ -21,7 +21,7 @@ import { CommissionRegisterFormType } from '@/types/form';
 import { useNavigate } from 'react-router-dom';
 import { queryClient } from '@/utils/query-client';
 import useRemoveInstrument from '@/hooks/use-remove-instrument';
-import { useAuth } from '@/provider/AuthProvider';
+import { useAuth } from '@/hooks/use-auth';
 
 interface CommissionRegisterFormProps {
   form: CommissionRegisterFormType

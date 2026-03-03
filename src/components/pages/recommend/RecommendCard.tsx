@@ -1,13 +1,13 @@
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import Button from '@/components/ui/button';
 import { RefreshCw, ExternalLink, SkipForward, PenLine, RotateCcw } from 'lucide-react';
 import { type MusicRecommendation } from '@/mock/recommendations';
 import { formatDate } from '@/utils/format-date';
 import { SoundpostLinks } from './SoundpostLinks';
 import { useSoundpostCheck } from '@/hooks/use-soundpost-check';
-import { useAuth } from '@/provider/AuthProvider';
+import { useAuth } from '@/hooks/use-auth';
 
 interface Props {
   rec: MusicRecommendation;

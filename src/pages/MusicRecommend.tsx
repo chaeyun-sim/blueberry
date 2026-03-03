@@ -7,7 +7,7 @@ import { useWorkedSongs } from '@/hooks/use-worked-songs';
 import { RecommendCard } from '@/components/pages/recommend/RecommendCard';
 import SidePanel from '@/components/pages/recommend/SidePanel';
 import { recommendationQueries } from '@/api/recommendation/queries';
-import { useAuth } from '@/provider/AuthProvider';
+import { useAuth } from '@/hooks/use-auth';
 
 function MusicRecommend() {
   const { isGuest } = useAuth();

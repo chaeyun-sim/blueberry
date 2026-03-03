@@ -1,5 +1,5 @@
 import { Navigate } from 'react-router-dom'
-import { useAuth } from '@/provider/AuthProvider'
+import { useAuth } from '@/hooks/use-auth'
 import { PropsWithChildren } from 'react';
 
 export default function ProtectedRoute({ children }: PropsWithChildren) {

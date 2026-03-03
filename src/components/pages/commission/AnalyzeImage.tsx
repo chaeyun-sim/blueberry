@@ -1,5 +1,5 @@
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import Button from '@/components/ui/button';
 import { X, ImageIcon, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRef } from 'react';
@@ -79,6 +79,13 @@ function AnalyzeImage({
           onDrop={handleImageDrop}
           onClick={() => fileInputRef.current?.click()}
           className='relative min-h-[300px] border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-4 bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer'
+          role='button'
+          tabIndex={0}
+          onKeyDown={e => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              fileInputRef.current?.click();
+            }
+          }}
         >
           {isAnalyzing && (
             <div className='absolute inset-0 rounded-lg overflow-hidden'>
