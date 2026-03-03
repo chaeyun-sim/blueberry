@@ -57,7 +57,7 @@ async function uploadAllFiles(
 
 interface CompleteDialogForm {
   zipName: string | null;
-  zipSize: number;
+  zipSize: number | null;
   files: FileEntry[];
 }
 
