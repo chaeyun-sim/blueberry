@@ -144,9 +144,15 @@ function CommissionRegisterForm({ form, setForm, imageFile, isAnalyzing }: Commi
 
           {/* Instrument Chips */}
           <div className='space-y-2'>
-            <Label>편성</Label>
+            <Label htmlFor='instrument-input'>편성</Label>
             <div className='relative'>
               <Input
+                id='instrument-input'
+                role='combobox'
+                aria-expanded={showInstrumentDropdown && !!instrumentInput && filteredOptions.length > 0}
+                aria-haspopup='listbox'
+                aria-controls='instrument-listbox'
+                aria-autocomplete='list'
                 placeholder='악기를 검색하여 추가...'
                 value={instrumentInput}
                 onChange={e => {
@@ -163,11 +169,18 @@ function CommissionRegisterForm({ form, setForm, imageFile, isAnalyzing }: Commi
                 disabled={isAnalyzing || isSubmitting}
               />
               {showInstrumentDropdown && instrumentInput && filteredOptions.length > 0 && (
-                <div className='absolute z-10 top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg max-h-48 overflow-y-auto'>
+                <div
+                  id='instrument-listbox'
+                  role='listbox'
+                  aria-label='악기 목록'
+                  className='absolute z-10 top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg max-h-48 overflow-y-auto'
+                >
                   {filteredOptions.map(opt => (
                     <button
                       key={opt}
                       type='button'
+                      role='option'
+                      aria-selected={false}
                       className='w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors flex items-center gap-2'
                       onMouseDown={e => {
                         e.preventDefault();
