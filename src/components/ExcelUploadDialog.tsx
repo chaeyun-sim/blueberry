@@ -13,6 +13,8 @@ import { Upload, FileSpreadsheet, X, CheckCircle2 } from "lucide-react";
 import { splitProduct } from "@/utils/split-product";
 import { ExcelRow } from '@/types/excel';
 import { parseExcelSheet } from '@/utils/parse-excel';
+import { useAuth } from '@/provider/AuthProvider';
+import { toast } from 'sonner';
 
 interface ExcelUploadDialogProps {
   open: boolean;
@@ -22,6 +24,8 @@ interface ExcelUploadDialogProps {
 
 
 export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: ExcelUploadDialogProps) => {
+  const { isGuest } = useAuth();
+
   const defaultUploadName = () => {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
@@ -87,6 +91,11 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: ExcelUploadD
   );
 
   const handleConfirm = () => {
+    if (isGuest) {
+      toast.error('게스트 모드에서는 엑셀 업로드를 할 수 없습니다.');
+      return;
+    }
+
     if (form.preview.length > 0 && form.uploadName.trim()) {
       onUpload(form.preview, form.uploadName.trim());
       reset();
