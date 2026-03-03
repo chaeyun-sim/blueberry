@@ -13,7 +13,7 @@ import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 import { scoreQueries } from '@/api/score/queries';
 import { commissionMutations } from '@/api/commission/mutations';
 import { ALL_INSTRUMENTS } from '@/constants/instruments';
-import { buildInstrumentList, hasRomanSuffix } from '@/utils/build-instrument-list';
+import { buildInstrumentList } from '@/utils/build-instrument-list';
 import { scoreMutations } from '@/api/score/mutations';
 import { toast } from 'sonner';
 import { commissionKeys } from '@/api/commission/queryKeys';
