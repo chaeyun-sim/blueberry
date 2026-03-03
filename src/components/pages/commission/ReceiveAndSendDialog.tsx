@@ -97,11 +97,19 @@ function ReceiveAndSendDialog({
   const Icon = config.icon;
 
   const handleConfirm = () => {
+    if (isGuest) {
+      toast.error('게스트 모드에서는 상태를 변경할 수 없습니다.');
+      return;
+    }
     onConfirm();
     close();
   };
 
   const handleEmailConfirm = async () => {
+    if (isGuest) {
+      toast.error('게스트 모드에서는 메일을 발송할 수 없습니다.');
+      return;
+    }
     if (isSendingRef.current) return;
 
     if (!commissionId) {
@@ -176,7 +184,7 @@ function ReceiveAndSendDialog({
           <Button
             onClick={toStatus === 'delivered' ? handleEmailConfirm : handleConfirm}
             className='gap-2'
-            disabled={isSending || (toStatus === 'delivered' && !commissionId) || isGuest}
+            disabled={isSending || (toStatus === 'delivered' && !commissionId)}
           >
             {isSending ? <Loader2 className='h-4 w-4 animate-spin' /> : Icon && <Icon className='h-4 w-4' />}
             {isSending ? '발송 중...' : config.acceptLabel}
