@@ -26,6 +26,7 @@ import { DifficultyLevelType } from '@/types/commission';
 import { FileEntry } from '@/types/form';
 import { InstrumentPicker } from '@/components/InstrumentPicker';
 import { ZipUploadCard } from '@/components/pages/score/ZipUploadCard';
+import { useAuth } from '@/provider/AuthProvider';
 
 interface ScoreRegisterFormType {
   songTitle: string;
@@ -39,6 +40,7 @@ interface ScoreRegisterFormType {
 
 const ScoreRegister = () => {
   const navigate = useNavigate();
+  const { isGuest } = useAuth();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -81,6 +83,11 @@ const ScoreRegister = () => {
   const { mutateAsync: uploadFile } = useMutation(scoreMutations.uploadArrangementFile());
 
   const handleSubmit = async () => {
+    if (isGuest) {
+      toast.error('게스트 모드에서는 악보를 등록할 수 없습니다.');
+      return;
+    }
+    
     if (!form.songTitle.trim()) {
       toast.error('곡명을 입력해주세요.');
       return;
