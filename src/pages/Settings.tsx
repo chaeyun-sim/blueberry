@@ -4,7 +4,7 @@ import { logout } from '@/api/auth';
 import { createPushSubscription } from '@/hooks/use-push';
 import { Switch } from '@/components/ui/switch';
 import { Bell, LogOut, ArrowLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import logoImg from '@/assets/logo.png';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,7 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { toast } from 'sonner';
 
 export default function Settings() {
-  const { session } = useAuth();
+  const { session, isGuest } = useAuth();
   const navigate = useNavigate();
 
   const [pushEnabled, setPushEnabled] = useState(false);
@@ -26,6 +26,11 @@ export default function Settings() {
   }, []);
 
   const handlePushToggle = async (checked: boolean) => {
+    if (isGuest) {
+      toast.error('게스트 모드에서는 푸시 알림을 설정할 수 없습니다.');
+      return;
+    }
+
     setPushLoading(true);
     try {
       if (checked) {
@@ -63,6 +68,8 @@ export default function Settings() {
     await logout().catch(() => {});
     navigate('/login');
   };
+
+  if (isGuest) return <Navigate to='/not-found' replace />;
 
   return (
     <AppLayout>

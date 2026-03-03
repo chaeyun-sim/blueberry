@@ -22,8 +22,11 @@ import type { ExcelUpload } from '@/types/stats';
 import UploadFolderRow from './UploadFolderRow';
 import { queryClient } from '@/utils/query-client';
 import { toast } from 'sonner';
+import { useAuth } from '@/provider/AuthProvider';
 
 function ExcelTab({ onUploadRequest }: { onUploadRequest: () => void }) {
+  const { isGuest } = useAuth();
+
   const [openUploadId, setOpenUploadId] = useState<string | null>(null);
 
   const {
@@ -43,12 +46,18 @@ function ExcelTab({ onUploadRequest }: { onUploadRequest: () => void }) {
   );
 
   const handleDelete = (upload: ExcelUpload) => {
+    if (isGuest) {
+      toast.error('게스트 모드에서는 업로드를 삭제할 수 없습니다.');
+      return;
+    }
+
     if (
       !confirm(
         `"${upload.name}" 업로드를 삭제하시겠습니까?\n연결된 ${upload.row_count}건의 매출 데이터도 함께 삭제됩니다.`,
       )
     )
       return;
+
     deleteUpload(upload.id, {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: statsKeys.all });
@@ -56,7 +65,9 @@ function ExcelTab({ onUploadRequest }: { onUploadRequest: () => void }) {
         toast.success(`"${upload.name}" 업로드가 삭제되었습니다.`);
       },
       onError: e =>
-        toast.error('삭제에 실패했습니다.', { description: e instanceof Error ? e.message : undefined }),
+        toast.error('삭제에 실패했습니다.', {
+          description: e instanceof Error ? e.message : undefined,
+        }),
     });
   };
 
