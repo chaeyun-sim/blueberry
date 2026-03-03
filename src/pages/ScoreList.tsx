@@ -27,9 +27,11 @@ import { useMutation } from '@tanstack/react-query';
 import { queryClient } from '@/utils/query-client';
 import dayjs from 'dayjs';
 import { toast } from 'sonner';
+import { useAuth } from '@/provider/AuthProvider';
 
 const ScoreList = () => {
   const navigate = useNavigate();
+  const { isGuest } = useAuth();
 
   const [search, setSearch] = useState('');
   const [openFolderId, setOpenFolderId] = useState<string | null>(null);
@@ -146,6 +148,11 @@ const ScoreList = () => {
                     song={song}
                     onClick={() => setOpenFolderId(song.id)}
                     onDelete={() => {
+                      if (isGuest) {
+                        toast.error('게스트 모드에서는 악보를 삭제할 수 없습니다.');
+                        return;
+                      }
+
                       if (song.arrangements.length > 0) {
                         overlay.open(overlayProps => (
                           <DeleteSongDialog

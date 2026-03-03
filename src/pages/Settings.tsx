@@ -12,7 +12,7 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { toast } from 'sonner';
 
 export default function Settings() {
-  const { session } = useAuth();
+  const { session, isGuest } = useAuth();
   const navigate = useNavigate();
 
   const [pushEnabled, setPushEnabled] = useState(false);
@@ -26,6 +26,11 @@ export default function Settings() {
   }, []);
 
   const handlePushToggle = async (checked: boolean) => {
+    if (isGuest) {
+      toast.error('게스트 모드에서는 푸시 알림을 설정할 수 없습니다.');
+      return;
+    }
+
     setPushLoading(true);
     try {
       if (checked) {

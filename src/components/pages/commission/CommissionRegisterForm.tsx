@@ -21,6 +21,7 @@ import { CommissionRegisterFormType } from '@/types/form';
 import { useNavigate } from 'react-router-dom';
 import { queryClient } from '@/utils/query-client';
 import useRemoveInstrument from '@/hooks/use-remove-instrument';
+import { useAuth } from '@/provider/AuthProvider';
 
 interface CommissionRegisterFormProps {
   form: CommissionRegisterFormType
@@ -33,7 +34,8 @@ interface CommissionRegisterFormProps {
 function CommissionRegisterForm({ form, setForm, imageFile, isAnalyzing }: CommissionRegisterFormProps) {
   const navigate = useNavigate();
   const dateInputRef = useRef<HTMLInputElement>(null);
-
+  
+  const { isGuest } = useAuth();
   const { removeInstrument } = useRemoveInstrument();
 
   const [showInstrumentDropdown, setShowInstrumentDropdown] = useState(false);
@@ -71,6 +73,11 @@ function CommissionRegisterForm({ form, setForm, imageFile, isAnalyzing }: Commi
   const { mutateAsync: findSongByTitle } = useMutation(scoreMutations.findSongByTitle());
 
   const handleSubmit = async () => {
+    if (isGuest) {
+      toast.error('게스트 모드에서는 의뢰를 등록할 수 없습니다.');
+      return;
+    }
+    
     setIsSubmitting(true);
     try {
       let songId: string | undefined;
