@@ -173,7 +173,7 @@ const CommissionDetail = () => {
   if (isLoading)
     return (
       <AppLayout>
-        <div className='mb-6 flex items-center justify-between'>
+        <div className='mb-6 flex items-center justify-between' role="status">
           <Skeleton className='h-9 w-16' />
           <Skeleton className='h-9 w-16' />
         </div>

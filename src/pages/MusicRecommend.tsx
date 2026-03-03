@@ -25,7 +25,7 @@ function MusicRecommend() {
   if (!isGuest && isPending) {
     return (
       <AppLayout>
-        <div className='h-full overflow-auto'>
+        <div className='h-full overflow-auto' role="status">
           <PageHeader title='음악 추천' description='클래식 & 연주곡 편곡 추천' />
           <p className='text-sm text-muted-foreground animate-pulse'>오늘의 추천곡을 불러오는 중...</p>
         </div>
