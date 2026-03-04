@@ -96,13 +96,13 @@ export function InstrumentPicker({
             className='absolute z-10 top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg max-h-48 overflow-y-auto'
           >
             {filteredOptions.map((opt, idx) => (
-              <button
+              <div
                 key={opt}
                 id={`${listboxId}-option-${idx}`}
-                type='button'
                 role='option'
+                tabIndex={-1}
                 aria-selected={idx === activeIndex}
-                className={`w-full text-left px-3 py-2 text-sm transition-colors flex items-center gap-2 ${idx === activeIndex ? 'bg-muted' : 'hover:bg-muted'}`}
+                className={`w-full text-left px-3 py-2 text-sm transition-colors flex items-center gap-2 cursor-default ${idx === activeIndex ? 'bg-muted' : 'hover:bg-muted'}`}
                 onMouseDown={e => {
                   e.preventDefault();
                   handleAdd(opt);
@@ -110,7 +110,7 @@ export function InstrumentPicker({
               >
                 <Plus className='h-3 w-3 text-muted-foreground' />
                 {opt}
-              </button>
+              </div>
             ))}
           </div>
         )}

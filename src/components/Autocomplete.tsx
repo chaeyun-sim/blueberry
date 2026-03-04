@@ -81,20 +81,20 @@ function Autocomplete({ value, onChange, placeholder = "곡 제목을 입력하�
           className="absolute z-10 top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg max-h-48 overflow-y-auto"
         >
           {filtered.map((song, idx) => (
-            <button
+            <div
               key={song}
               id={`${listboxId}-option-${idx}`}
-              type="button"
               role="option"
+              tabIndex={-1}
               aria-selected={idx === activeIndex}
-              className={`w-full text-left px-3 py-2 text-sm transition-colors ${idx === activeIndex ? 'bg-muted' : 'hover:bg-muted'}`}
+              className={`w-full text-left px-3 py-2 text-sm transition-colors cursor-default ${idx === activeIndex ? 'bg-muted' : 'hover:bg-muted'}`}
               onMouseDown={(e) => {
                 e.preventDefault();
                 select(song);
               }}
             >
               {song}
-            </button>
+            </div>
           ))}
         </div>
       )}
