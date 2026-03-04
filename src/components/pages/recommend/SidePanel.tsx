@@ -85,13 +85,11 @@ function SidePanel({ selectedRec, workedSongs, setSelectedRec }: SidePanelProps)
               return (
                 <button
                   key={r.id}
-                  disabled={done}
                   className={cn(
-                    'w-full text-left px-4 py-3 border-t border-border/50 first:border-t-0 transition-colors focus:outline-none',
-                    isSelected ? 'bg-primary/5' : !done && 'hover:bg-muted/40',
-                    done ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer',
+                    'cursor-pointer w-full text-left px-4 py-3 border-t border-border/50 first:border-t-0 transition-colors focus:outline-none',
+                    isSelected ? 'bg-primary/5' : 'hover:bg-muted/40',
                   )}
-                  onClick={() => { if (!done) { setSelectedRec(r); setQuery(''); } }}
+                  onClick={() => setSelectedRec(r)}
                 >
                   <p className='text-sm font-medium leading-snug'>
                     {r.title}
@@ -124,13 +122,11 @@ function SidePanel({ selectedRec, workedSongs, setSelectedRec }: SidePanelProps)
               return (
                 <button
                   key={r.id}
-                  disabled={done}
                   className={cn(
-                    'w-full text-left px-4 py-3 border-t border-border/50 first:border-t-0 transition-colors focus:outline-none',
-                    isSelected ? 'bg-primary/5' : !done && 'hover:bg-muted/40',
-                    done ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer',
+                    'cursor-pointer w-full text-left px-4 py-3 border-t border-border/50 first:border-t-0 transition-colors focus:outline-none',
+                    isSelected ? 'bg-primary/5' : 'hover:bg-muted/40',
                   )}
-                  onClick={() => !done && setSelectedRec(r)}
+                  onClick={() => setSelectedRec(r)}
                 >
                   <p className='text-[11px] text-muted-foreground mb-1'>{formatDate(dayjs(date))}</p>
                   <p className='text-sm font-medium leading-snug'>
