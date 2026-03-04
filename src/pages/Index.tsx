@@ -174,9 +174,10 @@ const Dashboard = () => {
       <div className='flex flex-col gap-4'>
         <div className='rounded-3xl shadow-sm overflow-hidden h-[180px]'>
           <img
-            src='https://images.unsplash.com/photo-1771506364945-0b6566c6cd5f?q=80&w=2232&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
+            src='https://images.unsplash.com/photo-1771506364945-0b6566c6cd5f?q=80&w=1440&auto=format&fit=crop'
             className='w-full h-full object-fill lg:object-center'
             alt=""
+            fetchPriority='high'
           />
         </div>
         {/* Top Row */}
