@@ -36,7 +36,7 @@ function Autocomplete({ value, onChange, placeholder = "곡 제목을 입력하�
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
       setActiveIndex(prev => (prev <= 0 ? filtered.length - 1 : prev - 1));
-    } else if (e.key === 'Enter' && activeIndex >= 0) {
+    } else if (e.key === 'Enter' && activeIndex >= 0 && activeIndex < filtered.length) {
       e.preventDefault();
       select(filtered[activeIndex]);
     } else if (e.key === 'Escape') {
@@ -60,7 +60,10 @@ function Autocomplete({ value, onChange, placeholder = "곡 제목을 입력하�
           setOpen(true);
           setActiveIndex(-1);
         }}
-        onFocus={() => setOpen(true)}
+        onFocus={() => {
+          clearTimeout(timeoutRef.current);
+          setOpen(true);
+        }}
         onBlur={() => {
           timeoutRef.current = setTimeout(() => {
             setOpen(false);
