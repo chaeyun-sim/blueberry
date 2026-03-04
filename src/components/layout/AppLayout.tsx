@@ -34,7 +34,7 @@ export function AppLayout({ children, bottomBar }: AppLayoutProps) {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.18, ease: "easeOut" }}
-                className="p-6 md:h-full"
+                className="p-6 md:h-full md:overflow-auto"
               >
                 {children}
               </motion.div>
