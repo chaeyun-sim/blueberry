@@ -52,7 +52,7 @@ export default function Login() {
           <div className='flex flex-col items-center gap-2 mb-8'>
             <img
               src={logoImg}
-              alt='BlueBerry'
+              alt='로고'
               className='object-contain'
               style={{ width: 48, height: 48 }}
             />

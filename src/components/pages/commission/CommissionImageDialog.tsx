@@ -35,12 +35,12 @@ function CommissionImageDialog({
           {imageUrl ? (
             <img
               src={imageUrl}
-              alt='commission kakao talk'
+              alt='카카오톡 의뢰 캡쳐 이미지'
               className='w-full h-full object-cover'
             />
           ) : (
             <div className='flex flex-col items-center justify-center gap-3 py-10 bg-muted/30'>
-              <img src={logo} alt='blueberry logo' className='w-20 h-20 opacity-60' />
+              <img src={logo} alt='로고' className='w-20 h-20 opacity-60' />
               <p className='text-xs text-muted-foreground'>이미지가 없습니다 🫐</p>
             </div>
           )}
