@@ -142,6 +142,7 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: ExcelUploadD
 
         {!form.fileName ? (
           <button
+            type="button"
             className={cn(
               'border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer',
               dragOver ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50',
