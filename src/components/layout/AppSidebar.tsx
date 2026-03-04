@@ -7,7 +7,7 @@ import {
   SidebarFooter,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
-import logoImg from "@/assets/logo.png";
+import logoImg from "@/assets/logo.webp";
 import { useAuth } from '@/hooks/use-auth';
 import { navItems } from '@/constants/nav-items';
 

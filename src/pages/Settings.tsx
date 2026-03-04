@@ -6,7 +6,7 @@ import { Switch } from '@/components/ui/switch';
 import { Bell, LogOut, ArrowLeft } from 'lucide-react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import logoImg from '@/assets/logo.png';
+import logoImg from '@/assets/logo.webp';
 import Button from '@/components/ui/button';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { toast } from 'sonner';
