@@ -47,7 +47,12 @@ function CommissionRegisterForm({
   );
 
   const { songSuggestions, composerSuggestions, handleSongSelect } = useSongField(
-    (songTitle, composer) => setForm({ ...form, songTitle, composer }),
+    (songTitle, composer) =>
+      setForm({
+        ...form,
+        songTitle,
+        composer: composer ?? (songTitle ? form.composer : ''),
+      }),
   );
 
   const { mutateAsync: createSong } = useMutation(scoreMutations.createSong());
