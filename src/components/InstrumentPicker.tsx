@@ -10,14 +10,12 @@ interface InstrumentPickerProps {
   instruments: string[];
   onChange: (instruments: string[]) => void;
   disabled?: boolean;
-  label?: string;
 }
 
 export function InstrumentPicker({
   instruments,
   onChange,
   disabled,
-  label = '편성',
 }: InstrumentPickerProps) {
   const [input, setInput] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
@@ -74,7 +72,7 @@ export function InstrumentPicker({
 
   return (
     <div className='space-y-2'>
-      <Label htmlFor={inputId}>{label}</Label>
+      <Label htmlFor={inputId}>악기 구성</Label>
       <div className='relative'>
         <Input
           id={inputId}
