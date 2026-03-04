@@ -200,6 +200,7 @@ const CommissionListContent = () => {
                     onClick={() => navigate(`/commissions/${item.id}`)}
                     onKeyDown={e => {
                       if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
                         navigate(`/commissions/${item.id}`);
                       }
                     }}

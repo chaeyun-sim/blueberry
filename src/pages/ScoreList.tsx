@@ -195,8 +195,9 @@ const ScoreList = () => {
                         tabIndex={0}
                         className='cursor-pointer hover:bg-muted/50'
                         onClick={() => navigate(`/scores/${openFolder.id}/arrangements/${arr.id}`)}
-                        onKeyDown={e => {
+                        onKeyDown={e => { 
                           if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
                             navigate(`/scores/${openFolder.id}/arrangements/${arr.id}`);
                           }
                         }}
