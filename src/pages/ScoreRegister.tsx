@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+import Button from '@/components/ui/button';
+import Label from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -26,7 +26,7 @@ import { DifficultyLevelType } from '@/types/commission';
 import { FileEntry } from '@/types/form';
 import { InstrumentPicker } from '@/components/InstrumentPicker';
 import { ZipUploadCard } from '@/components/pages/score/ZipUploadCard';
-import { useAuth } from '@/provider/AuthProvider';
+import { useAuth } from '@/hooks/use-auth';
 
 interface ScoreRegisterFormType {
   songTitle: string;

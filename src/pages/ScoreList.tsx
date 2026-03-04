@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import Button from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PlusCircle, Search, FileMusic, Music, AlertCircle } from 'lucide-react';
 import {
@@ -27,7 +27,7 @@ import { useMutation } from '@tanstack/react-query';
 import { queryClient } from '@/utils/query-client';
 import dayjs from 'dayjs';
 import { toast } from 'sonner';
-import { useAuth } from '@/provider/AuthProvider';
+import { useAuth } from '@/hooks/use-auth';
 
 const ScoreList = () => {
   const navigate = useNavigate();
@@ -47,7 +47,7 @@ const ScoreList = () => {
     return (
       <AppLayout>
         <PageHeader title='악보 관리' description='보유 중인 악보와 편성 버전을 관리합니다' />
-        <div className='space-y-4'>
+        <div className='space-y-4' role="status">
           {[0, 1, 2, 3].map(i => (
             <div key={i} className='h-12 rounded-lg bg-muted animate-pulse' />
           ))}
@@ -120,6 +120,7 @@ const ScoreList = () => {
             value={search}
             onChange={e => setSearch(e.target.value)}
             className='pl-9'
+            aria-label="곡명 검색"
           />
         </div>
       </div>
@@ -190,8 +191,16 @@ const ScoreList = () => {
                     {openFolder.arrangements.map(arr => (
                       <TableRow
                         key={arr.id}
+                        role="button"
+                        tabIndex={0}
                         className='cursor-pointer hover:bg-muted/50'
                         onClick={() => navigate(`/scores/${openFolder.id}/arrangements/${arr.id}`)}
+                        onKeyDown={e => { 
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            navigate(`/scores/${openFolder.id}/arrangements/${arr.id}`);
+                          }
+                        }}
                       >
                         <TableCell className='font-medium flex items-center gap-2'>
                           <FileMusic className='h-4 w-4 text-muted-foreground/60 shrink-0' />

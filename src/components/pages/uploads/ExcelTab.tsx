@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import Button from '@/components/ui/button';
 import { Upload, FileSpreadsheet, AlertCircle, Sheet } from 'lucide-react';
 import {
   Table,
@@ -22,7 +22,7 @@ import type { ExcelUpload } from '@/types/stats';
 import UploadFolderRow from './UploadFolderRow';
 import { queryClient } from '@/utils/query-client';
 import { toast } from 'sonner';
-import { useAuth } from '@/provider/AuthProvider';
+import { useAuth } from '@/hooks/use-auth';
 
 function ExcelTab({ onUploadRequest }: { onUploadRequest: () => void }) {
   const { isGuest } = useAuth();

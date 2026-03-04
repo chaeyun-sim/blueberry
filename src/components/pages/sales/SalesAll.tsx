@@ -14,7 +14,7 @@ import {
   SelectContent,
   SelectItem,
 } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
+import Button from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { formatCurrency } from '@/utils/format-currency';
 import { Fragment, useMemo, useState } from 'react';
@@ -214,7 +214,8 @@ function SalesAll() {
             ? Object.entries(groupedData).map(([category, rows]) => (
                 <Fragment key={`group-${category}`}>
                   {/* Group header */}
-                  <div
+                  <button
+                    type='button'
                     className='flex items-center justify-between px-4 py-2 bg-muted/40 hover:bg-muted/60 cursor-pointer select-none border-b border-border/40'
                     onClick={() => filterCategory === 'ALL' && toggleGroup(category)}
                   >
@@ -230,7 +231,7 @@ function SalesAll() {
                       </span>
                     </div>
                     <span className='text-muted-foreground text-xs'>{rows.length}건</span>
-                  </div>
+                  </button>
                   {/* Group rows */}
                   {!collapsedGroups.has(category) &&
                     rows.map((row, i) => {

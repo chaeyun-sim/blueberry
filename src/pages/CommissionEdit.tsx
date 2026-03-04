@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import Button from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import Label from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
@@ -27,7 +27,7 @@ import { EditFormType } from '@/types/form';
 import { CommissionStatus } from '@/constants/status-config';
 import { toast } from 'sonner';
 import { InstrumentPicker } from '@/components/InstrumentPicker';
-import { useAuth } from '@/provider/AuthProvider';
+import { useAuth } from '@/hooks/use-auth';
 
 const CommissionEdit = () => {
   const { id } = useParams();

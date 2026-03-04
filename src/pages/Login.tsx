@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+import Button from '@/components/ui/button';
+import Label from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Mail, Lock, Eye, EyeOff, Loader2, Loader } from 'lucide-react';
 import { toast } from 'sonner';
 import { login } from '@/api/auth';
-import { useAuth } from '@/provider/AuthProvider';
+import { useAuth } from '@/hooks/use-auth';
 import logoImg from '@/assets/logo.png';
 
 interface LoginFormType {
@@ -52,7 +52,7 @@ export default function Login() {
           <div className='flex flex-col items-center gap-2 mb-8'>
             <img
               src={logoImg}
-              alt='BlueBerry'
+              alt='로고'
               className='object-contain'
               style={{ width: 48, height: 48 }}
             />

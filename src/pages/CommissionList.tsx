@@ -13,7 +13,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Search, AlertCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import Button from '@/components/ui/button';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAppQuery as useQuery } from '@/hooks/use-app-query';
@@ -52,7 +52,7 @@ const CommissionListContent = () => {
           title='의뢰 목록'
           description='모든 악보 의뢰를 관리합니다'
         />
-        <div className='space-y-4'>
+        <div className='space-y-4' role="status">
           {[0, 1, 2, 3].map(i => (
             <div
               key={i}
@@ -127,6 +127,7 @@ const CommissionListContent = () => {
             value={search}
             onChange={e => setSearch(e.target.value)}
             className='text-sm md:text-base pl-9'
+            aria-label="곡명 검색"
           />
         </div>
       </div>
@@ -193,8 +194,16 @@ const CommissionListContent = () => {
                 {filtered.map(item => (
                   <TableRow
                     key={item.id}
+                    role="button"
+                    tabIndex={0}
                     className='cursor-pointer'
                     onClick={() => navigate(`/commissions/${item.id}`)}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        navigate(`/commissions/${item.id}`);
+                      }
+                    }}
                   >
                     <TableCell className='text-foreground'>{item.deadline}</TableCell>
                     <TableCell className='font-medium truncate'>{item.songs?.title ?? item.title ?? '-'}</TableCell>

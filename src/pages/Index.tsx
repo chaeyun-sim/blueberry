@@ -264,7 +264,8 @@ const Dashboard = () => {
                   </p>
                 ) : (
                   recentCommissions.map(c => (
-                    <div
+                    <button
+                      type='button'
                       key={c.id}
                       className='flex items-center justify-between gap-3 p-3.5 rounded-2xl bg-muted/30 cursor-pointer hover:bg-muted/60 transition-colors'
                       onClick={() => navigate(`/commissions/${c.id}`)}
@@ -283,7 +284,7 @@ const Dashboard = () => {
                           {c.deadline ? `${dayjs(c.deadline).format('MM/DD')} 마감` : '-'}
                         </span>
                       </div>
-                    </div>
+                    </button>
                   ))
                 )}
               </div>

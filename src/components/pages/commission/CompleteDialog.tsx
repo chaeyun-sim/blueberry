@@ -6,8 +6,8 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+import Button from '@/components/ui/button';
+import Label from '@/components/ui/label';
 import { Loader2, FileCheck } from 'lucide-react';
 import { OverlayProps } from '@/types/overlay';
 import { Commission } from '@/types/commission';
@@ -25,7 +25,8 @@ import { hasCompressibleAudio, compressAudioEntries } from '@/utils/compress-aud
 import DropZone from './Dropzone';
 import ZipFileHeader from './ZipFileHeader';
 import ReadOnlyFileList from './ReadOnlyFileList';
-import { useAuth } from '@/provider/AuthProvider';
+import { useAuth } from '@/hooks/use-auth';
+import { Input } from '@/components/ui/input';
 
 async function findOrCreateSong(
   title: string,
@@ -203,13 +204,14 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
 
         <div className='space-y-4'>
           <div>
-            <Label className='mb-2 block'>악보 파일 (ZIP)</Label>
-            <input
+            <Label htmlFor="zip-input" className='mb-2 block'>악보 파일 (ZIP)</Label>
+            <Input
               ref={zipInputRef}
               type='file'
               accept='.zip'
               className='hidden'
               onChange={e => { const f = e.target.files?.[0]; if (f) handleZipFile(f); }}
+              id="zip-input"
             />
 
             {!form.zipName ? (

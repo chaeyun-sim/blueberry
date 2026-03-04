@@ -14,7 +14,7 @@ import GrowthRateChart from './charts/GrowthRateChart';
 import CategoryGrowthRateChart from './charts/CategoryGrowthRateChart';
 import MonthlyGrowthRateChart from './charts/MonthlyGrowthRateChart';
 import { MONEY_RATIO } from '@/constants/money-ratio';
-import { useAuth } from '@/provider/AuthProvider';
+import { useAuth } from '@/hooks/use-auth';
 import { categoryChartConfig } from '@/constants/status-config';
 
 function YearlyStats() {

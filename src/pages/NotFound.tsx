@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
+import Button from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import sobbingImg from '@/assets/sobbing.png';
 

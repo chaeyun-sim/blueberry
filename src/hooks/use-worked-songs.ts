@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { markAsWorked, unmarkAsWorked } from '@/api/recommendation'
 import { recommendationKeys } from '@/api/recommendation/queryKeys'
 import { recommendationQueries } from '@/api/recommendation/queries'
-import { useAuth } from '@/provider/AuthProvider'
+import { useAuth } from '@/hooks/use-auth'
 
 export function useWorkedSongs() {
   const { isGuest } = useAuth()

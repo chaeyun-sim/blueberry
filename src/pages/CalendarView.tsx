@@ -3,7 +3,7 @@ import dayjs from 'dayjs';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import Button from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, Star } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -180,7 +180,8 @@ export default function CalendarView() {
                   )}
                   <div className='space-y-1.5'>
                     {commissions.slice(0, 3).map(c => (
-                      <div
+                      <button
+                        type='button'
                         key={c.id}
                         className={cn(
                           'text-xs leading-tight px-1.5 py-0.5 rounded border cursor-pointer truncate font-medium transition-opacity hover:opacity-80',
@@ -190,7 +191,7 @@ export default function CalendarView() {
                         title={`${c.songs?.title ?? c.title} — ${c.arrangement}`}
                       >
                         {c.songs?.title ?? c.title}
-                      </div>
+                      </button>
                     ))}
                     {commissions.length > 3 && (
                       <span className='text-[10px] text-muted-foreground pl-1'>

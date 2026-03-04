@@ -1,6 +1,6 @@
 import React, { ReactNode, ErrorInfo } from 'react';
 import { AlertCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import Button from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
 interface Props {

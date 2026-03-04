@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
-import { Button } from '@/components/ui/button';
+import Button from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import AnalyzeImage from '@/components/pages/commission/AnalyzeImage';
 import CommissionRegisterForm from '@/components/pages/commission/CommissionRegisterForm';
 import { buildInstrumentList } from '@/utils/build-instrument-list';
 import { CommissionRegisterFormType } from '@/types/form';
-import { useAuth } from '@/provider/AuthProvider';
+import { useAuth } from '@/hooks/use-auth';
 
 const CommissionRegister = () => {
   const navigate = useNavigate();

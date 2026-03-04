@@ -1,15 +1,9 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { ThemeContext } from './ThemeContext';
 
-type Theme = "light" | "dark";
+export type Theme = "light" | "dark";
 
-interface ThemeContextProps {
-  theme: Theme;
-  toggleTheme: () => void;
-}
-
-const ThemeContext = createContext<ThemeContextProps>({ theme: "light", toggleTheme: () => {} });
-
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
+function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
     const stored = localStorage.getItem("scoreflow-theme") as Theme | null;
     return stored || "light";
@@ -31,4 +25,4 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-export const useTheme = () => useContext(ThemeContext);
+export default ThemeProvider;

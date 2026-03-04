@@ -1,7 +1,7 @@
 const STOP_WORDS = new Set(['in', 'of', 'the', 'a', 'an', 'and', 'for', 'with', 'no']);
 
 function tokenize(s: string): string[] {
-  return s.toLowerCase().replace(/[_\-.,;:()\[\]]/g, ' ').split(/\s+/).filter(Boolean);
+  return s.toLowerCase().replace(/[_\-.,;:()[\]]/g, ' ').split(/\s+/).filter(Boolean);
 }
 
 function expandTokens(tokens: string[]): Set<string> {

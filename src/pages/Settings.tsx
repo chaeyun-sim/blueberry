@@ -1,5 +1,5 @@
 import { AppLayout } from '@/components/layout/AppLayout';
-import { useAuth } from '@/provider/AuthProvider';
+import { useAuth } from '@/hooks/use-auth';
 import { logout } from '@/api/auth';
 import { createPushSubscription } from '@/hooks/use-push';
 import { Switch } from '@/components/ui/switch';
@@ -7,7 +7,7 @@ import { Bell, LogOut, ArrowLeft } from 'lucide-react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import logoImg from '@/assets/logo.png';
-import { Button } from '@/components/ui/button';
+import Button from '@/components/ui/button';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { toast } from 'sonner';
 
@@ -91,7 +91,7 @@ export default function Settings() {
             <p className="text-xs text-muted-foreground font-medium mb-3">계정</p>
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                <img src={logoImg} alt="logo" className="w-5 h-5 object-contain" />
+                <img src={logoImg} alt="로고" className="w-5 h-5 object-contain" />
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-medium truncate">{session?.user?.email}</p>

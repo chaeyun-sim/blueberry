@@ -8,14 +8,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+import Button from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import Label from '@/components/ui/label';
 import { Image, Mail, CheckCircle, Loader2 } from 'lucide-react';
 import { OverlayProps } from '@/types/overlay';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
-import { useAuth } from '@/provider/AuthProvider';
+import { useAuth } from '@/hooks/use-auth';
 
 interface TransitionConfig {
   title: string;

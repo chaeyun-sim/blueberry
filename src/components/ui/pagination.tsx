@@ -2,7 +2,8 @@ import * as React from "react";
 import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { ButtonProps, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from './button.style';
+import { ButtonProps } from './button';
 
 const Pagination = ({ className, ...props }: React.ComponentProps<"nav">) => (
   <nav
@@ -42,7 +43,9 @@ const PaginationLink = ({ className, isActive, size = "icon", ...props }: Pagina
       className,
     )}
     {...props}
-  />
+  >
+    {props.children}
+  </a>
 );
 PaginationLink.displayName = "PaginationLink";
 
