@@ -1,4 +1,4 @@
-import { useState, useId } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { Plus, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import Label from '@/components/ui/label';
@@ -22,7 +22,14 @@ export function InstrumentPicker({
   const [input, setInput] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
+  const blurTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { removeInstrument } = useRemoveInstrument();
+
+  useEffect(() => {
+    return () => {
+      if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current);
+    };
+  }, []);
   const uid = useId();
   const inputId = `instrument-input-${uid}`;
   const listboxId = `instrument-listbox-${uid}`;
@@ -83,8 +90,17 @@ export function InstrumentPicker({
             setShowDropdown(true);
             setActiveIndex(-1);
           }}
-          onFocus={() => setShowDropdown(true)}
-          onBlur={() => setTimeout(() => { setShowDropdown(false); setActiveIndex(-1); }, 200)}
+          onFocus={() => {
+            if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current);
+            setShowDropdown(true);
+          }}
+          onBlur={() => {
+            if (blurTimeoutRef.current) clearTimeout(blurTimeoutRef.current);
+            blurTimeoutRef.current = setTimeout(() => {
+              setShowDropdown(false);
+              setActiveIndex(-1);
+            }, 200);
+          }}
           onKeyDown={handleKeyDown}
           disabled={disabled}
         />
