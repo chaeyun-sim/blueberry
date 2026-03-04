@@ -236,11 +236,15 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: ExcelUploadD
           </div>
         )}
 
-        +        {error && (
-+          <p role='alert' aria-live='assertive' className='text-sm text-destructive'>
-+            {error}
-+          </p>
-+        )}
+        {error && (
+          <p
+            role='alert'
+            aria-live='assertive'
+            className='text-sm text-destructive'
+          >
+            {error}
+          </p>
+        )}
 
         <div className='flex justify-end gap-2 pt-2'>
           <Button
