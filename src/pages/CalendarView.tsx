@@ -11,11 +11,15 @@ import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 import { commissionQueries } from '@/api/commission/queries';
 import { WEEK_KOR } from '@/constants/week';
 
-const getDateColorClass = (deadline: string) => {
+const getDateColorClass = (deadline: string, status: string) => {
   const today = dayjs().startOf('day');
   const deadlineDate = dayjs(deadline);
   if (deadlineDate.isBefore(today)) {
-    // Past: purple
+    // Past + delivered/complete: gray
+    if (status === 'delivered' || status === 'complete') {
+      return 'bg-muted text-muted-foreground border-border';
+    }
+    // Past + not delivered: purple
     return 'bg-[hsl(var(--status-delivered)/0.12)] text-[hsl(var(--status-delivered))] border-[hsl(var(--status-delivered)/0.25)]';
   }
   // Today or future: orange
@@ -184,8 +188,8 @@ export default function CalendarView() {
                         type='button'
                         key={c.id}
                         className={cn(
-                          'text-xs leading-tight px-1.5 py-0.5 rounded border cursor-pointer truncate font-medium transition-opacity hover:opacity-80',
-                          getDateColorClass(c.deadline),
+                          'w-full overflow-hidden text-xs leading-tight px-1.5 py-0.5 rounded border cursor-pointer truncate font-medium transition-opacity hover:opacity-80',
+                          getDateColorClass(c.deadline, c.status),
                         )}
                         onClick={() => navigate(`/commissions/${c.id}`)}
                         title={`${c.songs?.title ?? c.title} — ${c.arrangement}`}
