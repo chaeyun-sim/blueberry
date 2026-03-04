@@ -25,7 +25,7 @@ function RegisterFormVersion({ value, onChange, disabled }: RegisterFormVersionP
         }
         disabled={disabled}
       >
-        <SelectTrigger aria-label='버전 선택'>
+        <SelectTrigger id='version' aria-label='버전 선택'>
           <SelectValue placeholder='버전을 선택하세요' />
         </SelectTrigger>
         <SelectContent>
