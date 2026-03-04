@@ -47,10 +47,12 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: ExcelUploadD
 
   const parseFile = useCallback((file: File) => {
     setError(null);
+
+    const lowerName = file.name.toLowerCase();
     if (
-      !file.name.endsWith('.xlsx') &&
-      !file.name.endsWith('.xls') &&
-      !file.name.endsWith('.csv')
+      !lowerName.endsWith('.xlsx') &&
+      !lowerName.endsWith('.xls') &&
+      !lowerName.endsWith('.csv')
     ) {
       setError('엑셀 파일(.xlsx, .xls) 또는 CSV 파일만 업로드 가능합니다.');
       return;
@@ -89,6 +91,7 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: ExcelUploadD
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (file) parseFile(file);
+      e.currentTarget.value = '';
     },
     [parseFile],
   );
@@ -141,23 +144,25 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: ExcelUploadD
         </div>
 
         {!form.fileName ? (
-          <button
-            type="button"
-            className={cn(
-              'border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer',
-              dragOver ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50',
-            )}
-            onDragOver={e => {
-              e.preventDefault();
-              setDragOver(true);
-            }}
-            onDragLeave={() => setDragOver(false)}
-            onDrop={handleDrop}
-            onClick={() => document.getElementById('excel-file-input')?.click()}
-          >
-            <Upload className='h-10 w-10 mx-auto mb-3 text-muted-foreground' />
-            <p className='text-sm font-medium mb-1'>파일을 드래그하거나 클릭하여 업로드</p>
-            <p className='text-xs text-muted-foreground'>.xlsx, .xls, .csv 지원</p>
+          <>
+            <button
+              type='button'
+              className={cn(
+                'border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer',
+                dragOver ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50',
+              )}
+              onDragOver={e => {
+                e.preventDefault();
+                setDragOver(true);
+              }}
+              onDragLeave={() => setDragOver(false)}
+              onDrop={handleDrop}
+              onClick={() => document.getElementById('excel-file-input')?.click()}
+            >
+              <Upload className='h-10 w-10 mx-auto mb-3 text-muted-foreground' />
+              <p className='text-sm font-medium mb-1'>파일을 드래그하거나 클릭하여 업로드</p>
+              <p className='text-xs text-muted-foreground'>.xlsx, .xls, .csv 지원</p>
+            </button>
             <input
               id='excel-file-input'
               type='file'
@@ -165,7 +170,7 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: ExcelUploadD
               className='hidden'
               onChange={handleFileInput}
             />
-          </button>
+          </>
         ) : (
           <div className='space-y-4'>
             <div className='flex items-center justify-between p-3 rounded-lg bg-muted/50'>
