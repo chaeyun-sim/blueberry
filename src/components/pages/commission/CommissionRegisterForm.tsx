@@ -2,7 +2,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import Label from '@/components/ui/label';
 import Autocomplete from '@/components/Autocomplete';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from 'lucide-react';
 import { DifficultyLevelType } from '@/types/commission';
@@ -22,17 +28,21 @@ import { queryClient } from '@/utils/query-client';
 import { useAuth } from '@/hooks/use-auth';
 
 interface CommissionRegisterFormProps {
-  form: CommissionRegisterFormType
-  setForm: (form: CommissionRegisterFormType) => void
-  imageFile: File | null
-  isAnalyzing: boolean
+  form: CommissionRegisterFormType;
+  setForm: (form: CommissionRegisterFormType) => void;
+  imageFile: File | null;
+  isAnalyzing: boolean;
 }
 
-
-function CommissionRegisterForm({ form, setForm, imageFile, isAnalyzing }: CommissionRegisterFormProps) {
+function CommissionRegisterForm({
+  form,
+  setForm,
+  imageFile,
+  isAnalyzing,
+}: CommissionRegisterFormProps) {
   const navigate = useNavigate();
   const dateInputRef = useRef<HTMLInputElement>(null);
-  
+
   const { isGuest } = useAuth();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -51,7 +61,7 @@ function CommissionRegisterForm({ form, setForm, imageFile, isAnalyzing }: Commi
     const match = songs.find(s => s.title === value);
     setForm({ ...form, songTitle: value, ...(match ? { composer: match.composer } : {}) });
   };
-  
+
   const { mutateAsync: createSong } = useMutation(scoreMutations.createSong());
   const { mutateAsync: findSongByTitle } = useMutation(scoreMutations.findSongByTitle());
 
@@ -60,7 +70,7 @@ function CommissionRegisterForm({ form, setForm, imageFile, isAnalyzing }: Commi
       toast.error('게스트 모드에서는 의뢰를 등록할 수 없습니다.');
       return;
     }
-    
+
     setIsSubmitting(true);
     try {
       let songId: string | undefined;
@@ -105,7 +115,7 @@ function CommissionRegisterForm({ form, setForm, imageFile, isAnalyzing }: Commi
       setIsSubmitting(false);
     }
   };
-  
+
   return (
     <Card className='border-border/50'>
       <CardContent className='p-5'>
@@ -149,9 +159,8 @@ function CommissionRegisterForm({ form, setForm, imageFile, isAnalyzing }: Commi
                 })
               }
               disabled={isAnalyzing || isSubmitting}
-              aria-label='버전 선택'
             >
-              <SelectTrigger>
+              <SelectTrigger aria-label='버전 선택'>
                 <SelectValue placeholder='버전을 선택하세요' />
               </SelectTrigger>
               <SelectContent>

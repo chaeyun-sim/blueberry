@@ -165,6 +165,7 @@ const CommissionEdit = () => {
                   setForm(prev => ({ ...prev, status: value as CommissionStatus }))
                 }
                 disabled={isSubmitting}
+                aria-label='상태 선택'
               >
                 <SelectTrigger>
                   <SelectValue placeholder='상태를 선택하세요' />

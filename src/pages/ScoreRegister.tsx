@@ -224,9 +224,8 @@ const ScoreRegister = () => {
                   value={form.version ?? 'normal'}
                   onValueChange={v => setForm(prev => ({ ...prev, version: v === 'normal' ? null : v as DifficultyLevelType }))}
                   disabled={isSubmitting}
-                  aria-label='버전 선택'
                 >
-                  <SelectTrigger>
+                  <SelectTrigger aria-label='버전 선택'>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
