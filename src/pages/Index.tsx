@@ -79,22 +79,10 @@ const Dashboard = () => {
     : '-';
 
   const summaryValues = [
-    {
-      ...summary[0],
-      value: totalScores,
-    },
-    {
-      ...summary[1],
-      value: totalCompleted,
-    },
-    {
-      ...summary[2],
-      value: yoyGrowth,
-    },
-    {
-      ...summary[3],
-      value: avgPrice,
-    },
+    { ...summary[0], value: totalScores ?? summary[0].value },
+    { ...summary[1], value: totalCompleted ?? summary[1].value},
+    { ...summary[2], value: yoyGrowth ?? summary[2].value},
+    { ...summary[3], value: avgPrice ?? summary[3].value},
   ];
 
   const thisMonthCommissions = commissions.filter(c =>
@@ -174,7 +162,9 @@ const Dashboard = () => {
       <div className='flex flex-col gap-4'>
         <div className='rounded-3xl shadow-sm overflow-hidden h-[180px]'>
           <img
-            src='https://images.unsplash.com/photo-1771506364945-0b6566c6cd5f?q=80&w=1440&auto=format&fit=crop'
+            src="/backgrounds/background-768w.webp"
+            srcSet="/backgrounds/background-480w.webp 480w, /backgrounds/background-768w.webp 768w, /backgrounds/background-1080w.webp 1080w"
+            sizes="100vw"
             className='w-full h-full object-fill lg:object-center'
             alt=""
             fetchPriority='high'
