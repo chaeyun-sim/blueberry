@@ -14,7 +14,7 @@ import {
   SelectContent,
   SelectItem,
 } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
+import Button from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { formatCurrency } from '@/utils/format-currency';
 import { Fragment, useMemo, useState } from 'react';
@@ -126,6 +126,7 @@ function SalesAll() {
             <Select
               value={year ? String(year) : ''}
               onValueChange={v => setSelectedYear(Number(v))}
+              aria-label='연도 선택'
             >
               <SelectTrigger className='w-24 h-8 text-xs'>
                 <SelectValue placeholder='연도' />
@@ -136,7 +137,7 @@ function SalesAll() {
                 ))}
               </SelectContent>
             </Select>
-            <Select value={filterCategory} onValueChange={setFilterCategory}>
+            <Select value={filterCategory} onValueChange={setFilterCategory} aria-label='대분류 필터 선택'>
               <SelectTrigger className='w-32 h-8 text-xs'>
                 <SelectValue />
               </SelectTrigger>
@@ -156,6 +157,7 @@ function SalesAll() {
                 groupByCategory ? 'hover:bg-primary' : 'hover:bg-primary/10',
               )}
               onClick={() => setGroupByCategory(v => !v)}
+              aria-label='그룹핑 토글'
             >
               <Layers className='h-3 w-3' />
               그룹핑
@@ -212,7 +214,8 @@ function SalesAll() {
             ? Object.entries(groupedData).map(([category, rows]) => (
                 <Fragment key={`group-${category}`}>
                   {/* Group header */}
-                  <div
+                  <button
+                    type='button'
                     className='flex items-center justify-between px-4 py-2 bg-muted/40 hover:bg-muted/60 cursor-pointer select-none border-b border-border/40'
                     onClick={() => filterCategory === 'ALL' && toggleGroup(category)}
                   >
@@ -228,7 +231,7 @@ function SalesAll() {
                       </span>
                     </div>
                     <span className='text-muted-foreground text-xs'>{rows.length}건</span>
-                  </div>
+                  </button>
                   {/* Group rows */}
                   {!collapsedGroups.has(category) &&
                     rows.map((row, i) => {

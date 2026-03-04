@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import Button from '@/components/ui/button';
 import {
   ArrowLeft,
   CheckCircle,
@@ -37,6 +37,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { queryClient } from '@/utils/query-client';
 import { COMMISSION_INFO } from '@/types/commission';
 import { toast } from 'sonner';
+import { useAuth } from '@/hooks/use-auth';
 
 const statusProgress: Record<CommissionStatus, LucideIcon> = {
   received: Package2,
@@ -65,6 +66,8 @@ const cleanTitle = (title: string) =>
 const CommissionDetailContent = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { isGuest } = useAuth();
+
   const { data: commission, isLoading } = useQuery(commissionQueries.getCommission(id));
   const { data: song } = useQuery(scoreQueries.getSong(commission?.song_id ?? ''));
   const { mutate: updateStatus } = useMutation(commissionMutations.updateCommissionStatus());
@@ -144,6 +147,11 @@ const CommissionDetailContent = () => {
   };
 
   const handleDelete = () => {
+    if (isGuest) {
+      toast.error('게스트 모드에서는 의뢰를 삭제할 수 없습니다.');
+      return;
+    }
+
     overlay.open(
       overlayProps => (
         <DeleteCommissionDialog
@@ -166,7 +174,7 @@ const CommissionDetailContent = () => {
   if (isLoading)
     return (
       <AppLayout>
-        <div className='mb-6 flex items-center justify-between'>
+        <div className='mb-6 flex items-center justify-between' role="status">
           <Skeleton className='h-9 w-16' />
           <Skeleton className='h-9 w-16' />
         </div>

@@ -9,11 +9,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+import Button from '@/components/ui/button';
 import { useMutation } from '@tanstack/react-query';
 import { scoreMutations } from '@/api/score/mutations';
 import { scoreKeys } from '@/api/score/queryKeys';
 import { queryClient } from '@/utils/query-client';
+import { useAuth } from '@/hooks/use-auth';
 
 interface DeleteArrangementDialogProps extends OverlayProps {
   arrangementId: string;
@@ -29,10 +30,16 @@ function DeleteArrangementDialog({
   arrangement,
 }: DeleteArrangementDialogProps) {
   const navigate = useNavigate();
-
+  const { isGuest } = useAuth();
+  
   const { mutate: deleteArrangement, isPending } = useMutation(scoreMutations.deleteArrangement());
 
   const handleDelete = () => {
+    if (isGuest) {
+      toast.error('게스트 모드에서는 편성을 삭제할 수 없습니다.');
+      return;
+    }
+
     deleteArrangement({ id: arrangementId }, {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: scoreKeys.list() });

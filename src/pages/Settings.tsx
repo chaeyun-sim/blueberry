@@ -1,18 +1,18 @@
 import { AppLayout } from '@/components/layout/AppLayout';
-import { useAuth } from '@/provider/AuthProvider';
+import { useAuth } from '@/hooks/use-auth';
 import { logout } from '@/api/auth';
 import { createPushSubscription } from '@/hooks/use-push';
 import { Switch } from '@/components/ui/switch';
 import { Bell, LogOut, ArrowLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import logoImg from '@/assets/logo.png';
-import { Button } from '@/components/ui/button';
+import Button from '@/components/ui/button';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { toast } from 'sonner';
 
 export default function Settings() {
-  const { session } = useAuth();
+  const { session, isGuest } = useAuth();
   const navigate = useNavigate();
 
   const [pushEnabled, setPushEnabled] = useState(false);
@@ -26,6 +26,11 @@ export default function Settings() {
   }, []);
 
   const handlePushToggle = async (checked: boolean) => {
+    if (isGuest) {
+      toast.error('게스트 모드에서는 푸시 알림을 설정할 수 없습니다.');
+      return;
+    }
+
     setPushLoading(true);
     try {
       if (checked) {
@@ -64,6 +69,8 @@ export default function Settings() {
     navigate('/login');
   };
 
+  if (isGuest) return <Navigate to='/not-found' replace />;
+
   return (
     <AppLayout>
       <div className='mb-6'>
@@ -84,7 +91,7 @@ export default function Settings() {
             <p className="text-xs text-muted-foreground font-medium mb-3">계정</p>
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                <img src={logoImg} alt="logo" className="w-5 h-5 object-contain" />
+                <img src={logoImg} alt="로고" className="w-5 h-5 object-contain" />
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-medium truncate">{session?.user?.email}</p>
@@ -104,7 +111,7 @@ export default function Settings() {
                 <p className="text-sm font-medium">마감일 푸시 알림</p>
                 <p className="text-xs text-muted-foreground">당일·1일·2일 전 자동 알림</p>
               </div>
-              <Switch checked={pushEnabled} onCheckedChange={handlePushToggle} disabled={pushLoading} />
+              <Switch checked={pushEnabled} onCheckedChange={handlePushToggle} disabled={pushLoading} aria-label='마감일 푸시 알림 토글' />
             </div>
           </section>
 

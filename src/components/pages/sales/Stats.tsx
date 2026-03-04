@@ -285,6 +285,7 @@ function Stats() {
             <Select
               value={String(selectedYear)}
               onValueChange={v => setMonthlySalesYear(Number(v))}
+              aria-label='월별 판매 추이 연도 선택'
             >
               <SelectTrigger className='w-24 h-7 text-xs'>
                 <SelectValue />

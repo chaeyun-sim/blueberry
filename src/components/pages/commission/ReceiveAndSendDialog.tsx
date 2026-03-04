@@ -8,13 +8,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+import Button from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import Label from '@/components/ui/label';
 import { Image, Mail, CheckCircle, Loader2 } from 'lucide-react';
 import { OverlayProps } from '@/types/overlay';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
+import { useAuth } from '@/hooks/use-auth';
 
 interface TransitionConfig {
   title: string;
@@ -51,6 +52,8 @@ function ReceiveAndSendDialog({
   toStatus,
   onConfirm,
 }: ReceiveAndSendDialogProps) {
+  const { isGuest } = useAuth();
+
   const [isSending, setIsSending] = useState(false);
   const [toEmail, setToEmail] = useState('');
   const [progress, setProgress] = useState(0);
@@ -94,11 +97,19 @@ function ReceiveAndSendDialog({
   const Icon = config.icon;
 
   const handleConfirm = () => {
+    if (isGuest) {
+      toast.error('게스트 모드에서는 상태를 변경할 수 없습니다.');
+      return;
+    }
     onConfirm();
     close();
   };
 
   const handleEmailConfirm = async () => {
+    if (isGuest) {
+      toast.error('게스트 모드에서는 메일을 발송할 수 없습니다.');
+      return;
+    }
     if (isSendingRef.current) return;
 
     if (!commissionId) {

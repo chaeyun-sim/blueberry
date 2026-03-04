@@ -2,9 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import Button from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import Label from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
@@ -27,11 +27,13 @@ import { EditFormType } from '@/types/form';
 import { CommissionStatus } from '@/constants/status-config';
 import { toast } from 'sonner';
 import { InstrumentPicker } from '@/components/InstrumentPicker';
+import { useAuth } from '@/hooks/use-auth';
 
 const CommissionEdit = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const dateInputRef = useRef<HTMLInputElement>(null);
+  const { isGuest } = useAuth();
 
   const [form, setForm] = useState<EditFormType>({
     title: '',
@@ -67,6 +69,13 @@ const CommissionEdit = () => {
   const { mutate: updateCommission } = useMutation(commissionMutations.updateCommission());
 
   const handleSave = () => {
+    if (isGuest) {
+      toast.error('게스트 모드에서는 의뢰를 수정할 수 없습니다.');
+      return;
+    }
+    
+    if (!id) return;
+
     setIsSubmitting(true);
 
     updateCommission(

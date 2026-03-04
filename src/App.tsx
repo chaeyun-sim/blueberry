@@ -3,8 +3,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
-import { ThemeProvider } from "@/provider/ThemeProvider";
-import { AuthProvider } from "@/provider/AuthProvider";
+import ThemeProvider from "@/provider/ThemeProvider";
+import AuthProvider from "@/provider/AuthProvider";
 import { OverlayProvider } from 'overlay-kit';
 import { Analytics } from "@vercel/analytics/react"
 import { SpeedInsights } from "@vercel/speed-insights/react"

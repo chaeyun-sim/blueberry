@@ -28,67 +28,86 @@ import { scoreQueries } from '@/api/score/queries';
 import { statsQueries } from '@/api/stats/queries';
 import { formatCurrency } from '@/utils/format-currency';
 
-const summary = [{
-  icon: Music,
-  value: '24',
-  description: '보유 악보',
-  colorStatus: 'primary',
-}, {
-  icon: CheckCircle2,
-  value: '156',
-  description: '누적 완료',
-  colorStatus: 'complete',
-}, {
-  icon: ClipboardList,
-  value: '+22.4%',
-  description: '전년 대비 성장',
-  colorStatus: 'success',
-}, {
-  icon: DollarSign,
-  value: '₩14,930',
-  description: '평균 단가',
-  colorStatus: 'warning',
-}];
-
+const summary = [
+  {
+    icon: Music,
+    value: '24',
+    description: '보유 악보',
+    colorStatus: 'primary',
+  },
+  {
+    icon: CheckCircle2,
+    value: '156',
+    description: '누적 완료',
+    colorStatus: 'complete',
+  },
+  {
+    icon: ClipboardList,
+    value: '+22.4%',
+    description: '전년 대비 성장',
+    colorStatus: 'success',
+  },
+  {
+    icon: DollarSign,
+    value: '₩14,930',
+    description: '평균 단가',
+    colorStatus: 'warning',
+  },
+];
 
 const DashboardContent = () => {
   const navigate = useNavigate();
   const clock = useLiveClock();
 
-  const { data: commissions = [], isLoading, isError } = useQuery(commissionQueries.getCommissions());
-  const { data: songsSummary = [] } = useQuery(scoreQueries.getSongsSummary());
+  const {
+    data: commissions = [],
+    isLoading,
+    isError,
+  } = useQuery(commissionQueries.getCommissions());
+  const { data: scores = [] } = useQuery(scoreQueries.getSongs());
   const { data: salesSummary } = useQuery(statsQueries.getSalesSummary());
 
-  const totalScores = songsSummary.reduce((acc, s) => acc + (s.arrangements?.length ?? 0), 0);
-  const totalCompleted = commissions.filter(c => c.status === 'complete' || c.status === 'delivered').length;
-  const avgPrice = salesSummary && salesSummary.totalCount > 0
-    ? formatCurrency(Math.round(salesSummary.totalRevenue / salesSummary.totalCount))
-    : '-';
+  const totalScores = scores.reduce((acc, score) => acc + (score.arrangements?.length ?? 0), 0);
+  const totalCompleted = commissions.filter(
+    c => c.status === 'complete' || c.status === 'delivered',
+  ).length;
+  const avgPrice =
+    salesSummary && salesSummary.totalCount > 0
+      ? formatCurrency(Math.round(salesSummary.totalRevenue / salesSummary.totalCount))
+      : '-';
   const yoyGrowth = salesSummary
     ? `${salesSummary.revenueVsLastYear >= 0 ? '+' : ''}${salesSummary.revenueVsLastYear}%`
     : '-';
 
-  const summaryValues = [{
-    ...summary[0],
-    value: totalScores,
-  }, {
-    ...summary[1],
-    value: totalCompleted,
-  }, {
-    ...summary[2],
-    value: yoyGrowth,
-  }, {
-    ...summary[3],
-    value: avgPrice,
-  }]
+  const summaryValues = [
+    {
+      ...summary[0],
+      value: totalScores,
+    },
+    {
+      ...summary[1],
+      value: totalCompleted,
+    },
+    {
+      ...summary[2],
+      value: yoyGrowth,
+    },
+    {
+      ...summary[3],
+      value: avgPrice,
+    },
+  ];
 
   const thisMonthCommissions = commissions.filter(c =>
-    dayjs(c.created_at).isSame(dayjs(), 'month')
+    dayjs(c.created_at).isSame(dayjs(), 'month'),
   );
 
   const counts = thisMonthCommissions.reduce(
-    (acc, c) => { acc[c.status] = (acc[c.status] ?? 0) + 1; return acc; },
-    {} as Record<string, number>
+    (acc, c) => {
+      acc[c.status] = (acc[c.status] ?? 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>,
   );
 
   const workStatusConfig = {
@@ -104,7 +123,7 @@ const DashboardContent = () => {
 
   const getGreeting = () => {
     const h = clock.hour();
-    if (h < 6)  return '🌙 Good Night';
+    if (h < 6) return '🌙 Good Night';
     if (h < 12) return '☀️ Good Morning';
     if (h < 18) return '🌤️ Good Evening';
     return '🌙 Good Night';
@@ -118,9 +137,7 @@ const DashboardContent = () => {
       <div className='flex items-start justify-between mb-6 gap-6 py-2'>
         {/* Left: Greeting */}
         <div className='shrink-0'>
-          <h1 className='text-3xl font-display font-bold tracking-tight'>
-            {getGreeting()}
-          </h1>
+          <h1 className='text-3xl font-display font-bold tracking-tight'>{getGreeting()}</h1>
           <div className='flex flex-col md:flex-row md:items-center gap-2 md:gap-5 mt-2 text-sm text-muted-foreground'>
             <span className='flex items-center gap-1.5'>
               <Sun className='h-3.5 w-3.5 text-[hsl(var(--warning))]' />
@@ -128,18 +145,25 @@ const DashboardContent = () => {
             </span>
             <span className='flex items-center gap-1.5'>
               <Music className='h-3.5 w-3.5' />
-              진행 중인 의뢰 <strong className='text-foreground ml-0.5'>{workStatusConfig.working.summary}건</strong>
+              진행 중인 의뢰{' '}
+              <strong className='text-foreground ml-0.5'>
+                {workStatusConfig.working.summary}건
+              </strong>
             </span>
             <span className='flex items-center gap-1.5'>
               <History className='h-3.5 w-3.5 text-[hsl(var(--success))]' />
-              최근 업데이트 <strong className='text-foreground ml-0.5'>{recentCommissions.length}건</strong>
+              최근 업데이트{' '}
+              <strong className='text-foreground ml-0.5'>{recentCommissions.length}건</strong>
             </span>
           </div>
         </div>
 
         {/* Right: Clock */}
         <div className='hidden md:block shrink-0 text-right'>
-          <p className='text-4xl font-bold tabular-nums tracking-tight' style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+          <p
+            className='text-4xl font-bold tabular-nums tracking-tight'
+            style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}
+          >
             {clock.format('HH:mm')}
           </p>
           <p className='text-xs text-muted-foreground mt-1'>
@@ -150,7 +174,11 @@ const DashboardContent = () => {
       {/* Bento Grid */}
       <div className='flex flex-col gap-4'>
         <div className='rounded-3xl shadow-sm overflow-hidden h-[180px]'>
-          <img src='https://images.unsplash.com/photo-1771506364945-0b6566c6cd5f?q=80&w=2232&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' className='w-full h-full object-fill lg:object-center' />
+          <img
+            src='https://images.unsplash.com/photo-1771506364945-0b6566c6cd5f?q=80&w=2232&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
+            className='w-full h-full object-fill lg:object-center'
+            alt=""
+          />
         </div>
         {/* Top Row */}
         <div className='grid grid-cols-1 lg:grid-cols-[2fr_3fr] gap-4'>
@@ -158,7 +186,7 @@ const DashboardContent = () => {
           <div className='flex flex-col gap-4'>
             {/* Revenue Slider Card — green tint */}
             <Card className='border-[1px] shadow-sm'>
-              <CardContent className="pb-0">
+              <CardContent className='pb-0'>
                 <RevenueSliderCard />
               </CardContent>
             </Card>
@@ -166,9 +194,9 @@ const DashboardContent = () => {
             {/* Commission Summary Card — lavender tint */}
             <Card className='border-[1px] shadow-sm flex-1'>
               <CardContent className='p-5'>
-                <h3 className='text-xs font-semibold text-muted-foreground mb-4 uppercase tracking-wider'>
+                <h2 className='text-xs font-semibold text-muted-foreground mb-4 uppercase tracking-wider'>
                   이번 달 의뢰 요약
-                </h3>
+                </h2>
                 <div className='grid grid-cols-4 gap-2'>
                   {Object.entries(workStatusConfig).map(([key, item]) => (
                     <button
@@ -180,20 +208,28 @@ const DashboardContent = () => {
                         className='h-4 w-4 mb-1.5'
                         style={{ color: `hsl(var(--status-${key}))` }}
                       />
-                      <p className='text-xl font-display font-bold'>{isLoading ? '-' : item.summary}</p>
+                      <p className='text-xl font-display font-bold'>
+                        {isLoading ? '-' : item.summary}
+                      </p>
                       <p className='text-[10px] text-muted-foreground'>{item.label}</p>
                     </button>
                   ))}
                 </div>
                 <div className='flex h-2.5 rounded-full overflow-hidden mt-4'>
-                  {Object.entries(workStatusConfig).map(([key, { summary }]) => (
-                    <CommissionSummaryBar
-                      key={key}
-                      status={key}
-                      value={summary}
-                      maxValue={total}
-                    />
-                  ))}
+                  {Object.values(workStatusConfig)
+                    .map(el => el.summary)
+                    .reduce((acc, curr) => acc + curr, 0) > 0 ? (
+                    Object.entries(workStatusConfig).map(([key, { summary }]) => (
+                      <CommissionSummaryBar
+                        key={key}
+                        status={key}
+                        value={summary}
+                        maxValue={total}
+                      />
+                    ))
+                  ) : (
+                    <div className='w-full bg-muted' />
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -213,29 +249,43 @@ const DashboardContent = () => {
               </div>
               <div className='space-y-2 flex-1'>
                 {isError ? (
-                  <p className='text-sm text-muted-foreground text-center py-6'>데이터를 불러오지 못했습니다.</p>
+                  <p className='text-sm text-muted-foreground text-center py-6'>
+                    데이터를 불러오지 못했습니다.
+                  </p>
                 ) : isLoading ? (
                   [0, 1, 2].map(i => (
-                    <div key={i} className='h-[58px] rounded-2xl bg-muted/30 animate-pulse' />
+                    <div
+                      key={i}
+                      className='h-[58px] rounded-2xl bg-muted/30 animate-pulse'
+                    />
                   ))
                 ) : recentCommissions.length === 0 ? (
-                  <p className='text-sm text-muted-foreground text-center py-6'>최근 의뢰가 없습니다.</p>
+                  <p className='text-sm text-muted-foreground text-center py-6'>
+                    최근 의뢰가 없습니다.
+                  </p>
                 ) : (
                   recentCommissions.map(c => (
-                    <div
+                    <button
+                      type='button'
                       key={c.id}
                       className='flex items-center justify-between gap-3 p-3.5 rounded-2xl bg-muted/30 cursor-pointer hover:bg-muted/60 transition-colors'
                       onClick={() => navigate(`/commissions/${c.id}`)}
                     >
                       <div className='min-w-0'>
-                        <p className='font-semibold text-sm truncate'>{c.songs?.title ?? c.title}</p>
-                        <p className='hidden md:block text-xs text-muted-foreground mt-0.5'>{c.arrangement}</p>
+                        <p className='font-semibold text-sm truncate'>
+                          {c.songs?.title ?? c.title}
+                        </p>
+                        <p className='hidden md:block text-xs text-muted-foreground mt-0.5'>
+                          {c.arrangement}
+                        </p>
                       </div>
                       <div className='flex items-center gap-2 shrink-0'>
                         <StatusBadge status={c.status} />
-                        <span className='text-[10px] text-muted-foreground'>{c.deadline ? `${dayjs(c.deadline).format('MM/DD')} 마감` : '-'}</span>
+                        <span className='text-[10px] text-muted-foreground'>
+                          {c.deadline ? `${dayjs(c.deadline).format('MM/DD')} 마감` : '-'}
+                        </span>
                       </div>
-                    </div>
+                    </button>
                   ))
                 )}
               </div>

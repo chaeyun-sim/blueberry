@@ -6,8 +6,8 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+import Button from '@/components/ui/button';
+import Label from '@/components/ui/label';
 import { Loader2, FileCheck } from 'lucide-react';
 import { OverlayProps } from '@/types/overlay';
 import { Commission } from '@/types/commission';
@@ -25,6 +25,8 @@ import { hasCompressibleAudio, compressAudioEntries } from '@/utils/compress-aud
 import DropZone from './Dropzone';
 import ZipFileHeader from './ZipFileHeader';
 import ReadOnlyFileList from './ReadOnlyFileList';
+import { useAuth } from '@/hooks/use-auth';
+import { Input } from '@/components/ui/input';
 
 async function findOrCreateSong(
   title: string,
@@ -47,11 +49,17 @@ async function uploadAllFiles(
     try {
       await uploadFile({ arrangementId, file: entry.file, label: entry.label, fileType: entry.fileType });
     } catch (e) {
-      console.error('[upload] 실패:', entry.file.name, e);
+      toast.error('파일 업로드에 실패했습니다.', { description: (e as Error).message });
       failed.push(entry.label);
     }
   }
   return failed;
+}
+
+interface CompleteDialogForm {
+  zipName: string | null;
+  zipSize: number | null;
+  files: FileEntry[];
 }
 
 interface CompleteDialogProps extends OverlayProps {
@@ -61,10 +69,14 @@ interface CompleteDialogProps extends OverlayProps {
 
 export function CompleteDialog({ isOpen, close, commission, onConfirm }: CompleteDialogProps) {
   const zipInputRef = useRef<HTMLInputElement>(null);
+  const { isGuest } = useAuth();
 
-  const [zipName, setZipName] = useState<string | null>(null);
-  const [zipSize, setZipSize] = useState(0);
-  const [files, setFiles] = useState<FileEntry[]>([]);
+  const [form, setForm] = useState<CompleteDialogForm>({
+    zipName: null,
+    zipSize: null,
+    files: []
+  })
+
   const [isExtracting, setIsExtracting] = useState(false);
   const [isCompressing, setIsCompressing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -76,13 +88,11 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
 
   const songTitle = commission.songs?.title ?? commission.title ?? '';
   const composer = commission.songs?.composer ?? commission.composer ?? '';
-  const isZipTitleMatch = zipName ? matchesZipTitle(zipName, songTitle, composer) : false;
+  const isZipTitleMatch = form.zipName ? matchesZipTitle(form.zipName, songTitle, composer) : false;
   const isProcessing = isExtracting || isCompressing;
 
   const resetZip = () => {
-    setZipName(null);
-    setZipSize(0);
-    setFiles([]);
+    setForm(prev => ({ ...prev, zipName: null, zipSize: 0, files: [] }));
     if (zipInputRef.current) zipInputRef.current.value = '';
   };
 
@@ -98,9 +108,7 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
       return;
     }
 
-    setZipName(file.name);
-    setZipSize(file.size);
-    setFiles([]);
+    setForm(prev => ({ ...prev, zipName: file.name, zipSize: file.size, files: [] }));
     setIsExtracting(true);
 
     let rawEntries: FileEntry[];
@@ -117,13 +125,14 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
     }
 
     if (!hasCompressibleAudio(rawEntries)) {
-      setFiles(rawEntries);
+      setForm(prev => ({ ...prev, files: rawEntries }));
       return;
     }
 
     setIsCompressing(true);
     try {
-      setFiles(await compressAudioEntries(rawEntries));
+      const res = await compressAudioEntries(rawEntries)
+      setForm(prev => ({ ...prev, files: res as FileEntry[] }));
     } catch (e) {
       toast.error('오디오 변환에 실패했습니다.', { description: (e as Error).message });
       resetZip();
@@ -133,7 +142,12 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
   };
 
   const handleSubmit = async () => {
-    if (!zipName || files.length === 0) {
+    if (isGuest) {
+      toast.error('게스트 모드에서는 악보를 등록할 수 없습니다.');
+      return;
+    }
+
+    if (!form.zipName || form.files.length === 0) {
       toast.error('악보 ZIP 파일을 업로드해주세요.');
       return;
     }
@@ -149,9 +163,9 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
         commission_id: commission.id,
       });
 
-      const failed = await uploadAllFiles(files, arrangement.id, uploadFile);
+      const failed = await uploadAllFiles(form.files, arrangement.id, uploadFile);
 
-      if (failed.length === files.length) {
+      if (failed.length === form.files.length) {
         await deleteArrangement({ id: arrangement.id }).catch(() => {});
         toast.error('모든 파일 업로드에 실패했습니다. 다시 시도해주세요.');
         return;
@@ -176,7 +190,7 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
     if (f) handleZipFile(f);
   };
 
-  const canSubmit = !isSubmitting && !isProcessing && !!zipName && files.length > 0 && isZipTitleMatch;
+  const canSubmit = !isSubmitting && !isProcessing && !!form.zipName && form.files.length > 0 && isZipTitleMatch;
 
   return (
     <Dialog open={isOpen} onOpenChange={open => { if (!open) close(); }}>
@@ -190,16 +204,17 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
 
         <div className='space-y-4'>
           <div>
-            <Label className='mb-2 block'>악보 파일 (ZIP)</Label>
-            <input
+            <Label htmlFor="zip-input" className='mb-2 block'>악보 파일 (ZIP)</Label>
+            <Input
               ref={zipInputRef}
               type='file'
               accept='.zip'
               className='hidden'
               onChange={e => { const f = e.target.files?.[0]; if (f) handleZipFile(f); }}
+              id="zip-input"
             />
 
-            {!zipName ? (
+            {!form.zipName ? (
               <DropZone
                 onClick={() => zipInputRef.current?.click()}
                 onDrop={handleDrop}
@@ -207,9 +222,9 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
             ) : (
               <div className='space-y-2'>
                 <ZipFileHeader
-                  name={zipName}
-                  size={zipSize}
-                  fileCount={files.length}
+                  name={form.zipName}
+                  size={form.zipSize}
+                  fileCount={form.files.length}
                   onClear={resetZip}
                   disabled={isProcessing || isSubmitting}
                 />
@@ -220,10 +235,10 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
                       <span className='text-sm'>{isCompressing ? '오디오 MP3 변환 중...' : '압축 해제 중...'}</span>
                     </div>
                 ) : (
-                  <ReadOnlyFileList files={files} />
+                  <ReadOnlyFileList files={form.files} />
                 )}
 
-                {!isProcessing && zipName && !isZipTitleMatch && (
+                {!isProcessing && form.zipName && !isZipTitleMatch && (
                   <p className='text-xs text-destructive px-1'>
                     ZIP 파일명이 곡명 또는 작곡가명과 일치하지 않습니다.
                   </p>

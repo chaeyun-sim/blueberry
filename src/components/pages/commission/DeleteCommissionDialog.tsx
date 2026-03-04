@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+import Button from '@/components/ui/button';
 import { useMutation } from '@tanstack/react-query';
 import { commissionMutations } from '@/api/commission/mutations';
 import { commissionKeys } from '@/api/commission/queryKeys';

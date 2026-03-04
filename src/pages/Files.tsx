@@ -3,7 +3,7 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
-import { Button } from '@/components/ui/button';
+import Button from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TabsContent } from '@radix-ui/react-tabs';
 import { Music, Sheet, PlusCircle, Upload } from 'lucide-react';

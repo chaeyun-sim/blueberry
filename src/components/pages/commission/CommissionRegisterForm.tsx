@@ -1,24 +1,25 @@
 import { Card, CardContent } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
+import Label from '@/components/ui/label';
 import Autocomplete from '@/components/Autocomplete';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from 'lucide-react';
 import { DifficultyLevelType } from '@/types/commission';
-import { Button } from '@/components/ui/button';
+import Button from '@/components/ui/button';
 import { useRef, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 import { scoreQueries } from '@/api/score/queries';
 import { commissionMutations } from '@/api/commission/mutations';
-import { InstrumentPicker } from '@/components/InstrumentPicker';
 import { scoreMutations } from '@/api/score/mutations';
+import { InstrumentPicker } from '@/components/InstrumentPicker';
 import { toast } from 'sonner';
 import { commissionKeys } from '@/api/commission/queryKeys';
 import { CommissionRegisterFormType } from '@/types/form';
 import { useNavigate } from 'react-router-dom';
 import { queryClient } from '@/utils/query-client';
+import { useAuth } from '@/hooks/use-auth';
 
 interface CommissionRegisterFormProps {
   form: CommissionRegisterFormType
@@ -31,6 +32,8 @@ interface CommissionRegisterFormProps {
 function CommissionRegisterForm({ form, setForm, imageFile, isAnalyzing }: CommissionRegisterFormProps) {
   const navigate = useNavigate();
   const dateInputRef = useRef<HTMLInputElement>(null);
+  
+  const { isGuest } = useAuth();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const startTimeRef = useRef(performance.now());
@@ -53,6 +56,11 @@ function CommissionRegisterForm({ form, setForm, imageFile, isAnalyzing }: Commi
   const { mutateAsync: findSongByTitle } = useMutation(scoreMutations.findSongByTitle());
 
   const handleSubmit = async () => {
+    if (isGuest) {
+      toast.error('게스트 모드에서는 의뢰를 등록할 수 없습니다.');
+      return;
+    }
+    
     setIsSubmitting(true);
     try {
       let songId: string | undefined;
@@ -124,7 +132,6 @@ function CommissionRegisterForm({ form, setForm, imageFile, isAnalyzing }: Commi
             />
           </div>
 
-          {/* Instrument Chips */}
           <InstrumentPicker
             instruments={form.instruments}
             onChange={instruments => setForm({ ...form, instruments })}
@@ -142,6 +149,7 @@ function CommissionRegisterForm({ form, setForm, imageFile, isAnalyzing }: Commi
                 })
               }
               disabled={isAnalyzing || isSubmitting}
+              aria-label='버전 선택'
             >
               <SelectTrigger>
                 <SelectValue placeholder='버전을 선택하세요' />
@@ -172,6 +180,7 @@ function CommissionRegisterForm({ form, setForm, imageFile, isAnalyzing }: Commi
                 disabled={isAnalyzing || isSubmitting}
                 onClick={() => dateInputRef.current?.showPicker()}
                 className='absolute right-0 top-0 bottom-0 px-3 flex items-center text-muted-foreground hover:text-foreground transition-colors'
+                aria-label='마감일 선택'
               >
                 <Calendar className='h-4 w-4' />
               </button>

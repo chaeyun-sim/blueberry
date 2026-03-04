@@ -1,13 +1,13 @@
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import Button from '@/components/ui/button';
 import { RefreshCw, ExternalLink, SkipForward, PenLine, RotateCcw } from 'lucide-react';
 import { type MusicRecommendation } from '@/mock/recommendations';
 import { formatDate } from '@/utils/format-date';
-import { SoundpostBadge } from './SoundpostBadge';
 import { SoundpostLinks } from './SoundpostLinks';
 import { useSoundpostCheck } from '@/hooks/use-soundpost-check';
+import { useAuth } from '@/hooks/use-auth';
 
 interface Props {
   rec: MusicRecommendation;
@@ -29,8 +29,9 @@ export function RecommendCard({
   onUnmarkAsWorked,
 }: Props) {
   const navigate = useNavigate();
+  const { isGuest } = useAuth();
 
-  const { status: soundpostStatus, titleUrl, composerUrl } = useSoundpostCheck(rec);
+  const { titleUrl, composerUrl } = useSoundpostCheck(rec);
 
   const today = dayjs();
   const youtubeUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(rec.youtubeQuery)}`;
@@ -57,14 +58,6 @@ export function RecommendCard({
       </CardHeader>
 
       <CardContent className='space-y-5'>
-        {/* 뱃지 행 */}
-        <SoundpostBadge
-          status={soundpostStatus}
-          titleUrl={titleUrl}
-          category={rec.category}
-          difficulty={rec.difficulty}
-        />
-
         {/* 제목 */}
         <div>
           <h1 className='text-2xl font-display font-bold leading-tight'>
@@ -112,6 +105,7 @@ export function RecommendCard({
                 size='sm'
                 className='gap-1.5 flex-1 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30'
                 onClick={onUnmarkAsWorked}
+                disabled={isGuest}
               >
                 <RotateCcw className='h-3.5 w-3.5' />
                 건너뛰기 취소
@@ -122,6 +116,7 @@ export function RecommendCard({
                 size='sm'
                 className='gap-1.5 flex-1 hover:bg-muted'
                 onClick={onMarkAsWorked}
+                disabled={isGuest}
               >
                 <SkipForward className='h-3.5 w-3.5' />
                 건너뛰기
@@ -131,6 +126,7 @@ export function RecommendCard({
               size='sm'
               className='gap-1.5 flex-1'
               onClick={() => navigate('/new')}
+              disabled={isGuest}
             >
               <PenLine className='h-3.5 w-3.5' />
               지금 작업하기

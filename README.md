@@ -1,73 +1,56 @@
-# Welcome to your Lovable project
+# 🫐 blueberry
 
-## Project info
+> 편곡 작업자를 위한 의뢰 & 악보 관리 서비스
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+프리랜서 편곡가가 의뢰 접수부터 납품까지의 워크플로우를 한 곳에서 관리할 수 있도록 만든 개인용 업무 관리 도구입니다.
+의뢰 상태 추적, 악보 보관, 매출 통계, 편곡 추천까지 작업에 필요한 기능을 통합하여 제공합니다.
 
-## How can I edit this code?
+### 기능 소개
 
-There are several ways of editing your application.
+| | 기능 | 설명 |
+|--|------|------|
+| 🏠 | 대시보드 | 진행 중인 의뢰 현황, 매출 요약, 월별 차트를 한눈에 확인 |
+| 📋 | 의뢰 관리 | 악보 이미지 AI 분석으로 자동 입력, **대기 → 작업중 → 완료 → 전달** 상태 추적 |
+| 🎵 | 악보 관리 | 곡 단위로 악보 등록·분류, 파일 업로드 및 ZIP 다운로드 |
+| 💰 | 매출 통계 | 월별·연간 매출 차트 시각화, Excel 업로드로 데이터 일괄 등록 |
+| 🎧 | 음악 추천 | 오늘의 편곡 추천곡 제공, 사운드포스트 연동 레퍼런스 탐색 |
+| 📅 | 캘린더 | 의뢰 마감일 기반 월별 일정 뷰 |
+| 📁 | 파일 관리 | 업로드된 악보 파일 열람 및 ZIP 일괄 다운로드 |
 
-**Use Lovable**
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
 
-Changes made via Lovable will be committed automatically to this repo.
+### 기술 스택
 
-**Use your preferred IDE**
+| 분류 | 기술 |
+|------|------|
+| Frontend | React 18, TypeScript, Vite |
+| Styling | Tailwind CSS, shadcn/ui (Radix UI) |
+| Data Fetching | TanStack Query v5 |
+| Backend / DB | Supabase |
+| Charts | Recharts |
+| Animation | Framer Motion |
+| Routing | React Router DOM v6 |
+| Deployment | Vercel |
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
-Follow these steps:
+### 디렉토리 구조
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
 ```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+src/
+├── api/              # Supabase 쿼리 & 뮤테이션 (domain별 분리)
+│   ├── commission/
+│   ├── score/
+│   ├── stats/
+│   └── recommendation/
+├── components/       # 재사용 컴포넌트
+│   ├── layout/       # AppLayout, PageHeader 등
+│   ├── pages/        # 페이지별 하위 컴포넌트
+│   └── ui/           # shadcn/ui 기반 공통 컴포넌트
+├── constants/        # 상태 설정, 악기 목록 등 상수
+├── hooks/            # 커스텀 훅
+├── pages/            # 라우팅 단위 페이지 컴포넌트
+├── provider/         # AuthProvider 등 Context
+├── types/            # TypeScript 타입 정의
+└── utils/            # 유틸 함수
+```

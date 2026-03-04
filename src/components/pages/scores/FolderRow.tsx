@@ -1,7 +1,7 @@
 import { Song } from '@/types/score';
 import { motion } from 'framer-motion';
 import { Folder, FolderOpen, Layers, Trash2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import Button from '@/components/ui/button';
 
 function FolderRow({ song, onClick, onDelete }: { song: Song; onClick: () => void; onDelete: () => void }) {
   const Icon = song.arrangements.length > 0 ? FolderOpen : Folder;

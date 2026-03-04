@@ -1,6 +1,6 @@
 import { PlusCircle, Sun, Moon, LogIn, LogOut } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useTheme } from "@/provider/ThemeProvider";
+import { useTheme } from '@/hooks/use-theme';
 import {
   Sidebar,
   SidebarContent,
@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import logoImg from "@/assets/logo.png";
-import { useAuth } from '@/provider/AuthProvider';
+import { useAuth } from '@/hooks/use-auth';
 import { navItems } from '@/constants/nav-items';
 
 export function AppSidebar() {
@@ -29,7 +29,7 @@ export function AppSidebar() {
           className="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-border bg-muted/30 hover:bg-muted/50 transition-colors"
           onClick={() => navigate('/settings')}
         >
-          <img src={logoImg} alt="logo" className="h-3.5 w-3.5 shrink-0 object-contain" />
+          <img src={logoImg} alt="로고" className="h-3.5 w-3.5 shrink-0 object-contain" />
           <p className="flex-1 min-w-0 text-left text-sm md:text-xs text-muted-foreground truncate">{session?.user?.email}</p>
         </button>
       );
@@ -62,7 +62,7 @@ export function AppSidebar() {
     <Sidebar collapsible="offcanvas" className="border-r border-sidebar-border">
       {/* Logo */}
       <div className="flex h-14 items-center gap-2 px-4 border-b border-sidebar-border">
-        <img src={logoImg} alt="BlueBerry" className="shrink-0 object-contain" style={{ width: 28, height: 28 }} />
+        <img src={logoImg} alt="로고" className="shrink-0 object-contain" style={{ width: 28, height: 28 }} />
         <span className="font-display font-bold text-lg tracking-tight truncate">
           BlueBerry
         </span>
@@ -105,6 +105,7 @@ export function AppSidebar() {
           <button
             onClick={toggleTheme}
             className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-sidebar-foreground/70 hover:bg-foreground/5 border border-transparent transition-all duration-150"
+            aria-label="테마 변경"
           >
             {theme === "dark" ? <Sun className="h-4 w-4 shrink-0" /> : <Moon className="h-4 w-4 shrink-0" />}
             <span>{theme === "dark" ? "라이트 모드" : "다크 모드"}</span>

@@ -3,7 +3,7 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { ExcelUploadDialog } from '@/components/ExcelUploadDialog';
-import { Button } from '@/components/ui/button';
+import Button from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Upload, DollarSign, BarChart3, FileSpreadsheet, CalendarDays, List } from 'lucide-react';
 import Stats from '@/components/pages/sales/Stats';
@@ -20,6 +20,7 @@ import { statsQueries } from '@/api/stats/queries';
 import { ExcelRow } from '@/types/excel';
 import { MONEY_RATIO } from '@/constants/money-ratio';
 import { toast } from 'sonner';
+import { useAuth } from '@/hooks/use-auth';
 
 const tabItems = {
   all: { icon: BarChart3, label: '전체 분석', component: Stats },
@@ -31,13 +32,20 @@ const tabItems = {
 >;
 
 const SalesStatsContent = () => {
-  const [uploadOpen, setUploadOpen] = useState(false);
+  const { isGuest } = useAuth();
 
+  const [uploadOpen, setUploadOpen] = useState(false);
+  
   const { data: salesSummary } = useQuery(statsQueries.getSalesSummary());
   const { mutate: saveRows } = useMutation(statsMutations.saveSalesRows());
 
   const handleExcelUpload = useCallback(
     (data: ExcelRow[], name: string) => {
+      if (isGuest) {
+        toast.error('게스트 모드에서는 매출 데이터를 저장할 수 없습니다.');
+        return;
+      }
+
       saveRows(
         { rows: data, name },
         {
@@ -50,7 +58,7 @@ const SalesStatsContent = () => {
         },
       );
     },
-    [saveRows],
+    [saveRows, isGuest],
   );
 
   return (

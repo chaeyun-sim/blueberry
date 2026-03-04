@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+import Button from '@/components/ui/button';
+import Label from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Mail, Lock, Eye, EyeOff, Loader2, Loader } from 'lucide-react';
 import { toast } from 'sonner';
 import { login } from '@/api/auth';
-import { useAuth } from '@/provider/AuthProvider';
+import { useAuth } from '@/hooks/use-auth';
 import logoImg from '@/assets/logo.png';
 
 interface LoginFormType {
@@ -46,13 +46,13 @@ export default function Login() {
   };
 
   return (
-    <div className='min-h-screen flex items-center justify-center bg-background px-4'>
+    <main className='min-h-screen flex items-center justify-center bg-background px-4'>
       <Card className='w-full max-w-sm border-border shadow-lg'>
         <CardContent className='pt-8 pb-8 px-8'>
           <div className='flex flex-col items-center gap-2 mb-8'>
             <img
               src={logoImg}
-              alt='BlueBerry'
+              alt='로고'
               className='object-contain'
               style={{ width: 48, height: 48 }}
             />
@@ -83,6 +83,7 @@ export default function Login() {
                   onChange={e => setForm(prev => ({ ...prev, email: e.target.value }))}
                   className='pl-10'
                   disabled={loading}
+                  autoComplete='off'
                 />
               </div>
             </div>
@@ -104,11 +105,13 @@ export default function Login() {
                   onChange={e => setForm(prev => ({ ...prev, password: e.target.value }))}
                   className='pl-10 pr-10'
                   disabled={loading}
+                  autoComplete='off'
                 />
                 <button
                   type='button'
                   onClick={() => setShowPassword(!showPassword)}
-                  className='absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors'
+                  className='absolute right-1 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors py-1 px-2'
+                  aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 보기'}
                 >
                   {showPassword ? <EyeOff className='h-4 w-4' /> : <Eye className='h-4 w-4' />}
                 </button>
@@ -145,6 +148,6 @@ export default function Login() {
           </Button>
         </CardContent>
       </Card>
-    </div>
+    </main>
   );
 }
