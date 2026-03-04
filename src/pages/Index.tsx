@@ -258,10 +258,10 @@ const Dashboard = () => {
                     <button
                       type='button'
                       key={c.id}
-                      className='flex items-center justify-between gap-3 p-3.5 rounded-2xl bg-muted/30 cursor-pointer hover:bg-muted/60 transition-colors'
+                      className='overflow-hidden w-full flex items-center justify-between gap-3 p-3.5 rounded-2xl bg-muted/30 cursor-pointer hover:bg-muted/60 transition-colors'
                       onClick={() => navigate(`/commissions/${c.id}`)}
                     >
-                      <div className='min-w-0'>
+                      <div className='min-w-0 text-left'>
                         <p className='font-semibold text-sm truncate'>
                           {c.songs?.title ?? c.title}
                         </p>
