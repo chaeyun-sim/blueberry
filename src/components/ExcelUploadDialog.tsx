@@ -184,7 +184,7 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: ExcelUploadD
               <Button
                 variant='ghost'
                 size='sm'
-                aria-label='업로드 취소'
+                aria-label='선택한 파일 제거'
                 onClick={reset}
               >
                 <X className='h-4 w-4' />
@@ -236,7 +236,11 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: ExcelUploadD
           </div>
         )}
 
-        {error && <p className='text-sm text-destructive'>{error}</p>}
+        +        {error && (
++          <p role='alert' aria-live='assertive' className='text-sm text-destructive'>
++            {error}
++          </p>
++        )}
 
         <div className='flex justify-end gap-2 pt-2'>
           <Button
