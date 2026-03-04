@@ -59,8 +59,9 @@ export function InstrumentPicker({
       if (!isOpen) return;
       setActiveIndex(prev => (prev <= 0 ? filteredOptions.length - 1 : prev - 1));
     } else if (e.key === 'Enter') {
+      if (e.nativeEvent.isComposing) return;
       e.preventDefault();
-      if (isOpen && activeIndex >= 0) {
+      if (isOpen && activeIndex >= 0 && activeIndex < filteredOptions.length) {
         handleAdd(filteredOptions[activeIndex]);
       } else if (input.trim()) {
         handleAdd(input);
