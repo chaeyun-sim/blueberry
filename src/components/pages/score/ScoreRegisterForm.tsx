@@ -35,7 +35,12 @@ function ScoreRegisterForm({
   const { mutateAsync: uploadFile } = useMutation(scoreMutations.uploadArrangementFile());
 
   const { songSuggestions, composerSuggestions, handleSongSelect } = useSongField(
-    (songTitle, composer) => setForm({ ...form, songTitle, composer }),
+    (songTitle, composer) =>
+      setForm({
+        ...form,
+        songTitle,
+        composer: composer ?? form.composer ?? '',
+      }),
   );
 
   const validate = (): boolean => {
@@ -54,7 +59,7 @@ function ScoreRegisterForm({
     return newSong.id;
   };
 
-  const uploadFiles = async (arrangementId: string) => {
+  const uploadFiles = async (arrangementId: string): Promise<string[]> => {
     const failed: string[] = [];
     for (const entry of form.files) {
       try {
@@ -63,7 +68,7 @@ function ScoreRegisterForm({
         failed.push(entry.label);
       }
     }
-    if (failed.length > 0) toast.warning(`일부 파일 업로드 실패: ${failed.join(', ')}`);
+    return failed;
   };
 
   const handleSubmit = async () => {
@@ -78,10 +83,14 @@ function ScoreRegisterForm({
         version: form.version ?? undefined,
       });
 
-      await uploadFiles(newArrangement.id);
+      const failed = await uploadFiles(newArrangement.id);
       queryClient.invalidateQueries({ queryKey: scoreKeys.list() });
-      toast.success('악보가 등록되었습니다.');
-      clearZip();
+      if (failed.length === 0) {
+        toast.success('악보가 등록되었습니다.');
+        clearZip();
+      } else {
+        toast.warning(`일부 파일 업로드 실패: ${failed.join(', ')}`);
+      }
     } catch (e) {
       toast.error('악보 등록에 실패했습니다.', { description: (e as Error).message });
     } finally {
