@@ -58,7 +58,7 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: ExcelUploadD
       return;
     }
 
-    setForm(prev => ({ ...prev, fileName: file.name }));
+    setForm(prev => ({ ...prev, fileName: file.name, preview: [] }));
 
     const reader = new FileReader();
     reader.onload = e => {
@@ -66,11 +66,14 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: ExcelUploadD
         const data = new Uint8Array(e.target?.result as ArrayBuffer);
         const { rows, error: parseError } = parseExcelSheet(data);
         if (parseError) {
+          setForm(prev => ({ ...prev, preview: [] }));
           setError(parseError);
           return;
         }
         setForm(prev => ({ ...prev, preview: rows }));
+        setError(null);
       } catch {
+        setForm(prev => ({ ...prev, preview: [] }));
         setError('파일을 파싱하는 중 오류가 발생했습니다.');
       }
     };
@@ -181,6 +184,7 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: ExcelUploadD
               <Button
                 variant='ghost'
                 size='sm'
+                aria-label='업로드 취소'
                 onClick={reset}
               >
                 <X className='h-4 w-4' />
@@ -245,7 +249,7 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: ExcelUploadD
             취소
           </Button>
           <Button
-            disabled={form.preview.length === 0 || !form.uploadName.trim()}
+            disabled={!!error || form.preview.length === 0 || !form.uploadName.trim()}
             onClick={handleConfirm}
           >
             <Upload className='h-4 w-4 mr-1.5' />
