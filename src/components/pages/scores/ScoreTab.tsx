@@ -202,7 +202,7 @@ function ScoreTab() {
                       <TableHead className='text-xs uppercase tracking-wider text-left'>
                         편성명
                       </TableHead>
-                      <TableHead className='hidden md:block text-xs uppercase tracking-wider text-right'>
+                      <TableHead className='hidden md:table-cell text-xs uppercase tracking-wider text-right'>
                         등록일
                       </TableHead>
                     </TableRow>
@@ -218,7 +218,7 @@ function ScoreTab() {
                           <FileMusic className='h-4 w-4 text-muted-foreground/60 shrink-0 hidden md:flex' />
                           {arr.arrangement.split(',').length >= 10 ? 'Orchestra' : arr.arrangement}
                         </TableCell>
-                        <TableCell className='hidden md:block text-right text-muted-foreground'>
+                        <TableCell className='hidden md:table-cell text-right text-muted-foreground'>
                           {dayjs(arr.created_at).format('YYYY-MM-DD')}
                         </TableCell>
                       </TableRow>
