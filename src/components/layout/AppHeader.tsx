@@ -1,5 +1,5 @@
-import { ArrowLeft, Trash2 } from 'lucide-react';
-import Button, { ButtonProps } from '../ui/button';
+import { ArrowLeft } from 'lucide-react';
+import Button from '../ui/button';
 import { useNavigate } from 'react-router-dom';
 
 function AppHeader({ children }: { children: React.ReactNode }) {

@@ -71,7 +71,19 @@ export default function ExcelUploadDetail() {
     <AppLayout>
       <AppHeader>
         <AppHeader.Back />
-        {upload && <AppHeader.Delete onClick={handleDelete} disabled={isDeleting} />}
+        {upload && (
+          <AppHeader.Right>
+            <Button
+              variant='ghost'
+              size='icon'
+              className='text-muted-foreground hover:text-destructive hover:bg-destructive/10'
+              onClick={handleDelete}
+              disabled={isDeleting}
+            >
+              <Trash2 className='h-4 w-4' />
+            </Button>
+          </AppHeader.Right>
+        )}
       </AppHeader>
       <div className='mb-6 flex items-center justify-between'>
         <Button
@@ -79,7 +91,7 @@ export default function ExcelUploadDetail() {
           className='gap-2 pl-0 text-muted-foreground hover:bg-foreground/5'
           onClick={() => navigate('/files')}
         >
-          <ArrowLeft className='h-4 w-4' /> 
+          <ArrowLeft className='h-4 w-4' />
         </Button>
         {upload && (
           <Button
@@ -107,7 +119,10 @@ export default function ExcelUploadDetail() {
       {isLoading ? (
         <div className='space-y-4 mt-6'>
           {[0, 1, 2, 3].map(i => (
-            <div key={i} className='h-12 rounded-lg bg-muted animate-pulse' />
+            <div
+              key={i}
+              className='h-12 rounded-lg bg-muted animate-pulse'
+            />
           ))}
         </div>
       ) : rows.length === 0 ? (
