@@ -42,7 +42,10 @@ function ScoreTab() {
     return (
       <div className='space-y-4'>
         {[0, 1, 2, 3].map(i => (
-          <div key={i} className='h-12 rounded-lg bg-muted animate-pulse' />
+          <div
+            key={i}
+            className='h-12 rounded-lg bg-muted animate-pulse'
+          />
         ))}
       </div>
     );
@@ -73,7 +76,6 @@ function ScoreTab() {
     return acc;
   }, {});
 
-  // Level 0: filtered composer list
   const filteredComposers = Object.entries(composerGroups).filter(
     ([composer, composerSongs]) =>
       !search ||
@@ -81,15 +83,19 @@ function ScoreTab() {
       composerSongs.some(s => s.title.toLowerCase().includes(search.toLowerCase())),
   );
 
-  // Level 1: songs for selected composer
   const composerSongs = openComposer
     ? (composerGroups[openComposer] ?? []).filter(
         s => !search || s.title.toLowerCase().includes(search.toLowerCase()),
       )
     : [];
 
-  // Level 2: selected song for arrangement view
   const openSong = openSongId ? (songs.find(s => s.id === openSongId) ?? null) : null;
+
+  const filteredArrangements = openSong
+    ? openSong.arrangements.filter(
+        arr => !search || arr.arrangement.toLowerCase().includes(search.toLowerCase()),
+      )
+    : [];
 
   const breadcrumb: { label: string; id: string | null }[] = [{ label: '전체 악보', id: null }];
   if (openComposer) breadcrumb.push({ label: openComposer, id: 'COMPOSER' });
@@ -109,7 +115,7 @@ function ScoreTab() {
     if (openSong) return '편성명 검색...';
     if (openComposer) return '곡명 검색...';
     return '작곡가 또는 곡명 검색...';
-  }
+  };
 
   return (
     <div className='space-y-4'>
@@ -123,7 +129,10 @@ function ScoreTab() {
         />
       </div>
 
-      <Breadcrumb path={breadcrumb} onNavigate={handleNavigate} />
+      <Breadcrumb
+        path={breadcrumb}
+        onNavigate={handleNavigate}
+      />
 
       <Card className='border-border/50'>
         <CardContent className='p-2 md:p-5'>
@@ -141,7 +150,10 @@ function ScoreTab() {
                     key={composer}
                     label={composer}
                     count={composerSongs.length}
-                    onClick={() => { setOpenComposer(composer); setSearch(''); }}
+                    onClick={() => {
+                      setOpenComposer(composer);
+                      setSearch('');
+                    }}
                   />
                 ))}
                 {filteredComposers.length === 0 && (
@@ -165,9 +177,8 @@ function ScoreTab() {
                     label={song.title}
                     count={song.arrangements.length}
                     onClick={() => setOpenSongId(song.id)}
-                    onDelete={song.arrangements.length === 0
-                      ? () => deleteSong({ id: song.id })
-                      : undefined
+                    onDelete={
+                      song.arrangements.length === 0 ? () => deleteSong({ id: song.id }) : undefined
                     }
                   />
                 ))}
@@ -188,12 +199,16 @@ function ScoreTab() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className='text-xs uppercase tracking-wider text-left'>편성명</TableHead>
-                      <TableHead className='hidden md:block text-xs uppercase tracking-wider text-right'>등록일</TableHead>
+                      <TableHead className='text-xs uppercase tracking-wider text-left'>
+                        편성명
+                      </TableHead>
+                      <TableHead className='hidden md:block text-xs uppercase tracking-wider text-right'>
+                        등록일
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {openSong.arrangements.map(arr => (
+                    {filteredArrangements.map(arr => (
                       <TableRow
                         key={arr.id}
                         className='cursor-pointer hover:bg-muted/50'
