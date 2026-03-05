@@ -28,6 +28,7 @@ import { CommissionStatus } from '@/constants/status-config';
 import { toast } from 'sonner';
 import { InstrumentPicker } from '@/components/InstrumentPicker';
 import { useAuth } from '@/hooks/use-auth';
+import AppHeader from '@/components/layout/AppHeader';
 
 const CommissionEdit = () => {
   const { id } = useParams();
@@ -131,15 +132,9 @@ const CommissionEdit = () => {
         </div>
       }
     >
-      <div className='mb-6'>
-        <Button
-          variant='ghost'
-          className='gap-2 hover:bg-foreground/5 text-muted-foreground'
-          onClick={() => navigate(-1)}
-        >
-          <ArrowLeft className='h-4 w-4' /> 뒤로
-        </Button>
-      </div>
+      <AppHeader>
+        <AppHeader.Back />
+      </AppHeader>
 
       <PageHeader title={commission?.title ?? '의뢰 수정'} />
 

@@ -1,12 +1,10 @@
 import { useState } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
-import Button from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { FileEntry } from '@/types/form';
 import { ZipUploadCard } from '@/components/pages/score/ZipUploadCard';
 import ScoreRegisterForm from '@/components/pages/score/ScoreRegisterForm';
+import AppHeader from '@/components/layout/AppHeader';
 
 export interface ScoreRegisterFormType {
   songTitle: string;
@@ -19,8 +17,6 @@ export interface ScoreRegisterFormType {
 }
 
 const ScoreRegister = () => {
-  const navigate = useNavigate();
-
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [form, setForm] = useState<ScoreRegisterFormType>({
@@ -49,15 +45,9 @@ const ScoreRegister = () => {
 
   return (
     <AppLayout>
-      <div className='mb-6'>
-        <Button
-          variant='ghost'
-          className='gap-2 text-muted-foreground hover:bg-foreground/5'
-          onClick={() => navigate(-1)}
-        >
-          <ArrowLeft className='h-4 w-4' /> 뒤로
-        </Button>
-      </div>
+      <AppHeader>
+        <AppHeader.Back />
+      </AppHeader>
       <PageHeader
         title='악보 추가'
         description='새로운 악보를 등록합니다'
