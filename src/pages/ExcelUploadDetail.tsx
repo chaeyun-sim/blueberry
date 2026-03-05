@@ -30,10 +30,17 @@ export default function ExcelUploadDetail() {
   const navigate = useNavigate();
   const { isGuest } = useAuth();
 
-  const { data: uploads = [] } = useQuery(statsQueries.getExcelUploads());
-  const { data: rows = [], isLoading } = useQuery(
-    statsQueries.getSalesRowsByUploadId(uploadId ?? ''),
-  );
+  const {
+    data: uploads = [],
+    isError: isUploadsError,
+    error: uploadsError,
+  } = useQuery(statsQueries.getExcelUploads());
+  const {
+    data: rows = [],
+    isLoading,
+    isError: isRowsError,
+    error: rowsError,
+  } = useQuery(statsQueries.getSalesRowsByUploadId(uploadId ?? ''));
 
   const upload = uploads.find(u => u.id === uploadId);
 
@@ -66,6 +73,19 @@ export default function ExcelUploadDetail() {
         }),
     });
   };
+
+  if (isUploadsError || isRowsError) {
+    const message = (rowsError as Error)?.message ?? (uploadsError as Error)?.message ?? '데이터를 불러오지 못했습니다.';
+    
+    return (
+      <AppLayout>
+        <PageHeader title='업로드 상세' />
+        <div className='mt-6 text-sm text-destructive'>
+          {message}
+        </div>
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout>
