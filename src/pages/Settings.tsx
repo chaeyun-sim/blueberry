@@ -1,32 +1,29 @@
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useAuth } from '@/hooks/use-auth';
 import { logout } from '@/api/auth';
-import { createPushSubscription } from '@/hooks/use-push';
+import { createPushSubscription, pushQueries } from '@/hooks/use-push';
+import { supabase } from '@/lib/supabase';
 import { Switch } from '@/components/ui/switch';
-import { Bell, LogOut, ArrowLeft } from 'lucide-react';
+import { Bell, LogOut } from 'lucide-react';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import logoImg from '@/assets/logo.webp';
-import Button from '@/components/ui/button';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { toast } from 'sonner';
+import AppHeader from '@/components/layout/AppHeader';
 
 export default function Settings() {
   const { session, isGuest } = useAuth();
   const navigate = useNavigate();
 
-  const [pushEnabled, setPushEnabled] = useState(false);
+  const { data: pushEnabled = false, refetch: refetchPush } = useQuery(
+    pushQueries.hasPushSubscription(session?.user?.id),
+  );
   const [pushLoading, setPushLoading] = useState(false);
 
-  useEffect(() => {
-    navigator.serviceWorker.ready
-      .then((reg) => reg.pushManager.getSubscription())
-      .then((sub) => setPushEnabled(!!sub))
-      .catch(() => {});
-  }, []);
-
   const handlePushToggle = async (checked: boolean) => {
-    if (isGuest) {
+    if (isGuest || !session?.access_token) {
       toast.error('게스트 모드에서는 푸시 알림을 설정할 수 없습니다.');
       return;
     }
@@ -35,26 +32,22 @@ export default function Settings() {
     try {
       if (checked) {
         const subscription = await createPushSubscription();
-        const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-push`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-          },
-          body: JSON.stringify({
+        const { error: fnError } = await supabase.functions.invoke('send-push', {
+          body: {
             subscription,
             title: '알림 설정 완료',
             body: '마감일 푸시 알림이 활성화됐어요 🎵',
-          }),
+          },
         });
-        if (!res.ok) throw new Error(`푸시 서버 오류 (${res.status})`);
-        setPushEnabled(true);
+        if (fnError) throw new Error(`푸시 서버 오류: ${fnError.message}`);
+        await refetchPush();
         toast.success('푸시 알림이 활성화됐어요');
       } else {
         const reg = await navigator.serviceWorker.ready;
         const sub = await reg.pushManager.getSubscription();
         await sub?.unsubscribe();
-        setPushEnabled(false);
+        await supabase.from('push_subscriptions').delete().eq('user_id', session.user.id);
+        await refetchPush();
         toast.success('푸시 알림이 비활성화됐어요');
       }
     } catch (e) {
@@ -73,15 +66,9 @@ export default function Settings() {
 
   return (
     <AppLayout>
-      <div className='mb-6'>
-        <Button
-          variant='ghost'
-          className='gap-2 text-muted-foreground hover:bg-foreground/5'
-          onClick={() => navigate(-1)}
-        >
-          <ArrowLeft className='h-4 w-4' /> 뒤로
-        </Button>
-      </div>
+      <AppHeader>
+        <AppHeader.Back />
+      </AppHeader>
       <div className="max-w-lg mx-auto">
         <PageHeader title='설정' />
 
