@@ -1,6 +1,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { OverlayProps } from '@/types/overlay';
-import logo from '@/assets/logo.png';
+import logo from '@/assets/logo.webp';
 import dayjs from 'dayjs';
 
 interface CommissionImageDialogProps extends OverlayProps {

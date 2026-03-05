@@ -93,6 +93,9 @@ self.addEventListener('fetch', event => {
   // GET 이외의 요청(POST, PATCH 등)은 서비스 워커가 처리하지 않음
   if (request.method !== 'GET') return;
 
+  // http/https 이외의 스킴(chrome-extension:// 등)은 처리하지 않음
+  if (!url.protocol.startsWith('http')) return;
+
   // 개발 환경(localhost)에서는 캐시 사용 안 함
   if (url.hostname === 'localhost') return;
 

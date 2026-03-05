@@ -79,22 +79,10 @@ const Dashboard = () => {
     : '-';
 
   const summaryValues = [
-    {
-      ...summary[0],
-      value: totalScores,
-    },
-    {
-      ...summary[1],
-      value: totalCompleted,
-    },
-    {
-      ...summary[2],
-      value: yoyGrowth,
-    },
-    {
-      ...summary[3],
-      value: avgPrice,
-    },
+    { ...summary[0], value: totalScores ?? summary[0].value },
+    { ...summary[1], value: totalCompleted ?? summary[1].value},
+    { ...summary[2], value: yoyGrowth ?? summary[2].value},
+    { ...summary[3], value: avgPrice ?? summary[3].value},
   ];
 
   const thisMonthCommissions = commissions.filter(c =>
@@ -174,9 +162,12 @@ const Dashboard = () => {
       <div className='flex flex-col gap-4'>
         <div className='rounded-3xl shadow-sm overflow-hidden h-[180px]'>
           <img
-            src='https://images.unsplash.com/photo-1771506364945-0b6566c6cd5f?q=80&w=2232&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
+            src="/backgrounds/background-768w.webp"
+            srcSet="/backgrounds/background-480w.webp 480w, /backgrounds/background-768w.webp 768w, /backgrounds/background-1080w.webp 1080w"
+            sizes="100vw"
             className='w-full h-full object-fill lg:object-center'
             alt=""
+            fetchPriority='high'
           />
         </div>
         {/* Top Row */}
@@ -267,10 +258,10 @@ const Dashboard = () => {
                     <button
                       type='button'
                       key={c.id}
-                      className='flex items-center justify-between gap-3 p-3.5 rounded-2xl bg-muted/30 cursor-pointer hover:bg-muted/60 transition-colors'
+                      className='overflow-hidden w-full flex items-center justify-between gap-3 p-3.5 rounded-2xl bg-muted/30 cursor-pointer hover:bg-muted/60 transition-colors'
                       onClick={() => navigate(`/commissions/${c.id}`)}
                     >
-                      <div className='min-w-0'>
+                      <div className='min-w-0 text-left'>
                         <p className='font-semibold text-sm truncate'>
                           {c.songs?.title ?? c.title}
                         </p>

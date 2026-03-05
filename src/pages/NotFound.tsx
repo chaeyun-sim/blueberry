@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import Button from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
-import sobbingImg from '@/assets/sobbing.png';
+import sobbingImg from '@/assets/sobbing.webp';
 
 const NotFound = () => {
   const navigate = useNavigate();
