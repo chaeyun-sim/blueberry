@@ -61,7 +61,7 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="offcanvas" className="border-r border-sidebar-border">
       {/* Logo */}
-      <div className="flex h-14 items-center gap-2 px-4 border-b border-sidebar-border">
+      <div className="flex h-14 items-center gap-2 px-4 border-b border-sidebar-border" style={{ paddingTop: 'env(safe-area-inset-top)', height: 'calc(3.5rem + env(safe-area-inset-top))' }}>
         <img src={logoImg} alt="로고" className="shrink-0 object-contain" style={{ width: 28, height: 28 }} />
         <span className="font-display font-bold text-lg tracking-tight truncate">
           BlueBerry
