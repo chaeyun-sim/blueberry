@@ -18,11 +18,12 @@ export const pushQueries = {
     queryOptions({
       queryKey: ['push_subscription', userId],
       queryFn: async () => {
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from('push_subscriptions')
           .select('user_id')
           .eq('user_id', userId!)
           .maybeSingle();
+        if (error) throw error;
         return !!data;
       },
       enabled: !!userId,
