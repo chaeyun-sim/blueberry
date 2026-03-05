@@ -1,10 +1,16 @@
-import { Song } from '@/types/score';
 import { motion } from 'framer-motion';
 import { Folder, FolderOpen, Layers, Trash2 } from 'lucide-react';
 import Button from '@/components/ui/button';
 
-function FolderRow({ song, onClick, onDelete }: { song: Song; onClick: () => void; onDelete: () => void }) {
-  const Icon = song.arrangements.length > 0 ? FolderOpen : Folder;
+interface FolderRowProps {
+  label: string;
+  count: number;
+  onClick: () => void;
+  onDelete?: () => void;
+}
+
+function FolderRow({ label, count, onClick, onDelete }: FolderRowProps) {
+  const Icon = count > 0 ? FolderOpen : Folder;
 
   return (
     <motion.div
@@ -20,22 +26,24 @@ function FolderRow({ song, onClick, onDelete }: { song: Song; onClick: () => voi
           onClick={onClick}
           className="flex items-center gap-4 flex-1 min-w-0 text-left"
         >
-          <Icon className="h-5 w-5 text-primary/70 group-hover:text-primary shrink-0 transition-colors" />
-          <span className="font-medium text-sm flex-1 truncate">{song.title}</span>
+          <Icon className="hidden md:block h-5 w-5 text-primary/70 group-hover:text-primary shrink-0 transition-colors" />
+          <span className="font-medium text-sm flex-1 truncate">{label}</span>
           <span className="text-xs text-muted-foreground flex items-center gap-1">
             <Layers className="h-3 w-3" />
-            {song.arrangements.length}
+            {count}
           </span>
         </button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0"
-          aria-label="악보 삭제"
-          onClick={e => { e.stopPropagation(); onDelete(); }}
-        >
-          <Trash2 className="h-3.5 w-3.5" />
-        </Button>
+        {onDelete && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0"
+            aria-label="악보 삭제"
+            onClick={e => { e.stopPropagation(); onDelete(); }}
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </Button>
+        )}
       </div>
     </motion.div>
   );
