@@ -12,10 +12,13 @@ import logoImg from '@/assets/logo.webp';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { toast } from 'sonner';
 import AppHeader from '@/components/layout/AppHeader';
+import { SunMoon } from 'lucide-react';
+import { useTheme } from '@/hooks/use-theme';
 
 export default function Settings() {
   const { session, isGuest } = useAuth();
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
 
   const { data: pushEnabled = false, refetch: refetchPush } = useQuery(
     pushQueries.hasPushSubscription(session?.user?.id),
@@ -100,6 +103,26 @@ export default function Settings() {
               </div>
               <Switch checked={pushEnabled} onCheckedChange={handlePushToggle} disabled={pushLoading} aria-label='마감일 푸시 알림 토글' />
             </div>
+          </section>
+
+          {/* 화면 */}
+          <section className="rounded-xl border border-border bg-card p-4">
+            <p className="text-xs text-muted-foreground font-medium mb-3">화면</p>
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="flex items-center gap-3 w-full text-left"
+            >
+              <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                <SunMoon className="w-4 h-4 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium">테마</p>
+                <p className="text-xs text-muted-foreground">
+                  {theme === 'dark' ? '다크 모드 사용 중' : '라이트 모드 사용 중'}
+                </p>
+              </div>
+            </button>
           </section>
 
           {/* 로그아웃 */}
