@@ -25,6 +25,7 @@ const CalendarView = lazy(() => import("./pages/CalendarView"));
 const MusicRecommend = lazy(() => import("./pages/MusicRecommend"));
 const Login = lazy(() => import("./pages/Login"));
 const Settings = lazy(() => import("./pages/Settings"));
+const ExcelUploadDetail = lazy(() => import("./pages/ExcelUploadDetail"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 function Protected() {
@@ -63,6 +64,7 @@ const App = () => (
                     <Route path="/calendar" element={<CalendarView />} />
                     <Route path="/recommend" element={<MusicRecommend />} />
                     <Route path="/settings" element={<Settings />} />
+                    <Route path="/files/excel/:uploadId" element={<ExcelUploadDetail />} />
                   </Route>
                   <Route path="*" element={<NotFound />} />
                 </Routes>
