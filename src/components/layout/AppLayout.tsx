@@ -36,6 +36,7 @@ export function AppLayout({ children, bottomBar }: AppLayoutProps) {
                 exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.18, ease: "easeOut" }}
                 className="p-6 md:h-full md:overflow-auto"
+                style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}
               >
                 {children}
               </motion.div>
