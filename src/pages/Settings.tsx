@@ -49,7 +49,11 @@ export default function Settings() {
         const reg = await navigator.serviceWorker.ready;
         const sub = await reg.pushManager.getSubscription();
         await sub?.unsubscribe();
-        await supabase.from('push_subscriptions').delete().eq('user_id', session.user.id);
+        await supabase
+          .from('push_subscriptions')
+          .delete()
+          .eq('user_id', session.user.id)
+          .throwOnError();
         await refetchPush();
         toast.success('푸시 알림이 비활성화됐어요');
       }
