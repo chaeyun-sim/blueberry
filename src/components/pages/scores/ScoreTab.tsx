@@ -176,7 +176,7 @@ function ScoreTab() {
                     key={song.id}
                     label={song.title}
                     count={song.arrangements.length}
-                    onClick={() => setOpenSongId(song.id)}
+                    onClick={() => { setOpenSongId(song.id); setSearch(''); }}
                     onDelete={
                       song.arrangements.length === 0 ? () => deleteSong({ id: song.id }) : undefined
                     }
