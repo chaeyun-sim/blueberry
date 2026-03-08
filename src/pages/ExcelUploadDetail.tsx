@@ -99,6 +99,7 @@ export default function ExcelUploadDetail() {
               className='text-muted-foreground hover:text-destructive hover:bg-destructive/10'
               onClick={handleDelete}
               disabled={isDeleting}
+              aria-label='업로드 삭제'
             >
               <Trash2 className='h-4 w-4' />
             </Button>
