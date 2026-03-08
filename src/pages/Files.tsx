@@ -34,7 +34,9 @@ const Files = () => {
             toast.success(`"${name}" — ${rows.length}건이 저장되었습니다.`);
           },
           onError: e =>
-            toast.error('저장에 실패했습니다.', { description: e instanceof Error ? e.message : undefined }),
+            toast.error('저장에 실패했습니다.', {
+              description: e instanceof Error ? e.message : undefined,
+            }),
         },
       );
     },
@@ -54,32 +56,49 @@ const Files = () => {
         onUpload={handleUpload}
       />
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className='space-y-6'>
+      <Tabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className='space-y-6'
+      >
         {/* 탭 + 액션 버튼 같은 줄 */}
         <div className='flex items-center justify-between'>
           <TabsList className='grid grid-cols-2 w-auto'>
-            <TabsTrigger value='scores' className='gap-1.5'>
+            <TabsTrigger
+              value='scores'
+              className='gap-1.5'
+            >
               <Music className='h-3.5 w-3.5' />
               악보 관리
             </TabsTrigger>
-            <TabsTrigger value='excel' className='gap-1.5'>
+            <TabsTrigger
+              value='excel'
+              className='gap-1.5'
+            >
               <Sheet className='h-3.5 w-3.5' />
               엑셀 관리
             </TabsTrigger>
           </TabsList>
-
-          {activeTab === 'scores' && (
-            <Button className='gap-2' onClick={() => navigate('/scores/new')}>
-              <PlusCircle className='h-4 w-4' />
-              악보 추가
-            </Button>
-          )}
-          {activeTab === 'excel' && (
-            <Button className='gap-2' onClick={() => setUploadOpen(true)}>
-              <Upload className='h-4 w-4' />
-              엑셀 업로드
-            </Button>
-          )}
+          <div className='hidden md:flex'>
+             {activeTab === 'scores' && (
+              <Button
+                className='gap-2'
+                onClick={() => navigate('/scores/new')}
+              >
+                <PlusCircle className='h-4 w-4' />
+                악보 추가
+              </Button>
+            )}
+            {activeTab === 'excel' && (
+              <Button
+                className='gap-2'
+                onClick={() => setUploadOpen(true)}
+              >
+                <Upload className='h-4 w-4' />
+                엑셀 업로드
+              </Button>
+            )}
+         </div>
         </div>
 
         <TabsContent value='scores'>
@@ -89,6 +108,26 @@ const Files = () => {
           <ExcelTab onUploadRequest={() => setUploadOpen(true)} />
         </TabsContent>
       </Tabs>
+      <div className='md:hidden absolute bottom-5 left-6 right-6'>
+        {activeTab === 'scores' && (
+          <Button
+            className='gap-2 w-full'
+            onClick={() => navigate('/scores/new')}
+          >
+            <PlusCircle className='h-4 w-4' />
+            악보 추가
+          </Button>
+        )}
+        {activeTab === 'excel' && (
+          <Button
+            className='gap-2 w-full'
+            onClick={() => setUploadOpen(true)}
+          >
+            <Upload className='h-4 w-4' />
+            엑셀 업로드
+          </Button>
+        )}
+      </div>
     </AppLayout>
   );
 };

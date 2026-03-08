@@ -16,8 +16,6 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Breadcrumb from './BreadCrumb';
 import FolderRow from './FolderRow';
-import DeleteSongDialog from './DeleteSongDialog';
-import { overlay } from 'overlay-kit';
 import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 import { scoreQueries } from '@/api/score/queries';
 import { scoreMutations } from '@/api/score/mutations';
@@ -25,10 +23,12 @@ import { scoreKeys } from '@/api/score/queryKeys';
 import { useMutation } from '@tanstack/react-query';
 import { queryClient } from '@/utils/query-client';
 import dayjs from 'dayjs';
+import type { Song } from '@/types/score';
 
 function ScoreTab() {
   const [search, setSearch] = useState('');
-  const [openFolderId, setOpenFolderId] = useState<string | null>(null);
+  const [openComposer, setOpenComposer] = useState<string | null>(null);
+  const [openSongId, setOpenSongId] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const { data: songs = [], isLoading, isError, refetch } = useQuery(scoreQueries.getSongs());
@@ -42,7 +42,10 @@ function ScoreTab() {
     return (
       <div className='space-y-4'>
         {[0, 1, 2, 3].map(i => (
-          <div key={i} className='h-12 rounded-lg bg-muted animate-pulse' />
+          <div
+            key={i}
+            className='h-12 rounded-lg bg-muted animate-pulse'
+          />
         ))}
       </div>
     );
@@ -65,68 +68,130 @@ function ScoreTab() {
     );
   }
 
-  const filteredSongs = songs.filter(song =>
-    song.title.toLowerCase().includes(search.toLowerCase()),
+  // Group songs by composer
+  const composerGroups = songs.reduce<Record<string, Song[]>>((acc, song) => {
+    const key = song.composer || '(미상)';
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(song);
+    return acc;
+  }, {});
+
+  const filteredComposers = Object.entries(composerGroups).filter(
+    ([composer, composerSongs]) =>
+      !search ||
+      composer.toLowerCase().includes(search.toLowerCase()) ||
+      composerSongs.some(s => s.title.toLowerCase().includes(search.toLowerCase())),
   );
 
-  const openFolder = openFolderId
-    ? songs.find(s => s.id === openFolderId && s.arrangements.length > 0)
-    : null;
+  const composerSongs = openComposer
+    ? (composerGroups[openComposer] ?? []).filter(
+        s => !search || s.title.toLowerCase().includes(search.toLowerCase()),
+      )
+    : [];
+
+  const openSong = openSongId ? (songs.find(s => s.id === openSongId) ?? null) : null;
+
+  const filteredArrangements = openSong
+    ? openSong.arrangements.filter(
+        arr => !search || arr.arrangement.toLowerCase().includes(search.toLowerCase()),
+      )
+    : [];
 
   const breadcrumb: { label: string; id: string | null }[] = [{ label: '전체 악보', id: null }];
-  if (openFolder) breadcrumb.push({ label: openFolder.title, id: openFolder.id });
+  if (openComposer) breadcrumb.push({ label: openComposer, id: 'COMPOSER' });
+  if (openSong) breadcrumb.push({ label: openSong.title, id: openSong.id });
+
+  const handleNavigate = (id: string | null) => {
+    if (id === null) {
+      setOpenComposer(null);
+      setOpenSongId(null);
+    } else if (id === 'COMPOSER') {
+      setOpenSongId(null);
+    }
+    setSearch('');
+  };
+
+  const placeholder = () => {
+    if (openSong) return '편성명 검색...';
+    if (openComposer) return '곡명 검색...';
+    return '작곡가 또는 곡명 검색...';
+  };
 
   return (
     <div className='space-y-4'>
-      {/* 검색 */}
       <div className='relative max-w-sm'>
         <Search className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground' />
         <Input
-          placeholder='곡명 검색...'
+          placeholder={placeholder()}
           value={search}
           onChange={e => setSearch(e.target.value)}
           className='pl-9'
         />
       </div>
 
-      <Breadcrumb path={breadcrumb} onNavigate={id => setOpenFolderId(id)} />
+      <Breadcrumb
+        path={breadcrumb}
+        onNavigate={handleNavigate}
+      />
 
       <Card className='border-border/50'>
-        <CardContent className='p-5'>
+        <CardContent className='p-2 md:p-5'>
           <AnimatePresence mode='wait'>
-            {!openFolder ? (
+            {!openComposer ? (
               <motion.div
-                key='list-folders'
+                key='list-composers'
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 className='flex flex-col gap-0.5'
               >
-                {filteredSongs.map(song => (
+                {filteredComposers.map(([composer, composerSongs]) => (
                   <FolderRow
-                    key={song.id}
-                    song={song}
-                    onClick={() => setOpenFolderId(song.id)}
-                    onDelete={() => {
-                      if (song.arrangements.length > 0) {
-                        overlay.open(overlayProps => (
-                          <DeleteSongDialog
-                            {...overlayProps}
-                            songTitle={song.title}
-                            arrangementCount={song.arrangements.length}
-                            onConfirm={() => deleteSong({ id: song.id })}
-                          />
-                        ));
-                      } else {
-                        deleteSong({ id: song.id });
-                      }
+                    key={composer}
+                    label={composer}
+                    count={composerSongs.length}
+                    onClick={() => {
+                      setOpenComposer(composer);
+                      setSearch('');
                     }}
                   />
                 ))}
+                {filteredComposers.length === 0 && (
+                  <div className='flex flex-col items-center justify-center py-16 text-muted-foreground'>
+                    <Music className='h-12 w-12 mb-3 opacity-40' />
+                    <p className='text-sm'>검색 결과가 없습니다</p>
+                  </div>
+                )}
+              </motion.div>
+            ) : !openSong ? (
+              <motion.div
+                key={`list-songs-${openComposer}`}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className='flex flex-col gap-0.5'
+              >
+                {composerSongs.map(song => (
+                  <FolderRow
+                    key={song.id}
+                    label={song.title}
+                    count={song.arrangements.length}
+                    onClick={() => { setOpenSongId(song.id); setSearch(''); }}
+                    onDelete={
+                      song.arrangements.length === 0 ? () => deleteSong({ id: song.id }) : undefined
+                    }
+                  />
+                ))}
+                {composerSongs.length === 0 && (
+                  <div className='flex flex-col items-center justify-center py-16 text-muted-foreground'>
+                    <Music className='h-12 w-12 mb-3 opacity-40' />
+                    <p className='text-sm'>검색 결과가 없습니다</p>
+                  </div>
+                )}
               </motion.div>
             ) : (
               <motion.div
-                key='table-files'
+                key={`table-files-${openSongId}`}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -134,22 +199,26 @@ function ScoreTab() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className='text-xs uppercase tracking-wider text-left'>편성명</TableHead>
-                      <TableHead className='text-xs uppercase tracking-wider text-right'>등록일</TableHead>
+                      <TableHead className='text-xs uppercase tracking-wider text-left'>
+                        편성명
+                      </TableHead>
+                      <TableHead className='hidden md:table-cell text-xs uppercase tracking-wider text-right'>
+                        등록일
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {openFolder.arrangements.map(arr => (
+                    {filteredArrangements.map(arr => (
                       <TableRow
                         key={arr.id}
                         className='cursor-pointer hover:bg-muted/50'
-                        onClick={() => navigate(`/scores/${openFolder.id}/arrangements/${arr.id}`)}
+                        onClick={() => navigate(`/scores/${openSong.id}/arrangements/${arr.id}`)}
                       >
-                        <TableCell className='font-medium flex items-center gap-2'>
-                          <FileMusic className='h-4 w-4 text-muted-foreground/60 shrink-0' />
+                        <TableCell className='font-medium flex items-center gap-2 text-left'>
+                          <FileMusic className='h-4 w-4 text-muted-foreground/60 shrink-0 hidden md:flex' />
                           {arr.arrangement.split(',').length >= 10 ? 'Orchestra' : arr.arrangement}
                         </TableCell>
-                        <TableCell className='text-right text-muted-foreground'>
+                        <TableCell className='hidden md:table-cell text-right text-muted-foreground'>
                           {dayjs(arr.created_at).format('YYYY-MM-DD')}
                         </TableCell>
                       </TableRow>
@@ -159,13 +228,6 @@ function ScoreTab() {
               </motion.div>
             )}
           </AnimatePresence>
-
-          {!openFolder && filteredSongs.length === 0 && (
-            <div className='flex flex-col items-center justify-center py-16 text-muted-foreground'>
-              <Music className='h-12 w-12 mb-3 opacity-40' />
-              <p className='text-sm'>검색 결과가 없습니다</p>
-            </div>
-          )}
         </CardContent>
       </Card>
     </div>

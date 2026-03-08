@@ -1,17 +1,15 @@
 import { useState, useEffect } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
-import Button from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import AnalyzeImage from '@/components/pages/commission/AnalyzeImage';
 import CommissionRegisterForm from '@/components/pages/commission/CommissionRegisterForm';
 import { buildInstrumentList } from '@/utils/build-instrument-list';
 import { CommissionRegisterFormType } from '@/types/form';
 import { useAuth } from '@/hooks/use-auth';
+import AppHeader from '@/components/layout/AppHeader';
 
 const CommissionRegister = () => {
-  const navigate = useNavigate();
   const { isGuest } = useAuth();
   
   const [form, setForm] = useState<CommissionRegisterFormType>({
@@ -55,15 +53,9 @@ const CommissionRegister = () => {
 
   return (
     <AppLayout>
-      <div className='mb-6'>
-        <Button
-          variant='ghost'
-          className='gap-2 text-muted-foreground hover:bg-foreground/5'
-          onClick={() => navigate(-1)}
-        >
-          <ArrowLeft className='h-4 w-4' /> 뒤로
-        </Button>
-      </div>
+      <AppHeader>
+        <AppHeader.Back />
+      </AppHeader>
       <PageHeader
         title='의뢰 등록'
         description='카톡 캡처를 업로드하면 AI가 자동으로 분석합니다'

@@ -15,8 +15,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["IBM Plex Sans", "sans-serif"],
-        display: ["Space Grotesk", "sans-serif"],
+        sans: ["Pretendard", "-apple-system", "sans-serif"],
+        display: ["Pretendard", "-apple-system", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",

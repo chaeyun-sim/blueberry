@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
     <title>BlueBerry</title>
     <meta
@@ -23,9 +23,28 @@
       property="og:description"
       content="BlueBerry - 음악 작업 관리 서비스"
     />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="BlueBerry" />
+    <meta
+      name="theme-color"
+      content="#f5f3f0"
+      media="(prefers-color-scheme: light)"
+    />
+    <meta
+      name="theme-color"
+      content="#1f1914"
+      media="(prefers-color-scheme: dark)"
+    />
+    <meta
+      name="apple-mobile-web-app-capable"
+      content="yes"
+    />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta
+      name="apple-mobile-web-app-title"
+      content="BlueBerry"
+    />
     <link
       rel="manifest"
       href="/manifest.webmanifest"
@@ -274,6 +293,10 @@
       imagesrcset="/backgrounds/background-480w.webp 480w, /backgrounds/background-768w.webp 768w, /backgrounds/background-1080w.webp 1080w"
       imagesizes="100vw"
       fetchpriority="high"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"
     />
   </head>
 
