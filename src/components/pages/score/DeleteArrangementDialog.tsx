@@ -43,6 +43,7 @@ function DeleteArrangementDialog({
     deleteArrangement({ id: arrangementId }, {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: scoreKeys.list() });
+        queryClient.invalidateQueries({ queryKey: scoreKeys.summary() });
         queryClient.invalidateQueries({ queryKey: scoreKeys.arrangement(arrangementId) });
         toast.success('편성이 삭제되었습니다.');
         close();

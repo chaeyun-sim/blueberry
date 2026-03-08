@@ -39,7 +39,10 @@ const ScoreList = () => {
   const { data: songs = [], isLoading, isError, refetch } = useQuery(scoreQueries.getSongs());
   const { mutate: deleteSong } = useMutation({
     ...scoreMutations.deleteSong(),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: scoreKeys.list() }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: scoreKeys.list() });
+      queryClient.invalidateQueries({ queryKey: scoreKeys.summary() });
+    },
     onError: (e: Error) => toast.error('악보 삭제에 실패했습니다.', { description: e.message }),
   });
 

@@ -175,6 +175,7 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
       }
 
       queryClient.invalidateQueries({ queryKey: scoreKeys.list() });
+      queryClient.invalidateQueries({ queryKey: scoreKeys.summary() });
       onConfirm();
       close();
     } catch (e) {
