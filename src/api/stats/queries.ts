@@ -2,9 +2,10 @@ import { queryOptions } from '@tanstack/react-query';
 import { statsKeys } from './queryKeys';
 import { getCategoryDistribution, getMonthlySales, getSalesSummary, getTopSongs, getTopArrangements, getTopSongMonthlySales, getMonthlyCategoryBreakdown, getSalesRows, getExcelUploads, getSalesRowsByUploadId, getSalesYearRange } from '.';
 
-const THIS_YEAR = new Date().getFullYear();
 const PAST_YEAR_STALE = Infinity;
 const STATS_STALE = 1000 * 60 * 15; // 15분
+
+const isPastYear = (year: number) => year < new Date().getFullYear();
 
 export const statsQueries = {
   getSalesSummary: () => queryOptions({
@@ -16,13 +17,13 @@ export const statsQueries = {
     queryKey: statsKeys.monthlySales(year),
     queryFn: () => getMonthlySales(year),
     enabled: !!year,
-    staleTime: year < THIS_YEAR ? PAST_YEAR_STALE : STATS_STALE,
+    staleTime: isPastYear(year) ? PAST_YEAR_STALE : STATS_STALE,
   }),
   getMonthlyCategoryBreakdown: (year: number) => queryOptions({
     queryKey: statsKeys.monthlyCategoryBreakdown(year),
     queryFn: () => getMonthlyCategoryBreakdown(year),
     enabled: !!year,
-    staleTime: year < THIS_YEAR ? PAST_YEAR_STALE : STATS_STALE,
+    staleTime: isPastYear(year) ? PAST_YEAR_STALE : STATS_STALE,
   }),
   getCategoryDistribution: () => queryOptions({
     queryKey: statsKeys.categoryDistribution(),
@@ -43,12 +44,12 @@ export const statsQueries = {
     queryKey: statsKeys.topSongMonthlySales(year),
     queryFn: () => getTopSongMonthlySales(year),
     enabled: !!year,
-    staleTime: year < THIS_YEAR ? PAST_YEAR_STALE : STATS_STALE,
+    staleTime: isPastYear(year) ? PAST_YEAR_STALE : STATS_STALE,
   }),
   getSalesRows: (year?: number) => queryOptions({
     queryKey: statsKeys.salesRows(year),
     queryFn: () => getSalesRows(year),
-    staleTime: year && year < THIS_YEAR ? PAST_YEAR_STALE : STATS_STALE,
+    staleTime: year && isPastYear(year) ? PAST_YEAR_STALE : STATS_STALE,
   }),
   getExcelUploads: () => queryOptions({
     queryKey: statsKeys.excelUploads(),
