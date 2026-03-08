@@ -85,18 +85,19 @@ function SidePanel({ selectedRec, workedSongs, setSelectedRec }: SidePanelProps)
               return (
                 <button
                   key={r.id}
-                  disabled={done}
                   className={cn(
-                    'w-full text-left px-4 py-3 border-t border-border/50 first:border-t-0 transition-colors focus:outline-none',
-                    isSelected ? 'bg-primary/5' : !done && 'hover:bg-muted/40',
-                    done ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer',
+                    'relative cursor-pointer w-full text-left px-4 py-3 border-t border-border/50 first:border-t-0 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                    isSelected ? 'bg-primary/5' : 'hover:bg-muted/40',
                   )}
-                  onClick={() => { if (!done) { setSelectedRec(r); setQuery(''); } }}
+                  onClick={() => setSelectedRec(r)}
                 >
-                  <p className='text-sm font-medium leading-snug'>
-                    {r.title}
-                    {done && <span className='ml-1.5 text-[10px] text-muted-foreground'>(작업완료)</span>}
-                  </p>
+                  {done && <span className='absolute inset-0 bg-background/30 z-10 pointer-events-none' />}
+                  {done && (
+                    <p className='text-[11px] text-muted-foreground mb-1'>
+                      <span className='text-[10px] font-medium text-primary'>건너뜀</span>
+                    </p>
+                  )}
+                  <p className='text-sm font-medium leading-snug'>{r.title}</p>
                   <p className='text-xs text-muted-foreground'>{r.composer}</p>
                   <span className={cn('inline-block mt-1.5 text-[10px] font-medium px-1.5 py-0.5 rounded-full border', categoryStyle[r.category])}>
                     {r.category}
@@ -124,19 +125,18 @@ function SidePanel({ selectedRec, workedSongs, setSelectedRec }: SidePanelProps)
               return (
                 <button
                   key={r.id}
-                  disabled={done}
                   className={cn(
-                    'w-full text-left px-4 py-3 border-t border-border/50 first:border-t-0 transition-colors focus:outline-none',
-                    isSelected ? 'bg-primary/5' : !done && 'hover:bg-muted/40',
-                    done ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer',
+                    'relative cursor-pointer w-full text-left px-4 py-3 border-t border-border/50 first:border-t-0 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                    isSelected ? 'bg-primary/5' : 'hover:bg-muted/40',
                   )}
-                  onClick={() => !done && setSelectedRec(r)}
+                  onClick={() => setSelectedRec(r)}
                 >
-                  <p className='text-[11px] text-muted-foreground mb-1'>{formatDate(dayjs(date))}</p>
-                  <p className='text-sm font-medium leading-snug'>
-                    {r.title}
-                    {done && <span className='ml-1.5 text-[10px] text-muted-foreground'>(작업완료)</span>}
+                  {done && <span className='absolute inset-0 bg-background/30 z-10 pointer-events-none' />}
+                  <p className='text-[11px] text-muted-foreground mb-1'>
+                    {formatDate(dayjs(date))}
+                    {done && <span className='ml-1.5 text-[10px] font-medium text-primary'>건너뜀</span>}
                   </p>
+                  <p className='text-sm font-medium leading-snug'>{r.title}</p>
                   <p className='text-xs text-muted-foreground'>{r.composer}</p>
                   <span className={cn('inline-block mt-1.5 text-[10px] font-medium px-1.5 py-0.5 rounded-full border', categoryStyle[r.category])}>
                     {r.category}

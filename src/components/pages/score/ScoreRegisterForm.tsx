@@ -85,6 +85,7 @@ function ScoreRegisterForm({
 
       const failed = await uploadFiles(newArrangement.id);
       queryClient.invalidateQueries({ queryKey: scoreKeys.list() });
+      queryClient.invalidateQueries({ queryKey: scoreKeys.summary() });
       if (failed.length === 0) {
         toast.success('악보가 등록되었습니다.');
         clearZip();

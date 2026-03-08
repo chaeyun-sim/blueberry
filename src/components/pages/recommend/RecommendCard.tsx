@@ -47,7 +47,7 @@ export function RecommendCard({
             <Button
               variant='ghost'
               size='sm'
-              className='gap-1.5 text-xs h-8 text-muted-foreground hover:text-foreground'
+              className='gap-1.5 text-xs h-8 text-muted-foreground hover:text-foreground hover:bg-foreground/5'
               onClick={onResetSelection}
             >
               <RefreshCw className='h-3.5 w-3.5' />
@@ -101,9 +101,9 @@ export function RecommendCard({
           <div className='flex gap-2'>
             {isWorked ? (
               <Button
-                variant='secondary'
+                variant='ghost'
                 size='sm'
-                className='gap-1.5 flex-1 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30'
+                className='bg-foreground/5 gap-1.5 flex-1 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30'
                 onClick={onUnmarkAsWorked}
                 disabled={isGuest}
               >

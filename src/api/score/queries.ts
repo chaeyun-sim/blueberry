@@ -1,5 +1,5 @@
 import { queryOptions, skipToken } from '@tanstack/react-query'
-import { getArrangement, getSong, getSongs } from '.'
+import { getArrangement, getSong, getSongs, getSongsSummary } from '.'
 import { scoreKeys } from './queryKeys'
 
 export const scoreQueries = {
@@ -7,6 +7,11 @@ export const scoreQueries = {
     queryOptions({
       queryKey: scoreKeys.list(),
       queryFn: getSongs,
+    }),
+  getSongsSummary: () =>
+    queryOptions({
+      queryKey: scoreKeys.summary(),
+      queryFn: getSongsSummary,
     }),
   getSong: (id: string) =>
     queryOptions({
