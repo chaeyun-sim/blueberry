@@ -105,27 +105,6 @@ export default function ExcelUploadDetail() {
           </AppHeader.Right>
         )}
       </AppHeader>
-      <div className='mb-6 flex items-center justify-between'>
-        <Button
-          variant='ghost'
-          className='gap-2 pl-0 text-muted-foreground hover:bg-foreground/5'
-          onClick={() => navigate('/files')}
-        >
-          <ArrowLeft className='h-4 w-4' />
-        </Button>
-        {upload && (
-          <Button
-            variant='ghost'
-            size='icon'
-            className='text-muted-foreground hover:text-destructive hover:bg-destructive/10'
-            onClick={handleDelete}
-            disabled={isDeleting}
-            aria-label='업로드 삭제'
-          >
-            <Trash2 className='h-4 w-4' />
-          </Button>
-        )}
-      </div>
 
       <PageHeader
         title={upload?.name ?? '업로드 상세'}
