@@ -86,7 +86,7 @@ function SidePanel({ selectedRec, workedSongs, setSelectedRec }: SidePanelProps)
                 <button
                   key={r.id}
                   className={cn(
-                    'cursor-pointer w-full text-left px-4 py-3 border-t border-border/50 first:border-t-0 transition-colors focus:outline-none',
+                    'cursor-pointer w-full text-left px-4 py-3 border-t border-border/50 first:border-t-0 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                     isSelected ? 'bg-primary/5' : 'hover:bg-muted/40',
                   )}
                   onClick={() => setSelectedRec(r)}
@@ -123,7 +123,7 @@ function SidePanel({ selectedRec, workedSongs, setSelectedRec }: SidePanelProps)
                 <button
                   key={r.id}
                   className={cn(
-                    'cursor-pointer w-full text-left px-4 py-3 border-t border-border/50 first:border-t-0 transition-colors focus:outline-none',
+                    'cursor-pointer w-full text-left px-4 py-3 border-t border-border/50 first:border-t-0 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                     isSelected ? 'bg-primary/5' : 'hover:bg-muted/40',
                   )}
                   onClick={() => setSelectedRec(r)}
