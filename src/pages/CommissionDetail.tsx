@@ -69,8 +69,8 @@ const CommissionDetailContent = () => {
   const navigate = useNavigate();
   const { isGuest } = useAuth();
 
-  const { data: commission, isLoading } = useQuery({ ...commissionQueries.getCommission(id), throwOnError: true });
-  const { data: song } = useQuery({ ...scoreQueries.getSong(commission?.song_id ?? ''), throwOnError: true });
+  const { data: commission, isLoading } = useQuery(commissionQueries.getCommission(id));
+  const { data: song } = useQuery(scoreQueries.getSong(commission?.song_id ?? ''));
   const { mutate: updateStatus } = useMutation(commissionMutations.updateCommissionStatus());
 
   const matchedArrangements =
