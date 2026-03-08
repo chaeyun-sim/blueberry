@@ -1,3 +1,4 @@
+import { queryOptions } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_KEY
@@ -11,6 +12,23 @@ function urlBase64ToUint8Array(base64String: string) {
   const rawData = atob(base64)
   return Uint8Array.from([...rawData].map((c) => c.charCodeAt(0)))
 }
+
+export const pushQueries = {
+  hasPushSubscription: (userId: string | undefined) =>
+    queryOptions({
+      queryKey: ['push_subscription', userId],
+      queryFn: async () => {
+        const { data, error } = await supabase
+          .from('push_subscriptions')
+          .select('user_id')
+          .eq('user_id', userId!)
+          .maybeSingle();
+        if (error) throw error;
+        return !!data;
+      },
+      enabled: !!userId,
+    }),
+};
 
 export async function createPushSubscription() {
   if (!VAPID_PUBLIC_KEY) throw new Error('VITE_VAPID_KEY 환경 변수가 설정되지 않았습니다.')

@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+.omc
+.claude
+.moai
+.mcp.json
+.cursor

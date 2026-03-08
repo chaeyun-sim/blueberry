@@ -38,6 +38,7 @@ import { queryClient } from '@/utils/query-client';
 import { COMMISSION_INFO } from '@/types/commission';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/use-auth';
+import AppHeader from '@/components/layout/AppHeader';
 
 const statusProgress: Record<CommissionStatus, LucideIcon> = {
   received: Package2,
@@ -244,14 +245,9 @@ const CommissionDetailContent = () => {
         </div>
       }
     >
-      <div className='mb-6 flex items-center justify-between'>
-        <Button
-          variant='ghost'
-          className='gap-2 hover:bg-foreground/5 text-muted-foreground'
-          onClick={() => navigate(-1)}
-        >
-          <ArrowLeft className='h-4 w-4' /> 뒤로
-        </Button>
+      <AppHeader>
+        <AppHeader.Back />
+        <AppHeader.Right>
         <Button
           variant='ghost'
           className='gap-2 hover:bg-foreground/5 text-muted-foreground'
@@ -259,7 +255,8 @@ const CommissionDetailContent = () => {
         >
           <Pencil className='h-4 w-4' /> 수정
         </Button>
-      </div>
+        </AppHeader.Right>
+      </AppHeader>
 
       <PageHeader title={song?.title ?? commission.songs?.title ?? commission.title ?? ''} />
 

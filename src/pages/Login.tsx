@@ -8,7 +8,7 @@ import { Mail, Lock, Eye, EyeOff, Loader2, Loader } from 'lucide-react';
 import { toast } from 'sonner';
 import { login } from '@/api/auth';
 import { useAuth } from '@/hooks/use-auth';
-import logoImg from '@/assets/logo.png';
+import logoImg from '@/assets/logo.webp';
 
 interface LoginFormType {
   email: string;

@@ -1,7 +1,7 @@
 import { useState, useRef, useId } from "react";
 import { Input } from "@/components/ui/input";
 
-interface AutocompleteProps {
+export interface AutocompleteProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;

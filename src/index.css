@@ -4,6 +4,16 @@
 @tailwind components;
 @tailwind utilities;
 
+body {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* iOS 인풋 포커스 시 자동 줌인 방지 */
+input, textarea, select {
+  font-size: max(16px, 1em);
+}
+
 button:not(:disabled),
 [role="button"]:not(:disabled) {
   cursor: pointer;

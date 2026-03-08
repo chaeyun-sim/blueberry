@@ -1,32 +1,32 @@
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useAuth } from '@/hooks/use-auth';
 import { logout } from '@/api/auth';
-import { createPushSubscription } from '@/hooks/use-push';
+import { createPushSubscription, pushQueries } from '@/hooks/use-push';
+import { supabase } from '@/lib/supabase';
 import { Switch } from '@/components/ui/switch';
-import { Bell, LogOut, ArrowLeft } from 'lucide-react';
+import { Bell, LogOut } from 'lucide-react';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-import logoImg from '@/assets/logo.png';
-import Button from '@/components/ui/button';
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import logoImg from '@/assets/logo.webp';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { toast } from 'sonner';
+import AppHeader from '@/components/layout/AppHeader';
+import { SunMoon } from 'lucide-react';
+import { useTheme } from '@/hooks/use-theme';
 
 export default function Settings() {
   const { session, isGuest } = useAuth();
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
 
-  const [pushEnabled, setPushEnabled] = useState(false);
+  const { data: pushEnabled = false, refetch: refetchPush } = useQuery(
+    pushQueries.hasPushSubscription(session?.user?.id),
+  );
   const [pushLoading, setPushLoading] = useState(false);
 
-  useEffect(() => {
-    navigator.serviceWorker.ready
-      .then((reg) => reg.pushManager.getSubscription())
-      .then((sub) => setPushEnabled(!!sub))
-      .catch(() => {});
-  }, []);
-
   const handlePushToggle = async (checked: boolean) => {
-    if (isGuest) {
+    if (isGuest || !session?.access_token) {
       toast.error('게스트 모드에서는 푸시 알림을 설정할 수 없습니다.');
       return;
     }
@@ -35,26 +35,26 @@ export default function Settings() {
     try {
       if (checked) {
         const subscription = await createPushSubscription();
-        const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-push`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-          },
-          body: JSON.stringify({
+        const { error: fnError } = await supabase.functions.invoke('send-push', {
+          body: {
             subscription,
             title: '알림 설정 완료',
             body: '마감일 푸시 알림이 활성화됐어요 🎵',
-          }),
+          },
         });
-        if (!res.ok) throw new Error(`푸시 서버 오류 (${res.status})`);
-        setPushEnabled(true);
+        if (fnError) throw new Error(`푸시 서버 오류: ${fnError.message}`);
+        await refetchPush();
         toast.success('푸시 알림이 활성화됐어요');
       } else {
         const reg = await navigator.serviceWorker.ready;
         const sub = await reg.pushManager.getSubscription();
         await sub?.unsubscribe();
-        setPushEnabled(false);
+        await supabase
+          .from('push_subscriptions')
+          .delete()
+          .eq('user_id', session.user.id)
+          .throwOnError();
+        await refetchPush();
         toast.success('푸시 알림이 비활성화됐어요');
       }
     } catch (e) {
@@ -73,15 +73,9 @@ export default function Settings() {
 
   return (
     <AppLayout>
-      <div className='mb-6'>
-        <Button
-          variant='ghost'
-          className='gap-2 text-muted-foreground hover:bg-foreground/5'
-          onClick={() => navigate(-1)}
-        >
-          <ArrowLeft className='h-4 w-4' /> 뒤로
-        </Button>
-      </div>
+      <AppHeader>
+        <AppHeader.Back />
+      </AppHeader>
       <div className="max-w-lg mx-auto">
         <PageHeader title='설정' />
 
@@ -113,6 +107,26 @@ export default function Settings() {
               </div>
               <Switch checked={pushEnabled} onCheckedChange={handlePushToggle} disabled={pushLoading} aria-label='마감일 푸시 알림 토글' />
             </div>
+          </section>
+
+          {/* 화면 */}
+          <section className="rounded-xl border border-border bg-card p-4">
+            <p className="text-xs text-muted-foreground font-medium mb-3">화면</p>
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="flex items-center gap-3 w-full text-left"
+            >
+              <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                <SunMoon className="w-4 h-4 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium">테마</p>
+                <p className="text-xs text-muted-foreground">
+                  {theme === 'dark' ? '다크 모드 사용 중' : '라이트 모드 사용 중'}
+                </p>
+              </div>
+            </button>
           </section>
 
           {/* 로그아웃 */}
