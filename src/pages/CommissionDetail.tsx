@@ -69,8 +69,8 @@ const CommissionDetailContent = () => {
   const navigate = useNavigate();
   const { isGuest } = useAuth();
 
-  const { data: commission, isLoading } = useQuery(commissionQueries.getCommission(id));
-  const { data: song } = useQuery(scoreQueries.getSong(commission?.song_id ?? ''));
+  const { data: commission, isLoading } = useQuery({ ...commissionQueries.getCommission(id), throwOnError: true });
+  const { data: song } = useQuery({ ...scoreQueries.getSong(commission?.song_id ?? ''), throwOnError: true });
   const { mutate: updateStatus } = useMutation(commissionMutations.updateCommissionStatus());
 
   const matchedArrangements =
@@ -395,10 +395,13 @@ const CommissionDetailContent = () => {
   );
 };
 
-const CommissionDetail = () => (
-  <ErrorBoundary level='page'>
-    <CommissionDetailContent />
-  </ErrorBoundary>
-);
+const CommissionDetail = () => {
+  const { id } = useParams();
+  return (
+    <ErrorBoundary key={id} level='page'>
+      <CommissionDetailContent />
+    </ErrorBoundary>
+  );
+};
 
 export default CommissionDetail;
