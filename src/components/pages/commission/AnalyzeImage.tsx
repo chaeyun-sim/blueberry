@@ -49,13 +49,11 @@ function AnalyzeImage({
   const handleAnalyze = async () => {
     if (!url || !file) return;
     setIsAnalyzing(true);
-    const start = performance.now();
     try {
       const base64 = url.split(',')[1];
       const result = await analyzeCommissionImage(base64, file.type);
       setForm(result);
-      const elapsed = ((performance.now() - start) / 1000).toFixed(2);
-      toast.success(`AI 분석 완료 (${elapsed}초)`);
+      toast.success('AI 분석이 완료되었습니다.');
     } catch {
       toast.error('AI 분석에 실패했습니다.');
     } finally {
@@ -98,7 +96,7 @@ function AnalyzeImage({
               <img
                 src={url}
                 alt='업로드된 이미지'
-                className='max-h-[400px] rounded-md object-contain'
+                className='max-h-[400px] object-contain'
               />
               <button
                 type='button'

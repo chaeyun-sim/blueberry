@@ -39,7 +39,6 @@ function CommissionRegisterForm({
   const { isGuest } = useAuth();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const startTimeRef = useRef(performance.now());
 
   const { mutateAsync: createCommission } = useMutation(commissionMutations.createCommission());
   const { mutateAsync: uploadCommissionImage } = useMutation(
@@ -98,8 +97,7 @@ function CommissionRegisterForm({
 
       await uploadImage(res?.id);
       queryClient.invalidateQueries({ queryKey: commissionKeys.list() });
-      const elapsed = ((performance.now() - startTimeRef.current) / 1000).toFixed(2);
-      toast.success(`등록 완료 (총 ${elapsed}초)`);
+      toast.success('의뢰가 등록되었습니다.');
       navigate(`/commissions/${res?.id}`);
     } catch (e) {
       toast.error('의뢰 등록에 실패했습니다.', { description: (e as Error).message });
