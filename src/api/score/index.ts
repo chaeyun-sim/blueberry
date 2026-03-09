@@ -95,8 +95,8 @@ export async function createSong(input: CreateSongInput) {
       const { data: existing, error: fetchError } = await supabase
         .from(SONGS)
         .select()
-        .eq('title', input.title)
-        .eq('composer', input.composer)
+        .ilike('title', input.title)
+        .ilike('composer', input.composer)
         .is('deleted_at', null)
         .single();
 
