@@ -81,28 +81,29 @@ export async function getArrangement(arrangementId: string) {
   return data as Arrangement;
 }
 
-// 악보 등록 (insert or return existing — title unique 제약 기반)
+// 악보 등록 (insert, 중복 시 기존 row 반환)
 export async function createSong(input: CreateSongInput) {
   const { data, error } = await supabase
     .from(SONGS)
-    .upsert(input, { onConflict: 'title,composer', ignoreDuplicates: true })
+    .insert(input)
     .select()
-    .maybeSingle();
+    .single();
 
-  if (error) throw error;
+  if (error) {
+    // 중복 키 에러(23505)면 기존 row 반환
+    if (error.code === '23505') {
+      const { data: existing, error: fetchError } = await supabase
+        .from(SONGS)
+        .select()
+        .eq('title', input.title)
+        .eq('composer', input.composer)
+        .is('deleted_at', null)
+        .single();
 
-  // race condition으로 insert가 무시된 경우 기존 row 반환
-  if (!data) {
-    const { data: existing, error: fetchError } = await supabase
-      .from(SONGS)
-      .select()
-      .eq('title', input.title)
-      .eq('composer', input.composer)
-      .is('deleted_at', null)
-      .single();
-
-    if (fetchError) throw fetchError;
-    return existing as Song;
+      if (fetchError) throw fetchError;
+      return existing as Song;
+    }
+    throw error;
   }
 
   return data as Song;
