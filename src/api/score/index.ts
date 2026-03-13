@@ -57,7 +57,9 @@ export async function getSongsSummary() {
   // soft-delete된 편성은 JS에서 필터링
   return (data ?? []).map(song => ({
     id: song.id,
-    arrangements: (song.arrangements as { id: string; deleted_at: string | null }[]).filter(a => !a.deleted_at),
+    arrangements: Array.isArray(song.arrangements)
+      ? (song.arrangements as { id: string; deleted_at: string | null }[]).filter(a => !a.deleted_at)
+      : [],
   }));
 }
 
