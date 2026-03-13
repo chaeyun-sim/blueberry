@@ -29,7 +29,13 @@ const ExcelUploadDetail = lazy(() => import("./pages/ExcelUploadDetail"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 function Protected() {
-  return <ProtectedRoute><Outlet /></ProtectedRoute>;
+  return (
+    <ProtectedRoute>
+      <ErrorBoundary level='page'>
+        <Outlet />
+      </ErrorBoundary>
+    </ProtectedRoute>
+  );
 }
 
 const App = () => (
