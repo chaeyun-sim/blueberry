@@ -178,7 +178,9 @@ const DashboardContent = () => {
             {/* Revenue Slider Card — green tint */}
             <Card className='border-[1px] shadow-sm'>
               <CardContent className='pb-0'>
-                <RevenueSliderCard />
+                <ErrorBoundary level='section'>
+                  <RevenueSliderCard />
+                </ErrorBoundary>
               </CardContent>
             </Card>
 
@@ -285,7 +287,9 @@ const DashboardContent = () => {
         </div>
 
         {/* Second Row: Monthly Chart */}
-        <MonthlyChart />
+        <ErrorBoundary level='section'>
+          <MonthlyChart />
+        </ErrorBoundary>
 
         {/* Third Row: Quick Stats */}
         <div className='grid grid-cols-2 lg:grid-cols-4 gap-4'>

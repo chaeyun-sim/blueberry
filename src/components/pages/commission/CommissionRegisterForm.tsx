@@ -54,15 +54,13 @@ function CommissionRegisterForm({
       }),
   );
 
-  const { mutateAsync: createSong } = useMutation(scoreMutations.createSong());
   const { mutateAsync: findSongByTitle } = useMutation(scoreMutations.findSongByTitle());
 
+  // 의뢰 등록 시에는 기존 곡 연결만 허용 — 새 곡 생성은 CompleteDialog에서만
   const resolveSongId = async (): Promise<string | undefined> => {
     if (!form.songTitle) return undefined;
     const existing = await findSongByTitle({ title: form.songTitle, composer: form.composer });
-    if (existing) return existing.id;
-    const newSong = await createSong({ title: form.songTitle, composer: form.composer });
-    return newSong.id;
+    return existing?.id;
   };
 
   const uploadImage = async (commissionId: string) => {

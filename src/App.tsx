@@ -12,6 +12,10 @@ import { queryClient } from './utils/query-client';
 import ErrorBoundary from "@/components/ErrorBoundary";
 import ProtectedRoute from "@/components/layout/ProtectedRoute";
 
+function handlePageReset() {
+  queryClient.resetQueries();
+}
+
 const Index = lazy(() => import("./pages/Index"));
 const CommissionList = lazy(() => import("./pages/CommissionList"));
 const CommissionRegister = lazy(() => import("./pages/CommissionRegister"));
@@ -29,7 +33,13 @@ const ExcelUploadDetail = lazy(() => import("./pages/ExcelUploadDetail"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 function Protected() {
-  return <ProtectedRoute><Outlet /></ProtectedRoute>;
+  return (
+    <ProtectedRoute>
+      <ErrorBoundary level='page' onReset={handlePageReset}>
+        <Outlet />
+      </ErrorBoundary>
+    </ProtectedRoute>
+  );
 }
 
 const App = () => (

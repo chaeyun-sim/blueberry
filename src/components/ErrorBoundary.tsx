@@ -7,6 +7,7 @@ interface Props {
   children: ReactNode;
   level?: 'global' | 'page' | 'section';
   onError?: (error: Error, info: ErrorInfo) => void;
+  onReset?: () => void;
 }
 
 interface State {
@@ -41,6 +42,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
   }
 
   handleReset = () => {
+    this.props.onReset?.();
     this.setState({ hasError: false, error: null });
   };
 

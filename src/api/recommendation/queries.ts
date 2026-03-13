@@ -7,23 +7,27 @@ export const recommendationQueries = {
     queryOptions({
       queryKey: recommendationKeys.today(),
       queryFn: getTodayRecommendation,
+      retry: 1,
     }),
 
   recent: (limit: number) =>
     queryOptions({
       queryKey: recommendationKeys.recent(limit),
       queryFn: () => getRecentRecommendations(limit),
+      retry: 1,
     }),
 
   list: () =>
     queryOptions({
       queryKey: recommendationKeys.list(),
       queryFn: getAllRecommendations,
+      retry: 1,
     }),
 
   workedIds: () =>
     queryOptions({
       queryKey: recommendationKeys.workedIds(),
       queryFn: getWorkedSongIds,
+      retry: 1,
     }),
 }
