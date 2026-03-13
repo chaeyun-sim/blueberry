@@ -24,6 +24,7 @@ export async function findSongByTitle(title: string, composer: string) {
     .ilike('title', title)
     .ilike('composer', composer)
     .is('deleted_at', null)
+    .limit(1)
     .maybeSingle();
   if (error) throw error;
   return data as Pick<Song, 'id' | 'title' | 'composer'> | null;
@@ -35,23 +36,29 @@ export async function getSongs() {
     .from(SONGS)
     .select(SONGS_LIST_SELECT)
     .is('deleted_at', null)
-    .is('arrangements.deleted_at', null)
     .order('created_at', { ascending: false });
 
   if (error) throw error;
-  return data as Song[];
+  // soft-delete된 편성은 JS에서 필터링 (DB 필터는 INNER JOIN처럼 동작해 곡 자체를 제외시킴)
+  return (data as Song[]).map(song => ({
+    ...song,
+    arrangements: song.arrangements?.filter(a => !a.deleted_at) ?? [],
+  }));
 }
 
 // 악보 편성 수 집계용 경량 조회 (Dashboard 전용)
 export async function getSongsSummary() {
   const { data, error } = await supabase
     .from(SONGS)
-    .select('id, arrangements(id)')
-    .is('deleted_at', null)
-    .is('arrangements.deleted_at', null);
+    .select('id, arrangements(id, deleted_at)')
+    .is('deleted_at', null);
 
   if (error) throw error;
-  return (data ?? []) as { id: string; arrangements: { id: string }[] }[];
+  // soft-delete된 편성은 JS에서 필터링
+  return (data ?? []).map(song => ({
+    id: song.id,
+    arrangements: (song.arrangements as { id: string; deleted_at: string | null }[]).filter(a => !a.deleted_at),
+  }));
 }
 
 // 악보 상세 조회 (song + arrangements)
@@ -61,11 +68,15 @@ export async function getSong(id: string) {
     .select(SONGS_LIST_SELECT)
     .eq('id', id)
     .is('deleted_at', null)
-    .is('arrangements.deleted_at', null)
     .single();
 
   if (error) throw error;
-  return data as Song;
+  const song = data as Song;
+  // soft-delete된 편성은 JS에서 필터링
+  if (song?.arrangements) {
+    song.arrangements = song.arrangements.filter(a => !a.deleted_at);
+  }
+  return song;
 }
 
 // 편성 상세 조회 (arrangement + files + song)
@@ -98,9 +109,11 @@ export async function createSong(input: CreateSongInput) {
         .ilike('title', input.title)
         .ilike('composer', input.composer)
         .is('deleted_at', null)
+        .limit(1)
         .single();
 
       if (fetchError) throw fetchError;
+      if (!existing) throw error;
       return existing as Song;
     }
     throw error;
