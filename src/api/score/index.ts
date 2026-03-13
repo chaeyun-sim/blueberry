@@ -103,19 +103,31 @@ export async function createSong(input: CreateSongInput) {
     .single();
 
   if (error) {
-    // 중복 키 에러(23505)면 기존 row 반환
+    // 중복 키 에러(23505)면 기존 row 반환 (soft-deleted 포함 검색)
     if (error.code === '23505') {
       const { data: existing, error: fetchError } = await supabase
         .from(SONGS)
         .select()
         .ilike('title', input.title)
         .ilike('composer', input.composer)
-        .is('deleted_at', null)
         .limit(1)
         .single();
 
       if (fetchError) throw fetchError;
       if (!existing) throw error;
+
+      // soft-delete된 곡이면 복구 후 반환
+      if (existing.deleted_at) {
+        const { data: restored, error: restoreError } = await supabase
+          .from(SONGS)
+          .update({ deleted_at: null })
+          .eq('id', existing.id)
+          .select()
+          .single();
+        if (restoreError) throw restoreError;
+        return restored as Song;
+      }
+
       return existing as Song;
     }
     throw error;
