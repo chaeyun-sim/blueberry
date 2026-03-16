@@ -79,6 +79,19 @@ function ScoreTab() {
     return acc;
   }, {});
 
+  // 작곡가 폴더 표시 라벨 생성
+  // - 작곡가 2명+: "첫번째 외 N명"
+  // - 곡이 1개인 그룹: 뒤에 " · 곡명" 추가
+  const getComposerLabel = (composer: string, groupSongs: Song[]) => {
+    const names = composer.split(',').map(n => n.trim()).filter(Boolean);
+    const composerLabel = names.length > 1
+      ? `${names[0]} 외 ${names.length - 1}명`
+      : composer;
+    return groupSongs.length === 1
+      ? `${composerLabel} · ${groupSongs[0].title}`
+      : composerLabel;
+  };
+
   const filteredComposers = Object.entries(composerGroups).filter(
     ([composer, composerSongs]) =>
       !search ||
@@ -101,7 +114,7 @@ function ScoreTab() {
     : [];
 
   const breadcrumb: { label: string; id: string | null }[] = [{ label: '전체 악보', id: null }];
-  if (openComposer) breadcrumb.push({ label: openComposer, id: 'COMPOSER' });
+  if (openComposer) breadcrumb.push({ label: getComposerLabel(openComposer, composerGroups[openComposer] ?? []), id: 'COMPOSER' });
   if (openSong) breadcrumb.push({ label: openSong.title, id: openSong.id });
 
   const handleNavigate = (id: string | null) => {
@@ -151,7 +164,7 @@ function ScoreTab() {
                 {filteredComposers.map(([composer, composerSongs]) => (
                   <FolderRow
                     key={composer}
-                    label={composer}
+                    label={getComposerLabel(composer, composerSongs)}
                     count={composerSongs.length}
                     onClick={() => {
                       setOpenComposer(composer);
