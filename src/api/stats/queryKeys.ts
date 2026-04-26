@@ -11,4 +11,7 @@ export const statsKeys = {
   excelUploads: () => [...statsKeys.all, 'excelUploads'] as const,
   salesRowsByUpload: (uploadId: string) => [...statsKeys.all, 'salesRowsByUpload', uploadId] as const,
   salesYearRange: () => [...statsKeys.all, 'salesYearRange'] as const,
+  seasonalPattern: () => [...statsKeys.all, 'seasonalPattern'] as const,
+  trendingSongs: () => [...statsKeys.all, 'trendingSongs'] as const,
+  revenueConcentration: () => [...statsKeys.all, 'revenueConcentration'] as const,
 }

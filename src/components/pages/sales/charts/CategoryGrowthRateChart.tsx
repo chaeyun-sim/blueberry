@@ -1,7 +1,5 @@
 import { ChartConfig, ChartContainer, ChartTooltip } from "@/components/ui/chart";
-import { MONEY_RATIO } from '@/constants/money-ratio';
 import { MonthlyCategoryData } from '@/types/stats';
-import { formatCurrency } from '@/utils/format-currency';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 
 interface CategoryGrowthRateChartProps {
@@ -9,21 +7,29 @@ interface CategoryGrowthRateChartProps {
 	config: ChartConfig;
 }
 
-function CategoryGrowthRateChart({ data, config }: CategoryGrowthRateChartProps) {  
+const CATS = ['CLASSIC', 'OST', 'ANI', 'ETC', 'POP', 'K-POP'] as const;
+
+function CategoryGrowthRateChart({ data, config }: CategoryGrowthRateChartProps) {
+  const normalizedData = data.map(d => {
+    const total = CATS.reduce((s, cat) => s + ((d as Record<string, unknown>)[cat] as number ?? 0), 0);
+    if (total === 0) return { month: d.month, ...Object.fromEntries(CATS.map(c => [c, 0])) };
+    return {
+      month: d.month,
+      ...Object.fromEntries(
+        CATS.map(cat => [cat, parseFloat((((d as Record<string, unknown>)[cat] as number ?? 0) / total * 100).toFixed(1))])
+      ),
+    };
+  });
+
   return (
     <ChartContainer
       config={config}
-      className='w-full h-[220px]'
+      className='w-full h-[180px]'
     >
       <BarChart
-        data={data.map(d => ({
-          month: d.month,
-          CLASSIC: d.CLASSIC * MONEY_RATIO,
-          OST: d.OST * MONEY_RATIO,
-          ANI: d.ANI * MONEY_RATIO,
-          ETC: d.ETC * MONEY_RATIO,
-        }))}
+        data={normalizedData}
         margin={{ left: -16, right: 8, top: 4, bottom: 4 }}
+        barSize={21}
       >
         <CartesianGrid
           vertical={false}
@@ -39,17 +45,19 @@ function CategoryGrowthRateChart({ data, config }: CategoryGrowthRateChartProps)
           tickLine={false}
           axisLine={false}
           fontSize={11}
-          tickFormatter={v => `${(v / 10000).toFixed(0)}만`}
+          tickFormatter={v => `${v}%`}
+          domain={[0, 100]}
+          ticks={[0, 25, 50, 75, 100]}
         />
         <ChartTooltip
           content={({ active, payload }) => {
             if (!active || !payload?.length) return null;
             const d = payload[0].payload;
-            const total = d.CLASSIC + d.OST + d.ANI + d.ETC || 1;
+            const activeCats = CATS.filter(cat => config[cat] && d[cat] > 0);
             return (
               <div className='rounded-lg border border-border bg-background px-3 py-2 text-xs shadow-md space-y-1'>
                 <p className='font-semibold text-sm mb-1'>{d.month}</p>
-                {(['CLASSIC', 'OST', 'ANI', 'ETC'] as const).map(cat => (
+                {activeCats.map(cat => (
                   <div
                     key={cat}
                     className='flex items-center justify-between gap-4'
@@ -62,7 +70,7 @@ function CategoryGrowthRateChart({ data, config }: CategoryGrowthRateChartProps)
                       {cat}
                     </span>
                     <span className='tabular-nums text-muted-foreground'>
-                      {formatCurrency(d[cat])} · {Math.round((d[cat] / total) * 100)}%
+                      {d[cat]}%
                     </span>
                   </div>
                 ))}
@@ -70,27 +78,15 @@ function CategoryGrowthRateChart({ data, config }: CategoryGrowthRateChartProps)
             );
           }}
         />
-        <Bar
-          dataKey='CLASSIC'
-          stackId='a'
-          fill='var(--color-CLASSIC)'
-        />
-        <Bar
-          dataKey='OST'
-          stackId='a'
-          fill='var(--color-OST)'
-        />
-        <Bar
-          dataKey='ANI'
-          stackId='a'
-          fill='var(--color-ANI)'
-        />
-        <Bar
-          dataKey='ETC'
-          stackId='a'
-          fill='var(--color-ETC)'
-          radius={[4, 4, 0, 0]}
-        />
+        {CATS.filter(cat => config[cat]).map((cat, i, arr) => (
+          <Bar
+            key={cat}
+            dataKey={cat}
+            stackId='a'
+            fill={`var(--color-${cat})`}
+            radius={i === arr.length - 1 ? [4, 4, 0, 0] : undefined}
+          />
+        ))}
       </BarChart>
     </ChartContainer>
   );

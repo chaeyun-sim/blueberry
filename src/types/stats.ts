@@ -61,3 +61,28 @@ export type CategoryDistributionItem = {
   countShare: number;
   revenue: number;
 };
+
+export type SeasonalPatternItem = {
+  monthNum: number;
+  month: string;
+  avgRevenue: number;
+  avgCount: number;
+  years: number;
+  topSongs: { title: string; avgCount: number }[];
+};
+
+export type TrendingSong = {
+  title: string;
+  recentSales: number;
+  prevSales: number;
+  growth: number;
+};
+
+export type RevenueConcentrationItem = {
+  rank: number;
+  title: string;
+  revenue: number;
+  revenueShare: number;
+  cumulativeShare: number;
+  songShare: number;
+};
