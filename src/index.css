@@ -21,113 +21,121 @@ button:not(:disabled),
 
 @layer base {
   :root {
-    --background: 38 18% 95%;
-    --foreground: 28 22% 14%;
+    /* ── Blueberry Light ─────────────────────── */
+    --background: 250 8% 97%;        /* 거의 흰색, 미세한 쿨톤 */
+    --foreground: 252 55% 8%;        /* 딥 블루베리 블랙 */
 
-    --card: 38 22% 98%;
-    --card-foreground: 28 22% 14%;
+    --card: 0 0% 100%;
+    --card-foreground: 252 55% 8%;
 
-    --popover: 38 22% 98%;
-    --popover-foreground: 28 22% 14%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 252 55% 8%;
 
-    --primary: 345 42% 36%;
-    --primary-foreground: 38 22% 97%;
+    --primary: 252 70% 38%;          /* 블루베리 인디고 */
+    --primary-foreground: 0 0% 99%;
 
-    --secondary: 68 28% 88%;
-    --secondary-foreground: 28 22% 14%;
+    --secondary: 250 10% 92%;
+    --secondary-foreground: 252 55% 8%;
 
-    --muted: 38 16% 91%;
-    --muted-foreground: 28 14% 38%;
+    --muted: 250 8% 93%;
+    --muted-foreground: 250 12% 44%;
 
-    --accent: 64 36% 50%;
-    --accent-foreground: 28 22% 14%;
+    --accent: 192 100% 42%;           /* 네온 아이스 블루 — 유리 블루베리 */
+    --accent-foreground: 252 55% 8%;
 
     --destructive: 0 70% 42%;
-    --destructive-foreground: 38 22% 97%;
+    --destructive-foreground: 0 0% 99%;
 
-    --border: 38 18% 84%;
-    --input: 38 18% 84%;
-    --ring: 345 42% 36%;
+    --border: 250 10% 88%;
+    --input: 250 10% 88%;
+    --ring: 252 70% 38%;
 
     --radius: 1.5rem;
 
     --status-received: 0 65% 54%;
-    --status-working: 210 70% 45%;
+    --status-working: 252 70% 38%;
     --status-delivered: 265 55% 50%;
-    --status-complete: 150 45% 40%;
+    --status-complete: 150 45% 36%;
+    --status-cancelled: 250 8% 52%;
 
     --badge-received-text: 0 65% 30%;
-    --badge-working-text: 210 70% 28%;
+    --badge-working-text: 252 70% 25%;
     --badge-delivered-text: 265 55% 30%;
-    --badge-complete-text: 150 45% 26%;
+    --badge-complete-text: 150 45% 24%;
+    --badge-cancelled-text: 250 8% 36%;
 
-    --warning: 35 88% 50%;
-    --warning-foreground: 38 22% 97%;
-    --success: 150 45% 40%;
-    --success-foreground: 38 22% 97%;
+    --warning: 35 88% 48%;
+    --warning-foreground: 0 0% 99%;
+    --success: 150 45% 36%;
+    --success-foreground: 0 0% 99%;
 
-    --sidebar-background: 38 20% 97%;
-    --sidebar-foreground: 28 22% 14%;
-    --sidebar-primary: 345 42% 36%;
-    --sidebar-primary-foreground: 38 22% 97%;
-    --sidebar-accent: 68 28% 88%;
-    --sidebar-accent-foreground: 28 22% 14%;
-    --sidebar-border: 38 18% 84%;
-    --sidebar-ring: 345 42% 36%;
+    /* 사이드바 — 다크 블루베리 (라이트 모드에도 다크) */
+    --sidebar-background: 252 62% 10%;
+    --sidebar-foreground: 250 40% 92%;
+    --sidebar-primary: 192 100% 62%;  /* 네온 아이스 블루 active */
+    --sidebar-primary-foreground: 252 62% 8%;
+    --sidebar-accent: 252 55% 18%;
+    --sidebar-accent-foreground: 250 40% 92%;
+    --sidebar-border: 252 48% 16%;
+    --sidebar-ring: 192 100% 62%;
   }
 
   .dark {
-    --background: 28 20% 10%;
-    --foreground: 38 18% 88%;
+    /* ── Blueberry Dark ──────────────────────── */
+    --background: 248 50% 5%;        /* 딥 인디고 블랙 */
+    --foreground: 248 12% 92%;
 
-    --card: 28 18% 14%;
-    --card-foreground: 38 18% 88%;
+    --card: 248 45% 9%;
+    --card-foreground: 248 12% 92%;
 
-    --popover: 28 18% 14%;
-    --popover-foreground: 38 18% 88%;
+    --popover: 248 45% 9%;
+    --popover-foreground: 248 12% 92%;
 
-    --primary: 345 42% 55%;
-    --primary-foreground: 38 22% 97%;
+    --primary: 252 80% 68%;          /* 브라이트 블루베리 */
+    --primary-foreground: 0 0% 99%;
 
-    --secondary: 68 20% 20%;
-    --secondary-foreground: 38 18% 88%;
+    --secondary: 248 35% 16%;
+    --secondary-foreground: 248 12% 92%;
 
-    --muted: 28 15% 18%;
-    --muted-foreground: 38 12% 55%;
+    --muted: 248 30% 14%;
+    --muted-foreground: 248 12% 54%;
 
-    --accent: 64 32% 52%;
-    --accent-foreground: 28 22% 14%;
+    --accent: 192 100% 55%;           /* 네온 아이스 블루 다크모드 */
+    --accent-foreground: 248 50% 5%;
 
     --destructive: 0 65% 62%;
-    --destructive-foreground: 38 22% 97%;
+    --destructive-foreground: 0 0% 99%;
 
-    --border: 28 15% 22%;
-    --input: 28 15% 22%;
-    --ring: 345 42% 55%;
+    --border: 248 28% 18%;
+    --input: 248 28% 18%;
+    --ring: 252 80% 68%;
 
     --status-received: 0 65% 60%;
-    --status-working: 210 70% 58%;
+    --status-working: 252 80% 68%;
     --status-delivered: 265 55% 62%;
     --status-complete: 150 45% 50%;
+    --status-cancelled: 248 12% 52%;
 
-    --badge-received-text: 0 65% 70%;
-    --badge-working-text: 210 70% 72%;
+    --badge-received-text: 0 65% 72%;
+    --badge-working-text: 252 80% 78%;
     --badge-delivered-text: 265 55% 74%;
     --badge-complete-text: 150 45% 68%;
+    --badge-cancelled-text: 248 12% 66%;
 
     --warning: 35 88% 55%;
-    --warning-foreground: 38 22% 97%;
+    --warning-foreground: 0 0% 99%;
     --success: 150 45% 50%;
-    --success-foreground: 38 22% 97%;
+    --success-foreground: 0 0% 99%;
 
-    --sidebar-background: 28 22% 8%;
-    --sidebar-foreground: 38 18% 88%;
-    --sidebar-primary: 345 42% 55%;
-    --sidebar-primary-foreground: 38 22% 97%;
-    --sidebar-accent: 68 20% 20%;
-    --sidebar-accent-foreground: 38 18% 88%;
-    --sidebar-border: 28 15% 22%;
-    --sidebar-ring: 345 42% 55%;
+    /* 사이드바 — 더 딥하게 */
+    --sidebar-background: 248 58% 4%;
+    --sidebar-foreground: 248 40% 93%;
+    --sidebar-primary: 192 100% 65%;
+    --sidebar-primary-foreground: 248 62% 6%;
+    --sidebar-accent: 248 45% 11%;
+    --sidebar-accent-foreground: 248 40% 93%;
+    --sidebar-border: 248 40% 12%;
+    --sidebar-ring: 192 100% 65%;
   }
 }
 
@@ -188,5 +196,17 @@ button:not(:disabled),
   .badge-complete {
     background-color: hsl(var(--status-complete) / 0.15);
     color: hsl(var(--badge-complete-text));
+  }
+  .badge-cancelled {
+    background-color: hsl(var(--status-cancelled) / 0.12);
+    color: hsl(var(--badge-cancelled-text));
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 }
