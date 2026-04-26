@@ -1,3 +1,4 @@
+import { ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface BreadcrumbProps {
@@ -6,29 +7,34 @@ interface BreadcrumbProps {
 }
 
 function Breadcrumb({ path, onNavigate }: BreadcrumbProps) {
+  if (path.length <= 1) return null;
+
   return (
-    <div className="flex items-center gap-1.5 text-sm mb-5 mt-1 overflow-hidden">
+    <nav aria-label="breadcrumb" className="flex items-center gap-1 text-sm mb-4 mt-1 overflow-hidden">
       {path.map((item, i) => {
         const isLast = i === path.length - 1;
         return (
-          <span key={i} className={cn("flex items-center gap-1.5", isLast ? "min-w-0" : "shrink-0")}>
-            {i > 0 && <span className="text-muted-foreground/40 shrink-0">/</span>}
+          <span key={i} className={cn("flex items-center gap-1", isLast ? "min-w-0" : "shrink-0")}>
+            {i > 0 && (
+              <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/30 shrink-0" aria-hidden="true" />
+            )}
             <button
               type='button'
               onClick={() => onNavigate(item.id)}
               className={cn(
-                "hover:text-primary transition-colors",
+                "transition-colors rounded px-1 py-0.5 -mx-1",
                 isLast
-                  ? "font-semibold text-foreground truncate max-w-full"
-                  : "shrink-0 text-muted-foreground whitespace-nowrap"
+                  ? "font-semibold text-foreground truncate max-w-[200px] md:max-w-full cursor-default"
+                  : "shrink-0 text-muted-foreground whitespace-nowrap hover:text-foreground"
               )}
+              aria-current={isLast ? 'page' : undefined}
             >
               {item.label}
             </button>
           </span>
         );
       })}
-    </div>
+    </nav>
   );
 }
 
