@@ -35,7 +35,7 @@ function MonthlyChart() {
   const growth = prev > 0 ? Math.round(((last - prev) / prev) * 100) : null;
 
   return (
-    <div className='rounded-[var(--radius)] p-5 h-full' style={{ backgroundColor: 'hsl(345, 38%, 38%)' }}>
+    <div className='rounded-[var(--radius)] p-5 h-full' style={{ backgroundColor: 'hsl(252, 48%, 32%)' }}>
       {/* Header */}
       <div className='flex items-center justify-between mb-5'>
         <div className='flex items-center gap-2.5'>
