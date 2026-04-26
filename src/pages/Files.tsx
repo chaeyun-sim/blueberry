@@ -1,11 +1,7 @@
 import { useState, useCallback } from 'react';
 import ErrorBoundary from '@/components/ErrorBoundary';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { PageHeader } from '@/components/layout/PageHeader';
-import Button from '@/components/ui/button';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { TabsContent } from '@radix-ui/react-tabs';
 import { Music, Sheet, PlusCircle, Upload } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
 import { ExcelUploadDialog } from '@/components/ExcelUploadDialog';
@@ -16,127 +12,132 @@ import ScoreTab from '@/components/pages/scores/ScoreTab';
 import ExcelTab from '@/components/pages/uploads/ExcelTab';
 import { queryClient } from '@/utils/query-client';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
+
+const tabs = [
+	{ key: 'scores', icon: Music,  label: '악보 관리' },
+	{ key: 'excel',  icon: Sheet,  label: '엑셀 관리' },
+];
 
 const FilesContent = () => {
-  const navigate = useNavigate();
+	const navigate = useNavigate();
+	const [searchParams, setSearchParams] = useSearchParams();
+	const activeTab = searchParams.get('tab') ?? 'scores';
+	const setActiveTab = (tab: string) => setSearchParams({ tab }, { replace: true });
 
-  const [activeTab, setActiveTab] = useState('scores');
-  const [uploadOpen, setUploadOpen] = useState(false);
+	const [uploadOpen, setUploadOpen] = useState(false);
+	const { mutate: saveRows } = useMutation(statsMutations.saveSalesRows());
 
-  const { mutate: saveRows } = useMutation(statsMutations.saveSalesRows());
+	const handleUpload = useCallback(
+		(data: ExcelRow[], name: string) => {
+			saveRows(
+				{ rows: data, name },
+				{
+					onSuccess: (_, { rows }) => {
+						queryClient.invalidateQueries({ queryKey: statsKeys.all });
+						toast.success(`"${name}" — ${rows.length}건이 저장되었습니다.`);
+					},
+					onError: (e) =>
+						toast.error('저장에 실패했습니다.', {
+							description: e instanceof Error ? e.message : undefined,
+						}),
+				},
+			);
+		},
+		[saveRows],
+	);
 
-  const handleUpload = useCallback(
-    (data: ExcelRow[], name: string) => {
-      saveRows(
-        { rows: data, name },
-        {
-          onSuccess: (_, { rows }) => {
-            queryClient.invalidateQueries({ queryKey: statsKeys.all });
-            toast.success(`"${name}" — ${rows.length}건이 저장되었습니다.`);
-          },
-          onError: e =>
-            toast.error('저장에 실패했습니다.', {
-              description: e instanceof Error ? e.message : undefined,
-            }),
-        },
-      );
-    },
-    [saveRows],
-  );
+	return (
+		<AppLayout>
+			{/* ── Header ─────────────────────────────────── */}
+			<div className='flex items-center justify-between mb-6'>
+				<div>
+					<p className='text-[11px] font-semibold text-muted-foreground uppercase tracking-widest'>
+						파일 관리
+					</p>
+					<h1 className='text-3xl font-display font-bold tracking-tight mt-0.5'>
+						{activeTab === 'scores' ? '악보 관리' : '엑셀 관리'}
+					</h1>
+				</div>
 
-  return (
-    <AppLayout>
-      <PageHeader
-        title='파일 관리'
-        description='악보와 엑셀 데이터를 통합 관리합니다'
-      />
+				<div className='hidden md:block'>
+					{activeTab === 'scores' ? (
+						<button
+							onClick={() => navigate('/scores/new')}
+							className='flex items-center gap-1.5 bg-foreground text-background text-xs font-semibold px-5 py-2 rounded-2xl hover:opacity-80 transition-opacity'
+						>
+							<PlusCircle className='h-3.5 w-3.5' />
+							악보 추가
+						</button>
+					) : (
+						<button
+							onClick={() => setUploadOpen(true)}
+							className='flex items-center gap-1.5 bg-card border text-foreground text-xs font-semibold px-5 py-2 rounded-2xl shadow-sm hover:bg-muted/30 transition-colors'
+						>
+							<Upload className='h-3.5 w-3.5' />
+							엑셀 업로드
+						</button>
+					)}
+				</div>
+			</div>
 
-      <ExcelUploadDialog
-        open={uploadOpen}
-        onOpenChange={setUploadOpen}
-        onUpload={handleUpload}
-      />
+			<ExcelUploadDialog
+				open={uploadOpen}
+				onOpenChange={setUploadOpen}
+				onUpload={handleUpload}
+			/>
 
-      <Tabs
-        value={activeTab}
-        onValueChange={setActiveTab}
-        className='space-y-6'
-      >
-        {/* 탭 + 액션 버튼 같은 줄 */}
-        <div className='flex items-center justify-between'>
-          <TabsList className='grid grid-cols-2 w-auto'>
-            <TabsTrigger
-              value='scores'
-              className='gap-1.5'
-            >
-              <Music className='h-3.5 w-3.5' />
-              악보 관리
-            </TabsTrigger>
-            <TabsTrigger
-              value='excel'
-              className='gap-1.5'
-            >
-              <Sheet className='h-3.5 w-3.5' />
-              엑셀 관리
-            </TabsTrigger>
-          </TabsList>
-          <div className='hidden md:flex'>
-             {activeTab === 'scores' && (
-              <Button
-                className='gap-2'
-                onClick={() => navigate('/scores/new')}
-              >
-                <PlusCircle className='h-4 w-4' />
-                악보 추가
-              </Button>
-            )}
-            {activeTab === 'excel' && (
-              <Button
-                className='gap-2'
-                onClick={() => setUploadOpen(true)}
-              >
-                <Upload className='h-4 w-4' />
-                엑셀 업로드
-              </Button>
-            )}
-         </div>
-        </div>
+			{/* ── Tabs ────────────────────────────────────── */}
+			<div className='flex items-center gap-1 bg-card border rounded-2xl shadow-sm p-1 w-fit mb-6'>
+				{tabs.map(({ key, icon: Icon, label }) => (
+					<button
+						key={key}
+						onClick={() => setActiveTab(key)}
+						className={cn(
+							'flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-xl transition-colors',
+							activeTab === key
+								? 'bg-foreground text-background font-semibold shadow-sm'
+								: 'text-muted-foreground hover:text-foreground',
+						)}
+					>
+						<Icon className='h-3.5 w-3.5' />
+						{label}
+					</button>
+				))}
+			</div>
 
-        <TabsContent value='scores'>
-          <ScoreTab />
-        </TabsContent>
-        <TabsContent value='excel'>
-          <ExcelTab onUploadRequest={() => setUploadOpen(true)} />
-        </TabsContent>
-      </Tabs>
-      <div className='md:hidden absolute bottom-5 left-6 right-6'>
-        {activeTab === 'scores' && (
-          <Button
-            className='gap-2 w-full'
-            onClick={() => navigate('/scores/new')}
-          >
-            <PlusCircle className='h-4 w-4' />
-            악보 추가
-          </Button>
-        )}
-        {activeTab === 'excel' && (
-          <Button
-            className='gap-2 w-full'
-            onClick={() => setUploadOpen(true)}
-          >
-            <Upload className='h-4 w-4' />
-            엑셀 업로드
-          </Button>
-        )}
-      </div>
-    </AppLayout>
-  );
+			{/* ── Tab Content ─────────────────────────────── */}
+			{activeTab === 'scores' && <ScoreTab />}
+			{activeTab === 'excel' && <ExcelTab onUploadRequest={() => setUploadOpen(true)} />}
+
+			{/* ── Mobile FAB ──────────────────────────────── */}
+			<div className='md:hidden fixed bottom-5 left-6 right-6'>
+				{activeTab === 'scores' ? (
+					<button
+						onClick={() => navigate('/scores/new')}
+						className='flex items-center justify-center gap-2 w-full bg-foreground text-background text-sm font-semibold py-3 rounded-2xl hover:opacity-80 transition-opacity shadow-lg'
+					>
+						<PlusCircle className='h-4 w-4' />
+						악보 추가
+					</button>
+				) : (
+					<button
+						onClick={() => setUploadOpen(true)}
+						className='flex items-center justify-center gap-2 w-full bg-foreground text-background text-sm font-semibold py-3 rounded-2xl hover:opacity-80 transition-opacity shadow-lg'
+					>
+						<Upload className='h-4 w-4' />
+						엑셀 업로드
+					</button>
+				)}
+			</div>
+		</AppLayout>
+	);
 };
 
 const Files = () => (
-  <ErrorBoundary level='page'>
-    <FilesContent />
-  </ErrorBoundary>
+	<ErrorBoundary level='page'>
+		<FilesContent />
+	</ErrorBoundary>
 );
 
 export default Files;
