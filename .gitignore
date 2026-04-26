@@ -28,3 +28,7 @@ dist-ssr
 .moai
 .mcp.json
 .cursor
+
+.moai-backups/
+.moai/
+.agency/
