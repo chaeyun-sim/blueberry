@@ -32,8 +32,11 @@ export function matchesZipTitle(
   if (composerLastName.length > 1 && zipTokens.has(composerLastName)) return true;
 
   const titleTokens = expandTokens(tokenize(songTitle));
-  const significant = [...titleTokens].filter(t => isNum(t) || (t.length > 2 && !STOP_WORDS.has(t)));
-  const overlapCount = significant.filter(t => zipTokens.has(t)).length;
+  const isKorean = (t: string) => /[\uAC00-\uD7A3]{2,}/.test(t);
+  const significant = [...titleTokens].filter(t => isNum(t) || isKorean(t) || (t.length > 2 && !STOP_WORDS.has(t)));
+  const overlapTokens = significant.filter(t => zipTokens.has(t));
+  const overlapCount = overlapTokens.length;
 
-  return overlapCount >= 2;
+  const hasKoreanOverlap = overlapTokens.some(isKorean);
+  return hasKoreanOverlap ? overlapCount >= 1 : overlapCount >= 2;
 }

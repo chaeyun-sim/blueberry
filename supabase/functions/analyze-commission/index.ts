@@ -22,6 +22,10 @@ Deno.serve(async (req) => {
       })
     }
 
+    const kstNow = new Date(Date.now() + 9 * 60 * 60 * 1000)
+    const currentYear = kstNow.getUTCFullYear()
+    const currentDate = kstNow.toISOString().slice(0, 10)
+
     const response = await client.messages.create({
       model: 'claude-sonnet-4-6',
       max_tokens: 1024,
@@ -35,7 +39,11 @@ Deno.serve(async (req) => {
             },
             {
               type: 'text',
-              text: `이 이미지는 악보 편곡 의뢰 내용입니다. 이미지에서 아래 정보를 추출해 JSON 형식으로만 응답해주세요. 다른 텍스트는 절대 포함하지 마세요.
+              text: `오늘 날짜는 ${currentDate}이고, 현재 연도는 ${currentYear}년입니다.
+
+이 이미지는 악보 편곡 의뢰 내용입니다. 이미지에서 아래 정보를 추출해 JSON 형식으로만 응답해주세요. 다른 텍스트는 절대 포함하지 마세요.
+
+마감일에 연도가 명시되지 않은 경우 ${currentYear}년을 기준으로 판단하고, 해당 날짜가 오늘(${currentDate})보다 이미 지났다면 ${currentYear + 1}년으로 처리해주세요.
 
 {
   "songTitle": "곡명 (없으면 null)",

@@ -8,6 +8,9 @@ import type {
   TopArrangement,
   TopSongMonthlySalesResult,
   ExcelUpload,
+  SeasonalPatternItem,
+  TrendingSong,
+  RevenueConcentrationItem,
 } from '@/types/stats'
 import type { Song } from '@/types/score'
 import type { ExcelRow } from '@/types/excel'
@@ -274,6 +277,56 @@ const demoSalesRows: ExcelRow[] = [
 
 const demoSalesYearRange = { min: thisYear - 1, max: thisYear }
 
+// ─── Seasonal Pattern ───────────────────────────────────────────────────────
+
+const monthLabels = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월']
+const demoAvgRevenues = [420000,380000,510000,450000,620000,480000,550000,390000,470000,530000,580000,520000]
+const demoMonthTopSongs = [
+  ['Clair de lune','Canon in D','Liebesleid'],
+  ['Canon in D','Clair de lune','Gymnopédie No.1'],
+  ['Clair de lune','Merry Go Round','Spring Waltz'],
+  ['Spring Waltz','Clair de lune','River Flows in You'],
+  ['Merry Go Round','Clair de lune','Summer'],
+  ['Summer','Kiss the Rain','River Flows in You'],
+  ['Summer','Merry Go Round','Clair de lune'],
+  ['River Flows in You','Kiss the Rain','Canon in D'],
+  ['Canon in D','Clair de lune','Liebesleid'],
+  ['Liebesleid','Canon in D','Gymnopédie No.1'],
+  ['Clair de lune','Canon in D','Liebesleid'],
+  ['Clair de lune','Merry Go Round','Canon in D'],
+]
+
+const demoSeasonalPattern: SeasonalPatternItem[] = Array.from({ length: 12 }, (_, i) => ({
+  monthNum: i + 1,
+  month: monthLabels[i],
+  avgRevenue: demoAvgRevenues[i],
+  avgCount: Math.round(demoAvgRevenues[i] / 15000),
+  years: 2,
+  topSongs: demoMonthTopSongs[i].map((title, j) => ({ title, avgCount: (8 - j * 2) * 2 })),
+}))
+
+// ─── Trending Songs ─────────────────────────────────────────────────────────
+
+const demoTrendingSongs: TrendingSong[] = [
+  { title: 'Clair de lune', recentSales: 12, prevSales: 7, growth: 71.4 },
+  { title: 'Merry Go Round', recentSales: 9, prevSales: 6, growth: 50.0 },
+  { title: 'River Flows in You', recentSales: 8, prevSales: 6, growth: 33.3 },
+  { title: 'Liebesleid', recentSales: 5, prevSales: 4, growth: 25.0 },
+  { title: 'Canon in D', recentSales: 7, prevSales: 6, growth: 16.7 },
+  { title: 'Summer', recentSales: 4, prevSales: 4, growth: 0 },
+]
+
+// ─── Revenue Concentration ──────────────────────────────────────────────────
+
+const demoRevenueConcentration: RevenueConcentrationItem[] = Array.from({ length: 10 }, (_, i) => ({
+  rank: i + 1,
+  title: demoTopSongs[i]?.title ?? `Song ${i + 1}`,
+  revenue: Math.max(420000 - i * 35000, 30000),
+  revenueShare: parseFloat((14 - i * 1.2).toFixed(2)),
+  cumulativeShare: parseFloat(Math.min((i + 1) * 12.5, 100).toFixed(2)),
+  songShare: parseFloat(((i + 1) * 10).toFixed(1)),
+}))
+
 // ─── Registry ───────────────────────────────────────────────────────────────
 
 const demoDataMap: Record<string, unknown> = {
@@ -290,6 +343,9 @@ const demoDataMap: Record<string, unknown> = {
   'stats:excelUploads': demoExcelUploads,
   'stats:salesRowsByUpload': demoSalesRows,
   'stats:salesYearRange': demoSalesYearRange,
+  'stats:seasonalPattern': demoSeasonalPattern,
+  'stats:trendingSongs': demoTrendingSongs,
+  'stats:revenueConcentration': demoRevenueConcentration,
   'scores:list': demoSongs,
 }
 
