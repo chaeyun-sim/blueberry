@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import Button from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,8 +12,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ArrowLeft, Calendar } from 'lucide-react';
+import { Calendar, Pencil, XCircle } from 'lucide-react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
+import { overlay } from 'overlay-kit';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { COMMISSION_STATUS_TRANSLATE } from '@/constants/translate';
 import { commissionQueries } from '@/api/commission/queries';
 import { useMutation } from '@tanstack/react-query';
@@ -34,7 +42,12 @@ const CommissionEdit = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const dateInputRef = useRef<HTMLInputElement>(null);
+  const titleEditRef = useRef<HTMLInputElement>(null);
+  const composerEditRef = useRef<HTMLInputElement>(null);
   const { isGuest } = useAuth();
+
+  const [isTitleEditing, setIsTitleEditing] = useState(false);
+  const [isComposerEditing, setIsComposerEditing] = useState(false);
 
   const [form, setForm] = useState<EditFormType>({
     title: '',
@@ -68,6 +81,7 @@ const CommissionEdit = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { mutate: updateCommission } = useMutation(commissionMutations.updateCommission());
+  const { mutate: updateStatus } = useMutation(commissionMutations.updateCommissionStatus());
 
   const handleSave = () => {
     if (isGuest) {
@@ -97,6 +111,52 @@ const CommissionEdit = () => {
           toast.error('의뢰 수정에 실패했습니다.', { description: e.message });
         },
       },
+    );
+  };
+
+  const handleCancel = () => {
+    overlay.open(
+      ({ isOpen, close }) => (
+        <Dialog open={isOpen} onOpenChange={open => !open && close()}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>의뢰를 취소하시겠습니까?</DialogTitle>
+              <DialogDescription>
+                취소된 의뢰는 목록의 '취소' 탭에서 확인할 수 있습니다. 취소 후에도 기록은 유지됩니다.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant='outline' onClick={close}>
+                닫기
+              </Button>
+              <Button
+                className='bg-destructive text-destructive-foreground hover:bg-destructive/90'
+                onClick={() => {
+                  if (!id) return;
+                  updateStatus(
+                    { commissionId: id, status: 'cancelled' },
+                    {
+                      onSuccess: () => {
+                        queryClient.invalidateQueries({ queryKey: commissionKeys.detail(id) });
+                        queryClient.invalidateQueries({ queryKey: commissionKeys.list() });
+                        toast.success('의뢰가 취소되었습니다.');
+                        close();
+                        navigate(`/commissions/${id}`);
+                      },
+                      onError: e => {
+                        toast.error('취소에 실패했습니다.', { description: e.message });
+                      },
+                    },
+                  );
+                }}
+              >
+                취소 처리
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      ),
+      { overlayId: 'cancel-commission-dialog' },
     );
   };
 
@@ -136,22 +196,62 @@ const CommissionEdit = () => {
         <AppHeader.Back />
       </AppHeader>
 
-      <PageHeader title={commission?.title ?? '의뢰 수정'} />
+      {/* 인라인 편집 타이틀 */}
+      <div className='mb-6'>
+        {isTitleEditing ? (
+          <input
+            ref={titleEditRef}
+            value={form.title}
+            onChange={e => setForm(prev => ({ ...prev, title: e.target.value }))}
+            onBlur={() => setIsTitleEditing(false)}
+            onKeyDown={e => { if (e.key === 'Enter' || e.key === 'Escape') setIsTitleEditing(false); }}
+            className='text-2xl font-display font-bold w-full bg-transparent border-b-2 border-primary outline-none pb-0.5 tracking-tight'
+            placeholder='곡명을 입력하세요'
+          />
+        ) : (
+          <button
+            type='button'
+            onClick={() => { setIsTitleEditing(true); setTimeout(() => titleEditRef.current?.focus(), 0); }}
+            className='group flex items-center gap-2 cursor-pointer hover:opacity-70 transition-opacity text-left border-b-2 border-transparent pb-0.5'
+            aria-label='곡명 편집'
+          >
+            <h1 className='text-2xl font-display font-bold tracking-tight'>
+              {form.title || <span className='text-muted-foreground font-normal text-xl'>곡명 없음</span>}
+            </h1>
+            <Pencil className='h-3.5 w-3.5 text-muted-foreground opacity-40 group-hover:opacity-100 transition-opacity shrink-0' />
+          </button>
+        )}
 
-      <Card className='border-border/50'>
+        {isComposerEditing ? (
+          <input
+            ref={composerEditRef}
+            value={form.composer}
+            onChange={e => setForm(prev => ({ ...prev, composer: e.target.value }))}
+            onBlur={() => setIsComposerEditing(false)}
+            onKeyDown={e => { if (e.key === 'Enter' || e.key === 'Escape') setIsComposerEditing(false); }}
+            className='mt-1 text-sm text-muted-foreground w-full bg-transparent border-b border-primary outline-none pb-0.5'
+            placeholder='작곡가를 입력하세요'
+          />
+        ) : (
+          <button
+            type='button'
+            onClick={() => { setIsComposerEditing(true); setTimeout(() => composerEditRef.current?.focus(), 0); }}
+            className='group flex items-center gap-1.5 mt-1 cursor-pointer hover:opacity-70 transition-opacity text-left border-b border-transparent pb-0.5'
+            aria-label='작곡가 편집'
+          >
+            <p className='text-sm text-muted-foreground'>
+              {form.composer || <span className='italic'>작곡가 미입력</span>}
+            </p>
+            <Pencil className='h-3 w-3 text-muted-foreground opacity-40 group-hover:opacity-100 transition-opacity shrink-0' />
+          </button>
+        )}
+      </div>
+
+      <Card className='border-border/50 mb-6'>
         <CardContent className='p-5'>
           <h2 className='font-display font-semibold mb-4'>의뢰 정보</h2>
-          <div className='space-y-5'>
-            <div className='space-y-2'>
-              <Label>곡명</Label>
-              <Input
-                placeholder='곡명을 입력하세요'
-                value={form.title}
-                onChange={e => setForm(prev => ({ ...prev, title: e.target.value }))}
-                disabled={isSubmitting}
-              />
-            </div>
-
+          <div className='grid grid-cols-1 md:grid-cols-3 gap-5'>
+            {/* 현재 상태 */}
             <div className='space-y-2'>
               <Label>현재 상태</Label>
               <Select
@@ -167,10 +267,7 @@ const CommissionEdit = () => {
                 </SelectTrigger>
                 <SelectContent>
                   {commissionStatuses.map(status => (
-                    <SelectItem
-                      key={status}
-                      value={status}
-                    >
+                    <SelectItem key={status} value={status}>
                       {COMMISSION_STATUS_TRANSLATE[status]}
                     </SelectItem>
                   ))}
@@ -178,24 +275,29 @@ const CommissionEdit = () => {
               </Select>
             </div>
 
+            {/* 마감일 */}
             <div className='space-y-2'>
-              <Label>작곡가</Label>
+              <Label htmlFor='deadline'>마감일</Label>
               <div className='relative'>
                 <Input
-                  placeholder='작곡가를 입력하세요'
-                  value={form.composer}
-                  onChange={e => setForm(prev => ({ ...prev, composer: e.target.value }))}
+                  id='deadline'
+                  ref={dateInputRef}
+                  type='date'
+                  className='pr-9 [&::-webkit-calendar-picker-indicator]:hidden'
+                  value={form.deadline}
+                  onChange={e => setForm(prev => ({ ...prev, deadline: e.target.value }))}
                   disabled={isSubmitting}
                 />
+                <button
+                  type='button'
+                  aria-label='날짜 선택'
+                  onClick={() => dateInputRef.current?.showPicker()}
+                  className='absolute right-0 top-0 bottom-0 px-3 flex items-center cursor-pointer text-muted-foreground hover:text-foreground transition-colors'
+                >
+                  <Calendar className='h-4 w-4' />
+                </button>
               </div>
             </div>
-
-            {/* 편성 */}
-            <InstrumentPicker
-              instruments={form.instruments}
-              onChange={instruments => setForm(prev => ({ ...prev, instruments }))}
-              disabled={isSubmitting}
-            />
 
             {/* 버전 */}
             <div className='space-y-2'>
@@ -222,32 +324,20 @@ const CommissionEdit = () => {
               </Select>
             </div>
 
-            {/* 마감일 */}
-            <div className='space-y-2'>
-              <Label>마감일</Label>
-              <div className='relative'>
-                <Input
-                  ref={dateInputRef}
-                  type='date'
-                  className='pr-9 [&::-webkit-calendar-picker-indicator]:hidden'
-                  value={form.deadline}
-                  onChange={e => setForm(prev => ({ ...prev, deadline: e.target.value }))}
-                  disabled={isSubmitting}
-                />
-                <button
-                  type='button'
-                  onClick={() => dateInputRef.current?.showPicker()}
-                  className='absolute right-0 top-0 bottom-0 px-3 flex items-center text-muted-foreground hover:text-foreground transition-colors'
-                >
-                  <Calendar className='h-4 w-4' />
-                </button>
-              </div>
+            {/* 편성 — 전체 너비 */}
+            <div className='md:col-span-3'>
+              <InstrumentPicker
+                instruments={form.instruments}
+                onChange={instruments => setForm(prev => ({ ...prev, instruments }))}
+                disabled={isSubmitting}
+              />
             </div>
 
-            {/* 메모 */}
-            <div className='space-y-2'>
-              <Label>메모</Label>
+            {/* 메모 — 전체 너비 */}
+            <div className='space-y-2 md:col-span-3'>
+              <Label htmlFor='notes'>메모</Label>
               <Textarea
+                id='notes'
                 placeholder='추가 요청사항이나 메모...'
                 rows={4}
                 value={form.notes}
@@ -258,6 +348,27 @@ const CommissionEdit = () => {
           </div>
         </CardContent>
       </Card>
+
+      {commission.status !== 'cancelled' && (
+        <div className='border-t border-border/50 pt-6'>
+          <div className='flex items-center justify-between gap-4'>
+            <div>
+              <p className='text-sm font-medium text-muted-foreground'>의뢰 취소</p>
+              <p className='text-xs text-muted-foreground/70 mt-0.5'>
+                취소 후에도 기록은 유지되며 '취소' 탭에서 확인할 수 있습니다.
+              </p>
+            </div>
+            <button
+              type='button'
+              onClick={handleCancel}
+              className='shrink-0 flex items-center gap-1.5 text-sm text-muted-foreground hover:text-destructive transition-colors cursor-pointer min-h-[44px] px-1'
+            >
+              <XCircle className='h-4 w-4' />
+              취소 처리
+            </button>
+          </div>
+        </div>
+      )}
     </AppLayout>
   );
 };

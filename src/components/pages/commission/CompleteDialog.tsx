@@ -80,6 +80,7 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
   const [isExtracting, setIsExtracting] = useState(false);
   const [isCompressing, setIsCompressing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [forceOverride, setForceOverride] = useState(false);
 
   const { mutateAsync: createSong } = useMutation(scoreMutations.createSong());
   const { mutateAsync: createArrangement } = useMutation(scoreMutations.createArrangement());
@@ -93,6 +94,7 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
 
   const resetZip = () => {
     setForm(prev => ({ ...prev, zipName: null, zipSize: 0, files: [] }));
+    setForceOverride(false);
     if (zipInputRef.current) zipInputRef.current.value = '';
   };
 
@@ -191,7 +193,7 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
     if (f) handleZipFile(f);
   };
 
-  const canSubmit = !isSubmitting && !isProcessing && !!form.zipName && form.files.length > 0 && isZipTitleMatch;
+  const canSubmit = !isSubmitting && !isProcessing && !!form.zipName && form.files.length > 0 && (isZipTitleMatch || forceOverride);
 
   return (
     <Dialog open={isOpen} onOpenChange={open => { if (!open) close(); }}>
@@ -241,7 +243,16 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
 
                 {!isProcessing && form.zipName && !isZipTitleMatch && (
                   <p className='text-xs text-destructive px-1'>
-                    ZIP 파일명이 곡명 또는 작곡가명과 일치하지 않습니다.
+                    ZIP 파일명이 곡명 또는 작곡가명과 일치하지 않습니다.{' '}
+                    {!forceOverride && (
+                      <button
+                        type='button'
+                        onClick={() => setForceOverride(true)}
+                        className='underline underline-offset-2 hover:opacity-70 transition-opacity'
+                      >
+                        그래도 등록하기
+                      </button>
+                    )}
                   </p>
                 )}
               </div>

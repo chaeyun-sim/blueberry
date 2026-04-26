@@ -153,7 +153,7 @@ function CommissionRegisterForm({
             type='button'
             disabled={isAnalyzing || isSubmitting}
             onClick={() => dateInputRef.current?.showPicker()}
-            className='absolute right-0 top-0 bottom-0 px-3 flex items-center text-muted-foreground hover:text-foreground transition-colors'
+            className='absolute right-0 top-0 bottom-0 px-3 flex items-center cursor-pointer text-muted-foreground hover:text-foreground transition-colors'
             aria-label='마감일 선택'
           >
             <Calendar className='h-4 w-4' />
