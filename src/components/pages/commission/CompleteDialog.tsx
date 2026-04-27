@@ -193,8 +193,15 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
 
   const canSubmit = !isSubmitting && !isProcessing && !!form.zipName && form.files.length > 0 && isZipTitleMatch;
 
+  const onOpenChange = (open: boolean) => {
+    if (!open) {
+      resetZip();
+      close();
+    }
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={open => { if (!open) close(); }}>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className='sm:max-w-xl'>
         <DialogHeader>
           <DialogTitle className='font-display'>작업 완료</DialogTitle>

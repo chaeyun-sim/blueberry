@@ -109,28 +109,22 @@ const CommissionDetailContent = () => {
 
   const handleOpenDialog = () => {
     if (nextStatus === 'working' || nextStatus === 'delivered') {
-      overlay.open(
-        overlayProps => (
-          <ReceiveAndSendDialog
-            {...overlayProps}
-            commissionId={id}
-            toStatus={nextStatus as CommissionStatus}
-            onConfirm={handleTransitionConfirm}
-          />
-        ),
-        { overlayId: 'receive-and-send-dialog' },
-      );
+      overlay.open(overlayProps => (
+        <ReceiveAndSendDialog
+          {...overlayProps}
+          commissionId={id}
+          toStatus={nextStatus as CommissionStatus}
+          onConfirm={handleTransitionConfirm}
+        />
+      ));
     } else {
-      overlay.open(
-        overlayProps => (
-          <CompleteDialog
-            {...overlayProps}
-            commission={commission}
-            onConfirm={handleTransitionConfirm}
-          />
-        ),
-        { overlayId: 'status-transition-dialog' },
-      );
+      overlay.open(overlayProps => (
+        <CompleteDialog
+          {...overlayProps}
+          commission={commission}
+          onConfirm={handleTransitionConfirm}
+        />
+      ));
     }
   };
 
