@@ -1,6 +1,8 @@
 export type SalesSummary = {
   totalRevenue: number;
   totalCount: number;
+  thisMonthCount: number;
+  thisYearCount: number;
   lastMonthRevenue: number;
   lastMonthCount: number;
   revenueVsLastYear: number; // % 변화율

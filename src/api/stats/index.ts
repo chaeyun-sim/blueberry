@@ -92,6 +92,7 @@ export async function getSalesSummary(): Promise<SalesSummary> {
 
 	const thisYearRange = dateRange(thisYear);
 	const lastYearRange = dateRange(thisYear - 1);
+	const thisMonthRange = dateRange(thisYear, thisMonth);
 	const prevMonthRange = dateRange(prevMonthYear, prevMonth);
 	const prevPrevMonthRange = dateRange(prevPrevMonthYear, prevPrevMonth);
 
@@ -99,8 +100,9 @@ export async function getSalesSummary(): Promise<SalesSummary> {
 		{ data: allRows, error: e0 },
 		{ data: thisYearRows, error: e1 },
 		{ data: lastYearRows, error: e2 },
-		{ data: prevMonthRows, error: e3 },
-		{ data: prevPrevMonthRows, error: e4 },
+		{ data: thisMonthRows, error: e3 },
+		{ data: prevMonthRows, error: e4 },
+		{ data: prevPrevMonthRows, error: e5 },
 	] = await Promise.all([
 		supabase.from(SALES).select(SELECT_AMOUNT).limit(MAX_ROWS),
 		supabase
@@ -114,6 +116,12 @@ export async function getSalesSummary(): Promise<SalesSummary> {
 			.select(SELECT_AMOUNT)
 			.gte(SOLD_AT, lastYearRange.gte)
 			.lt(SOLD_AT, lastYearRange.lt!)
+			.limit(MAX_ROWS),
+		supabase
+			.from(SALES)
+			.select(SELECT_AMOUNT)
+			.gte(SOLD_AT, thisMonthRange.gte)
+			.lt(SOLD_AT, thisMonthRange.lt!)
 			.limit(MAX_ROWS),
 		supabase
 			.from(SALES)
@@ -134,6 +142,7 @@ export async function getSalesSummary(): Promise<SalesSummary> {
 	if (e2) throw e2;
 	if (e3) throw e3;
 	if (e4) throw e4;
+	if (e5) throw e5;
 
 	const totalRevenue = (allRows ?? []).reduce((s, r) => s + r.amount, 0);
 	const totalCount = (allRows ?? []).length;
@@ -141,6 +150,7 @@ export async function getSalesSummary(): Promise<SalesSummary> {
 	const thisYearCount = (thisYearRows ?? []).length;
 	const lastYearRevenue = (lastYearRows ?? []).reduce((s, r) => s + r.amount, 0);
 	const lastYearCount = (lastYearRows ?? []).length;
+	const thisMonthCount = (thisMonthRows ?? []).length;
 	const lastMonthRevenue = (prevMonthRows ?? []).reduce(
 		(s, r) => s + r.amount,
 		0,
@@ -155,6 +165,8 @@ export async function getSalesSummary(): Promise<SalesSummary> {
 	return {
 		totalRevenue,
 		totalCount,
+		thisMonthCount,
+		thisYearCount,
 		lastMonthRevenue,
 		lastMonthCount,
 		revenueVsLastYear: pctChange(thisYearRevenue, lastYearRevenue),

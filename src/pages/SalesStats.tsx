@@ -107,8 +107,10 @@ const SalesStatsContent = () => {
         />
         <SalesSummaryCard
           icon={FileSpreadsheet}
-          title='총 판매건'
-          value={salesSummary?.totalCount ?? 0}
+          title='올해 판매건'
+          value={salesSummary?.thisYearCount ?? 0}
+          percentage={salesSummary?.countVsLastYear ?? 0}
+          compareKey='lastYear'
         />
         <SalesSummaryCard
           icon={CalendarDays}
