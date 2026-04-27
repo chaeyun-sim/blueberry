@@ -58,11 +58,17 @@ export default function CalendarView() {
 		? commissions.filter((c) => c.status !== 'complete' && c.status !== 'cancelled')
 		: commissions;
 
+	const STATUS_PRIORITY: Record<string, number> = { received: 0, working: 1, complete: 2, delivered: 3, cancelled: 4 };
+
 	const getCommissionsForDate = (dateStr: string) =>
-		visibleCommissions.filter((c) => dayjs(c.deadline).format('YYYY-MM-DD') === dateStr);
+		visibleCommissions
+			.filter((c) => dayjs(c.deadline).format('YYYY-MM-DD') === dateStr)
+			.sort((a, b) => (STATUS_PRIORITY[a.status] ?? 99) - (STATUS_PRIORITY[b.status] ?? 99));
 
 	const getAllCommissionsForDate = (dateStr: string) =>
-		commissions.filter((c) => dayjs(c.deadline).format('YYYY-MM-DD') === dateStr);
+		commissions
+			.filter((c) => dayjs(c.deadline).format('YYYY-MM-DD') === dateStr)
+			.sort((a, b) => (STATUS_PRIORITY[a.status] ?? 99) - (STATUS_PRIORITY[b.status] ?? 99));
 
 	const formatDate = (d: number) => {
 		const m = String(month + 1).padStart(2, '0');
