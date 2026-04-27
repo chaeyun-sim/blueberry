@@ -140,7 +140,7 @@ export default function CalendarView() {
 	return (
 		<AppLayout>
 			{/* ── Header ─────────────────────────────────── */}
-			<div className='flex items-center justify-between mb-6'>
+			<div className='flex items-end justify-between mb-6'>
 				<div>
 					<p className='text-[11px] font-semibold text-muted-foreground uppercase tracking-widest'>
 						캘린더
