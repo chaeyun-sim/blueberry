@@ -36,7 +36,7 @@ export async function getSongs() {
     .from(SONGS)
     .select(SONGS_LIST_SELECT)
     .is('deleted_at', null)
-    .order('created_at', { ascending: false });
+    .order('composer', { ascending: true, nullsFirst: false });
 
   if (error) throw error;
   // soft-delete된 편성은 JS에서 필터링 (DB 필터는 INNER JOIN처럼 동작해 곡 자체를 제외시킴)
