@@ -13,6 +13,7 @@ import {
 	Check,
 	ChevronLeft,
 	ChevronRight,
+	MailCheck,
 } from 'lucide-react';
 import {
 	DropdownMenu,
@@ -322,10 +323,10 @@ const CommissionListContent = () => {
 								<th className='text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-widest px-3 py-3.5 w-[20%]'>작곡가</th>
 								<th className='text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-widest px-3 py-3.5 w-[22%]'>편성</th>
 								{filter !== 'cancelled' && (
-									<th className='text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-widest px-3 py-3.5 w-[10%]'>버전</th>
+									<th className='text-center text-[11px] font-semibold text-muted-foreground uppercase tracking-widest px-3 py-3.5 w-[10%]'>버전</th>
 								)}
 								{filter === 'complete' && (
-									<th className='text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-widest px-3 py-3.5 w-[11%]'>전달</th>
+									<th className='text-center text-[11px] font-semibold text-muted-foreground uppercase tracking-widest px-3 py-3.5 w-[11%]'>전달 여부</th>
 								)}
 							</tr>
 						</thead>
@@ -352,7 +353,7 @@ const CommissionListContent = () => {
 										{(item.arrangement ?? '').split(', ').map(abbreviateInstrument).join(', ')}
 									</td>
 									{filter !== 'cancelled' && (
-										<td className='px-3 py-4'>
+										<td className='px-3 py-4 text-center'>
 											{item.version ? (
 												<span className='text-xs px-2 py-1 rounded-lg bg-warning/12 text-warning font-medium capitalize'>
 													{item.version}
@@ -364,7 +365,7 @@ const CommissionListContent = () => {
 									)}
 									{filter === 'complete' && (
 										<td className='px-3 py-4 text-sm text-muted-foreground'>
-											{item.is_delivered ? '전달함' : '-'}
+											{item.is_delivered ? <MailCheck className='h-4 w-4 mx-auto' /> : '-'}
 										</td>
 									)}
 								</tr>
