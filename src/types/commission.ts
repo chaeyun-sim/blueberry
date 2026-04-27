@@ -11,6 +11,7 @@ export type Commission = {
   version: DifficultyLevelType
   deadline: string
   status: CommissionStatus
+  is_delivered: boolean
   notes: string | null
   image_url: string | null
   created_at: string
@@ -39,7 +40,8 @@ export type UpdateCommissionInput = {
   deadline?: string
   notes?: string
   status?: CommissionStatus
-  image_url?: string | null 
+  is_delivered?: boolean
+  image_url?: string | null
 }
 
 export const COMMISSION_INFO = {

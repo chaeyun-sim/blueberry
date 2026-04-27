@@ -7,32 +7,27 @@
 
 ### 기능 소개
 
-| | 기능 | 설명 |
-|--|------|------|
-| 🏠 | 대시보드 | 진행 중인 의뢰 현황, 매출 요약, 월별 차트를 한눈에 확인 |
-| 📋 | 의뢰 관리 | 악보 이미지 AI 분석으로 자동 입력, **대기 → 작업중 → 완료 → 전달** 상태 추적 |
-| 🎵 | 악보 관리 | 곡 단위로 악보 등록·분류, 파일 업로드 및 ZIP 다운로드 |
-| 💰 | 매출 통계 | 월별·연간 매출 차트 시각화, Excel 업로드로 데이터 일괄 등록 |
-| 🎧 | 음악 추천 | 오늘의 편곡 추천곡 제공, 사운드포스트 연동 레퍼런스 탐색 |
-| 📅 | 캘린더 | 의뢰 마감일 기반 월별 일정 뷰 |
-| 📁 | 파일 관리 | 업로드된 악보 파일 열람 및 ZIP 일괄 다운로드 |
-
-
+|     | 기능      | 설명                                                                         |
+| --- | --------- | ---------------------------------------------------------------------------- |
+| 🏠  | 대시보드  | 진행 중인 의뢰 현황, 매출 요약, 월별 차트를 한눈에 확인                      |
+| 📋  | 의뢰 관리 | 악보 이미지 AI 분석으로 자동 입력, **대기 → 작업중 → 완료 → 전달** 상태 추적 |
+| 🎵  | 악보 관리 | 곡 단위로 악보 등록·분류, 파일 업로드 및 ZIP 다운로드                        |
+| 💰  | 매출 통계 | 월별·연간 매출 차트 시각화, Excel 업로드로 데이터 일괄 등록                  |
+| 📅  | 캘린더    | 의뢰 마감일 기반 월별 일정 뷰                                                |
+| 📁  | 파일 관리 | 업로드된 악보 파일 열람 및 ZIP 일괄 다운로드                                 |
 
 ### 기술 스택
 
-| 분류 | 기술 |
-|------|------|
-| Frontend | React 18, TypeScript, Vite |
-| Styling | Tailwind CSS, shadcn/ui (Radix UI) |
-| Data Fetching | TanStack Query v5 |
-| Backend / DB | Supabase |
-| Charts | Recharts |
-| Animation | Framer Motion |
-| Routing | React Router DOM v6 |
-| Deployment | Vercel |
-
-
+| 분류          | 기술                               |
+| ------------- | ---------------------------------- |
+| Frontend      | React 18, TypeScript, Vite         |
+| Styling       | Tailwind CSS, shadcn/ui (Radix UI) |
+| Data Fetching | TanStack Query v5                  |
+| Backend / DB  | Supabase                           |
+| Charts        | Recharts                           |
+| Animation     | Framer Motion                      |
+| Routing       | React Router DOM v6                |
+| Deployment    | Vercel                             |
 
 ### 디렉토리 구조
 

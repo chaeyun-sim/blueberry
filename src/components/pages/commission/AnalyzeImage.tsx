@@ -76,8 +76,9 @@ function AnalyzeImage({
           onDragOver={e => e.preventDefault()}
           onDrop={handleImageDrop}
           onClick={() => fileInputRef.current?.click()}
-          className='relative min-h-[300px] border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-4 bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer'
+          className='relative min-h-[300px] border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-4 bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2'
           role='button'
+          aria-label='이미지 업로드 영역. 클릭하거나 파일을 드래그하세요'
           tabIndex={0}
           onKeyDown={e => {
             if (e.key === 'Enter' || e.key === ' ') {
@@ -88,7 +89,7 @@ function AnalyzeImage({
         >
           {isAnalyzing && (
             <div className='absolute inset-0 rounded-lg overflow-hidden'>
-              <div className='absolute left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-accent animate-scan-line' />
+              <div className='absolute left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-accent motion-safe:animate-scan-line' />
             </div>
           )}
           {url ? (
@@ -100,12 +101,13 @@ function AnalyzeImage({
               />
               <button
                 type='button'
+                aria-label='이미지 삭제'
                 onClick={e => {
                   e.stopPropagation();
                   setImage({ url: null, file: null });
                   if (fileInputRef.current) fileInputRef.current.value = '';
                 }}
-                className='absolute top-2 right-2 p-1 rounded-full bg-background/80 hover:bg-background border border-border transition-colors'
+                className='absolute top-2 right-2 p-2 rounded-full bg-background/80 hover:bg-background border border-border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary'
               >
                 <X className='h-4 w-4' />
               </button>

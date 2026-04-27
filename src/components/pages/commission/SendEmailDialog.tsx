@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react';
-import { CommissionStatus } from '@/constants/status-config';
 import {
   Dialog,
   DialogContent,
@@ -11,41 +10,18 @@ import {
 import Button from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Label from '@/components/ui/label';
-import { Image, Mail, CheckCircle, Loader2 } from 'lucide-react';
+import { Mail, Loader2 } from 'lucide-react';
 import { OverlayProps } from '@/types/overlay';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/use-auth';
 
-interface TransitionConfig {
-  title: string;
-  description: string;
-  acceptLabel: string;
-  icon: typeof Image;
-}
-
-const transitionConfigs: Record<string, TransitionConfig> = {
-  working: {
-    title: '의뢰 승낙',
-    description: '의뢰를 승낙할지 거부할지 결정해주세요.',
-    acceptLabel: '작업 시작',
-    icon: CheckCircle,
-  },
-};
-
-interface ReceiveAndSendDialogProps extends OverlayProps {
+interface SendEmailDialogProps extends OverlayProps {
   commissionId: string | undefined;
-  toStatus: CommissionStatus;
-  onConfirm: () => void;
+  onDelivered?: () => void;
 }
 
-function ReceiveAndSendDialog({
-  isOpen,
-  close,
-  commissionId,
-  toStatus,
-  onConfirm,
-}: ReceiveAndSendDialogProps) {
+function SendEmailDialog({ isOpen, close, commissionId, onDelivered }: SendEmailDialogProps) {
   const { isGuest } = useAuth();
 
   const [isSending, setIsSending] = useState(false);
@@ -78,34 +54,18 @@ function ReceiveAndSendDialog({
         timeoutRef.current = setTimeout(() => setProgress(0), 600);
       }
     }
-
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, [isSending]);
 
-  const config = transitionConfigs[toStatus];
-  if (!config) return null;
-
-  const Icon = config.icon;
-
-  const handleConfirm = () => {
-    if (isGuest) {
-      toast.error('게스트 모드에서는 상태를 변경할 수 없습니다.');
-      return;
-    }
-    onConfirm();
-    close();
-  };
-
-  const handleEmailConfirm = async () => {
+  const handleSend = async () => {
     if (isGuest) {
       toast.error('게스트 모드에서는 메일을 발송할 수 없습니다.');
       return;
     }
     if (isSendingRef.current) return;
-
     if (!commissionId) {
       toast.error('의뢰를 찾을 수 없어 메일을 보낼 수 없어요.');
       return;
@@ -125,9 +85,8 @@ function ReceiveAndSendDialog({
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
       if (error) throw error;
-
       toast.success('메일을 발송했어요!');
-      onConfirm();
+      onDelivered?.();
       close();
     } catch (e) {
       const message = e instanceof Error ? e.message : '알 수 없는 오류';
@@ -139,14 +98,30 @@ function ReceiveAndSendDialog({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && close()}>
+    <Dialog open={isOpen} onOpenChange={open => !open && close()}>
       <DialogContent className='sm:max-w-md'>
         <DialogHeader>
           <DialogTitle className='flex items-center gap-2 font-display'>
-            {config.title}
+            <Mail className='h-4 w-4' /> 이메일 발송
           </DialogTitle>
-          <DialogDescription>{config.description}</DialogDescription>
+          <DialogDescription>
+            저장된 악보와 오디오 파일을 ZIP으로 압축해 메일로 발송합니다.
+          </DialogDescription>
         </DialogHeader>
+
+        {!isSending && (
+          <div className='space-y-1.5'>
+            <Label htmlFor='recipient-email'>수신자 이메일</Label>
+            <Input
+              id='recipient-email'
+              type='email'
+              placeholder='example@email.com'
+              value={toEmail}
+              onChange={e => setToEmail(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleSend()}
+            />
+          </div>
+        )}
 
         {isSending && (
           <div className='space-y-1.5'>
@@ -156,14 +131,27 @@ function ReceiveAndSendDialog({
                 style={{ width: `${progress}%` }}
               />
             </div>
-            <p className='text-xs text-muted-foreground text-center'>파일을 ZIP으로 압축하고 메일을 발송하고 있어요...</p>
+            <p className='text-xs text-muted-foreground text-center'>
+              파일을 ZIP으로 압축하고 메일을 발송하고 있어요...
+            </p>
           </div>
         )}
 
-        <DialogFooter className='gap-2 sm:gap-0'>
-          <Button onClick={handleConfirm} className='gap-2'>
-            {Icon && <Icon className='h-4 w-4' />}
-            {config.acceptLabel}
+        <DialogFooter className='gap-2'>
+          <Button variant='outline' onClick={close} disabled={isSending}>
+            나중에
+          </Button>
+          <Button
+            onClick={handleSend}
+            className='gap-2'
+            disabled={isSending || !commissionId}
+          >
+            {isSending ? (
+              <Loader2 className='h-4 w-4 animate-spin' />
+            ) : (
+              <Mail className='h-4 w-4' />
+            )}
+            {isSending ? '발송 중...' : '메일 보내기'}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -171,4 +159,4 @@ function ReceiveAndSendDialog({
   );
 }
 
-export default ReceiveAndSendDialog;
+export default SendEmailDialog;

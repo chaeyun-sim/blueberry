@@ -59,28 +59,11 @@ function YearlyStats() {
   );
 
   return (
-    <>
-      <div className='flex items-center gap-3 mb-2'>
-        <Select
-          value={String(year)}
-          onValueChange={v => setSelectedYear(Number(v))}
-          aria-label='월별 매출 추이 연도 선택'
-        >
-          <SelectTrigger className='w-32'>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {yearOptions.map(y => (
-              <SelectItem key={y} value={String(y)}>{y}년</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
+    <div className='space-y-6'>
       <Card className='border-border/50 overflow-hidden'>
         <CardHeader className='pb-4'>
-          <div className='flex items-center justify-between'>
-            <CardTitle className='text-base font-display'>월별 매출 추이</CardTitle>
+          <div className='flex items-center justify-between flex-wrap gap-3'>
+            <CardTitle className='text-base font-display'>월별 매출</CardTitle>
             <div className='flex items-center gap-4'>
               <span className='flex items-center gap-1.5 text-xs text-muted-foreground'>
                 <span className='w-2 h-2 rounded-full bg-primary inline-block' />
@@ -89,22 +72,31 @@ function YearlyStats() {
               <span className='flex items-center gap-1.5 text-xs text-muted-foreground'>
                 <span className='w-2 h-2 rounded-full bg-muted-foreground/40 inline-block' />전년도
               </span>
+              <Select
+                value={String(year)}
+                onValueChange={v => setSelectedYear(Number(v))}
+                aria-label='월별 매출 연도 선택'
+              >
+                <SelectTrigger className='w-24 h-7 text-xs'>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {yearOptions.map(y => (
+                    <SelectItem key={y} value={String(y)}>{y}년</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className='space-y-6'>
           <MonthlyGrowthRateChart
             data={monthlySalesWithAvg}
             avgCount={avgCount}
           />
-        </CardContent>
-      </Card>
-
-      <div className='grid lg:grid-cols-2 gap-6'>
-        <Card className='border-border/50 overflow-hidden'>
-          <CardHeader className='pb-2'>
-            <div className='flex items-center justify-between'>
-              <CardTitle className='text-base font-display shrink-0'>카테고리별 월 매출 비중</CardTitle>
+          <div className='border-t border-border/40 pt-4'>
+            <div className='flex items-center justify-between mb-3'>
+              <p className='text-sm font-medium text-muted-foreground'>카테고리별 매출 비중</p>
               <div className='hidden md:flex items-center gap-3'>
                 {Object.entries(activeCategoryConfig).map(([key, cfg]) => (
                   <span
@@ -120,28 +112,26 @@ function YearlyStats() {
                 ))}
               </div>
             </div>
-          </CardHeader>
-          <CardContent>
             <CategoryGrowthRateChart
               data={categoryData}
               config={activeCategoryConfig}
             />
-          </CardContent>
-        </Card>
+          </div>
+        </CardContent>
+      </Card>
 
-        <Card className='border-border/50 overflow-hidden'>
-          <CardHeader className='pb-2'>
-            <CardTitle className='text-base font-display'>전년 대비 월별 성장률</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <GrowthRateChart
-              data={growthData}
-              offset={zeroOffset}
-            />
-          </CardContent>
-        </Card>
-      </div>
-    </>
+      <Card className='border-border/50 overflow-hidden'>
+        <CardHeader className='pb-2'>
+          <CardTitle className='text-base font-display'>전년 대비 월별 성장률</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <GrowthRateChart
+            data={growthData}
+            offset={zeroOffset}
+          />
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 

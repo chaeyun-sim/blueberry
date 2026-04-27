@@ -2,15 +2,22 @@ import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import Button from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, FileMusic, Music, AlertCircle } from 'lucide-react';
+import {
+	Search,
+	FileMusic,
+	Music,
+	AlertCircle,
+	X,
+	ChevronRight,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
 } from '@/components/ui/table';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -26,228 +33,263 @@ import dayjs from 'dayjs';
 import type { Song } from '@/types/score';
 
 function ScoreTab() {
-  const [search, setSearch] = useState('');
-  const [openComposer, setOpenComposer] = useState<string | null>(null);
-  const [openSongId, setOpenSongId] = useState<string | null>(null);
-  const navigate = useNavigate();
+	const [search, setSearch] = useState('');
+	const [openComposer, setOpenComposer] = useState<string | null>(null);
+	const [openSongId, setOpenSongId] = useState<string | null>(null);
+	const navigate = useNavigate();
 
-  const { data: songs = [], isLoading, isError, refetch } = useQuery(scoreQueries.getSongs());
-  const { mutate: deleteSong } = useMutation({
-    ...scoreMutations.deleteSong(),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: scoreKeys.list() });
-      queryClient.invalidateQueries({ queryKey: scoreKeys.summary() });
-    },
-    onError: (e: Error) => toast.error('악보 삭제에 실패했습니다.', { description: e.message }),
-  });
+	const {
+		data: songs = [],
+		isLoading,
+		isError,
+		refetch,
+	} = useQuery(scoreQueries.getSongs());
+	const { mutate: deleteSong } = useMutation({
+		...scoreMutations.deleteSong(),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: scoreKeys.list() });
+			queryClient.invalidateQueries({ queryKey: scoreKeys.summary() });
+		},
+		onError: (e: Error) =>
+			toast.error('악보 삭제에 실패했습니다.', { description: e.message }),
+	});
 
-  if (isLoading && !songs.length) {
-    return (
-      <div className='space-y-4'>
-        {[0, 1, 2, 3].map(i => (
-          <div
-            key={i}
-            className='h-12 rounded-lg bg-muted animate-pulse'
-          />
-        ))}
-      </div>
-    );
-  }
+	if (isLoading && !songs.length) {
+		return (
+			<div className='space-y-4'>
+				{[0, 1, 2, 3].map((i) => (
+					<div key={i} className='h-12 rounded-lg bg-muted animate-pulse' />
+				))}
+			</div>
+		);
+	}
 
-  if (isError) {
-    return (
-      <Card className='border-destructive/50'>
-        <CardContent className='p-6'>
-          <div className='flex items-center gap-4'>
-            <AlertCircle className='h-8 w-8 text-destructive flex-shrink-0' />
-            <div className='flex-1'>
-              <p className='font-medium text-destructive'>악보 목록을 불러올 수 없습니다</p>
-              <p className='text-sm text-muted-foreground mt-1'>잠시 후 다시 시도해주세요.</p>
-            </div>
-            <Button onClick={() => refetch()}>다시 시도</Button>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+	if (isError) {
+		return (
+			<Card className='border-destructive/50'>
+				<CardContent className='p-6'>
+					<div className='flex items-center gap-4'>
+						<AlertCircle className='h-8 w-8 text-destructive flex-shrink-0' />
+						<div className='flex-1'>
+							<p className='font-medium text-destructive'>
+								악보 목록을 불러올 수 없습니다
+							</p>
+							<p className='text-sm text-muted-foreground mt-1'>
+								잠시 후 다시 시도해주세요.
+							</p>
+						</div>
+						<Button onClick={() => refetch()}>다시 시도</Button>
+					</div>
+				</CardContent>
+			</Card>
+		);
+	}
 
-  // Group songs by composer
-  const composerGroups = songs.reduce<Record<string, Song[]>>((acc, song) => {
-    const key = song.composer || '(미상)';
-    if (!acc[key]) acc[key] = [];
-    acc[key].push(song);
-    return acc;
-  }, {});
+	const composerGroups = songs.reduce<Record<string, Song[]>>((acc, song) => {
+		const key = song.composer || '(미상)';
+		if (!acc[key]) acc[key] = [];
+		acc[key].push(song);
+		return acc;
+	}, {});
 
-  // 작곡가 폴더 표시 라벨 생성
-  // - 작곡가 2명+: "첫번째 외 N명"
-  // - 곡이 1개인 그룹: 뒤에 " · 곡명" 추가
-  const getComposerLabel = (composer: string, groupSongs: Song[]) => {
-    const names = composer.split(',').map(n => n.trim()).filter(Boolean);
-    const composerLabel = names.length > 1
-      ? `${names[0]} 외 ${names.length - 1}명`
-      : composer;
-    return groupSongs.length === 1
-      ? `${composerLabel} · ${groupSongs[0].title}`
-      : composerLabel;
-  };
+	const filteredComposers = Object.entries(composerGroups).filter(
+		([composer, composerSongs]) =>
+			!search ||
+			composer.toLowerCase().includes(search.toLowerCase()) ||
+			composerSongs.some((s) =>
+				s.title.toLowerCase().includes(search.toLowerCase()),
+			),
+	);
 
-  const filteredComposers = Object.entries(composerGroups).filter(
-    ([composer, composerSongs]) =>
-      !search ||
-      composer.toLowerCase().includes(search.toLowerCase()) ||
-      composerSongs.some(s => s.title.toLowerCase().includes(search.toLowerCase())),
-  );
+	const composerSongs = openComposer
+		? (composerGroups[openComposer] ?? []).filter(
+				(s) => !search || s.title.toLowerCase().includes(search.toLowerCase()),
+			)
+		: [];
 
-  const composerSongs = openComposer
-    ? (composerGroups[openComposer] ?? []).filter(
-        s => !search || s.title.toLowerCase().includes(search.toLowerCase()),
-      )
-    : [];
+	const openSong = openSongId
+		? (songs.find((s) => s.id === openSongId) ?? null)
+		: null;
 
-  const openSong = openSongId ? (songs.find(s => s.id === openSongId) ?? null) : null;
+	const filteredArrangements = openSong
+		? openSong.arrangements.filter(
+				(arr) =>
+					!search || arr.arrangement.toLowerCase().includes(search.toLowerCase()),
+			)
+		: [];
 
-  const filteredArrangements = openSong
-    ? openSong.arrangements.filter(
-        arr => !search || arr.arrangement.toLowerCase().includes(search.toLowerCase()),
-      )
-    : [];
+	const breadcrumb: { label: string; id: string | null }[] = [
+		{ label: '전체 악보', id: null },
+	];
 
-  const breadcrumb: { label: string; id: string | null }[] = [{ label: '전체 악보', id: null }];
-  if (openComposer) breadcrumb.push({ label: getComposerLabel(openComposer, composerGroups[openComposer] ?? []), id: 'COMPOSER' });
-  if (openSong) breadcrumb.push({ label: openSong.title, id: openSong.id });
+	if (openComposer)
+		breadcrumb.push({
+			label: openComposer,
+			id: 'COMPOSER',
+		});
 
-  const handleNavigate = (id: string | null) => {
-    if (id === null) {
-      setOpenComposer(null);
-      setOpenSongId(null);
-    } else if (id === 'COMPOSER') {
-      setOpenSongId(null);
-    }
-    setSearch('');
-  };
+	if (openSong) breadcrumb.push({ label: openSong.title, id: openSong.id });
 
-  const placeholder = () => {
-    if (openSong) return '편성명 검색...';
-    if (openComposer) return '곡명 검색...';
-    return '작곡가 또는 곡명 검색...';
-  };
+	const handleNavigate = (id: string | null) => {
+		if (id === null) {
+			setOpenComposer(null);
+			setOpenSongId(null);
+		} else if (id === 'COMPOSER') {
+			setOpenSongId(null);
+		}
+		setSearch('');
+	};
 
-  return (
-    <div className='space-y-4'>
-      <div className='relative max-w-sm'>
-        <Search className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground' />
-        <Input
-          placeholder={placeholder()}
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          className='pl-9'
-        />
-      </div>
+	const placeholder = () => {
+		if (openSong) return '편성명 검색...';
+		if (openComposer) return '곡명 검색...';
+		return '작곡가 또는 곡명 검색...';
+	};
 
-      <Breadcrumb
-        path={breadcrumb}
-        onNavigate={handleNavigate}
-      />
+	return (
+		<div className='space-y-4'>
+			<div className='relative max-w-sm'>
+				<Search className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none' />
+				<Input
+					placeholder={placeholder()}
+					value={search}
+					onChange={(e) => setSearch(e.target.value)}
+					className='pl-9 pr-9'
+				/>
+				{search && (
+					<button
+						type='button'
+						onClick={() => setSearch('')}
+						className='absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors'
+						aria-label='검색어 지우기'
+					>
+						<X className='h-3.5 w-3.5' />
+					</button>
+				)}
+			</div>
 
-      <Card className='border-border/50'>
-        <CardContent className='p-2 md:p-5'>
-          <AnimatePresence mode='wait'>
-            {!openComposer ? (
-              <motion.div
-                key='list-composers'
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className='flex flex-col gap-0.5'
-              >
-                {filteredComposers.map(([composer, composerSongs]) => (
-                  <FolderRow
-                    key={composer}
-                    label={getComposerLabel(composer, composerSongs)}
-                    count={composerSongs.length}
-                    onClick={() => {
-                      setOpenComposer(composer);
-                      setSearch('');
-                    }}
-                  />
-                ))}
-                {filteredComposers.length === 0 && (
-                  <div className='flex flex-col items-center justify-center py-16 text-muted-foreground'>
-                    <Music className='h-12 w-12 mb-3 opacity-40' />
-                    <p className='text-sm'>검색 결과가 없습니다</p>
-                  </div>
-                )}
-              </motion.div>
-            ) : !openSong ? (
-              <motion.div
-                key={`list-songs-${openComposer}`}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className='flex flex-col gap-0.5'
-              >
-                {composerSongs.map(song => (
-                  <FolderRow
-                    key={song.id}
-                    label={song.title}
-                    count={song.arrangements.length}
-                    onClick={() => { setOpenSongId(song.id); setSearch(''); }}
-                    onDelete={
-                      song.arrangements.length === 0 ? () => deleteSong({ id: song.id }) : undefined
-                    }
-                  />
-                ))}
-                {composerSongs.length === 0 && (
-                  <div className='flex flex-col items-center justify-center py-16 text-muted-foreground'>
-                    <Music className='h-12 w-12 mb-3 opacity-40' />
-                    <p className='text-sm'>검색 결과가 없습니다</p>
-                  </div>
-                )}
-              </motion.div>
-            ) : (
-              <motion.div
-                key={`table-files-${openSongId}`}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className='text-xs uppercase tracking-wider text-left'>
-                        편성명
-                      </TableHead>
-                      <TableHead className='hidden md:table-cell text-xs uppercase tracking-wider text-right'>
-                        등록일
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredArrangements.map(arr => (
-                      <TableRow
-                        key={arr.id}
-                        className='cursor-pointer hover:bg-muted/50'
-                        onClick={() => navigate(`/scores/${openSong.id}/arrangements/${arr.id}`)}
-                      >
-                        <TableCell className='font-medium flex items-center gap-2 text-left'>
-                          <FileMusic className='h-4 w-4 text-muted-foreground/60 shrink-0 hidden md:flex' />
-                          {arr.arrangement.split(',').length >= 10 ? 'Orchestra' : arr.arrangement}
-                        </TableCell>
-                        <TableCell className='hidden md:table-cell text-right text-muted-foreground'>
-                          {dayjs(arr.created_at).format('YYYY-MM-DD')}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </CardContent>
-      </Card>
-    </div>
-  );
+			<Breadcrumb path={breadcrumb} onNavigate={handleNavigate} />
+
+			<Card className='border-border/50'>
+				<CardContent className='p-2 md:p-5'>
+					<AnimatePresence mode='wait'>
+						{!openComposer ? (
+							<motion.div
+								key='list-composers'
+								initial={{ opacity: 0 }}
+								animate={{ opacity: 1 }}
+								exit={{ opacity: 0 }}
+								className='flex flex-col gap-0.5'
+							>
+								{filteredComposers.map(([composer, composerSongs]) => (
+									<FolderRow
+										key={composer}
+										label={composer}
+										count={composerSongs.length}
+										onClick={() => {
+											setOpenComposer(composer);
+											setSearch('');
+										}}
+									/>
+								))}
+								{filteredComposers.length === 0 && (
+									<div className='flex flex-col items-center justify-center py-16 text-muted-foreground'>
+										<Music className='h-10 w-10 mb-3 opacity-30' />
+										<p className='text-sm font-medium'>
+											{search ? '검색 결과가 없습니다' : '등록된 악보가 없습니다'}
+										</p>
+										{search && (
+											<p className='text-xs mt-1 opacity-60'>다른 검색어를 입력해보세요</p>
+										)}
+									</div>
+								)}
+							</motion.div>
+						) : !openSong ? (
+							<motion.div
+								key={`list-songs-${openComposer}`}
+								initial={{ opacity: 0 }}
+								animate={{ opacity: 1 }}
+								exit={{ opacity: 0 }}
+								className='flex flex-col gap-0.5'
+							>
+								{composerSongs.map((song) => (
+									<FolderRow
+										key={song.id}
+										label={song.title}
+										count={song.arrangements.length}
+										onClick={() => {
+											setOpenSongId(song.id);
+											setSearch('');
+										}}
+										onDelete={
+											song.arrangements.length === 0
+												? () => deleteSong({ id: song.id })
+												: undefined
+										}
+									/>
+								))}
+								{composerSongs.length === 0 && (
+									<div className='flex flex-col items-center justify-center py-16 text-muted-foreground'>
+										<Music className='h-10 w-10 mb-3 opacity-30' />
+										<p className='text-sm font-medium'>검색 결과가 없습니다</p>
+										{search && (
+											<p className='text-xs mt-1 opacity-60'>다른 검색어를 입력해보세요</p>
+										)}
+									</div>
+								)}
+							</motion.div>
+						) : (
+							<motion.div
+								key={`table-files-${openSongId}`}
+								initial={{ opacity: 0 }}
+								animate={{ opacity: 1 }}
+								exit={{ opacity: 0 }}
+							>
+								<Table>
+									<TableBody>
+										{filteredArrangements.map((arr) => (
+											<TableRow
+												key={arr.id}
+												className='cursor-pointer hover:bg-muted/40 group'
+												onClick={() =>
+													navigate(`/scores/${openSong.id}/arrangements/${arr.id}`)
+												}
+											>
+												<TableCell className='font-medium flex items-center gap-2.5 text-left'>
+													<FileMusic className='h-4 w-4 text-muted-foreground/50 shrink-0' />
+													{arr.arrangement.split(',').length >= 10
+														? 'Orchestra'
+														: arr.arrangement}
+												</TableCell>
+												<TableCell className='text-right pr-3'>
+													<ChevronRight className='h-4 w-4 text-muted-foreground/30 group-hover:text-muted-foreground ml-auto transition-colors' />
+												</TableCell>
+											</TableRow>
+										))}
+										{filteredArrangements.length === 0 && (
+											<tr>
+												<td colSpan={3}>
+													<div className='flex flex-col items-center justify-center py-14 text-muted-foreground'>
+														<FileMusic className='h-10 w-10 mb-3 opacity-30' />
+														<p className='text-sm font-medium'>검색 결과가 없습니다</p>
+														{search && (
+															<p className='text-xs mt-1 opacity-60'>
+																다른 검색어를 입력해보세요
+															</p>
+														)}
+													</div>
+												</td>
+											</tr>
+										)}
+									</TableBody>
+								</Table>
+							</motion.div>
+						)}
+					</AnimatePresence>
+				</CardContent>
+			</Card>
+		</div>
+	);
 }
 
 export default ScoreTab;

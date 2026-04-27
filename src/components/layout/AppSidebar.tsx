@@ -26,24 +26,24 @@ export function AppSidebar() {
     if (session) {
       return (
         <button
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-border bg-muted/30 hover:bg-muted/50 transition-colors"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-sidebar-border bg-sidebar-foreground/8 hover:bg-sidebar-foreground/12 transition-colors"
           onClick={() => navigate('/settings')}
         >
           <img src={logoImg} alt="로고" className="h-3.5 w-3.5 shrink-0 object-contain" />
-          <p className="flex-1 min-w-0 text-left text-sm md:text-xs text-muted-foreground truncate">{session?.user?.email}</p>
+          <p className="flex-1 min-w-0 text-left text-sm md:text-xs text-sidebar-foreground truncate">{session?.user?.email}</p>
         </button>
       );
     }
     if (isGuest) {
       return (
         <button
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-border bg-muted/30"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-sidebar-border bg-sidebar-foreground/8 hover:bg-sidebar-foreground/12 transition-colors"
           onClick={() => { exitGuestMode(); navigate('/login'); }}
         >
-          <div className="text-muted-foreground hover:text-foreground transition-colors">
+          <div className="text-sidebar-foreground/70 hover:text-sidebar-foreground transition-colors">
             <LogOut className="h-3.5 w-3.5" />
           </div>
-          <p className="flex-1 min-w-0 text-left text-sm md:text-xs text-muted-foreground truncate">게스트</p>
+          <p className="flex-1 min-w-0 text-left text-sm md:text-xs text-sidebar-foreground truncate">게스트</p>
         </button>
       );
     }
@@ -76,13 +76,16 @@ export function AppSidebar() {
               onClick={() => navigate(item.url)}
               className={cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-[12px] text-sm font-medium transition-all duration-150",
-                "hover:bg-foreground/5",
+                "hover:bg-sidebar-foreground/10",
                 isActive(item)
-                  ? "bg-primary/10 text-primary border border-primary/20"
-                  : "text-sidebar-foreground/70 border border-transparent"
+                  ? "bg-sidebar-foreground/12 text-sidebar-primary font-semibold"
+                  : "text-sidebar-foreground"
               )}
             >
-              <item.icon className={cn("h-4 w-4 shrink-0", isActive(item) ? "text-primary" : "")} />
+              <item.icon className={cn(
+                "h-4 w-4 shrink-0",
+                isActive(item) ? "text-sidebar-primary" : ""
+              )} />
               <span>{item.title}</span>
             </button>
           ))}
@@ -104,7 +107,7 @@ export function AppSidebar() {
           {/* 다크/라이트 모드 */}
           <button
             onClick={toggleTheme}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-sidebar-foreground/70 hover:bg-foreground/5 border border-transparent transition-all duration-150"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-sidebar-foreground hover:bg-sidebar-foreground/10 border border-transparent transition-all duration-150"
             aria-label="테마 변경"
           >
             {theme === "dark" ? <Sun className="h-4 w-4 shrink-0" /> : <Moon className="h-4 w-4 shrink-0" />}

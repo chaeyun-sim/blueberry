@@ -6,10 +6,11 @@
  *     "시대를 초월한 마음 (OST)-QUARTET(Vn,Vc)"  → { song: "시대를 초월한 마음 (OST)", arrangement: "QUARTET(Vn,Vc)" }
  */
 export function splitProduct(product: string): { song: string; arrangement: string } {
-  const lastDash = product.lastIndexOf('-');
-  if (lastDash === -1) return { song: product, arrangement: '' };
+  const cleaned = product.replace(/^.*?님\s*개인결제용\s*/i, '');
+  const lastDash = cleaned.lastIndexOf('-');
+  if (lastDash === -1) return { song: cleaned, arrangement: '' };
   return {
-    song: product.slice(0, lastDash).trim(),
-    arrangement: product.slice(lastDash + 1).trim(),
+    song: cleaned.slice(0, lastDash).trim(),
+    arrangement: cleaned.slice(lastDash + 1).trim(),
   };
 }

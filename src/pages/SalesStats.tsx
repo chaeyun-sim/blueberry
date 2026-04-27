@@ -1,16 +1,15 @@
 import React, { useState, useCallback } from 'react';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { PageHeader } from '@/components/layout/PageHeader';
 import { ExcelUploadDialog } from '@/components/ExcelUploadDialog';
-import Button from '@/components/ui/button';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Upload, DollarSign, BarChart3, FileSpreadsheet, CalendarDays, List } from 'lucide-react';
+import { Upload, DollarSign, BarChart3, FileSpreadsheet, CalendarDays, List, Lightbulb } from 'lucide-react';
 import Stats from '@/components/pages/sales/Stats';
 import YearlyStats from '@/components/pages/sales/YearlyStats';
 import SalesSummaryCard from '@/components/pages/sales/SalesSummaryCard';
 import SalesAll from '@/components/pages/sales/SalesAll';
-import { TabsContent } from '@radix-ui/react-tabs';
+import SeasonalHint from '@/components/pages/sales/insights/SeasonalHint';
+import TrendingSongs from '@/components/pages/sales/insights/TrendingSongs';
+import ParetoChart from '@/components/pages/sales/insights/ParetoChart';
 import { statsMutations } from '@/api/stats/mutations';
 import { useMutation } from '@tanstack/react-query';
 import { useAppQuery as useQuery } from '@/hooks/use-app-query';
@@ -21,21 +20,30 @@ import { ExcelRow } from '@/types/excel';
 import { MONEY_RATIO } from '@/constants/money-ratio';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/use-auth';
+import { cn } from '@/lib/utils';
 
-const tabItems = {
-  all: { icon: BarChart3, label: '전체 분석', component: Stats },
-  yearly: { icon: CalendarDays, label: '월별 분석', component: YearlyStats },
-  raw: { icon: List, label: '전체 보기', component: SalesAll },
-} satisfies Record<
-  string,
-  { icon: React.ElementType; label: string; component: React.ElementType }
->;
+const InsightsTab = () => (
+  <div className='space-y-6'>
+    <SeasonalHint />
+    <div className='grid lg:grid-cols-2 gap-6'>
+      <div className='min-w-0'><TrendingSongs /></div>
+      <div className='min-w-0'><ParetoChart /></div>
+    </div>
+  </div>
+);
+
+const tabItems = [
+  { key: 'all',     icon: BarChart3,      label: '전체 분석',  component: Stats },
+  { key: 'yearly',  icon: CalendarDays,   label: '월별 분석',  component: YearlyStats },
+  { key: 'insights',icon: Lightbulb,      label: '인사이트',   component: InsightsTab },
+  { key: 'raw',     icon: List,           label: '전체 보기',  component: SalesAll },
+] satisfies { key: string; icon: React.ElementType; label: string; component: React.ElementType }[];
 
 const SalesStatsContent = () => {
   const { isGuest } = useAuth();
-
   const [uploadOpen, setUploadOpen] = useState(false);
-  
+  const [activeTab, setActiveTab] = useState('all');
+
   const { data: salesSummary } = useQuery(statsQueries.getSalesSummary());
   const { mutate: saveRows } = useMutation(statsMutations.saveSalesRows());
 
@@ -45,7 +53,6 @@ const SalesStatsContent = () => {
         toast.error('게스트 모드에서는 매출 데이터를 저장할 수 없습니다.');
         return;
       }
-
       saveRows(
         { rows: data, name },
         {
@@ -53,7 +60,7 @@ const SalesStatsContent = () => {
             queryClient.invalidateQueries({ queryKey: statsKeys.all });
             toast.success(`${rows.length}건이 저장되었습니다.`);
           },
-          onError: e =>
+          onError: (e) =>
             toast.error('저장에 실패했습니다.', { description: e instanceof Error ? e.message : undefined }),
         },
       );
@@ -61,28 +68,37 @@ const SalesStatsContent = () => {
     [saveRows, isGuest],
   );
 
+  const ActiveComponent = tabItems.find((t) => t.key === activeTab)?.component ?? Stats;
+
   return (
     <AppLayout>
-      <PageHeader
-        title='매출 통계'
-        description='엑셀 데이터 기반 매출 분석'
-      >
-        <Button
-          variant='outline'
-          className='gap-2'
+      {/* ── Header ─────────────────────────────────── */}
+      <div className='flex items-center justify-between mb-6'>
+        <div>
+          <p className='text-[11px] font-semibold text-muted-foreground uppercase tracking-widest'>
+            매출 통계
+          </p>
+          <h1 className='text-3xl font-display font-bold tracking-tight mt-0.5'>
+            Sales Analytics
+          </h1>
+        </div>
+        <button
           onClick={() => setUploadOpen(true)}
+          className='flex items-center gap-1.5 bg-card border text-foreground text-xs font-semibold px-5 py-2 rounded-2xl shadow-sm hover:bg-muted/30 transition-colors'
         >
-          <Upload className='h-4 w-4' />
+          <Upload className='h-3.5 w-3.5' />
           엑셀 업로드
-        </Button>
-      </PageHeader>
+        </button>
+      </div>
+
       <ExcelUploadDialog
         open={uploadOpen}
         onOpenChange={setUploadOpen}
         onUpload={handleExcelUpload}
       />
 
-      <div className='grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8'>
+      {/* ── Summary Cards ───────────────────────────── */}
+      <div className='grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6'>
         <SalesSummaryCard
           icon={DollarSign}
           title='총 매출'
@@ -111,39 +127,27 @@ const SalesStatsContent = () => {
         />
       </div>
 
-      <Tabs
-        defaultValue='all'
-        className='space-y-6'
-      >
-        <TabsList className='grid w-full grid-cols-3 max-w-md'>
-          {(Object.keys(tabItems) as Array<keyof typeof tabItems>).map(tab => {
-            const Icon = tabItems[tab].icon;
-            return (
-              <TabsTrigger
-                key={tab}
-                value={tab}
-                className='gap-1.5'
-              >
-                <Icon className='h-3.5 w-3.5' />
-                {tabItems[tab].label}
-              </TabsTrigger>
-            );
-          })}
-        </TabsList>
+      {/* ── Tabs ────────────────────────────────────── */}
+      <div className='flex items-center gap-1 bg-card border rounded-2xl shadow-sm p-1 w-fit mb-6'>
+        {tabItems.map(({ key, icon: Icon, label }) => (
+          <button
+            key={key}
+            onClick={() => setActiveTab(key)}
+            className={cn(
+              'flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-xl transition-colors',
+              activeTab === key
+                ? 'bg-foreground text-background font-semibold shadow-sm'
+                : 'text-muted-foreground hover:text-foreground',
+            )}
+          >
+            <Icon className='h-3.5 w-3.5' />
+            {label}
+          </button>
+        ))}
+      </div>
 
-        {(Object.keys(tabItems) as Array<keyof typeof tabItems>).map(tab => {
-          const Component = tabItems[tab].component;
-          return (
-            <TabsContent
-              key={tab}
-              value={tab}
-              className='space-y-6'
-            >
-              <Component />
-            </TabsContent>
-          );
-        })}
-      </Tabs>
+      {/* ── Tab Content ─────────────────────────────── */}
+      <ActiveComponent />
     </AppLayout>
   );
 };
