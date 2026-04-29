@@ -7,16 +7,51 @@ import { Music, Trash2 } from 'lucide-react';
 import { useParams, Navigate } from 'react-router-dom';
 import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 import { scoreQueries } from '@/api/score/queries';
+import { scoreMutations } from '@/api/score/mutations';
+import { scoreKeys } from '@/api/score/queryKeys';
 import { fileTypeConfig } from '@/constants/file-types';
 import { overlay } from 'overlay-kit';
 import DeleteArrangementDialog from '@/components/pages/score/DeleteArrangementDialog';
 import AppHeader from '@/components/layout/AppHeader';
+import { useMutation } from '@tanstack/react-query';
+import { queryClient } from '@/utils/query-client';
+import { toast } from 'sonner';
+import type { ArrangementFile } from '@/types/score';
+
+const getFileDisplayLabel = (file: ArrangementFile): string => {
+  if (file.file_type === 'audio') return '오디오';
+  if (file.file_type === 'musicxml') return 'Music XML';
+
+  // score / part / finale: " - 악기명" 있으면 Part, 없으면 Score
+  if (['score', 'part', 'finale'].includes(file.file_type)) {
+    if (!file.label.includes(' - ')) return 'Score';
+    return `Part - ${file.label.split(' - ').pop()!}`;
+  }
+
+  return fileTypeConfig[file.file_type]?.label ?? file.label;
+};
 
 const ScoreDetail = () => {
   const { scoreId, arrangementId } = useParams();
 
   const { data: arrangement, isLoading } = useQuery(scoreQueries.getArrangement(arrangementId));
   const { data: song } = useQuery(scoreQueries.getSong(scoreId ?? ''));
+  const { mutate: deleteFile, isPending: isDeletingFile } = useMutation(scoreMutations.deleteArrangementFile());
+
+  const handleDeleteFile = (fileId: string) => {
+    deleteFile(
+      { id: fileId },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: scoreKeys.arrangement(arrangementId!) });
+          toast.success('파일이 삭제되었습니다.');
+        },
+        onError: (e) => {
+          toast.error('파일 삭제에 실패했습니다.', { description: e.message });
+        },
+      },
+    );
+  };
 
   const handleDelete = () => {
     overlay.open(
@@ -44,9 +79,13 @@ const ScoreDetail = () => {
         <Skeleton className='h-4 w-40 mb-6' />
         <Card className='border-border/50'>
           <CardContent className='p-5'>
-            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
+            <div className='divide-y divide-border/50'>
               {[...Array(4)].map((_, i) => (
-                <Skeleton key={i} className='aspect-[3/4] rounded-lg' />
+                <div key={i} className='flex items-center gap-3 py-3'>
+                  <Skeleton className='h-5 w-5 rounded shrink-0' />
+                  <Skeleton className='h-4 flex-1' />
+                  <Skeleton className='h-8 w-8 rounded' />
+                </div>
               ))}
             </div>
           </CardContent>
@@ -93,31 +132,34 @@ const ScoreDetail = () => {
               <p className='text-sm'>등록된 파일이 없습니다</p>
             </div>
           ) : (
-            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
+            <div className='divide-y divide-border/50'>
               {files.map(file => {
                 const config = fileTypeConfig[file.file_type] ?? fileTypeConfig.score;
                 const Icon = config.icon;
-                const partName = file.file_type === 'part'
-                  ? (file.label.includes(' - ') ? file.label.split(' - ').pop() : file.label)
-                  : null;
+                const displayLabel = getFileDisplayLabel(file);
                 return (
-                  <div key={file.id} className='flex flex-col gap-2'>
+                  <div key={file.id} className='flex items-center gap-3 py-3 first:pt-0 last:pb-0'>
                     <a
                       href={file.url}
                       target='_blank'
                       rel='noopener noreferrer'
-                      className='aspect-[3/4] border border-dashed border-border rounded-lg flex flex-col items-center justify-center gap-3 bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer group'
+                      className='flex items-center gap-3 flex-1 min-w-0 group'
                     >
-                      <Icon className={`h-12 w-12 ${config.color} group-hover:scale-105 transition-transform`} />
-                      <div className='text-center px-3'>
-                        {partName && (
-                          <p className='text-sm font-medium truncate max-w-full'>{partName}</p>
-                        )}
-                        <span className='text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium mt-1 inline-block'>
-                          {config.label}
-                        </span>
-                      </div>
+                      <Icon className={`h-5 w-5 shrink-0 ${config.color}`} />
+                      <span className='text-sm font-medium truncate group-hover:underline'>
+                        {displayLabel}
+                      </span>
                     </a>
+                    <Button
+                      variant='ghost'
+                      size='icon'
+                      className='h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10'
+                      disabled={isDeletingFile}
+                      onClick={() => handleDeleteFile(file.id)}
+                      aria-label='파일 삭제'
+                    >
+                      <Trash2 className='h-4 w-4' />
+                    </Button>
                   </div>
                 );
               })}
