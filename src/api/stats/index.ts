@@ -587,9 +587,7 @@ export async function getTrendingSongs(): Promise<TrendingSong[]> {
 		results.push({ title, recentSales: recent, prevSales: prev, growth });
 	}
 
-	return results
-		.filter((s) => s.recentSales > 0)
-		.sort((a, b) => b.growth - a.growth);
+	return results.sort((a, b) => b.growth - a.growth);
 }
 
 /**

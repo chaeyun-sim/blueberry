@@ -39,7 +39,7 @@ function SalesForecast() {
 					<CalendarClock className='h-4 w-4 text-primary' />
 					이번 달 매출 예측
 				</CardTitle>
-				</CardHeader>
+			</CardHeader>
 			<CardContent>
 				<div className='space-y-4'>
 					{/* 예상 매출 */}
