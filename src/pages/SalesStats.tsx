@@ -8,7 +8,7 @@ import YearlyStats from '@/components/pages/sales/YearlyStats';
 import SalesSummaryCard from '@/components/pages/sales/SalesSummaryCard';
 import SalesAll from '@/components/pages/sales/SalesAll';
 import SeasonalHint from '@/components/pages/sales/insights/SeasonalHint';
-import TrendingSongs from '@/components/pages/sales/insights/TrendingSongs';
+import SalesForecast from '@/components/pages/sales/insights/SalesForecast';
 import ParetoChart from '@/components/pages/sales/insights/ParetoChart';
 import { statsMutations } from '@/api/stats/mutations';
 import { useMutation } from '@tanstack/react-query';
@@ -26,7 +26,7 @@ const InsightsTab = () => (
   <div className='space-y-6'>
     <SeasonalHint />
     <div className='grid lg:grid-cols-2 gap-6'>
-      <div className='min-w-0'><TrendingSongs /></div>
+      <div className='min-w-0'><SalesForecast /></div>
       <div className='min-w-0'><ParetoChart /></div>
     </div>
   </div>

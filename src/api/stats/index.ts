@@ -542,7 +542,7 @@ export async function getSeasonalPattern(): Promise<SeasonalPatternItem[]> {
 /**
  * 최근 3개월 vs 직전 3개월 판매 상승 곡 조회
  */
-export async function getTrendingSongs(topN = 8): Promise<TrendingSong[]> {
+export async function getTrendingSongs(): Promise<TrendingSong[]> {
 	const now = new Date();
 	const sixMonthsAgo = new Date(now);
 	sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
@@ -575,20 +575,21 @@ export async function getTrendingSongs(topN = 8): Promise<TrendingSong[]> {
 	const allTitles = new Set([...recentMap.keys(), ...prevMap.keys()]);
 	const results: TrendingSong[] = [];
 
+	const MIN_RECENT = 3; // 최근 기간 최소 판매건
+	const MIN_PREV = 1;   // 이전 기간 최소 판매건 (비교 가능해야 의미 있음)
+
 	for (const title of allTitles) {
 		const recent = recentMap.get(title) ?? 0;
 		const prev = prevMap.get(title) ?? 0;
-		const growth =
-			prev === 0
-				? recent * 100
-				: parseFloat((((recent - prev) / prev) * 100).toFixed(1));
+		if (recent < MIN_RECENT || prev < MIN_PREV) continue;
+		if (Math.abs(recent - prev) <= 1) continue;
+		const growth = parseFloat((((recent - prev) / prev) * 100).toFixed(1));
 		results.push({ title, recentSales: recent, prevSales: prev, growth });
 	}
 
 	return results
 		.filter((s) => s.recentSales > 0)
-		.sort((a, b) => b.growth - a.growth)
-		.slice(0, topN);
+		.sort((a, b) => b.growth - a.growth);
 }
 
 /**
