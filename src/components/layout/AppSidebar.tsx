@@ -1,6 +1,5 @@
-import { PlusCircle, Sun, Moon, LogIn, LogOut } from "lucide-react";
+import { PlusCircle, LogIn, LogOut } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useTheme } from '@/hooks/use-theme';
 import {
   Sidebar,
   SidebarContent,
@@ -14,7 +13,6 @@ import { navItems } from '@/constants/nav-items';
 export function AppSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { theme, toggleTheme } = useTheme();
   const { session, loading: authLoading, isGuest, exitGuestMode } = useAuth();
 
   const isActive = (item: typeof navItems[0]) =>
@@ -103,19 +101,7 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="px-3 pb-4">
-        <div className="flex flex-col gap-1.5">
-          {/* 다크/라이트 모드 */}
-          <button
-            onClick={toggleTheme}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-sidebar-foreground hover:bg-sidebar-foreground/10 border border-transparent transition-all duration-150"
-            aria-label="테마 변경"
-          >
-            {theme === "dark" ? <Sun className="h-4 w-4 shrink-0" /> : <Moon className="h-4 w-4 shrink-0" />}
-            <span>{theme === "dark" ? "라이트 모드" : "다크 모드"}</span>
-          </button>
-
-          {renderAuthButton()}
-        </div>
+        {renderAuthButton()}
       </SidebarFooter>
     </Sidebar>
   );
