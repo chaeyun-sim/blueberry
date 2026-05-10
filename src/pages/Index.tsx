@@ -86,6 +86,9 @@ const DashboardContent = () => {
           <div
             className='bg-card rounded-3xl p-6 border shadow-sm cursor-pointer hover:opacity-80 transition-opacity flex flex-col justify-between min-h-[160px]'
             onClick={() => navigate('/stats')}
+            onKeyDown={(e) => e.key === 'Enter' && navigate('/stats')}
+            role='button'
+            tabIndex={0}
           >
             <div>
               <p className='text-[11px] font-semibold text-muted-foreground uppercase tracking-widest'>
@@ -114,6 +117,9 @@ const DashboardContent = () => {
           <div
             className='bg-card rounded-3xl p-6 border shadow-sm cursor-pointer hover:opacity-80 transition-opacity flex flex-col justify-between min-h-[160px]'
             onClick={() => navigate('/commissions?status=complete')}
+            onKeyDown={(e) => e.key === 'Enter' && navigate('/commissions?status=complete')}
+            role='button'
+            tabIndex={0}
           >
             <div>
               <p className='text-[11px] font-semibold text-muted-foreground uppercase tracking-widest'>

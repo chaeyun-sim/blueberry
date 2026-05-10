@@ -27,6 +27,7 @@ const ScoreRegister = lazy(() => import('./pages/ScoreRegister'));
 const SalesStats = lazy(() => import('./pages/SalesStats'));
 const CalendarView = lazy(() => import('./pages/CalendarView'));
 const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
 const Settings = lazy(() => import('./pages/Settings'));
 const ExcelUploadDetail = lazy(() => import('./pages/ExcelUploadDetail'));
 const NotFound = lazy(() => import('./pages/NotFound'));
@@ -60,6 +61,7 @@ const App = () => (
 								<Suspense>
 									<Routes>
 										<Route path='/login' element={<Login />} />
+										<Route path='/register' element={<Register />} />
 										<Route element={<Protected />}>
 											<Route path='/' element={<Index />} />
 											<Route path='/commissions' element={<CommissionList />} />

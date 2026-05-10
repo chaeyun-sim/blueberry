@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, Navigate } from 'react-router-dom';
+import { useNavigate, Navigate, Link } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import Button from '@/components/ui/button';
 import Label from '@/components/ui/label';
@@ -139,16 +139,16 @@ export default function Login() {
 						</div>
 					</div>
 
-					<Button
-						variant='ghost'
-						className='w-full border border-transparent hover:bg-foreground/5'
-						onClick={() => {
-							enterGuestMode();
-							navigate('/');
-						}}
-					>
-						게스트로 둘러보기
-					</Button>
+					<div className='flex flex-col gap-2'>
+						<Link to='/register'>
+							<Button
+								variant='ghost'
+								className='w-full border border-transparent hover:bg-foreground/5'
+							>
+								계정이 없으신가요? 회원가입하기
+							</Button>
+						</Link>
+					</div>
 				</CardContent>
 			</Card>
 		</main>
