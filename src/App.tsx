@@ -1,4 +1,5 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Toaster as Sonner } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -11,6 +12,12 @@ import { SpeedInsights } from '@vercel/speed-insights/react';
 import { queryClient } from './utils/query-client';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import ProtectedRoute from '@/components/layout/ProtectedRoute';
+
+function ScrollToTop() {
+	const { pathname } = useLocation();
+	useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
+	return null;
+}
 
 function handlePageReset() {
 	queryClient.resetQueries();
@@ -56,6 +63,7 @@ const App = () => (
 				<TooltipProvider>
 					<Sonner />
 					<BrowserRouter>
+						<ScrollToTop />
 						<AuthProvider>
 							<OverlayProvider>
 								<Suspense>
