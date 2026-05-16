@@ -1,8 +1,8 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { Music, Sheet, PlusCircle, Upload } from 'lucide-react';
+import { Music, Sheet, PlusCircle, Upload, Plus, X } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
 import { ExcelUploadDialog } from '@/components/ExcelUploadDialog';
 import { ExcelRow } from '@/types/excel';
@@ -26,6 +26,7 @@ const FilesContent = () => {
 	const setActiveTab = (tab: string) => setSearchParams({ tab }, { replace: true });
 
 	const [uploadOpen, setUploadOpen] = useState(false);
+	const [fabOpen, setFabOpen] = useState(false);
 	const { mutate: saveRows } = useMutation(statsMutations.saveSalesRows());
 
 	const handleUpload = useCallback(
@@ -46,6 +47,14 @@ const FilesContent = () => {
 		},
 		[saveRows],
 	);
+
+	// 외부 클릭 시 FAB 닫기
+	useEffect(() => {
+		if (!fabOpen) return;
+		const close = () => setFabOpen(false);
+		document.addEventListener('click', close);
+		return () => document.removeEventListener('click', close);
+	}, [fabOpen]);
 
 	return (
 		<AppLayout>
@@ -110,25 +119,49 @@ const FilesContent = () => {
 			{activeTab === 'scores' && <ScoreTab />}
 			{activeTab === 'excel' && <ExcelTab onUploadRequest={() => setUploadOpen(true)} />}
 
-			{/* ── Mobile FAB ──────────────────────────────── */}
-			<div className='md:hidden fixed bottom-5 left-6 right-6'>
-				{activeTab === 'scores' ? (
-					<button
-						onClick={() => navigate('/scores/new')}
-						className='flex items-center justify-center gap-2 w-full bg-foreground text-background text-sm font-semibold py-3 rounded-2xl hover:opacity-80 transition-opacity shadow-lg'
-					>
-						<PlusCircle className='h-4 w-4' />
-						악보 추가
-					</button>
-				) : (
-					<button
-						onClick={() => setUploadOpen(true)}
-						className='flex items-center justify-center gap-2 w-full bg-foreground text-background text-sm font-semibold py-3 rounded-2xl hover:opacity-80 transition-opacity shadow-lg'
-					>
-						<Upload className='h-4 w-4' />
-						엑셀 업로드
-					</button>
-				)}
+			{/* ── Mobile Speed Dial FAB ───────────────────── */}
+			<div
+				className='md:hidden fixed right-6 z-50 flex flex-col items-end gap-3'
+				style={{ bottom: 'calc(4rem + env(safe-area-inset-bottom) + 1rem)' }}
+				onClick={(e) => e.stopPropagation()}
+			>
+				{/* Menu items */}
+				<div
+					className={cn(
+						'flex flex-col items-end gap-3 transition-all duration-200',
+						fabOpen ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-3 pointer-events-none',
+					)}
+				>
+					<div className='flex items-center gap-2'>
+						<span className='bg-foreground/90 text-background text-xs font-semibold px-3 py-1.5 rounded-xl shadow'>악보 추가</span>
+						<button
+							onClick={() => { setFabOpen(false); navigate('/scores/new'); }}
+							className='w-12 h-12 rounded-full bg-card border shadow-lg flex items-center justify-center hover:bg-muted transition-colors'
+						>
+							<Music className='h-5 w-5' />
+						</button>
+					</div>
+					<div className='flex items-center gap-2'>
+						<span className='bg-foreground/90 text-background text-xs font-semibold px-3 py-1.5 rounded-xl shadow'>엑셀 업로드</span>
+						<button
+							onClick={() => { setFabOpen(false); setUploadOpen(true); }}
+							className='w-12 h-12 rounded-full bg-card border shadow-lg flex items-center justify-center hover:bg-muted transition-colors'
+						>
+							<Sheet className='h-5 w-5' />
+						</button>
+					</div>
+				</div>
+
+				{/* Main FAB */}
+				<button
+					onClick={() => setFabOpen((o) => !o)}
+					className={cn(
+						'w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-all duration-200 active:scale-95',
+						fabOpen ? 'bg-foreground text-background rotate-45' : 'bg-primary text-primary-foreground',
+					)}
+				>
+					{fabOpen ? <X className='h-6 w-6' /> : <Plus className='h-6 w-6' />}
+				</button>
 			</div>
 		</AppLayout>
 	);

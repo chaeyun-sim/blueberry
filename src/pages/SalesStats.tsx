@@ -82,12 +82,22 @@ const SalesStatsContent = () => {
             Sales Analytics
           </h1>
         </div>
+        {/* md 이상: 기존 버튼 */}
         <button
           onClick={() => setUploadOpen(true)}
-          className='flex items-center gap-1.5 bg-card border text-foreground text-xs font-semibold px-5 py-2 rounded-2xl shadow-sm hover:bg-muted/30 transition-colors'
+          className='hidden md:flex items-center gap-1.5 bg-card border text-foreground text-xs font-semibold px-5 py-2 rounded-2xl shadow-sm hover:bg-muted/30 transition-colors'
         >
           <Upload className='h-3.5 w-3.5' />
           엑셀 업로드
+        </button>
+
+        {/* 모바일: floating 원형 버튼 */}
+        <button
+          onClick={() => setUploadOpen(true)}
+          style={{ bottom: 'calc(4rem + env(safe-area-inset-bottom) + 1rem)' }}
+          className='md:hidden fixed right-6 z-50 w-14 h-14 rounded-full bg-foreground text-background shadow-xl flex items-center justify-center hover:opacity-80 active:scale-95 transition-all'
+        >
+          <Upload className='h-5 w-5' />
         </button>
       </div>
 
@@ -136,14 +146,14 @@ const SalesStatsContent = () => {
             key={key}
             onClick={() => setActiveTab(key)}
             className={cn(
-              'flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-xl transition-colors',
+              'flex items-center gap-1.5 px-2 md:px-3 py-1.5 text-xs md:text-sm rounded-xl transition-colors',
               activeTab === key
                 ? 'bg-foreground text-background font-semibold shadow-sm'
                 : 'text-muted-foreground hover:text-foreground',
             )}
           >
-            <Icon className='h-3.5 w-3.5' />
-            {label}
+            <Icon className='h-3 w-3 md:h-3.5 md:w-3.5 shrink-0' />
+            <span className='whitespace-nowrap'>{label}</span>
           </button>
         ))}
       </div>
