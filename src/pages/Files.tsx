@@ -123,7 +123,7 @@ const FilesContent = () => {
 			<div
 				className='md:hidden fixed right-6 z-50 flex flex-col items-end gap-3'
 				style={{ bottom: 'calc(4rem + env(safe-area-inset-bottom) + 1rem)' }}
-				onClick={(e) => e.stopPropagation()}
+				onClickCapture={(e) => e.stopPropagation()}
 			>
 				{/* Menu items */}
 				<div
