@@ -12,6 +12,7 @@ import { ActiveCommissionsWidget } from '@/components/pages/dashboard/ActiveComm
 import { DeadlineWidget } from '@/components/pages/dashboard/DeadlineWidget';
 import { StatusDonutWidget } from '@/components/pages/dashboard/StatusDonutWidget';
 import { DiscoverWidget } from '@/components/pages/dashboard/DiscoverWidget';
+import { CorkboardWidget } from '@/components/pages/dashboard/CorkboardWidget';
 import MonthlyChart from '@/components/pages/dashboard/MonthlyChart';
 import useLiveClock from '@/hooks/use-live-clock';
 import { WEEK_KOR } from '@/constants/week';
@@ -55,88 +56,91 @@ const DashboardContent = () => {
             <Sparkles className='h-5 w-5 text-primary opacity-60' />
           </h1>
         </div>
-        <button
-          onClick={() => navigate('/new')}
-          className='flex items-center gap-2 bg-foreground text-background text-sm font-semibold px-4 py-2.5 rounded-2xl hover:opacity-80 transition-opacity'
-        >
-          <Plus className='h-4 w-4' />
-          새 의뢰
-        </button>
       </div>
+
+      {/* ── Floating 새 의뢰 버튼 (sm ~ md only) ──────────── */}
+      <button
+        onClick={() => navigate('/new')}
+        style={{ bottom: 'calc(4rem + env(safe-area-inset-bottom) + 1rem)' }}
+        className='md:hidden fixed right-6 z-50 w-14 h-14 rounded-full bg-foreground text-background shadow-xl flex items-center justify-center hover:opacity-80 active:scale-95 transition-all'
+      >
+        <Plus className='h-6 w-6' />
+      </button>
+
+      {/* ── Corkboard (lg only) ────────────────────────── */}
+      <CorkboardWidget commissions={commissions} isLoading={isLoading} />
 
       {/* ── Bento Grid ─────────────────────────────────── */}
       <div className='flex flex-col gap-4'>
 
-        {/* Row 1: Active (2/3) + Deadline (1/3) */}
-        <div className='grid grid-cols-1 lg:grid-cols-3 gap-4'>
-          <div className='lg:col-span-2'>
+        {/* Row 1: 모바일 단일 컬럼 (Deadline → Active), lg에서 Deadline 전체 너비 */}
+        <div className='flex flex-col gap-4'>
+          <DeadlineWidget commissions={commissions} />
+          <div className='lg:hidden'>
             <ActiveCommissionsWidget commissions={commissions} isLoading={isLoading} />
-          </div>
-          <div>
-            <DeadlineWidget commissions={commissions} />
           </div>
         </div>
 
-        {/* Row 2: Donut (1/3) + Revenue (1/3) + Completed (1/3) */}
-        <div className='grid grid-cols-1 sm:grid-cols-3 gap-4'>
+        {/* Row 2: Donut (1/2→1/3) + Revenue (1/2→1/3) + Completed (hidden on mobile→1/3) */}
+        <div className='grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-4'>
           {/* Status Donut */}
           <StatusDonutWidget commissions={commissions} totalScores={totalScores} />
 
           {/* Revenue mini */}
           <div
-            className='bg-card rounded-3xl p-6 border shadow-sm cursor-pointer hover:opacity-80 transition-opacity flex flex-col justify-between min-h-[160px]'
+            className='bg-card rounded-2xl md:rounded-3xl p-4 md:p-6 border shadow-sm cursor-pointer hover:opacity-80 transition-opacity flex flex-col justify-between'
             onClick={() => navigate('/stats')}
             onKeyDown={(e) => e.key === 'Enter' && navigate('/stats')}
             role='button'
             tabIndex={0}
           >
             <div>
-              <p className='text-[11px] font-semibold text-muted-foreground uppercase tracking-widest'>
+              <p className='text-xs md:text-[11px] font-semibold text-muted-foreground uppercase tracking-widest'>
                 지난 달 매출
               </p>
-              <p className='text-3xl font-display font-bold mt-3 tabular-nums'>
+              <p className='text-2xl md:text-3xl font-display font-bold mt-2 md:mt-3 tabular-nums'>
                 {salesSummary ? (
                   <RollingNumber value={thisMonthRevenue} />
                 ) : (
-                  <span className='inline-block h-9 w-28 rounded-xl bg-muted animate-pulse' />
+                  <span className='inline-block h-7 md:h-9 w-16 md:w-28 rounded-xl bg-muted animate-pulse' />
                 )}
               </p>
               {vsLastMonth !== null && (
-                <p className={`flex items-center gap-1 mt-2 text-xs font-semibold ${vsLastMonth >= 0 ? 'text-success' : 'text-destructive'}`}>
+                <p className={`flex items-center gap-1 mt-1.5 md:mt-2 text-xs font-semibold ${vsLastMonth >= 0 ? 'text-success' : 'text-destructive'}`}>
                   {vsLastMonth >= 0
                     ? <TrendingUp className='h-3 w-3' />
                     : <TrendingDown className='h-3 w-3' />}
-                  {vsLastMonth >= 0 ? '+' : ''}{vsLastMonth}% 전월 대비
+                  {vsLastMonth >= 0 ? '+' : ''}{vsLastMonth}%
                 </p>
               )}
             </div>
-            <p className='text-xs text-muted-foreground'>자세히 →</p>
+            <p className='text-xs text-muted-foreground mt-3 md:mt-0'>자세히 →</p>
           </div>
 
-          {/* Total completed */}
+          {/* Total completed — 모바일에서 숨김 */}
           <div
-            className='bg-card rounded-3xl p-6 border shadow-sm cursor-pointer hover:opacity-80 transition-opacity flex flex-col justify-between min-h-[160px]'
+            className='hidden md:flex bg-card rounded-2xl md:rounded-3xl p-3 md:p-6 border shadow-sm cursor-pointer hover:opacity-80 transition-opacity flex-col justify-between'
             onClick={() => navigate('/commissions?status=complete')}
             onKeyDown={(e) => e.key === 'Enter' && navigate('/commissions?status=complete')}
             role='button'
             tabIndex={0}
           >
             <div>
-              <p className='text-[11px] font-semibold text-muted-foreground uppercase tracking-widest'>
+              <p className='text-[9px] md:text-[11px] font-semibold text-muted-foreground uppercase tracking-widest'>
                 누적 완료
               </p>
-              <p className='text-3xl font-display font-bold mt-3 tabular-nums'>
+              <p className='text-lg md:text-3xl font-display font-bold mt-1 md:mt-3 tabular-nums'>
                 {isLoading
-                  ? <span className='inline-block h-9 w-16 rounded-xl bg-muted animate-pulse' />
-                  : <>{totalCompleted}<span className='text-base text-muted-foreground font-normal ml-1'>건</span></>
+                  ? <span className='inline-block h-6 md:h-9 w-10 md:w-16 rounded-xl bg-muted animate-pulse' />
+                  : <>{totalCompleted}<span className='text-sm md:text-base text-muted-foreground font-normal ml-0.5 md:ml-1'>건</span></>
                 }
               </p>
-              <div className='flex items-center gap-1.5 mt-2'>
-                <CheckCircle2 className='h-3.5 w-3.5 text-success' />
-                <span className='text-xs text-muted-foreground'>오늘까지 완료한 의뢰</span>
+              <div className='flex items-center gap-1 mt-1 md:mt-2'>
+                <CheckCircle2 className='h-3 w-3 md:h-3.5 md:w-3.5 text-success shrink-0' />
+                <span className='text-[10px] md:text-xs text-muted-foreground hidden sm:block'>오늘까지 완료한 의뢰</span>
               </div>
             </div>
-            <p className='text-xs text-muted-foreground'>전체 보기 →</p>
+            <p className='text-[10px] md:text-xs text-muted-foreground mt-2 md:mt-0'>전체 보기 →</p>
           </div>
         </div>
 
