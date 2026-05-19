@@ -77,6 +77,7 @@ const DashboardContent = () => {
 				onClick={() => navigate('/new')}
 				style={{ bottom: 'calc(4rem + env(safe-area-inset-bottom) + 1rem)' }}
 				className='md:hidden fixed right-6 z-50 w-14 h-14 rounded-full bg-foreground text-background shadow-xl flex items-center justify-center hover:opacity-80 active:scale-95 transition-all'
+			aria-label='새 의뢰 등록'
 			>
 				<Plus className='h-6 w-6' />
 			</button>
