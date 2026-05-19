@@ -48,12 +48,17 @@ const FilesContent = () => {
 		[saveRows],
 	);
 
-	// 외부 클릭 시 FAB 닫기
+	// 외부 클릭 / Escape 키로 FAB 닫기
 	useEffect(() => {
 		if (!fabOpen) return;
 		const close = () => setFabOpen(false);
+		const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setFabOpen(false); };
 		document.addEventListener('click', close);
-		return () => document.removeEventListener('click', close);
+		document.addEventListener('keydown', onKey);
+		return () => {
+			document.removeEventListener('click', close);
+			document.removeEventListener('keydown', onKey);
+		};
 	}, [fabOpen]);
 
 	return (
@@ -155,6 +160,8 @@ const FilesContent = () => {
 				{/* Main FAB */}
 				<button
 					onClick={() => setFabOpen((o) => !o)}
+					aria-label={fabOpen ? '메뉴 닫기' : '메뉴 열기'}
+					aria-expanded={fabOpen}
 					className={cn(
 						'w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-all duration-200 active:scale-95',
 						fabOpen ? 'bg-foreground text-background rotate-45' : 'bg-primary text-primary-foreground',
