@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { PieChart, Pie, Cell } from 'recharts';
 import { Commission } from '@/types/commission';
 import dayjs from 'dayjs';
@@ -16,19 +17,20 @@ const STATUS_SEGMENTS = [
 
 export function StatusDonutWidget({ commissions, totalScores }: Props) {
   const navigate = useNavigate();
-  const thisMonth = commissions.filter((c) =>
-    dayjs(c.deadline).isSame(dayjs(), 'month'),
-  );
-
-  const counts = STATUS_SEGMENTS.map(({ key, label, color }) => ({
-    label,
-    color,
-    key,
-    value: thisMonth.filter((c) => c.status === key).length,
-  }));
-
-  const total = counts.reduce((a, b) => a + b.value, 0);
-  const chartData = total > 0 ? counts.filter((d) => d.value > 0) : [{ value: 1, color: 'hsl(var(--muted))', label: '', key: '' }];
+  const { counts, total, chartData } = useMemo(() => {
+    const thisMonth = commissions.filter((c) =>
+      dayjs(c.deadline).isSame(dayjs(), 'month'),
+    );
+    const counts = STATUS_SEGMENTS.map(({ key, label, color }) => ({
+      label,
+      color,
+      key,
+      value: thisMonth.filter((c) => c.status === key).length,
+    }));
+    const total = counts.reduce((a, b) => a + b.value, 0);
+    const chartData = total > 0 ? counts.filter((d) => d.value > 0) : [{ value: 1, color: 'hsl(var(--muted))', label: '', key: '' }];
+    return { counts, total, chartData };
+  }, [commissions]);
 
   return (
     <div className='bg-card rounded-2xl md:rounded-3xl p-4 md:p-6 border shadow-sm flex flex-col justify-between'>

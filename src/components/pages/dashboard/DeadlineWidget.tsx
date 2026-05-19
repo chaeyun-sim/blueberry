@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Commission } from '@/types/commission';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
@@ -18,12 +19,16 @@ function urgencyLabel(days: number) {
 export function DeadlineWidget({ commissions }: Props) {
   const navigate = useNavigate();
 
-  const upcoming = commissions
-    .filter((c) => c.status !== 'complete' && c.status !== 'cancelled' && c.deadline)
-    .map((c) => ({ ...c, daysLeft: dayjs(c.deadline).diff(dayjs(), 'day') }))
-    .filter((c) => c.daysLeft <= 7)
-    .sort((a, b) => a.daysLeft - b.daysLeft)
-    .slice(0, 5);
+  const upcoming = useMemo(
+    () =>
+      commissions
+        .filter((c) => c.status !== 'complete' && c.status !== 'cancelled' && c.deadline)
+        .map((c) => ({ ...c, daysLeft: dayjs(c.deadline).diff(dayjs(), 'day') }))
+        .filter((c) => c.daysLeft <= 7)
+        .sort((a, b) => a.daysLeft - b.daysLeft)
+        .slice(0, 5),
+    [commissions],
+  );
 
   return (
     <div className='bg-card rounded-2xl md:rounded-3xl p-4 md:p-6 h-full border shadow-sm flex flex-col'>

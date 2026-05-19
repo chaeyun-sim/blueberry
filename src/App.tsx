@@ -66,7 +66,7 @@ const App = () => (
 						<ScrollToTop />
 						<AuthProvider>
 							<OverlayProvider>
-								<Suspense>
+								<Suspense fallback={<div className='min-h-screen bg-background' />}>
 									<Routes>
 										<Route path='/login' element={<Login />} />
 										<Route path='/register' element={<Register />} />

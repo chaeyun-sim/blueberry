@@ -5,6 +5,7 @@ function ThemeProvider({ children }: { children: React.ReactNode }) {
     document.documentElement.classList.remove("dark");
     document.documentElement.classList.add("light");
     localStorage.removeItem("scoreflow-theme");
+    localStorage.removeItem("blueberry-theme");
   }, []);
 
   return <>{children}</>;

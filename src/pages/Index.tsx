@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useNavigate } from 'react-router-dom';
 import { useAppQuery as useQuery } from '@/hooks/use-app-query';
@@ -41,13 +42,14 @@ const DashboardContent = () => {
 	const { data: scores = [] } = useQuery(scoreQueries.getSongsSummary());
 	const { data: salesSummary } = useQuery(statsQueries.getSalesSummary());
 
-	const totalScores = scores.reduce(
-		(acc, s) => acc + (s.arrangements?.length ?? 0),
-		0,
+	const totalScores = useMemo(
+		() => scores.reduce((acc, s) => acc + (s.arrangements?.length ?? 0), 0),
+		[scores],
 	);
-	const totalCompleted = commissions.filter(
-		(c) => c.status === 'complete',
-	).length;
+	const totalCompleted = useMemo(
+		() => commissions.filter((c) => c.status === 'complete').length,
+		[commissions],
+	);
 
 	const thisMonthRevenue = (salesSummary?.lastMonthRevenue ?? 0) * MONEY_RATIO;
 	const vsLastMonth = salesSummary?.revenueVsLastMonth ?? null;

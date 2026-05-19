@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Commission } from '@/types/commission';
 import { useNavigate } from 'react-router-dom';
 import { Music2, ArrowRight } from 'lucide-react';
@@ -19,9 +20,13 @@ function DeadlinePill({ deadline }: { deadline: string }) {
 
 export function ActiveCommissionsWidget({ commissions, isLoading }: Props) {
   const navigate = useNavigate();
-  const working = commissions
-    .filter((c) => c.status === 'working')
-    .sort((a, b) => dayjs(a.deadline).valueOf() - dayjs(b.deadline).valueOf());
+  const working = useMemo(
+    () =>
+      commissions
+        .filter((c) => c.status === 'working')
+        .sort((a, b) => dayjs(a.deadline).valueOf() - dayjs(b.deadline).valueOf()),
+    [commissions],
+  );
 
   return (
     <div className='bg-card rounded-2xl md:rounded-3xl p-4 md:p-6 h-full border shadow-sm flex flex-col'>

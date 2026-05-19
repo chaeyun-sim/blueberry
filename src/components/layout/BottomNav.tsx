@@ -23,8 +23,10 @@ export function BottomNav() {
 						<button
 							key={item.title}
 							onClick={() => navigate(item.url)}
+							aria-label={item.title}
+							aria-current={active ? 'page' : undefined}
 							className={cn(
-								'flex-1 flex items-center justify-center transition-colors',
+								'flex-1 flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset',
 								active
 									? 'text-primary'
 									: 'text-muted-foreground hover:text-foreground'

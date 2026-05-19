@@ -49,14 +49,15 @@ export default function Register() {
 					setDone(true);
 				}
 			})
-			.catch((err: Error) => {
-				const msg = err.message ?? '';
-				if (msg.includes('already registered') || msg.includes('User already registered')) {
+			.catch((err: unknown) => {
+				const code = (err as { code?: string })?.code ?? '';
+				const msg = (err as { message?: string })?.message ?? '';
+				if (code === 'user_already_exists' || msg.includes('already registered')) {
 					toast.error('이미 가입된 이메일입니다.');
-				} else if (msg.includes('Email signups are disabled')) {
-					toast.error('현재 이메일 가입이 비활성화되어 있습니다. Supabase 대시보드를 확인해주세요.');
+				} else if (code === 'email_provider_disabled' || msg.includes('Email signups are disabled')) {
+					toast.error('현재 이메일 가입이 비활성화되어 있습니다.');
 				} else {
-					toast.error(`회원가입 실패: ${msg}`);
+					toast.error('회원가입에 실패했습니다.');
 				}
 			})
 			.finally(() => setLoading(false));
@@ -112,7 +113,7 @@ export default function Register() {
 											onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
 											className='pl-10'
 											disabled={loading}
-											autoComplete='off'
+											autoComplete='email'
 										/>
 									</div>
 								</div>
@@ -131,7 +132,7 @@ export default function Register() {
 											onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
 											className='pl-10 pr-10'
 											disabled={loading}
-											autoComplete='off'
+											autoComplete='new-password'
 										/>
 										<button
 											type='button'
@@ -158,7 +159,7 @@ export default function Register() {
 											onChange={(e) => setForm((p) => ({ ...p, confirm: e.target.value }))}
 											className='pl-10 pr-10'
 											disabled={loading}
-											autoComplete='off'
+											autoComplete='new-password'
 										/>
 										<button
 											type='button'
