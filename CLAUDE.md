@@ -1,3 +1,58 @@
+# Project Context
+
+## Service Overview
+
+**편곡 의뢰 및 악보 카탈로그 관리 서비스** — 1인 편곡가/악보 제작자 전용 생산성 도구.
+
+- **타겟**: 개인 편곡가 (의뢰인은 접속하지 않는 1인용 도구)
+- **배포**: Vercel + Supabase (Auth / PostgreSQL / Storage)
+- **상세 문서**: `docs/` 폴더 참조
+
+### 핵심 도메인
+
+| 도메인 | 설명 |
+|--------|------|
+| 의뢰(Commission) | 편곡 의뢰 등록·상태 관리·마감 추적 |
+| 악보 카탈로그(Song/Arrangement) | 곡·편성·첨부 파일 계층 관리 |
+| 매출 통계(Stats) | Excel 판매 보고서 업로드 → 차트 자동 생성 |
+
+### 의뢰 상태
+
+`received(대기)` → `working(작업중)` → `complete(완료)` / `cancelled(취소)`
+
+### 주요 기술 스택
+
+- React 18 + Vite 5 + TypeScript 5.8
+- TailwindCSS v3 + shadcn/ui (Radix UI)
+- TanStack Query v5 + Supabase v2
+- react-router-dom v6, react-hook-form + zod, recharts, overlay-kit, framer-motion
+
+### 폴더 구조 요약
+
+```
+src/
+  pages/          # 라우트 페이지
+  components/     # layout/, ui/(shadcn), pages/(도메인별)
+  api/            # commission/, score/, stats/, auth/, recommendation/
+  types/          # TypeScript 타입
+  constants/      # 상수 (status-config, nav-items, instruments 등)
+  hooks/          # 커스텀 훅
+  utils/          # supabase 클라이언트, query-client, 유틸 함수
+  provider/       # AuthProvider, ThemeProvider
+```
+
+### 문서 참조
+
+- 서비스 개요: @docs/overview.md
+- 기능 명세: @docs/features.md
+- 요구사항: @docs/requirements.md
+- 기술 스택: @docs/tech-stack.md
+- 아키텍처: @docs/architecture.md
+- DB 스키마: @docs/db-schema.md
+- 사용자 흐름: @docs/userflow.md
+
+---
+
 # MoAI Execution Directive
 
 ## 1. Core Identity

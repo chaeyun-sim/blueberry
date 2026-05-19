@@ -1,4 +1,5 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Toaster as Sonner } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -11,6 +12,12 @@ import { SpeedInsights } from '@vercel/speed-insights/react';
 import { queryClient } from './utils/query-client';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import ProtectedRoute from '@/components/layout/ProtectedRoute';
+
+function ScrollToTop() {
+	const { pathname } = useLocation();
+	useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
+	return null;
+}
 
 function handlePageReset() {
 	queryClient.resetQueries();
@@ -27,6 +34,7 @@ const ScoreRegister = lazy(() => import('./pages/ScoreRegister'));
 const SalesStats = lazy(() => import('./pages/SalesStats'));
 const CalendarView = lazy(() => import('./pages/CalendarView'));
 const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
 const Settings = lazy(() => import('./pages/Settings'));
 const ExcelUploadDetail = lazy(() => import('./pages/ExcelUploadDetail'));
 const NotFound = lazy(() => import('./pages/NotFound'));
@@ -55,11 +63,13 @@ const App = () => (
 				<TooltipProvider>
 					<Sonner />
 					<BrowserRouter>
+						<ScrollToTop />
 						<AuthProvider>
 							<OverlayProvider>
-								<Suspense>
+								<Suspense fallback={<div className='min-h-screen bg-background' />}>
 									<Routes>
 										<Route path='/login' element={<Login />} />
+										<Route path='/register' element={<Register />} />
 										<Route element={<Protected />}>
 											<Route path='/' element={<Index />} />
 											<Route path='/commissions' element={<CommissionList />} />

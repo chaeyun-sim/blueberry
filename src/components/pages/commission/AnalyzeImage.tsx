@@ -2,8 +2,14 @@ import { Card, CardContent } from '@/components/ui/card';
 import Button from '@/components/ui/button';
 import { X, ImageIcon, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { analyzeCommissionImage } from '@/api/commission';
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import exampleImg from '@/assets/example-commission.png';
 
 type AnalyzeResult = Awaited<ReturnType<typeof analyzeCommissionImage>>
 
@@ -25,6 +31,7 @@ function AnalyzeImage({
   setIsAnalyzing,
 }: AnalyzeImageProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [exampleOpen, setExampleOpen] = useState(false);
 
   const loadImageFile = (file: File) => {
     if (!file.type.startsWith('image/')) return;
@@ -64,7 +71,23 @@ function AnalyzeImage({
   return (
     <Card className='border-border/50'>
       <CardContent className='p-5'>
-        <h2 className='font-display font-semibold mb-4'>원본 이미지</h2>
+        <div className='flex items-center justify-between mb-4'>
+          <h2 className='font-display font-semibold'>원본 이미지</h2>
+          <button
+            type='button'
+            onClick={() => setExampleOpen(true)}
+            className='text-xs text-primary underline underline-offset-2 hover:opacity-70 transition-opacity'
+          >
+            예시 이미지 보기
+          </button>
+        </div>
+
+        <Dialog open={exampleOpen} onOpenChange={setExampleOpen}>
+          <DialogContent className='max-w-sm'>
+            <DialogTitle className='text-sm font-semibold'>예시 이미지</DialogTitle>
+            <img src={exampleImg} alt='예시 이미지' className='w-full rounded-lg' />
+          </DialogContent>
+        </Dialog>
         <input
           ref={fileInputRef}
           type='file'

@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { useNavigate, Navigate } from 'react-router-dom';
+import { useNavigate, Navigate, Link } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import Button from '@/components/ui/button';
 import Label from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
-import { Mail, Lock, Eye, EyeOff, Loader2, Loader } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { login } from '@/api/auth';
 import { useAuth } from '@/hooks/use-auth';
@@ -17,7 +17,7 @@ interface LoginFormType {
 
 export default function Login() {
 	const navigate = useNavigate();
-	const { session, loading: authLoading, isGuest, enterGuestMode } = useAuth();
+	const { session, loading: authLoading, isGuest } = useAuth();
 
 	const [form, setForm] = useState<LoginFormType>({
 		email: '',
@@ -84,7 +84,7 @@ export default function Login() {
 									}
 									className='pl-10'
 									disabled={loading}
-									autoComplete='off'
+									autoComplete='email'
 								/>
 							</div>
 						</div>
@@ -108,7 +108,7 @@ export default function Login() {
 									}
 									className='pl-10 pr-10'
 									disabled={loading}
-									autoComplete='off'
+									autoComplete='current-password'
 								/>
 								<button
 									type='button'
@@ -139,16 +139,16 @@ export default function Login() {
 						</div>
 					</div>
 
-					<Button
-						variant='ghost'
-						className='w-full border border-transparent hover:bg-foreground/5'
-						onClick={() => {
-							enterGuestMode();
-							navigate('/');
-						}}
-					>
-						게스트로 둘러보기
-					</Button>
+					<div className='flex flex-col gap-2'>
+						<Link to='/register'>
+							<Button
+								variant='ghost'
+								className='w-full border border-transparent hover:bg-foreground/5'
+							>
+								계정이 없으신가요? 회원가입하기
+							</Button>
+						</Link>
+					</div>
 				</CardContent>
 			</Card>
 		</main>

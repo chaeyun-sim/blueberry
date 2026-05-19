@@ -9,6 +9,15 @@ import { CommissionRegisterFormType } from '@/types/form';
 import { useAuth } from '@/hooks/use-auth';
 import AppHeader from '@/components/layout/AppHeader';
 
+function getDefaultDeadline() {
+  const d = new Date();
+  d.setDate(d.getDate() + 13);
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
 const CommissionRegister = () => {
   const { isGuest } = useAuth();
   const [searchParams] = useSearchParams();
@@ -19,7 +28,7 @@ const CommissionRegister = () => {
     songTitle: '',
     composer: '',
     version: null,
-    deadline: searchParams.get('deadline') ?? '',
+    deadline: searchParams.get('deadline') ?? getDefaultDeadline(),
     notes: '',
     imageFile: null,
   });
@@ -74,6 +83,7 @@ const CommissionRegister = () => {
             setForm(prev => ({
               ...prev,
               ...res,
+              deadline: res.deadline || prev.deadline,
               instruments: buildInstrumentList(res.instruments ?? []),
             }))
           }

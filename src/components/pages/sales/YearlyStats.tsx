@@ -58,6 +58,14 @@ function YearlyStats() {
     activeCategories.map(k => [k, categoryChartConfig[k]])
   );
 
+  const hasData = salesData.length > 0;
+
+  const emptyState = (
+    <p className='text-sm text-muted-foreground py-8 text-center'>
+      데이터가 없습니다. 매출 데이터를 업로드하면 확인할 수 있어요.
+    </p>
+  );
+
   return (
     <div className='space-y-6'>
       <Card className='border-border/50 overflow-hidden'>
@@ -90,33 +98,37 @@ function YearlyStats() {
           </div>
         </CardHeader>
         <CardContent className='space-y-6'>
-          <MonthlyGrowthRateChart
-            data={monthlySalesWithAvg}
-            avgCount={avgCount}
-          />
-          <div className='border-t border-border/40 pt-4'>
-            <div className='flex items-center justify-between mb-3'>
-              <p className='text-sm font-medium text-muted-foreground'>카테고리별 매출 비중</p>
-              <div className='hidden md:flex items-center gap-3'>
-                {Object.entries(activeCategoryConfig).map(([key, cfg]) => (
-                  <span
-                    key={key}
-                    className='flex items-center gap-1 text-xs text-muted-foreground'
-                  >
-                    <span
-                      className='w-2 h-2 rounded-sm inline-block'
-                      style={{ backgroundColor: cfg.color }}
-                    />
-                    {cfg.label}
-                  </span>
-                ))}
+          {!hasData ? emptyState : (
+            <>
+              <MonthlyGrowthRateChart
+                data={monthlySalesWithAvg}
+                avgCount={avgCount}
+              />
+              <div className='border-t border-border/40 pt-4'>
+                <div className='flex items-center justify-between mb-3'>
+                  <p className='text-sm font-medium text-muted-foreground'>카테고리별 매출 비중</p>
+                  <div className='hidden md:flex items-center gap-3'>
+                    {Object.entries(activeCategoryConfig).map(([key, cfg]) => (
+                      <span
+                        key={key}
+                        className='flex items-center gap-1 text-xs text-muted-foreground'
+                      >
+                        <span
+                          className='w-2 h-2 rounded-sm inline-block'
+                          style={{ backgroundColor: cfg.color }}
+                        />
+                        {cfg.label}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <CategoryGrowthRateChart
+                  data={categoryData}
+                  config={activeCategoryConfig}
+                />
               </div>
-            </div>
-            <CategoryGrowthRateChart
-              data={categoryData}
-              config={activeCategoryConfig}
-            />
-          </div>
+            </>
+          )}
         </CardContent>
       </Card>
 
@@ -125,10 +137,12 @@ function YearlyStats() {
           <CardTitle className='text-base font-display'>전년 대비 월별 성장률</CardTitle>
         </CardHeader>
         <CardContent>
-          <GrowthRateChart
-            data={growthData}
-            offset={zeroOffset}
-          />
+          {!hasData ? emptyState : (
+            <GrowthRateChart
+              data={growthData}
+              offset={zeroOffset}
+            />
+          )}
         </CardContent>
       </Card>
     </div>

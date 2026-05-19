@@ -23,9 +23,17 @@ Deno.serve(async (req) => {
   if (!CRON_SECRET || authHeader !== `Bearer ${CRON_SECRET}`) {
     return new Response("Unauthorized", { status: 401 })
   }
-  // 한국 시간(UTC+9) 기준 오늘/내일/모레 날짜 계산
+
+  // body에서 days 배열 받기 (없으면 기본값 [0, 1, 2])
+  let days: number[] = [0, 1, 2]
+  try {
+    const body = await req.json()
+    if (Array.isArray(body?.days)) days = body.days
+  } catch { /* body 없으면 기본값 사용 */ }
+
+  // 한국 시간(UTC+9) 기준 날짜 계산
   const now = new Date(Date.now() + 9 * 60 * 60 * 1000)
-  const targets = [0, 1, 2].map((d) => {
+  const targets = days.map((d) => {
     const date = new Date(now)
     date.setUTCDate(date.getUTCDate() + d)
     return date.toISOString().split('T')[0]

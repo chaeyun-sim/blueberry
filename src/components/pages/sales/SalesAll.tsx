@@ -41,7 +41,9 @@ const ROW_BASE =
 	'flex items-center border-b border-border/40 last:border-0 hover:bg-muted/30 transition-colors';
 
 function SalesAll() {
-	const { data: yearRange } = useQuery(statsQueries.getSalesYearRange());
+	const { data: yearRange, isFetched: yearRangeFetched } = useQuery(
+		statsQueries.getSalesYearRange(),
+	);
 	const [selectedYear, setSelectedYear] = useState<number | null>(null);
 	const year = selectedYear ?? yearRange?.max ?? undefined;
 	const yearOptions = yearRange
@@ -184,7 +186,7 @@ function SalesAll() {
 				</div>
 			</CardHeader>
 
-			<CardContent className='relative'>
+			<CardContent className='relative md:pb-0 pb-40'>
 				{/* 모바일 블러 오버레이 */}
 				<div className='md:hidden absolute inset-0 z-10 backdrop-blur-sm bg-background/80 rounded-b-xl flex flex-col items-center justify-center gap-3 pointer-events-none'>
 					<Monitor className='h-8 w-8 text-muted-foreground' />
@@ -193,164 +195,173 @@ function SalesAll() {
 						표 데이터는 넓은 화면에서 더 잘 보여요
 					</p>
 				</div>
-				<div className='rounded-md border border-border/50 overflow-auto'>
-					{/* ── Header ── */}
-					<div className='flex items-center bg-muted/30 border-b border-border/40'>
-						<div className={cn(COL.idx, HEAD_BASE)} />
-						{!groupByCategory && (
+				{yearRangeFetched && !yearRange && (
+					<p className='text-sm text-muted-foreground py-8 text-center'>
+						데이터가 없습니다. 매출 데이터를 업로드하면 확인할 수 있어요.
+					</p>
+				)}
+				{(!yearRangeFetched || !!yearRange) && (
+					<div className='rounded-md border border-border/50 overflow-auto'>
+						{/* ── Header ── */}
+						<div className='flex items-center bg-muted/30 border-b border-border/40'>
+							<div className={cn(COL.idx, HEAD_BASE)} />
+							{!groupByCategory && (
+								<button
+									type='button'
+									className={cn(
+										COL.cat,
+										HEAD_BASE,
+										'inline-flex items-center cursor-pointer hover:text-foreground transition-colors',
+									)}
+									onClick={() => toggleSort('category')}
+								>
+									대분류
+									<SortIcon col='category' sortKey={sortKey} sortDir={sortDir} />
+								</button>
+							)}
 							<button
 								type='button'
 								className={cn(
-									COL.cat,
+									COL.song,
 									HEAD_BASE,
 									'inline-flex items-center cursor-pointer hover:text-foreground transition-colors',
 								)}
-								onClick={() => toggleSort('category')}
+								onClick={() => toggleSort('product')}
 							>
-								대분류
-								<SortIcon col='category' sortKey={sortKey} sortDir={sortDir} />
+								곡명
+								<SortIcon col='product' sortKey={sortKey} sortDir={sortDir} />
 							</button>
-						)}
-						<button
-							type='button'
-							className={cn(
-								COL.song,
-								HEAD_BASE,
-								'inline-flex items-center cursor-pointer hover:text-foreground transition-colors',
-							)}
-							onClick={() => toggleSort('product')}
-						>
-							곡명
-							<SortIcon col='product' sortKey={sortKey} sortDir={sortDir} />
-						</button>
-						<div
-							className={cn(
-								COL.arrangement,
-								HEAD_BASE,
-								'text-xs uppercase text-muted-foreground',
-							)}
-						>
-							편성명
+							<div
+								className={cn(
+									COL.arrangement,
+									HEAD_BASE,
+									'text-xs uppercase text-muted-foreground',
+								)}
+							>
+								편성명
+							</div>
+							<button
+								type='button'
+								className={cn(
+									COL.amount,
+									HEAD_BASE,
+									'inline-flex items-center justify-end cursor-pointer hover:text-foreground transition-colors',
+								)}
+								onClick={() => toggleSort('amount')}
+							>
+								상품총액
+								<SortIcon col='amount' sortKey={sortKey} sortDir={sortDir} />
+							</button>
 						</div>
-						<button
-							type='button'
-							className={cn(
-								COL.amount,
-								HEAD_BASE,
-								'inline-flex items-center justify-end cursor-pointer hover:text-foreground transition-colors',
-							)}
-							onClick={() => toggleSort('amount')}
-						>
-							상품총액
-							<SortIcon col='amount' sortKey={sortKey} sortDir={sortDir} />
-						</button>
-					</div>
 
-					{/* ── Body ── */}
-					{groupByCategory && groupedData
-						? Object.entries(groupedData).map(([category, rows]) => (
-								<Fragment key={`group-${category}`}>
-									{/* Group header */}
-									<button
-										type='button'
-										className='w-full flex items-center justify-between px-4 py-2 bg-muted/40 hover:bg-muted/60 cursor-pointer select-none border-b border-border/40'
-										onClick={() => filterCategory === 'ALL' && toggleGroup(category)}
-									>
-										<div className='inline-flex items-center gap-2'>
-											{filterCategory === 'ALL' &&
-												(collapsedGroups.has(category) ? (
-													<ChevronRight className='h-4 w-4 text-muted-foreground' />
-												) : (
-													<ChevronDown className='h-4 w-4 text-muted-foreground' />
-												))}
-											<span className='px-2 py-0.5 rounded-full text-xs bg-foreground text-background font-bold font-display'>
-												{category}
+						{/* ── Body ── */}
+						{groupByCategory && groupedData
+							? Object.entries(groupedData).map(([category, rows]) => (
+									<Fragment key={`group-${category}`}>
+										{/* Group header */}
+										<button
+											type='button'
+											className='w-full flex items-center justify-between px-4 py-2 bg-muted/40 hover:bg-muted/60 cursor-pointer select-none border-b border-border/40'
+											onClick={() => filterCategory === 'ALL' && toggleGroup(category)}
+										>
+											<div className='inline-flex items-center gap-2'>
+												{filterCategory === 'ALL' &&
+													(collapsedGroups.has(category) ? (
+														<ChevronRight className='h-4 w-4 text-muted-foreground' />
+													) : (
+														<ChevronDown className='h-4 w-4 text-muted-foreground' />
+													))}
+												<span className='px-2 py-0.5 rounded-full text-xs bg-foreground text-background font-bold font-display'>
+													{category}
+												</span>
+											</div>
+											<span className='text-muted-foreground text-xs'>
+												{rows.length}건
 											</span>
-										</div>
-										<span className='text-muted-foreground text-xs'>{rows.length}건</span>
-									</button>
-									{/* Group rows */}
-									{!collapsedGroups.has(category) &&
-										rows.map((row, i) => {
-											const { song, arrangement } = splitProduct(row.product);
-											return (
-												<div key={row.id} className={ROW_BASE}>
-													<div
-														className={cn(
-															COL.idx,
-															'px-3 py-2.5 text-xs text-muted-foreground',
-														)}
-													>
-														{i + 1}
+										</button>
+										{/* Group rows */}
+										{!collapsedGroups.has(category) &&
+											rows.map((row, i) => {
+												const { song, arrangement } = splitProduct(row.product);
+												return (
+													<div key={row.id} className={ROW_BASE}>
+														<div
+															className={cn(
+																COL.idx,
+																'px-3 py-2.5 text-xs text-muted-foreground',
+															)}
+														>
+															{i + 1}
+														</div>
+														<div
+															className={cn(
+																COL.song,
+																'px-3 py-2.5 font-medium text-sm truncate',
+															)}
+														>
+															{song}
+														</div>
+														<div
+															className={cn(
+																COL.arrangement,
+																'px-3 py-2.5 text-sm text-muted-foreground truncate',
+															)}
+														>
+															{arrangement}
+														</div>
+														<div
+															className={cn(
+																COL.amount,
+																'px-3 py-2.5 text-right tabular-nums text-sm',
+															)}
+														>
+															{formatCurrency(row.amount)}
+														</div>
 													</div>
-													<div
-														className={cn(
-															COL.song,
-															'px-3 py-2.5 font-medium text-sm truncate',
-														)}
-													>
-														{song}
-													</div>
-													<div
-														className={cn(
-															COL.arrangement,
-															'px-3 py-2.5 text-sm text-muted-foreground truncate',
-														)}
-													>
-														{arrangement}
-													</div>
-													<div
-														className={cn(
-															COL.amount,
-															'px-3 py-2.5 text-right tabular-nums text-sm',
-														)}
-													>
-														{formatCurrency(row.amount)}
-													</div>
-												</div>
-											);
-										})}
-								</Fragment>
-							))
-						: displayData.map((row, i) => {
-								const { song, arrangement } = splitProduct(row.product);
-								return (
-									<div key={row.id} className={ROW_BASE}>
-										<div
-											className={cn(COL.idx, 'px-3 py-2.5 text-xs text-muted-foreground')}
-										>
-											{i + 1}
+												);
+											})}
+									</Fragment>
+								))
+							: displayData.map((row, i) => {
+									const { song, arrangement } = splitProduct(row.product);
+									return (
+										<div key={row.id} className={ROW_BASE}>
+											<div
+												className={cn(COL.idx, 'px-3 py-2.5 text-xs text-muted-foreground')}
+											>
+												{i + 1}
+											</div>
+											<div className={cn(COL.cat, 'px-3 py-2.5')}>
+												<span className='px-2 py-0.5 rounded-full text-xs bg-secondary text-secondary-foreground'>
+													{row.category}
+												</span>
+											</div>
+											<div
+												className={cn(COL.song, 'px-3 py-2.5 font-medium text-sm truncate')}
+											>
+												{song}
+											</div>
+											<div
+												className={cn(
+													COL.arrangement,
+													'px-3 py-2.5 text-sm text-muted-foreground truncate',
+												)}
+											>
+												{arrangement}
+											</div>
+											<div
+												className={cn(
+													COL.amount,
+													'px-3 py-2.5 text-right tabular-nums text-sm',
+												)}
+											>
+												{formatCurrency(row.amount)}
+											</div>
 										</div>
-										<div className={cn(COL.cat, 'px-3 py-2.5')}>
-											<span className='px-2 py-0.5 rounded-full text-xs bg-secondary text-secondary-foreground'>
-												{row.category}
-											</span>
-										</div>
-										<div
-											className={cn(COL.song, 'px-3 py-2.5 font-medium text-sm truncate')}
-										>
-											{song}
-										</div>
-										<div
-											className={cn(
-												COL.arrangement,
-												'px-3 py-2.5 text-sm text-muted-foreground truncate',
-											)}
-										>
-											{arrangement}
-										</div>
-										<div
-											className={cn(
-												COL.amount,
-												'px-3 py-2.5 text-right tabular-nums text-sm',
-											)}
-										>
-											{formatCurrency(row.amount)}
-										</div>
-									</div>
-								);
-							})}
-				</div>
+									);
+								})}
+					</div>
+				)}
 			</CardContent>
 		</Card>
 	);

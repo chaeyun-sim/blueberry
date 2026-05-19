@@ -69,6 +69,14 @@ function Stats() {
 	const salesStep = Math.ceil(maxSales / 5);
 	const salesTicks = Array.from({ length: 6 }, (_, i) => i * salesStep);
 
+	const hasData = (categoryDistribution?.length ?? 0) > 0;
+
+	const emptyState = (
+		<p className='text-sm text-muted-foreground py-8 text-center'>
+			데이터가 없습니다. 매출 데이터를 업로드하면 확인할 수 있어요.
+		</p>
+	);
+
 	return (
 		<div className='space-y-6'>
 			<div className='grid lg:grid-cols-3 gap-6 min-w-0'>
@@ -82,50 +90,54 @@ function Stats() {
 						<p className='text-xs text-muted-foreground'>전체 판매 건수 기준</p>
 					</CardHeader>
 					<CardContent className='flex flex-col flex-1 justify-between gap-4'>
-						<ChartContainer config={{}} className='mx-auto h-[180px]'>
-							<PieChart>
-								<Pie
-									data={categoryDistribution}
-									dataKey='countShare'
-									nameKey='name'
-									cx='50%'
-									cy='50%'
-									innerRadius={48}
-									outerRadius={78}
-									strokeWidth={2}
-									stroke='hsl(var(--background))'
-								>
-									{categoryDistribution?.map((entry, i) => (
-										<Cell
-											key={i}
-											fill={categoryColors[entry.name] ?? `hsl(${i * 55} 60% 55%)`}
-										/>
-									))}
-								</Pie>
-							</PieChart>
-						</ChartContainer>
+						{!hasData ? emptyState : (
+							<>
+								<ChartContainer config={{}} className='mx-auto h-[180px]'>
+									<PieChart>
+										<Pie
+											data={categoryDistribution}
+											dataKey='countShare'
+											nameKey='name'
+											cx='50%'
+											cy='50%'
+											innerRadius={48}
+											outerRadius={78}
+											strokeWidth={2}
+											stroke='hsl(var(--background))'
+										>
+											{categoryDistribution?.map((entry, i) => (
+												<Cell
+													key={i}
+													fill={categoryColors[entry.name] ?? `hsl(${i * 55} 60% 55%)`}
+												/>
+											))}
+										</Pie>
+									</PieChart>
+								</ChartContainer>
 
-						<div className='border-t border-border/40 pt-[24px] pb-[16px]'>
-							<div className='grid grid-cols-2 gap-2'>
-								{categoryDistribution?.map((c, i) => (
-									<div
-										key={c.name}
-										className='rounded-[14px] px-3 py-2 space-y-2 bg-muted/40'
-									>
-										<div className='flex items-center gap-1.5'>
-											<span
-												className='w-2 h-2 rounded-full shrink-0'
-												style={{ backgroundColor: categoryColors[c.name] }}
-											/>
-											<span className='text-xs font-semibold'>{c.name}</span>
-										</div>
-										<p className='text-xs text-muted-foreground tabular-nums'>
-											{c.countShare}% · {c.count.toLocaleString()}건
-										</p>
+								<div className='border-t border-border/40 pt-[24px] pb-[16px]'>
+									<div className='grid grid-cols-2 gap-2'>
+										{categoryDistribution?.map((c) => (
+											<div
+												key={c.name}
+												className='rounded-[14px] px-3 py-2 space-y-2 bg-muted/40'
+											>
+												<div className='flex items-center gap-1.5'>
+													<span
+														className='w-2 h-2 rounded-full shrink-0'
+														style={{ backgroundColor: categoryColors[c.name] }}
+													/>
+													<span className='text-xs font-semibold'>{c.name}</span>
+												</div>
+												<p className='text-xs text-muted-foreground tabular-nums'>
+													{c.countShare}% · {c.count.toLocaleString()}건
+												</p>
+											</div>
+										))}
 									</div>
-								))}
-							</div>
-						</div>
+								</div>
+							</>
+						)}
 					</CardContent>
 				</Card>
 
@@ -139,6 +151,7 @@ function Stats() {
 						<p className='text-xs text-muted-foreground'>전체 기간 누적 판매 기준</p>
 					</CardHeader>
 					<CardContent className='space-y-4'>
+						{!hasData ? emptyState : (<>
 						<ChartContainer
 							config={{ sales: { label: '판매수', color: 'hsl(var(--primary))' } }}
 							className='w-full h-[240px]'
@@ -202,6 +215,7 @@ function Stats() {
 								))}
 							</div>
 						</div>
+						</>)}
 					</CardContent>
 				</Card>
 			</div>
@@ -240,6 +254,7 @@ function Stats() {
 					</div>
 				</CardHeader>
 				<CardContent className='space-y-4'>
+					{!hasData ? emptyState : (<>
 					<ChartContainer config={topProductConfig} className='w-full h-[240px]'>
 						<LineChart
 							data={topSongMonthlySales?.data ?? []}
@@ -306,6 +321,7 @@ function Stats() {
 							))}
 						</div>
 					</div>
+					</>)}
 				</CardContent>
 			</Card>
 		</div>
