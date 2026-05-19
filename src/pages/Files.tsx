@@ -126,9 +126,10 @@ const FilesContent = () => {
 
 			{/* ── Mobile Speed Dial FAB ───────────────────── */}
 			<div
+				role='none'
 				className='md:hidden fixed right-6 z-50 flex flex-col items-end gap-3'
 				style={{ bottom: 'calc(4rem + env(safe-area-inset-bottom) + 1rem)' }}
-				onClickCapture={(e) => e.stopPropagation()}
+				onClick={(e) => e.stopPropagation()}
 			>
 				{/* Menu items */}
 				<div
