@@ -32,7 +32,6 @@ import { CompleteDialog } from '@/components/pages/commission/CompleteDialog';
 import SendEmailDialog from '@/components/pages/commission/SendEmailDialog';
 import CommissionImageDialog from '@/components/pages/commission/CommissionImageDialog';
 import { CommissionStatus } from '@/constants/status-config';
-import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { useAppQuery as useQuery } from '@/hooks/use-app-query';
@@ -49,7 +48,10 @@ import { toast } from 'sonner';
 import { useAuth } from '@/hooks/use-auth';
 import AppHeader from '@/components/layout/AppHeader';
 
-const statusProgress: Record<Exclude<CommissionStatus, 'cancelled'>, LucideIcon> = {
+const statusProgress: Record<
+	Exclude<CommissionStatus, 'cancelled'>,
+	LucideIcon
+> = {
 	received: Package2,
 	working: Music2,
 	complete: CheckCircle,
@@ -101,11 +103,6 @@ const CommissionDetailContent = () => {
 			},
 		);
 	};
-
-	const matchedArrangements =
-		song?.arrangements?.filter(
-			(a) => a.arrangement === commission?.arrangement,
-		) ?? [];
 
 	const rawTitle =
 		song?.english_title ?? commission?.songs?.title ?? commission?.title ?? '';
@@ -212,7 +209,6 @@ const CommissionDetailContent = () => {
 		);
 	};
 
-
 	if (!id) return <Navigate to='/commissions' replace />;
 
 	if (isLoading)
@@ -260,21 +256,26 @@ const CommissionDetailContent = () => {
 	return (
 		<AppLayout
 			bottomBar={
-				<div className='fixed bottom-0 left-0 right-0 border-t border-border bg-background/95 backdrop-blur-sm'>
-					<div className='px-6 flex items-center justify-end' style={{ paddingTop: '0.75rem', paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}>
-						{commission.status !== 'cancelled' && (
-							nextStatus ? (
-								<Button onClick={handleOpenDialog} className='gap-2 px-6 py-5'>
+				<div className='md:border-t md:border-border md:bg-background/95 md:backdrop-blur-sm'>
+					<div className='px-4 py-2 md:px-6 md:py-3 flex items-center justify-end'>
+						{commission.status !== 'cancelled' &&
+							(nextStatus ? (
+								<Button
+									onClick={handleOpenDialog}
+									className='gap-2 w-full md:w-auto rounded-2xl md:rounded-md py-6 md:py-5 shadow-lg md:shadow-none'
+								>
 									<ChevronRight className='h-4 w-4' />{' '}
 									{COMMISSION_STATUS_TRANSLATE[nextStatus]}
 									{nextStatus === 'working' ? '으로' : '로'} 변경
 								</Button>
 							) : !commission.is_delivered ? (
-								<Button className='gap-2' onClick={openEmailDialog}>
+								<Button
+									className='gap-2 w-full md:w-auto rounded-2xl md:rounded-md py-6 md:py-5 shadow-lg md:shadow-none'
+									onClick={openEmailDialog}
+								>
 									<Mail className='h-4 w-4' /> 이메일 보내기
 								</Button>
-							) : null
-						)}
+							) : null)}
 					</div>
 				</div>
 			}
@@ -284,7 +285,12 @@ const CommissionDetailContent = () => {
 				<AppHeader.Right>
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
-							<Button variant='ghost' size='icon' className='hover:bg-foreground/5' aria-label='더보기 메뉴'>
+							<Button
+								variant='ghost'
+								size='icon'
+								className='hover:bg-foreground/5'
+								aria-label='더보기 메뉴'
+							>
 								<MoreVertical className='h-4 w-4' />
 							</Button>
 						</DropdownMenuTrigger>
@@ -330,7 +336,8 @@ const CommissionDetailContent = () => {
 						<div className='flex items-center justify-between w-full'>
 							{Object.entries(COMMISSION_STATUS_TRANSLATE).map(
 								([status, label], i, originArray) => {
-									const Icon = statusProgress[status as Exclude<CommissionStatus, 'cancelled'>];
+									const Icon =
+										statusProgress[status as Exclude<CommissionStatus, 'cancelled'>];
 									return (
 										<div
 											key={status}
@@ -348,7 +355,9 @@ const CommissionDetailContent = () => {
 															: 'border-2 border-border text-muted-foreground/40',
 													)}
 												>
-													<Icon className={i <= currentStatusIndex ? 'h-5 w-5' : 'h-4 w-4'} />
+													<Icon
+														className={i <= currentStatusIndex ? 'h-5 w-5' : 'h-4 w-4'}
+													/>
 												</div>
 												<span
 													className={cn(
@@ -376,7 +385,7 @@ const CommissionDetailContent = () => {
 				</Card>
 			)}
 
-			<div className='mb-8'>
+			<div className='mb-6'>
 				{/* Commission Info */}
 				<Card className='border-border/50'>
 					<CardContent className='p-5'>
@@ -430,38 +439,15 @@ const CommissionDetailContent = () => {
 			{/* Linked Scores */}
 			<Card className='border-border/50'>
 				<CardContent className='p-5'>
-					<h2 className='font-display font-semibold mb-4'>연결된 악보</h2>
-					<div className='space-y-2'>
-						<a
-							href={imslpUrl}
-							target='_blank'
-							rel='noopener noreferrer'
-							className='flex items-center justify-between w-full p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors'
-						>
-							<p className='text-sm font-medium'>IMSLP에서 찾기</p>
-							<ExternalLink className='h-4 w-4 text-muted-foreground shrink-0' />
-						</a>
-						{matchedArrangements.length > 0 &&
-							matchedArrangements.map((arrangement) => (
-								<button
-									key={arrangement.id}
-									onClick={() =>
-										navigate(`/scores/${song?.id}/arrangements/${arrangement.id}`)
-									}
-									className='flex items-center justify-between w-full p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors text-left'
-								>
-									<div>
-										<p className='text-sm font-medium'>{arrangement.arrangement}</p>
-										{arrangement.version && (
-											<p className='text-xs text-muted-foreground'>
-												{arrangement.version} ver.
-											</p>
-										)}
-									</div>
-									<ChevronRight className='h-4 w-4 text-muted-foreground shrink-0' />
-								</button>
-							))}
-					</div>
+					<a
+						href={imslpUrl}
+						target='_blank'
+						rel='noopener noreferrer'
+						className='flex items-center justify-between w-full rounded-md hover:bg-muted/50 transition-colors'
+					>
+						<p className='text-sm font-medium'>IMSLP에서 찾기</p>
+						<ExternalLink className='h-4 w-4 text-muted-foreground shrink-0' />
+					</a>
 				</CardContent>
 			</Card>
 		</AppLayout>

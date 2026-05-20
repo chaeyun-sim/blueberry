@@ -31,7 +31,7 @@ export function AppLayout({ children, bottomBar, className }: AppLayoutProps) {
 								style={{
 									paddingTop: 'max(1.5rem, env(safe-area-inset-top))',
 									paddingBottom: bottomBar
-										? 'max(5rem, calc(env(safe-area-inset-bottom) + 5rem))'
+										? 'max(8rem, calc(env(safe-area-inset-bottom) + 8rem))'
 										: 'max(calc(4rem + env(safe-area-inset-bottom) + 0.5rem), 1.5rem)',
 								}}
 							>
@@ -39,7 +39,17 @@ export function AppLayout({ children, bottomBar, className }: AppLayoutProps) {
 							</motion.div>
 						</AnimatePresence>
 					</main>
-					{bottomBar}
+					{/* Desktop: sticky at bottom */}
+					<div className='hidden md:block sticky bottom-0'>{bottomBar}</div>
+					{/* Mobile: fixed above BottomNav */}
+					{bottomBar && (
+						<div
+							className='fixed left-0 right-0 z-[51] md:hidden'
+							style={{ bottom: 'calc(4rem + env(safe-area-inset-bottom) + 0.75rem)' }}
+						>
+							{bottomBar}
+						</div>
+					)}
 				</div>
 			</div>
 			<BottomNav />

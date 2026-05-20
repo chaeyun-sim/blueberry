@@ -1,3 +1,4 @@
+import { cn } from '@/lib/utils';
 import { formatCurrency } from '@/utils/format-currency';
 import { LucideProps, TrendingDown, TrendingUp } from 'lucide-react';
 import { ForwardRefExoticComponent, RefAttributes } from 'react';
@@ -9,11 +10,12 @@ interface SalesSummaryCardProps {
   percentage?: number;
   compareKey?: 'lastYear' | 'lastMonth';
   isMoney?: boolean;
+  className?: string;
 }
 
-function SalesSummaryCard({ icon: Icon, title, value, percentage, compareKey, isMoney = false }: SalesSummaryCardProps) {
+function SalesSummaryCard({ icon: Icon, title, value, percentage, compareKey, isMoney = false, className }: SalesSummaryCardProps) {
   return (
-    <div className='bg-card rounded-3xl border shadow-sm p-6 flex flex-col justify-between min-h-[120px]'>
+    <div className={cn('bg-card rounded-3xl border shadow-sm p-6 flex flex-col justify-between min-h-[120px]', className)}>
       <div>
         <p className='text-[11px] font-semibold text-muted-foreground uppercase tracking-widest'>{title}</p>
         <p className='text-2xl font-display font-bold mt-3 tabular-nums'>
