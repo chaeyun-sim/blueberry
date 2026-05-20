@@ -2,7 +2,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 import { statsQueries } from '@/api/stats/queries';
 import { TrendingUp, TrendingDown, Minus, CalendarClock } from 'lucide-react';
-import { MONEY_RATIO } from '@/constants/money-ratio';
+import { getNetAmount } from '@/utils/getNetAmount';
 import { cn } from '@/lib/utils';
 
 function SalesForecast() {
@@ -13,18 +13,25 @@ function SalesForecast() {
 	const totalDays = new Date(year, monthIndex + 1, 0).getDate();
 	const progress = dayOfMonth / totalDays;
 
-	const { data: monthlySales = [] } = useQuery(statsQueries.getMonthlySales(year));
+	const { data: monthlySales = [] } = useQuery(
+		statsQueries.getMonthlySales(year),
+	);
 
 	const current = monthlySales[monthIndex];
 	if (!current) return null;
 
-	const actualRevenue = current.revenue * MONEY_RATIO;
-	const lastYearRevenue = current.prevRevenue * MONEY_RATIO;
-	const projectedRevenue = progress > 0 ? Math.round(actualRevenue / progress) : 0;
+	const actualRevenue = getNetAmount(current.revenue);
+	const lastYearRevenue = getNetAmount(current.prevRevenue);
+	const projectedRevenue =
+		progress > 0 ? Math.round(actualRevenue / progress) : 0;
 
 	const vsLastYear =
 		lastYearRevenue > 0
-			? parseFloat((((projectedRevenue - lastYearRevenue) / lastYearRevenue) * 100).toFixed(1))
+			? parseFloat(
+					(((projectedRevenue - lastYearRevenue) / lastYearRevenue) * 100).toFixed(
+						1,
+					),
+				)
 			: null;
 
 	const isUp = vsLastYear !== null && vsLastYear > 0;
@@ -65,7 +72,8 @@ function SalesForecast() {
 									) : (
 										<Minus className='h-3.5 w-3.5' />
 									)}
-									{isUp ? '+' : ''}{vsLastYear}%
+									{isUp ? '+' : ''}
+									{vsLastYear}%
 								</div>
 							)}
 						</div>

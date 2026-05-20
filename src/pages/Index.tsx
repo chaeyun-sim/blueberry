@@ -5,8 +5,7 @@ import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 import { commissionQueries } from '@/api/commission/queries';
 import { scoreQueries } from '@/api/score/queries';
 import { statsQueries } from '@/api/stats/queries';
-import { MONEY_RATIO } from '@/constants/money-ratio';
-import { formatCurrency } from '@/utils/format-currency';
+import { getNetAmount } from '@/utils/getNetAmount';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import RollingNumber from '@/components/pages/dashboard/RollingNumber';
 import { ActiveCommissionsWidget } from '@/components/pages/dashboard/ActiveCommissionsWidget';
@@ -23,7 +22,6 @@ import {
 	CheckCircle2,
 	Sparkles,
 } from 'lucide-react';
-import dayjs from 'dayjs';
 
 function getGreeting(hour: number) {
 	if (hour < 6) return 'Good Night';
@@ -51,7 +49,7 @@ const DashboardContent = () => {
 		[commissions],
 	);
 
-	const thisMonthRevenue = (salesSummary?.lastMonthRevenue ?? 0) * MONEY_RATIO;
+	const thisMonthRevenue = getNetAmount(salesSummary?.lastMonthRevenue ?? 0);
 	const vsLastMonth = salesSummary?.revenueVsLastMonth ?? null;
 
 	const greeting = getGreeting(clock.hour());
@@ -77,7 +75,7 @@ const DashboardContent = () => {
 				onClick={() => navigate('/new')}
 				style={{ bottom: 'calc(4rem + env(safe-area-inset-bottom) + 1rem)' }}
 				className='md:hidden fixed right-6 z-50 w-14 h-14 rounded-full bg-foreground text-background shadow-xl flex items-center justify-center hover:opacity-80 active:scale-95 transition-all'
-			aria-label='새 의뢰 등록'
+				aria-label='새 의뢰 등록'
 			>
 				<Plus className='h-6 w-6' />
 			</button>

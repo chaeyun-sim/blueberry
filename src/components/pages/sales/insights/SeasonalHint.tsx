@@ -4,7 +4,7 @@ import { ChartContainer } from '@/components/ui/chart';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Cell } from 'recharts';
 import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 import { statsQueries } from '@/api/stats/queries';
-import { MONEY_RATIO } from '@/constants/money-ratio';
+import { getNetAmount } from '@/utils/getNetAmount';
 import { CalendarDays } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -58,7 +58,7 @@ function SeasonalHint() {
 							<BarChart
 								data={months.map((m) => ({
 									...m,
-									avgRevenue: m.avgRevenue * MONEY_RATIO,
+									avgRevenue: getNetAmount(m.avgRevenue),
 								}))}
 								margin={{ left: -8, right: 8, top: 4, bottom: 4 }}
 								barSize={22}
