@@ -129,7 +129,7 @@ const CommissionDetailContent = () => {
 	const handleTransitionConfirm = () => {
 		if (!nextStatus) return;
 		updateStatus(
-			{ commissionId: id, status: nextStatus as CommissionStatus },
+			{ commissionId: id, status: nextStatus as CommissionStatus, prevStatus: commission.status },
 			{
 				onSuccess: () => {
 					queryClient.invalidateQueries({ queryKey: commissionKeys.detail(id) });

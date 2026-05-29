@@ -123,14 +123,24 @@ export async function uploadCommissionImage(commissionId: string, file: File): P
 }
 
 // 의뢰 상태 변경
-export async function updateCommissionStatus(id: string, status: CommissionStatus) {
+export async function updateCommissionStatus(
+  id: string,
+  status: CommissionStatus,
+  prevStatus: CommissionStatus,
+) {
   const { data, error } = await supabase
     .from(COMMISSIONS)
     .update({ status })
     .eq('id', id)
+    .eq('status', prevStatus)
     .select()
     .single()
 
-  if (error) throw error
+  if (error) {
+    if (error.code === 'PGRST116') {
+      throw new Error('다른 기기에서 이미 상태가 변경되었습니다. 페이지를 새로고침해주세요.')
+    }
+    throw error
+  }
   return data as Commission
 }

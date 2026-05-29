@@ -144,7 +144,7 @@ const CommissionEdit = () => {
 								onClick={() => {
 									if (!id) return;
 									updateStatus(
-										{ commissionId: id, status: 'cancelled' },
+										{ commissionId: id, status: 'cancelled', prevStatus: commission.status },
 										{
 											onSuccess: () => {
 												queryClient.invalidateQueries({

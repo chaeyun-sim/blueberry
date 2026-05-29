@@ -32,8 +32,15 @@ export const commissionMutations = {
     }),
   updateCommissionStatus: () =>
     mutationOptions({
-      mutationFn: ({ commissionId, status }: { commissionId: string; status: CommissionStatus }) =>
-        updateCommissionStatus(commissionId, status),
-      retry: 1,
+      mutationFn: ({
+        commissionId,
+        status,
+        prevStatus,
+      }: {
+        commissionId: string;
+        status: CommissionStatus;
+        prevStatus: CommissionStatus;
+      }) => updateCommissionStatus(commissionId, status, prevStatus),
+      retry: 0,
     }),
 };
