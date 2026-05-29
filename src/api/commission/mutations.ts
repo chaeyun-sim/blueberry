@@ -1,5 +1,5 @@
 import { mutationOptions } from '@tanstack/react-query';
-import { createCommission, deleteCommission, updateCommission, updateCommissionStatus, uploadCommissionImage } from '.';
+import { createCommission, ConcurrencyConflictError, deleteCommission, updateCommission, updateCommissionStatus, uploadCommissionImage } from '.';
 import { Commission, CreateCommissionInput, UpdateCommissionInput } from '@/types/commission';
 import { CommissionStatus } from '@/constants/status-config';
 
@@ -41,6 +41,9 @@ export const commissionMutations = {
         status: CommissionStatus;
         prevStatus: CommissionStatus;
       }) => updateCommissionStatus(commissionId, status, prevStatus),
-      retry: 0,
+      // Never retry concurrency conflicts — the stale status must be refreshed by the user.
+      // Retry once for transient network errors.
+      retry: (failureCount, error) =>
+        !(error instanceof ConcurrencyConflictError) && failureCount < 1,
     }),
 };

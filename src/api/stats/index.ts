@@ -7,6 +7,16 @@ import {
 	MonthlyCategoryData,
 	MonthlySale,
 	RevenueConcentrationItem,
+	RpcCategoryDistributionRow,
+	RpcMonthlyCategoryRow,
+	RpcMonthlySaleRow,
+	RpcRevenueConcentrationRow,
+	RpcSalesSummaryRow,
+	RpcSeasonalPatternRow,
+	RpcTopArrangementRow,
+	RpcTopSongMonthlySaleRow,
+	RpcTopSongRow,
+	RpcTrendingSongRow,
 	SalesSummary,
 	SeasonalPatternItem,
 	TopArrangement,
@@ -63,19 +73,7 @@ export async function getSalesSummary(): Promise<SalesSummary> {
 	const { data, error } = await supabase.rpc('get_sales_summary');
 	if (error) throw error;
 
-	const d = data as {
-		totalRevenue: number;
-		totalCount: number;
-		thisYearRevenue: number;
-		thisYearCount: number;
-		lastYearRevenue: number;
-		lastYearCount: number;
-		thisMonthCount: number;
-		lastMonthRevenue: number;
-		lastMonthCount: number;
-		prevPrevRevenue: number;
-		prevPrevCount: number;
-	};
+	const d = data as RpcSalesSummaryRow;
 
 	return {
 		totalRevenue: d.totalRevenue,
@@ -98,7 +96,7 @@ export async function getMonthlySales(year: number): Promise<MonthlySale[]> {
 	const { data, error } = await supabase.rpc('get_monthly_sales', { p_year: year });
 	if (error) throw error;
 
-	return (data ?? []).map((row: { month_num: number; revenue: number; count: number; prev_revenue: number; prev_count: number }) => ({
+	return (data ?? []).map((row: RpcMonthlySaleRow) => ({
 		month: MONTH[row.month_num as keyof typeof MONTH],
 		revenue: row.revenue,
 		count: row.count,
@@ -116,15 +114,7 @@ export async function getMonthlyCategoryBreakdown(
 	const { data, error } = await supabase.rpc('get_monthly_category_breakdown', { p_year: year });
 	if (error) throw error;
 
-	return (data ?? []).map((row: {
-		month_num: number;
-		CLASSIC: number;
-		POP: number;
-		'K-POP': number;
-		OST: number;
-		ANI: number;
-		ETC: number;
-	}) => ({
+	return (data ?? []).map((row: RpcMonthlyCategoryRow) => ({
 		month: MONTH[row.month_num as keyof typeof MONTH],
 		CLASSIC: row.CLASSIC,
 		POP: row.POP,
@@ -146,7 +136,7 @@ export async function getCategoryDistribution(
 	});
 	if (error) throw error;
 
-	const rows = (data ?? []) as { name: string; revenue: number; count: number }[];
+	const rows = (data ?? []) as RpcCategoryDistributionRow[];
 	const grandRevenue = rows.reduce((s, r) => s + r.revenue, 0);
 	const grandCount = rows.reduce((s, r) => s + r.count, 0);
 
@@ -170,7 +160,7 @@ export async function getTopSongs(topN = 5): Promise<TopSong[]> {
 	const { data, error } = await supabase.rpc('get_top_songs', { p_top_n: topN });
 	if (error) throw error;
 
-	return (data ?? []).map((row: { song_title: string; category: string; sales: number; revenue: number }, i: number) => ({
+	return (data ?? []).map((row: RpcTopSongRow, i: number) => ({
 		rank: i + 1,
 		title: row.song_title,
 		category: row.category,
@@ -186,7 +176,7 @@ export async function getTopArrangements(topN = 5): Promise<TopArrangement[]> {
 	const { data, error } = await supabase.rpc('get_top_arrangements', { p_top_n: topN });
 	if (error) throw error;
 
-	return (data ?? []).map((row: { arrangement: string; sales: number; revenue: number }, i: number) => ({
+	return (data ?? []).map((row: RpcTopArrangementRow, i: number) => ({
 		rank: i + 1,
 		arrangement: row.arrangement,
 		sales: row.sales,
@@ -207,12 +197,7 @@ export async function getTopSongMonthlySales(
 	});
 	if (error) throw error;
 
-	const rows = (data ?? []) as {
-		month_num: number;
-		song_title: string;
-		count: number;
-		song_rank: number;
-	}[];
+	const rows = (data ?? []) as RpcTopSongMonthlySaleRow[];
 
 	const config: Record<string, string> = {};
 	const keyMap = new Map<string, string>();
@@ -284,13 +269,7 @@ export async function getSeasonalPattern(): Promise<SeasonalPatternItem[]> {
 	const { data, error } = await supabase.rpc('get_seasonal_pattern');
 	if (error) throw error;
 
-	return (data ?? []).map((row: {
-		month_num: number;
-		avg_revenue: number;
-		avg_count: number;
-		years: number;
-		top_songs: { title: string; avgCount: number }[];
-	}) => ({
+	return (data ?? []).map((row: RpcSeasonalPatternRow) => ({
 		monthNum: row.month_num,
 		month: MONTH[row.month_num as keyof typeof MONTH],
 		avgRevenue: row.avg_revenue,
@@ -307,12 +286,7 @@ export async function getTrendingSongs(): Promise<TrendingSong[]> {
 	const { data, error } = await supabase.rpc('get_trending_songs');
 	if (error) throw error;
 
-	return (data ?? []).map((row: {
-		title: string;
-		recent_sales: number;
-		prev_sales: number;
-		growth: number;
-	}) => ({
+	return (data ?? []).map((row: RpcTrendingSongRow) => ({
 		title: row.title,
 		recentSales: row.recent_sales,
 		prevSales: row.prev_sales,
@@ -329,14 +303,7 @@ export async function getRevenueConcentration(): Promise<
 	const { data, error } = await supabase.rpc('get_revenue_concentration');
 	if (error) throw error;
 
-	return (data ?? []).map((row: {
-		rank: number;
-		title: string;
-		revenue: number;
-		revenue_share: number;
-		cumulative_share: number;
-		song_share: number;
-	}) => ({
+	return (data ?? []).map((row: RpcRevenueConcentrationRow) => ({
 		rank: row.rank,
 		title: row.title,
 		revenue: row.revenue,

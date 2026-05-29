@@ -6,7 +6,7 @@ import { buildInstrumentList } from '@/utils/build-instrument-list';
 import { parseInstrumentsFromZipName } from '@/utils/parse-instruments-from-zipName';
 import { MAX_ZIP_SIZE } from '@/constants/file-size';
 import { FileEntry } from '@/types/form';
-import { WorkerFile } from '@/workers/zip-worker';
+import { extractZipInWorker } from '@/utils/extract-zip-in-worker';
 import DropZone from '../commission/Dropzone';
 import FileEntryList from './FileEntryList';
 import ZipFileHeader from '../commission/ZipFileHeader';
@@ -74,41 +74,6 @@ export function ZipUploadCard({
       if (zipInputRef.current) zipInputRef.current.value = '';
     }
   };
-
-  function extractZipInWorker(buffer: ArrayBuffer): Promise<FileEntry[]> {
-    return new Promise((resolve, reject) => {
-      const worker = new Worker(
-        new URL('@/workers/zip-worker.ts', import.meta.url),
-        { type: 'module' },
-      );
-
-      worker.onmessage = (e: MessageEvent<
-        | { ok: true;  files: WorkerFile[] }
-        | { ok: false; message: string; isZipError: boolean }
-      >) => {
-        worker.terminate();
-        const data = e.data;
-        if (!data.ok) {
-          reject(new Error(data.message));
-          return;
-        }
-        const entries: FileEntry[] = data.files.map(f => ({
-          file:     new File([f.buffer], f.name),
-          label:    f.label,
-          fileType: f.fileType,
-        }));
-        resolve(entries);
-      };
-
-      worker.onerror = () => {
-        worker.terminate();
-        reject(new Error('ZIP 파일을 읽을 수 없습니다.'));
-      };
-
-      // Transfer the buffer (zero-copy) to the worker
-      worker.postMessage({ buffer }, { transfer: [buffer] });
-    });
-  }
 
   const handleDrop = (e: DragEvent) => {
     e.preventDefault();
