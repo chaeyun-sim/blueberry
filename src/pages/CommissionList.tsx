@@ -29,6 +29,8 @@ import { commissionQueries } from '@/api/commission/queries';
 import { abbreviateInstrument } from '@/utils/instrument';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { CommissionStatus } from '@/constants/status-config';
+import { CommissionListSkeleton } from '@/components/pages/commission/CommissionListSkeleton';
+import { DateRange, getDateRangeBounds, getPaginationPages } from '@/utils/commission-utils';
 
 const tabs: { label: string; value: CommissionStatus }[] = [
 	{ label: '대기', value: 'received' },
@@ -38,7 +40,6 @@ const tabs: { label: string; value: CommissionStatus }[] = [
 ];
 
 type SortDir = 'asc' | 'desc';
-type DateRange = 'all' | 'week' | 'month';
 
 const PAGE_SIZE = 15;
 
@@ -47,29 +48,6 @@ const dateRangeOptions: { label: string; value: DateRange }[] = [
 	{ label: '이번 주', value: 'week' },
 	{ label: '이번 달', value: 'month' },
 ];
-
-function getPaginationPages(current: number, total: number): (number | '...')[] {
-	if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
-	if (current <= 4) return [1, 2, 3, 4, 5, '...', total];
-	if (current >= total - 3) return [1, '...', total - 4, total - 3, total - 2, total - 1, total];
-	return [1, '...', current - 1, current, current + 1, '...', total];
-}
-
-function getDateRangeBounds(range: DateRange): { from: string; to: string } | null {
-	if (range === 'all') return null;
-	const today = new Date();
-	today.setHours(0, 0, 0, 0);
-	if (range === 'week') {
-		const mon = new Date(today);
-		mon.setDate(today.getDate() - ((today.getDay() + 6) % 7));
-		const sun = new Date(mon);
-		sun.setDate(mon.getDate() + 6);
-		return { from: mon.toISOString().slice(0, 10), to: sun.toISOString().slice(0, 10) };
-	}
-	const from = new Date(today.getFullYear(), today.getMonth(), 1);
-	const to = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-	return { from: from.toISOString().slice(0, 10), to: to.toISOString().slice(0, 10) };
-}
 
 const CommissionListContent = () => {
 	const navigate = useNavigate();
@@ -90,30 +68,7 @@ const CommissionListContent = () => {
 
 	const currentTabLabel = tabs.find((t) => t.value === filter)?.label ?? '의뢰';
 
-	// 로딩
-	if (isLoading && !commissions.length) {
-		return (
-			<AppLayout>
-				<div className='flex items-center justify-between mb-6'>
-					<div>
-						<p className='text-[11px] font-semibold text-muted-foreground uppercase tracking-widest'>의뢰 목록</p>
-						<h1 className='text-3xl font-display font-bold tracking-tight mt-0.5'>불러오는 중...</h1>
-					</div>
-				</div>
-				<div className='bg-card rounded-3xl border shadow-sm overflow-hidden'>
-					<div className='divide-y divide-border/40'>
-						{[0, 1, 2, 3, 4].map((i) => (
-							<div key={i} className='flex gap-6 px-6 py-4'>
-								{[10, 24, 18, 16, 8].map((w, j) => (
-									<div key={j} className='h-4 rounded-lg bg-muted animate-pulse' style={{ width: `${w}%` }} />
-								))}
-							</div>
-						))}
-					</div>
-				</div>
-			</AppLayout>
-		);
-	}
+	if (isLoading && !commissions.length) return <CommissionListSkeleton />;
 
 	// 에러
 	if (isError) {
