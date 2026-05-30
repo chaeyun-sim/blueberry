@@ -2,6 +2,14 @@ import { supabase } from '@/lib/supabase';
 import { MONTH } from '@/constants/month';
 import { ExcelRow } from '@/types/excel';
 import {
+	getUtcYear,
+	pctChange,
+	yearRange,
+	norm,
+	parseNumeric,
+	normalizeCategory,
+} from '@/utils/stats-helpers';
+import {
 	CategoryDistributionItem,
 	ExcelUpload,
 	MonthlyCategoryData,
@@ -33,33 +41,6 @@ const SALES_ROW_SELECT = 'id, sold_at, amount, category, product';
 const EXCEL_UPLOADS_SELECT = 'id, name, row_count, uploaded_at';
 const SONGS = 'songs';
 const ARRANGEMENTS = 'arrangements';
-
-const CATEGORIES = new Set(['CLASSIC', 'POP', 'K-POP', 'OST', 'ANI', 'ETC']);
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-const getUtcYear = (iso: string) => new Date(iso).getUTCFullYear();
-
-function pctChange(current: number, prev: number): number {
-	if (prev === 0) return 0;
-	return parseFloat((((current - prev) / prev) * 100).toFixed(1));
-}
-
-const yearRange = (year: number) =>
-	({ gte: `${year}-01-01`, lt: `${year + 1}-01-01` });
-
-const norm = (s: string) =>
-	s
-		.toLowerCase()
-		.replace(/\s*([(),])\s*/g, '$1')
-		.trim();
-
-// PostgREST returns NUMERIC columns as strings; coerce to JS number.
-const parseNumeric = (v: unknown) => parseFloat(String(v));
-
-// Coerce unrecognised or null categories to the catch-all bucket.
-const normalizeCategory = (cat: string | null | undefined) =>
-	cat && CATEGORIES.has(cat) ? cat : 'ETC';
 
 // ─── API Functions ────────────────────────────────────────────────────────────
 
