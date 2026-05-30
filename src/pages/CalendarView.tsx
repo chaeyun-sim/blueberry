@@ -14,40 +14,41 @@ import { useMutation } from '@tanstack/react-query';
 import { queryClient } from '@/utils/query-client';
 import { toast } from 'sonner';
 import { StatusBadge } from '@/components/pages/commission/StatusBadge';
+import {
+	getChipStyle,
+	getCommissionsForDate,
+	buildCalendarDateStr,
+	isCalendarToday,
+} from '@/utils/calendar';
 
 const CALENDAR_HEIGHT = 576;
-
-const getChipStyle = (deadline: string, status: string) => {
-	const today = dayjs().startOf('day');
-	const d = dayjs(deadline);
-	if (status === 'complete') return 'bg-muted/60 text-muted-foreground';
-	if (status === 'cancelled') return 'bg-muted/40 text-muted-foreground/50 line-through';
-	if (d.isBefore(today)) return 'bg-[hsl(var(--destructive)/0.15)] text-destructive font-semibold';
-	if (d.diff(today, 'day') <= 3) return 'bg-[hsl(var(--destructive)/0.15)] text-destructive font-semibold animate-pulse';
-	return 'bg-primary/10 text-primary font-semibold';
-};
 
 type Cell = { day: number; currentMonth: boolean };
 
 export default function CalendarView() {
 	const navigate = useNavigate();
-	const today = dayjs();
-
 	const [currentDate, setCurrentDate] = useState(dayjs().startOf('month'));
 	const [selectedDate, setSelectedDate] = useState<string | null>(null);
 	const [hideCompleted, setHideCompleted] = useState(false);
 	const [draggingId, setDraggingId] = useState<string | null>(null);
 	const [dragOverDate, setDragOverDate] = useState<string | null>(null);
 
-	const { data: commissions = [] } = useQuery(commissionQueries.getCommissions());
-	const { mutate: updateDeadline } = useMutation(commissionMutations.updateCommission());
+	const { data: commissions = [] } = useQuery(
+		commissionQueries.getCommissions(),
+	);
+	const { mutate: updateDeadline } = useMutation(
+		commissionMutations.updateCommission(),
+	);
 
 	const year = currentDate.year();
 	const month = currentDate.month();
 
 	const firstDay = dayjs().year(year).month(month).date(1).day();
 	const daysInMonth = dayjs().year(year).month(month).daysInMonth();
-	const prevMonthDays = dayjs().year(year).month(month - 1).daysInMonth();
+	const prevMonthDays = dayjs()
+		.year(year)
+		.month(month - 1)
+		.daysInMonth();
 
 	const goTo = (offset: number) => {
 		setCurrentDate(currentDate.add(offset, 'month').startOf('month'));
@@ -55,29 +56,10 @@ export default function CalendarView() {
 	};
 
 	const visibleCommissions = hideCompleted
-		? commissions.filter((c) => c.status !== 'complete' && c.status !== 'cancelled')
+		? commissions.filter(
+				(c) => c.status !== 'complete' && c.status !== 'cancelled',
+			)
 		: commissions;
-
-	const STATUS_PRIORITY: Record<string, number> = { received: 0, working: 1, complete: 2, delivered: 3, cancelled: 4 };
-
-	const getCommissionsForDate = (dateStr: string) =>
-		visibleCommissions
-			.filter((c) => dayjs(c.deadline).format('YYYY-MM-DD') === dateStr)
-			.sort((a, b) => (STATUS_PRIORITY[a.status] ?? 99) - (STATUS_PRIORITY[b.status] ?? 99));
-
-	const getAllCommissionsForDate = (dateStr: string) =>
-		commissions
-			.filter((c) => dayjs(c.deadline).format('YYYY-MM-DD') === dateStr)
-			.sort((a, b) => (STATUS_PRIORITY[a.status] ?? 99) - (STATUS_PRIORITY[b.status] ?? 99));
-
-	const formatDate = (d: number) => {
-		const m = String(month + 1).padStart(2, '0');
-		const dd = String(d).padStart(2, '0');
-		return `${year}-${m}-${dd}`;
-	};
-
-	const isToday = (d: number) =>
-		year === today.year() && month === today.month() && d === today.date();
 
 	const handleDragStart = (e: DragEvent<HTMLButtonElement>, id: string) => {
 		e.dataTransfer.effectAllowed = 'move';
@@ -95,7 +77,10 @@ export default function CalendarView() {
 		e.preventDefault();
 		if (!draggingId) return;
 		const commission = commissions.find((c) => c.id === draggingId);
-		if (commission && dayjs(commission.deadline).format('YYYY-MM-DD') !== dateStr) {
+		if (
+			commission &&
+			dayjs(commission.deadline).format('YYYY-MM-DD') !== dateStr
+		) {
 			updateDeadline(
 				{ commissionId: draggingId, input: { deadline: dateStr } },
 				{
@@ -121,21 +106,22 @@ export default function CalendarView() {
 	};
 
 	const cells: Cell[] = [];
-	for (let i = firstDay - 1; i >= 0; i--) cells.push({ day: prevMonthDays - i, currentMonth: false });
-	for (let d = 1; d <= daysInMonth; d++) cells.push({ day: d, currentMonth: true });
+	for (let i = firstDay - 1; i >= 0; i--)
+		cells.push({ day: prevMonthDays - i, currentMonth: false });
+	for (let d = 1; d <= daysInMonth; d++)
+		cells.push({ day: d, currentMonth: true });
 	const remaining = 7 - (cells.length % 7);
-	if (remaining < 7) for (let i = 1; i <= remaining; i++) cells.push({ day: i, currentMonth: false });
+	if (remaining < 7)
+		for (let i = 1; i <= remaining; i++)
+			cells.push({ day: i, currentMonth: false });
 
 	const weeks: Cell[][] = [];
 	for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7));
 	const rowHeight = Math.round(CALENDAR_HEIGHT / weeks.length);
 
-	const monthCommissions = commissions.filter((c) => {
-		const d = dayjs(c.deadline);
-		return d.year() === year && d.month() === month;
-	});
-
-	const selectedDateCommissions = selectedDate ? getAllCommissionsForDate(selectedDate) : [];
+	const selectedDateCommissions = selectedDate
+		? getCommissionsForDate(commissions, selectedDate)
+		: [];
 
 	return (
 		<AppLayout>
@@ -153,7 +139,9 @@ export default function CalendarView() {
 				<div className='flex items-center gap-3'>
 					{/* 완료 숨기기 */}
 					<div className='flex items-center gap-2'>
-						<span className='hidden md:block text-xs text-muted-foreground'>완료 숨기기</span>
+						<span className='hidden md:block text-xs text-muted-foreground'>
+							완료 숨기기
+						</span>
 						<button
 							type='button'
 							role='switch'
@@ -196,8 +184,7 @@ export default function CalendarView() {
 							<ChevronRight className='h-4 w-4' />
 						</button>
 					</div>
-
-					</div>
+				</div>
 			</div>
 
 			{/* ── Calendar ───────────────────────────────── */}
@@ -209,7 +196,11 @@ export default function CalendarView() {
 							key={w}
 							className={cn(
 								'py-3 text-center text-[11px] font-semibold tracking-widest uppercase',
-								i === 0 ? 'text-destructive/70' : i === 6 ? 'text-[hsl(var(--warning))]' : 'text-muted-foreground',
+								i === 0
+									? 'text-destructive/70'
+									: i === 6
+										? 'text-[hsl(var(--warning))]'
+										: 'text-muted-foreground',
 							)}
 						>
 							{w}
@@ -229,8 +220,12 @@ export default function CalendarView() {
 								style={{ height: rowHeight }}
 							>
 								{week.map((cell, dayIdx) => {
-									const dateStr = cell.currentMonth ? formatDate(cell.day) : '';
-									const dayCommissions = cell.currentMonth ? getCommissionsForDate(dateStr) : [];
+									const dateStr = cell.currentMonth
+										? buildCalendarDateStr(year, month, cell.day)
+										: '';
+									const dayCommissions = cell.currentMonth
+										? getCommissionsForDate(visibleCommissions, dateStr)
+										: [];
 									const isSun = dayIdx === 0;
 									const isSat = dayIdx === 6;
 									const isSelected = cell.currentMonth && selectedDate === dateStr;
@@ -244,7 +239,8 @@ export default function CalendarView() {
 											onKeyDown={(e) => {
 												if (e.key === 'Enter' || e.key === ' ') {
 													e.preventDefault();
-													if (cell.currentMonth) setSelectedDate((p) => (p === dateStr ? null : dateStr));
+													if (cell.currentMonth)
+														setSelectedDate((p) => (p === dateStr ? null : dateStr));
 												}
 											}}
 											className={cn(
@@ -258,9 +254,13 @@ export default function CalendarView() {
 												if (!cell.currentMonth) return;
 												setSelectedDate((p) => (p === dateStr ? null : dateStr));
 											}}
-											onDragOver={cell.currentMonth ? (e) => handleDragOver(e, dateStr) : undefined}
+											onDragOver={
+												cell.currentMonth ? (e) => handleDragOver(e, dateStr) : undefined
+											}
 											onDragLeave={handleDragLeave}
-											onDrop={cell.currentMonth ? (e) => handleDrop(e, dateStr) : undefined}
+											onDrop={
+												cell.currentMonth ? (e) => handleDrop(e, dateStr) : undefined
+											}
 										>
 											{/* 날짜 + + 버튼 */}
 											<div className='flex items-center justify-between mb-1 shrink-0'>
@@ -271,7 +271,8 @@ export default function CalendarView() {
 														cell.currentMonth && isSun && 'text-destructive',
 														cell.currentMonth && isSat && 'text-[hsl(var(--warning))]',
 														cell.currentMonth && !isSun && !isSat && 'text-foreground',
-														isToday(cell.day) && cell.currentMonth &&
+														isCalendarToday(year, month, cell.day) &&
+															cell.currentMonth &&
 															'bg-foreground text-background font-bold ring-2 ring-foreground/20 ring-offset-1 ring-offset-background',
 													)}
 												>
@@ -285,7 +286,7 @@ export default function CalendarView() {
 															navigate(`/new?deadline=${dateStr}`);
 														}}
 														className='opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity flex items-center justify-center w-6 h-6 rounded-full hover:bg-primary/10 text-muted-foreground hover:text-primary focus-visible:ring-2 focus-visible:ring-primary/40'
-														aria-label="의뢰 추가"
+														aria-label='의뢰 추가'
 													>
 														<Plus className='h-3 w-3' />
 													</button>
@@ -300,7 +301,10 @@ export default function CalendarView() {
 														key={c.id}
 														draggable
 														onDragStart={(e) =>
-															handleDragStart(e as unknown as DragEvent<HTMLButtonElement>, c.id)
+															handleDragStart(
+																e as unknown as DragEvent<HTMLButtonElement>,
+																c.id,
+															)
 														}
 														onDragEnd={handleDragEnd}
 														className={cn(
@@ -351,14 +355,15 @@ export default function CalendarView() {
 									<h3 className='text-xl font-display font-bold mt-0.5'>
 										{dayjs(selectedDate).format('M월 D일')}
 										<span className='text-base text-muted-foreground font-normal ml-2'>
-											({WEEK_KOR[dayjs(selectedDate).day()]}) · {selectedDateCommissions.length}건
+											({WEEK_KOR[dayjs(selectedDate).day()]}) ·{' '}
+											{selectedDateCommissions.length}건
 										</span>
 									</h3>
 								</div>
 								<button
 									onClick={() => setSelectedDate(null)}
 									className='w-8 h-8 flex items-center justify-center rounded-full hover:bg-muted/50 transition-colors text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring'
-								aria-label="날짜 선택 닫기"
+									aria-label='날짜 선택 닫기'
 								>
 									<X className='h-4 w-4' />
 								</button>
@@ -382,7 +387,9 @@ export default function CalendarView() {
 													{c.songs?.title ?? c.title}
 												</p>
 												<p className='text-[11px] text-muted-foreground mt-0.5 truncate'>
-													{[c.songs?.composer ?? c.composer, c.arrangement].filter(Boolean).join(' · ')}
+													{[c.songs?.composer ?? c.composer, c.arrangement]
+														.filter(Boolean)
+														.join(' · ')}
 												</p>
 											</div>
 											<StatusBadge status={c.status} className='shrink-0' />
