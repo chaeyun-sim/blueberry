@@ -4,17 +4,12 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import Button from '@/components/ui/button';
 import {
-	CheckCircle,
 	ChevronRight,
 	ExternalLink,
-	LucideIcon,
 	Mail,
 	MoreVertical,
-	Music2,
-	Package2,
 	Pencil,
 	Trash2,
-	XCircle,
 } from 'lucide-react';
 import {
 	DropdownMenu,
@@ -24,8 +19,6 @@ import {
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
-import { cn } from '@/lib/utils';
-import { COMMISSION_STATUS_TRANSLATE } from '@/constants/translate';
 import { overlay } from 'overlay-kit';
 import ReceiveAndSendDialog from '@/components/pages/commission/ReceiveAndSendDialog';
 import { CompleteDialog } from '@/components/pages/commission/CompleteDialog';
@@ -41,37 +34,20 @@ import { commissionKeys } from '@/api/commission/queryKeys';
 import { scoreQueries } from '@/api/score/queries';
 import DeleteCommissionDialog from '@/components/pages/commission/DeleteCommissionDialog';
 import NotFound from './NotFound';
-import { Skeleton } from '@/components/ui/skeleton';
 import { queryClient } from '@/utils/query-client';
 import { COMMISSION_INFO } from '@/types/commission';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/use-auth';
 import AppHeader from '@/components/layout/AppHeader';
-
-const statusProgress: Record<
-	Exclude<CommissionStatus, 'cancelled'>,
-	LucideIcon
-> = {
-	received: Package2,
-	working: Music2,
-	complete: CheckCircle,
-};
+import { CommissionDetailSkeleton } from '@/components/pages/commission/CommissionDetailSkeleton';
+import { CommissionStatusProgress } from '@/components/pages/commission/CommissionStatusProgress';
+import { cleanTitle } from '@/utils/commission-utils';
+import { COMMISSION_STATUS_TRANSLATE } from '@/constants/translate';
 
 const toastMessages: Partial<Record<CommissionStatus, string>> = {
 	working: '작업을 시작합니다.',
 	complete: '작업이 완료되었습니다.',
 };
-
-const cleanTitle = (title: string) =>
-	title
-		.replace(/\d+\s*(악장|st|nd|rd|th)(\s*movement)?/gi, '')
-		.replace(
-			/\b(allegro|andante|adagio|presto|vivace|moderato|largo|lento|grave|scherzo|finale)\b/gi,
-			'',
-		)
-		.replace(/[-–—]\s*$/, '')
-		.replace(/\s+/g, ' ')
-		.trim();
 
 const CommissionDetailContent = () => {
 	const { id } = useParams();
@@ -129,7 +105,11 @@ const CommissionDetailContent = () => {
 	const handleTransitionConfirm = () => {
 		if (!nextStatus) return;
 		updateStatus(
-			{ commissionId: id, status: nextStatus as CommissionStatus, prevStatus: commission.status },
+			{
+				commissionId: id,
+				status: nextStatus as CommissionStatus,
+				prevStatus: commission.status,
+			},
 			{
 				onSuccess: () => {
 					queryClient.invalidateQueries({ queryKey: commissionKeys.detail(id) });
@@ -211,45 +191,7 @@ const CommissionDetailContent = () => {
 
 	if (!id) return <Navigate to='/commissions' replace />;
 
-	if (isLoading)
-		return (
-			<AppLayout>
-				<div className='mb-6 flex items-center justify-between' role='status'>
-					<Skeleton className='h-9 w-16' />
-					<Skeleton className='h-9 w-16' />
-				</div>
-				<Skeleton className='h-8 w-48 mb-8' />
-				<Card className='mb-8 border-border/50'>
-					<CardContent className='p-6'>
-						<div className='flex items-center justify-between w-full'>
-							{[0, 1, 2, 3].map((i) => (
-								<div key={i} className='flex items-center flex-1'>
-									<div className='flex flex-col items-center'>
-										<Skeleton className='w-10 h-10 rounded-full' />
-										<Skeleton className='h-3 w-10 mt-2' />
-									</div>
-									{i < 3 && <Skeleton className='flex-1 h-0.5 mx-3' />}
-								</div>
-							))}
-						</div>
-					</CardContent>
-				</Card>
-				<Card className='border-border/50'>
-					<CardContent className='p-5 space-y-4'>
-						<Skeleton className='h-5 w-20' />
-						{[0, 1, 2, 3, 4].map((i) => (
-							<div
-								key={i}
-								className='flex items-center justify-between py-2 border-b border-border/50 last:border-0'
-							>
-								<Skeleton className='h-4 w-16' />
-								<Skeleton className='h-4 w-24' />
-							</div>
-						))}
-					</CardContent>
-				</Card>
-			</AppLayout>
-		);
+	if (isLoading) return <CommissionDetailSkeleton />;
 
 	if (!commission) return <NotFound />;
 
@@ -323,67 +265,10 @@ const CommissionDetailContent = () => {
 			/>
 
 			{/* Status Progress */}
-			{commission.status === 'cancelled' ? (
-				<Card className='mb-8 border-border/50'>
-					<CardContent className='p-6 flex items-center justify-center gap-2.5 text-muted-foreground'>
-						<XCircle className='h-5 w-5' />
-						<span className='text-sm font-medium'>취소된 의뢰입니다</span>
-					</CardContent>
-				</Card>
-			) : (
-				<Card className='mb-8 border-border/50'>
-					<CardContent className='p-6'>
-						<div className='flex items-center justify-between w-full'>
-							{Object.entries(COMMISSION_STATUS_TRANSLATE).map(
-								([status, label], i, originArray) => {
-									const Icon =
-										statusProgress[status as Exclude<CommissionStatus, 'cancelled'>];
-									return (
-										<div
-											key={status}
-											className={cn(
-												'flex items-center',
-												i < originArray.length - 1 ? 'flex-1' : '',
-											)}
-										>
-											<div className='flex flex-col items-center'>
-												<div
-													className={cn(
-														'w-10 h-10 rounded-full flex items-center justify-center transition-colors',
-														i <= currentStatusIndex
-															? 'bg-primary text-primary-foreground'
-															: 'border-2 border-border text-muted-foreground/40',
-													)}
-												>
-													<Icon
-														className={i <= currentStatusIndex ? 'h-5 w-5' : 'h-4 w-4'}
-													/>
-												</div>
-												<span
-													className={cn(
-														'text-xs mt-2',
-														i <= currentStatusIndex ? 'font-medium' : 'text-muted-foreground',
-													)}
-												>
-													{label}
-												</span>
-											</div>
-											{i < originArray.length - 1 && (
-												<div
-													className={cn(
-														'flex-1 h-0.5 mx-3',
-														i < currentStatusIndex ? 'bg-primary' : 'bg-border',
-													)}
-												/>
-											)}
-										</div>
-									);
-								},
-							)}
-						</div>
-					</CardContent>
-				</Card>
-			)}
+			<CommissionStatusProgress
+				status={commission.status}
+				currentStatusIndex={currentStatusIndex}
+			/>
 
 			<div className='mb-6'>
 				{/* Commission Info */}
