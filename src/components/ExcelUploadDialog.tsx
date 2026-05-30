@@ -12,10 +12,10 @@ import Label from '@/components/ui/label';
 import { Upload, FileSpreadsheet, X, CheckCircle2 } from 'lucide-react';
 import { splitProduct } from '@/utils/split-product';
 import { ExcelRow } from '@/types/excel';
-import { parseExcelSheet } from '@/utils/parse-excel';
 import { useAuth } from '@/hooks/use-auth';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useExcelFileParser } from '@/hooks/use-excel-file-parser';
 
 interface ExcelUploadDialogProps {
   open: boolean;
@@ -23,62 +23,21 @@ interface ExcelUploadDialogProps {
   onUpload: (data: ExcelRow[], name: string) => void;
 }
 
+function getDefaultUploadName(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
+
 export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: ExcelUploadDialogProps) => {
   const { isGuest } = useAuth();
-
-  const defaultUploadName = () => {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-  };
-
-  const [form, setForm] = useState({
-    fileName: '',
-    preview: [] as ExcelRow[],
-    uploadName: defaultUploadName(),
-  });
-
+  const { fileName, preview, error, parseFile, reset: resetParser } = useExcelFileParser();
+  const [uploadName, setUploadName] = useState(getDefaultUploadName);
   const [dragOver, setDragOver] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  const reset = () => {
-    setForm(prev => ({ ...prev, fileName: '', preview: [], uploadName: defaultUploadName() }));
-    setError(null);
-  };
-
-  const parseFile = useCallback((file: File) => {
-    setError(null);
-
-    const lowerName = file.name.toLowerCase();
-    if (
-      !lowerName.endsWith('.xlsx') &&
-      !lowerName.endsWith('.xls') &&
-      !lowerName.endsWith('.csv')
-    ) {
-      setError('엑셀 파일(.xlsx, .xls) 또는 CSV 파일만 업로드 가능합니다.');
-      return;
-    }
-
-    setForm(prev => ({ ...prev, fileName: file.name, preview: [] }));
-
-    const reader = new FileReader();
-    reader.onload = e => {
-      try {
-        const data = new Uint8Array(e.target?.result as ArrayBuffer);
-        const { rows, error: parseError } = parseExcelSheet(data);
-        if (parseError) {
-          setForm(prev => ({ ...prev, preview: [] }));
-          setError(parseError);
-          return;
-        }
-        setForm(prev => ({ ...prev, preview: rows }));
-        setError(null);
-      } catch {
-        setForm(prev => ({ ...prev, preview: [] }));
-        setError('파일을 파싱하는 중 오류가 발생했습니다.');
-      }
-    };
-    reader.readAsArrayBuffer(file);
-  }, []);
+  const reset = useCallback(() => {
+    resetParser();
+    setUploadName(getDefaultUploadName());
+  }, [resetParser]);
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
@@ -105,8 +64,8 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: ExcelUploadD
       return;
     }
 
-    if (form.preview.length > 0 && form.uploadName.trim()) {
-      onUpload(form.preview, form.uploadName.trim());
+    if (preview.length > 0 && uploadName.trim()) {
+      onUpload(preview, uploadName.trim());
       reset();
       onOpenChange(false);
     }
@@ -138,15 +97,15 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: ExcelUploadD
           </Label>
           <Input
             id='upload-name'
-            value={form.uploadName}
-            onChange={e => setForm(prev => ({ ...prev, uploadName: e.target.value }))}
+            value={uploadName}
+            onChange={e => setUploadName(e.target.value)}
             placeholder='예: 2025-01'
             className='h-9'
           />
           <p className='text-xs text-muted-foreground'>이 이름으로 업로드가 폴더처럼 저장됩니다.</p>
         </div>
 
-        {!form.fileName ? (
+        {!fileName ? (
           <>
             <button
               type='button'
@@ -179,7 +138,7 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: ExcelUploadD
             <div className='flex items-center justify-between p-3 rounded-lg bg-muted/50'>
               <div className='flex items-center gap-2'>
                 <CheckCircle2 className='h-4 w-4 text-[hsl(var(--status-complete))]' />
-                <span className='text-sm font-medium'>{form.fileName}</span>
+                <span className='text-sm font-medium'>{fileName}</span>
               </div>
               <Button
                 variant='ghost'
@@ -191,10 +150,10 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: ExcelUploadD
               </Button>
             </div>
 
-            {form.preview.length > 0 && (
+            {preview.length > 0 && (
               <div className='text-sm'>
                 <p className='text-muted-foreground mb-2'>
-                  미리보기 ({form.preview.length}건 감지)
+                  미리보기 ({preview.length}건 감지)
                 </p>
                 <div className='rounded-md border border-border/50 overflow-auto max-h-48'>
                   <table className='w-full text-xs'>
@@ -207,7 +166,7 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: ExcelUploadD
                       </tr>
                     </thead>
                     <tbody>
-                      {form.preview.slice(0, 5).map(row => {
+                      {preview.slice(0, 5).map(row => {
                         const { song, arrangement } = splitProduct(row.product);
                         return (
                           <tr
@@ -226,9 +185,9 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: ExcelUploadD
                     </tbody>
                   </table>
                 </div>
-                {form.preview.length > 5 && (
+                {preview.length > 5 && (
                   <p className='text-xs text-muted-foreground mt-1'>
-                    외 {form.preview.length - 5}건...
+                    외 {preview.length - 5}건...
                   </p>
                 )}
               </div>
@@ -257,11 +216,11 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: ExcelUploadD
             취소
           </Button>
           <Button
-            disabled={!!error || form.preview.length === 0 || !form.uploadName.trim()}
+            disabled={!!error || preview.length === 0 || !uploadName.trim()}
             onClick={handleConfirm}
           >
             <Upload className='h-4 w-4 mr-1.5' />
-            {form.preview.length}건 업로드
+            {preview.length}건 업로드
           </Button>
         </div>
       </DialogContent>
