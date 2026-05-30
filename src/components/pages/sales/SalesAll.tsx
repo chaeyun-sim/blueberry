@@ -1,5 +1,4 @@
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { MOBILE_BREAKPOINT } from '@/constants/breakpoints';
 import {
 	ChevronDown,
 	ChevronRight,
@@ -17,14 +16,12 @@ import {
 import Button from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { formatCurrency } from '@/utils/format-currency';
-import { Fragment, useMemo, useState } from 'react';
+import { Fragment, useState } from 'react';
 import { statsQueries } from '@/api/stats/queries';
 import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 import { splitProduct } from '@/utils/split-product';
 import SortIcon from './SortIcon';
-
-type SortKey = 'category' | 'product' | 'amount';
-type SortDir = 'asc' | 'desc';
+import { useSalesTableData } from '@/hooks/use-sales-table-data';
 
 // 컬럼 flex 비율 — 헤더·바디에서 공유
 const COL = {
@@ -58,72 +55,21 @@ function SalesAll() {
 		enabled: year !== undefined,
 	});
 
-	const [sortKey, setSortKey] = useState<SortKey>('category');
-	const [sortDir, setSortDir] = useState<SortDir>('asc');
-	const [filterCategory, setFilterCategory] = useState('ALL');
-	const [groupByCategory, setGroupByCategory] = useState(true);
-	const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
-
-	const toggleGroup = (category: string) => {
-		setCollapsedGroups((prev) => {
-			const next = new Set(prev);
-			if (next.has(category)) next.delete(category);
-			else next.add(category);
-			return next;
-		});
-	};
-
-	const categories = useMemo(
-		() => [
-			'ALL',
-			...Array.from(new Set(originData.map((r) => r.category).filter(Boolean))),
-		],
-		[originData],
-	);
-
-	const toggleSort = (key: SortKey) => {
-		if (sortKey === key) {
-			setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
-		} else {
-			setSortKey(key);
-			setSortDir('asc');
-		}
-	};
-
-	const sortedData = useMemo(() => {
-		let data = [...originData];
-		if (filterCategory !== 'ALL') {
-			data = data.filter((r) => r.category === filterCategory);
-		}
-		data.sort((a, b) => {
-			if (groupByCategory && sortKey !== 'category') {
-				const catCmp = a.category.localeCompare(b.category, 'ko');
-				if (catCmp !== 0) return catCmp;
-			}
-			const aVal = a[sortKey];
-			const bVal = b[sortKey];
-			const cmp =
-				typeof aVal === 'number'
-					? aVal - (bVal as number)
-					: String(aVal).localeCompare(String(bVal), 'ko');
-			return sortDir === 'asc' ? cmp : -cmp;
-		});
-		return data;
-	}, [sortKey, sortDir, filterCategory, groupByCategory, originData]);
-
-	const isMobile =
-		typeof window !== 'undefined' && window.innerWidth < MOBILE_BREAKPOINT;
-	const displayData = isMobile ? sortedData.slice(0, 6) : sortedData;
-
-	const groupedData = useMemo(() => {
-		if (!groupByCategory) return null;
-		const groups: Record<string, typeof originData> = {};
-		displayData.forEach((row) => {
-			if (!groups[row.category]) groups[row.category] = [];
-			groups[row.category].push(row);
-		});
-		return groups;
-	}, [displayData, groupByCategory]);
+	const {
+		sortKey,
+		sortDir,
+		filterCategory,
+		setFilterCategory,
+		groupByCategory,
+		setGroupByCategory,
+		collapsedGroups,
+		toggleGroup,
+		toggleSort,
+		categories,
+		sortedData,
+		displayData,
+		groupedData,
+	} = useSalesTableData(originData);
 
 	return (
 		<Card className='border-border/50'>
