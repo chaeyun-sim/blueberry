@@ -13,12 +13,6 @@ import {
 	TableHeader,
 	TableRow,
 } from '@/components/ui/table';
-import {
-	Dialog,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-} from '@/components/ui/dialog';
 import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 import { statsQueries } from '@/api/stats/queries';
 import { statsMutations } from '@/api/stats/mutations';
@@ -30,6 +24,7 @@ import { splitProduct } from '@/utils/split-product';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/use-auth';
 import AppHeader from '@/components/layout/AppHeader';
+import { SongSummaryDialog } from '@/components/pages/uploads/SongSummaryDialog';
 
 export default function ExcelUploadDetail() {
 	const { uploadId } = useParams<{ uploadId: string }>();
@@ -190,69 +185,3 @@ export default function ExcelUploadDetail() {
 	);
 }
 
-function SongSummaryDialog({
-	open,
-	onOpenChange,
-	rows,
-}: {
-	open: boolean;
-	onOpenChange: (v: boolean) => void;
-	rows: { product: string; amount: number }[];
-}) {
-	const summary = Object.entries(
-		rows.reduce<Record<string, { arrangements: Set<string>; total: number }>>(
-			(acc, row) => {
-				const { song, arrangement } = splitProduct(row.product);
-				if (!acc[song]) acc[song] = { arrangements: new Set(), total: 0 };
-				acc[song].arrangements.add(arrangement);
-				acc[song].total += row.amount;
-				return acc;
-			},
-			{},
-		),
-	)
-		.map(([song, { arrangements, total }]) => ({
-			song,
-			count: arrangements.size,
-			total,
-		}))
-		.sort((a, b) => b.count - a.count || b.total - a.total);
-
-	return (
-		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className='max-w-xl'>
-				<DialogHeader>
-					<DialogTitle>곡별 매출 요약</DialogTitle>
-				</DialogHeader>
-				<div className='max-h-[60vh] overflow-y-auto '>
-					<Table>
-						<TableHeader>
-							<TableRow>
-								<TableHead className='text-xs uppercase text-left'>곡명</TableHead>
-								<TableHead className='text-xs uppercase text-center shrink-0 w-fit'>
-									편성 수
-								</TableHead>
-								<TableHead className='text-xs uppercase text-right shrink-0'>
-									총 매출
-								</TableHead>
-							</TableRow>
-						</TableHeader>
-						<TableBody>
-							{summary.map(({ song, count, total }) => (
-								<TableRow key={song}>
-									<TableCell className='font-medium text-sm text-left'>{song}</TableCell>
-									<TableCell className='text-center text-sm text-muted-foreground shrink-0'>
-										{count}
-									</TableCell>
-									<TableCell className='text-right tabular-nums text-sm shrink-0'>
-										{formatCurrency(total)}
-									</TableCell>
-								</TableRow>
-							))}
-						</TableBody>
-					</Table>
-				</div>
-			</DialogContent>
-		</Dialog>
-	);
-}
