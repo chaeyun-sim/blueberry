@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import Button from '@/components/ui/button';
@@ -12,31 +12,21 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
-import { Calendar, Pencil, XCircle } from 'lucide-react';
+import { Calendar, XCircle } from 'lucide-react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { overlay } from 'overlay-kit';
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-} from '@/components/ui/dialog';
 import { COMMISSION_STATUS_TRANSLATE } from '@/constants/translate';
 import { commissionQueries } from '@/api/commission/queries';
-import { useMutation } from '@tanstack/react-query';
 import { useAppQuery as useQuery } from '@/hooks/use-app-query';
-import { commissionKeys } from '@/api/commission/queryKeys';
-import { commissionMutations } from '@/api/commission/mutations';
 import { DifficultyLevelType } from '@/types/commission';
-import { queryClient } from '@/utils/query-client';
-import { EditFormType } from '@/types/form';
 import { CommissionStatus } from '@/constants/status-config';
-import { toast } from 'sonner';
 import { InstrumentPicker } from '@/components/InstrumentPicker';
 import { useAuth } from '@/hooks/use-auth';
 import AppHeader from '@/components/layout/AppHeader';
+import { toast } from 'sonner';
+import { useCommissionEditForm } from '@/hooks/use-commission-edit-form';
+import { CancelCommissionDialog } from '@/components/pages/commission/CancelCommissionDialog';
+import { InlineEditField } from '@/components/pages/commission/InlineEditField';
 
 const CommissionEdit = () => {
 	const { id } = useParams();
@@ -49,124 +39,19 @@ const CommissionEdit = () => {
 	const [isTitleEditing, setIsTitleEditing] = useState(false);
 	const [isComposerEditing, setIsComposerEditing] = useState(false);
 
-	const [form, setForm] = useState<EditFormType>({
-		title: '',
-		instruments: [],
-		version: null,
-		deadline: '',
-		notes: '',
-		status: null,
-		composer: '',
-	});
+	const { data: commission, isLoading } = useQuery(commissionQueries.getCommission(id));
 
-	const { data: commission, isLoading } = useQuery(
-		commissionQueries.getCommission(id),
-	);
-
-	useEffect(() => {
-		if (!commission) return;
-		setForm({
-			title: commission.title ?? '',
-			composer: commission.composer ?? '',
-			instruments: commission.arrangement
-				? commission.arrangement.split(', ')
-				: [],
-			version: commission.version ?? null,
-			deadline: commission.deadline ?? '',
-			notes: commission.notes ?? '',
-			status: commission.status,
-		});
-	}, [commission]);
-
-
-
-	const [isSubmitting, setIsSubmitting] = useState(false);
-
-	const { mutate: updateCommission } = useMutation(
-		commissionMutations.updateCommission(),
-	);
-	const { mutate: updateStatus } = useMutation(
-		commissionMutations.updateCommissionStatus(),
-	);
-
-	const handleSave = () => {
-		if (isGuest) {
-			toast.error('게스트 모드에서는 의뢰를 수정할 수 없습니다.');
-			return;
-		}
-
-		if (!id) return;
-
-		setIsSubmitting(true);
-
-		updateCommission(
-			{
-				commissionId: id,
-				input: (({ instruments, ...rest }) => ({
-					...rest,
-					arrangement: instruments.join(', '),
-				}))(form),
-			},
-			{
-				onSuccess: () => {
-					queryClient.invalidateQueries({ queryKey: commissionKeys.detail(id) });
-					queryClient.invalidateQueries({ queryKey: commissionKeys.list() });
-					setIsSubmitting(false);
-					toast.success('의뢰가 수정되었습니다.');
-					navigate(-1);
-				},
-				onError: (e) => {
-					setIsSubmitting(false);
-					toast.error('의뢰 수정에 실패했습니다.', { description: e.message });
-				},
-			},
-		);
-	};
+	const { form, setForm, isSubmitting, handleSave } = useCommissionEditForm(commission);
 
 	const handleCancel = () => {
 		overlay.open(
 			({ isOpen, close }) => (
-				<Dialog open={isOpen} onOpenChange={(open) => !open && close()}>
-					<DialogContent>
-						<DialogHeader>
-							<DialogTitle>의뢰를 취소하시겠습니까?</DialogTitle>
-							<DialogDescription>
-								취소된 의뢰는 목록의 '취소' 탭에서 확인할 수 있습니다. 취소 후에도
-								기록은 유지됩니다.
-							</DialogDescription>
-						</DialogHeader>
-						<DialogFooter>
-							<Button variant='outline' onClick={close}>
-								닫기
-							</Button>
-							<Button
-								className='bg-destructive text-destructive-foreground hover:bg-destructive/90'
-								onClick={() => {
-									if (!id) return;
-									updateStatus(
-										{ commissionId: id, status: 'cancelled', prevStatus: commission.status },
-										{
-											onSuccess: () => {
-												queryClient.invalidateQueries({
-													queryKey: commissionKeys.detail(id),
-												});
-												queryClient.invalidateQueries({ queryKey: commissionKeys.list() });
-												toast.success('의뢰가 취소되었습니다.');
-												close();
-												navigate(`/commissions/${id}`);
-											},
-											onError: (e) => {
-												toast.error('취소에 실패했습니다.', { description: e.message });
-											},
-										},
-									);
-								}}
-							>
-								취소 처리
-							</Button>
-						</DialogFooter>
-					</DialogContent>
-				</Dialog>
+				<CancelCommissionDialog
+					isOpen={isOpen}
+					close={close}
+					commissionId={id!}
+					prevStatus={commission!.status}
+				/>
 			),
 			{ overlayId: 'cancel-commission-dialog' },
 		);
@@ -190,7 +75,13 @@ const CommissionEdit = () => {
 							수정 취소
 						</Button>
 						<Button
-							onClick={handleSave}
+							onClick={() => {
+								if (isGuest) {
+									toast.error('게스트 모드에서는 의뢰를 수정할 수 없습니다.');
+									return;
+								}
+								handleSave(id);
+							}}
 							className='flex-1 md:flex-none md:px-6 rounded-2xl md:rounded-md py-6 md:py-2 shadow-lg md:shadow-none'
 							disabled={isSubmitting}
 						>
@@ -204,78 +95,58 @@ const CommissionEdit = () => {
 				<AppHeader.Back />
 			</AppHeader>
 
-			{/* 인라인 편집 타이틀 */}
 			<div className='mb-6'>
-				{isTitleEditing ? (
-					<input
-						ref={titleEditRef}
-						value={form.title}
-						onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
-						onBlur={() => setIsTitleEditing(false)}
-						onKeyDown={(e) => {
-							if (e.key === 'Enter' || e.key === 'Escape') setIsTitleEditing(false);
-						}}
-						className='text-2xl font-display font-bold w-full bg-transparent border-b-2 border-primary outline-none pb-0.5 tracking-tight'
-						placeholder='곡명을 입력하세요'
-					/>
-				) : (
-					<button
-						type='button'
-						onClick={() => {
-							setIsTitleEditing(true);
-							setTimeout(() => titleEditRef.current?.focus(), 0);
-						}}
-						className='group flex items-center gap-2 cursor-pointer hover:opacity-70 transition-opacity text-left border-b-2 border-transparent pb-0.5'
-						aria-label='곡명 편집'
-					>
+				<InlineEditField
+					value={form.title}
+					isEditing={isTitleEditing}
+					inputRef={titleEditRef}
+					onChange={(v) => setForm((prev) => ({ ...prev, title: v }))}
+					onStartEditing={() => {
+						setIsTitleEditing(true);
+						setTimeout(() => titleEditRef.current?.focus(), 0);
+					}}
+					onStopEditing={() => setIsTitleEditing(false)}
+					placeholder='곡명을 입력하세요'
+					ariaLabel='곡명 편집'
+					inputClassName='text-2xl font-display font-bold w-full bg-transparent border-b-2 border-primary outline-none pb-0.5 tracking-tight'
+					buttonClassName='group flex items-center gap-2 cursor-pointer hover:opacity-70 transition-opacity text-left border-b-2 border-transparent pb-0.5'
+					displayContent={
+						<h1 className='text-2xl font-display font-bold tracking-tight'>{form.title}</h1>
+					}
+					emptyDisplay={
 						<h1 className='text-2xl font-display font-bold tracking-tight'>
-							{form.title || (
-								<span className='text-muted-foreground font-normal text-xl'>
-									곡명 없음
-								</span>
-							)}
+							<span className='text-muted-foreground font-normal text-xl'>곡명 없음</span>
 						</h1>
-						<Pencil className='h-3.5 w-3.5 text-muted-foreground opacity-40 group-hover:opacity-100 transition-opacity shrink-0' />
-					</button>
-				)}
+					}
+				/>
 
-				{isComposerEditing ? (
-					<input
-						ref={composerEditRef}
-						value={form.composer}
-						onChange={(e) =>
-							setForm((prev) => ({ ...prev, composer: e.target.value }))
-						}
-						onBlur={() => setIsComposerEditing(false)}
-						onKeyDown={(e) => {
-							if (e.key === 'Enter' || e.key === 'Escape') setIsComposerEditing(false);
-						}}
-						className='mt-1 text-sm text-muted-foreground w-full bg-transparent border-b border-primary outline-none pb-0.5'
-						placeholder='작곡가를 입력하세요'
-					/>
-				) : (
-					<button
-						type='button'
-						onClick={() => {
-							setIsComposerEditing(true);
-							setTimeout(() => composerEditRef.current?.focus(), 0);
-						}}
-						className='group flex items-center gap-1.5 mt-1 cursor-pointer hover:opacity-70 transition-opacity text-left border-b border-transparent pb-0.5'
-						aria-label='작곡가 편집'
-					>
+				<InlineEditField
+					value={form.composer}
+					isEditing={isComposerEditing}
+					inputRef={composerEditRef}
+					onChange={(v) => setForm((prev) => ({ ...prev, composer: v }))}
+					onStartEditing={() => {
+						setIsComposerEditing(true);
+						setTimeout(() => composerEditRef.current?.focus(), 0);
+					}}
+					onStopEditing={() => setIsComposerEditing(false)}
+					placeholder='작곡가를 입력하세요'
+					ariaLabel='작곡가 편집'
+					inputClassName='mt-1 text-sm text-muted-foreground w-full bg-transparent border-b border-primary outline-none pb-0.5'
+					buttonClassName='group flex items-center gap-1.5 mt-1 cursor-pointer hover:opacity-70 transition-opacity text-left border-b border-transparent pb-0.5'
+					displayContent={<p className='text-sm text-muted-foreground'>{form.composer}</p>}
+					emptyDisplay={
 						<p className='text-sm text-muted-foreground'>
-							{form.composer || <span className='italic'>작곡가 미입력</span>}
+							<span className='italic'>작곡가 미입력</span>
 						</p>
-						<Pencil className='h-3 w-3 text-muted-foreground opacity-40 group-hover:opacity-100 transition-opacity shrink-0' />
-					</button>
-				)}
+					}
+				/>
 			</div>
 
 			<Card className='border-border/50 mb-6'>
 				<CardContent className='p-5'>
 					<h2 className='font-display font-semibold mb-4'>의뢰 정보</h2>
 					<div className='grid grid-cols-1 md:grid-cols-3 gap-5'>
-						{/* 현재 상태 */}
 						<div className='space-y-2'>
 							<Label>현재 상태</Label>
 							<Select
@@ -299,7 +170,6 @@ const CommissionEdit = () => {
 							</Select>
 						</div>
 
-						{/* 마감일 */}
 						<div className='space-y-2'>
 							<Label htmlFor='deadline'>마감일</Label>
 							<div className='relative'>
@@ -325,7 +195,6 @@ const CommissionEdit = () => {
 							</div>
 						</div>
 
-						{/* 버전 */}
 						<div className='space-y-2'>
 							<Label>버전</Label>
 							<Select
@@ -350,18 +219,14 @@ const CommissionEdit = () => {
 							</Select>
 						</div>
 
-						{/* 편성 — 전체 너비 */}
 						<div className='md:col-span-3'>
 							<InstrumentPicker
 								instruments={form.instruments}
-								onChange={(instruments) =>
-									setForm((prev) => ({ ...prev, instruments }))
-								}
+								onChange={(instruments) => setForm((prev) => ({ ...prev, instruments }))}
 								disabled={isSubmitting}
 							/>
 						</div>
 
-						{/* 메모 — 전체 너비 */}
 						<div className='space-y-2 md:col-span-3'>
 							<Label htmlFor='notes'>메모</Label>
 							<Textarea
@@ -369,9 +234,7 @@ const CommissionEdit = () => {
 								placeholder='추가 요청사항이나 메모...'
 								rows={4}
 								value={form.notes}
-								onChange={(e) =>
-									setForm((prev) => ({ ...prev, notes: e.target.value }))
-								}
+								onChange={(e) => setForm((prev) => ({ ...prev, notes: e.target.value }))}
 								disabled={isSubmitting}
 							/>
 						</div>
