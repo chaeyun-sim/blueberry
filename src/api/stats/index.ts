@@ -45,22 +45,21 @@ function pctChange(current: number, prev: number): number {
 	return parseFloat((((current - prev) / prev) * 100).toFixed(1));
 }
 
-function dateRange(year: number, month?: number) {
-	if (month !== undefined) {
-		const nextMonth = month === 12 ? 1 : month + 1;
-		const nextMonthYear = month === 12 ? year + 1 : year;
-		const mm = String(month).padStart(2, '0');
-		const nmm = String(nextMonth).padStart(2, '0');
-		return { gte: `${year}-${mm}-01`, lt: `${nextMonthYear}-${nmm}-01` };
-	}
-	return { gte: `${year}-01-01`, lt: `${year + 1}-01-01` };
-}
+const yearRange = (year: number) =>
+	({ gte: `${year}-01-01`, lt: `${year + 1}-01-01` });
 
 const norm = (s: string) =>
 	s
 		.toLowerCase()
 		.replace(/\s*([(),])\s*/g, '$1')
 		.trim();
+
+// PostgREST returns NUMERIC columns as strings; coerce to JS number.
+const parseNumeric = (v: unknown) => parseFloat(String(v));
+
+// Coerce unrecognised or null categories to the catch-all bucket.
+const normalizeCategory = (cat: string | null | undefined) =>
+	cat && CATEGORIES.has(cat) ? cat : 'ETC';
 
 // ─── API Functions ────────────────────────────────────────────────────────────
 
@@ -290,7 +289,7 @@ export async function getTrendingSongs(): Promise<TrendingSong[]> {
 		title: row.title,
 		recentSales: row.recent_sales,
 		prevSales: row.prev_sales,
-		growth: parseFloat(String(row.growth)),
+		growth: parseNumeric(row.growth),
 	}));
 }
 
@@ -307,9 +306,9 @@ export async function getRevenueConcentration(): Promise<
 		rank: row.rank,
 		title: row.title,
 		revenue: row.revenue,
-		revenueShare: parseFloat(String(row.revenue_share)),
-		cumulativeShare: parseFloat(String(row.cumulative_share)),
-		songShare: parseFloat(String(row.song_share)),
+		revenueShare: parseNumeric(row.revenue_share),
+		cumulativeShare: parseNumeric(row.cumulative_share),
+		songShare: parseNumeric(row.song_share),
 	}));
 }
 
@@ -354,7 +353,7 @@ export async function getSalesRowsByUploadId(
 
 	return (data ?? []).map((row) => ({
 		id: row.id,
-		category: row.category && CATEGORIES.has(row.category) ? row.category : 'ETC',
+		category: normalizeCategory(row.category),
 		product: row.product ?? '',
 		amount: row.amount,
 	}));
@@ -423,7 +422,7 @@ export async function saveSalesRows(
 			arrangement_id,
 			upload_id: uploadId,
 			category:
-				row.category && CATEGORIES.has(row.category) ? row.category : 'ETC',
+				normalizeCategory(row.category),
 			product: row.product,
 			amount: row.amount,
 			sold_at: uploadDate,
@@ -455,8 +454,8 @@ export async function getSalesRows(year?: number): Promise<ExcelRow[]> {
 
 	if (year) {
 		query = query
-			.gte(SOLD_AT, dateRange(year).gte)
-			.lt(SOLD_AT, dateRange(year).lt);
+			.gte(SOLD_AT, yearRange(year).gte)
+			.lt(SOLD_AT, yearRange(year).lt);
 	}
 
 	const { data, error } = await query;
@@ -464,7 +463,7 @@ export async function getSalesRows(year?: number): Promise<ExcelRow[]> {
 
 	return (data ?? []).map((row) => ({
 		id: row.id,
-		category: row.category && CATEGORIES.has(row.category) ? row.category : 'ETC',
+		category: normalizeCategory(row.category),
 		product: row.product ?? '',
 		amount: row.amount,
 	}));
