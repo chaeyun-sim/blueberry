@@ -1,4 +1,4 @@
-import { useState, useRef, DragEvent } from 'react';
+import { useState, DragEvent } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -17,22 +17,13 @@ import { scoreKeys } from '@/api/score/queryKeys';
 import { findOrCreateSong, uploadAllFiles } from '@/api/score/helpers';
 import { queryClient } from '@/utils/query-client';
 import { toast } from 'sonner';
-import { FileEntry } from '@/types/form';
-import { MAX_ZIP_SIZE } from '@/constants/file-size';
-import { extractZipEntries, ZipExtractionError } from '@/utils/extract-zip-entries';
 import { matchesZipTitle } from '@/utils/match-zip-title';
-import { hasCompressibleAudio, compressAudioEntries } from '@/utils/compress-audio-entries';
 import DropZone from './Dropzone';
 import ZipFileHeader from './ZipFileHeader';
 import ReadOnlyFileList from './ReadOnlyFileList';
 import { useAuth } from '@/hooks/use-auth';
 import { Input } from '@/components/ui/input';
-
-interface CompleteDialogForm {
-  zipName: string | null;
-  zipSize: number | null;
-  files: FileEntry[];
-}
+import { useZipFileHandler } from '@/hooks/use-zip-file-handler';
 
 interface CompleteDialogProps extends OverlayProps {
   commission: Commission;
@@ -40,19 +31,20 @@ interface CompleteDialogProps extends OverlayProps {
 }
 
 export function CompleteDialog({ isOpen, close, commission, onConfirm }: CompleteDialogProps) {
-  const zipInputRef = useRef<HTMLInputElement>(null);
   const { isGuest } = useAuth();
-
-  const [form, setForm] = useState<CompleteDialogForm>({
-    zipName: null,
-    zipSize: null,
-    files: []
-  })
-
-  const [isExtracting, setIsExtracting] = useState(false);
-  const [isCompressing, setIsCompressing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [forceOverride, setForceOverride] = useState(false);
+
+  const {
+    zipInputRef,
+    zipName,
+    zipSize,
+    files,
+    isExtracting,
+    isCompressing,
+    reset: resetZip,
+    handleZipFile,
+  } = useZipFileHandler();
 
   const { mutateAsync: createSong } = useMutation(scoreMutations.createSong());
   const { mutateAsync: createArrangement } = useMutation(scoreMutations.createArrangement());
@@ -61,59 +53,8 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
 
   const songTitle = commission.songs?.title ?? commission.title ?? '';
   const composer = commission.songs?.composer ?? commission.composer ?? '';
-  const isZipTitleMatch = form.zipName ? matchesZipTitle(form.zipName, songTitle, composer) : false;
+  const isZipTitleMatch = zipName ? matchesZipTitle(zipName, songTitle, composer) : false;
   const isProcessing = isExtracting || isCompressing;
-
-  const resetZip = () => {
-    setForm(prev => ({ ...prev, zipName: null, zipSize: 0, files: [] }));
-    setForceOverride(false);
-    if (zipInputRef.current) zipInputRef.current.value = '';
-  };
-
-  const handleZipFile = async (file: File) => {
-    if (!file.name.toLowerCase().endsWith('.zip')) {
-      toast.error('ZIP 파일만 업로드할 수 있습니다.');
-      if (zipInputRef.current) zipInputRef.current.value = '';
-      return;
-    }
-    if (file.size > MAX_ZIP_SIZE) {
-      toast.error('ZIP 파일 크기는 200MB 이하여야 합니다.');
-      if (zipInputRef.current) zipInputRef.current.value = '';
-      return;
-    }
-
-    setForm(prev => ({ ...prev, zipName: file.name, zipSize: file.size, files: [] }));
-    setIsExtracting(true);
-
-    let rawEntries: FileEntry[];
-    try {
-      const buffer = await file.arrayBuffer();
-      rawEntries = await extractZipEntries(buffer);
-    } catch (e) {
-      const msg = e instanceof ZipExtractionError ? e.message : 'ZIP 파일을 읽을 수 없습니다.';
-      toast.error(msg, e instanceof ZipExtractionError ? undefined : { description: (e as Error).message });
-      resetZip();
-      return;
-    } finally {
-      setIsExtracting(false);
-    }
-
-    if (!hasCompressibleAudio(rawEntries)) {
-      setForm(prev => ({ ...prev, files: rawEntries }));
-      return;
-    }
-
-    setIsCompressing(true);
-    try {
-      const res = await compressAudioEntries(rawEntries)
-      setForm(prev => ({ ...prev, files: res as FileEntry[] }));
-    } catch (e) {
-      toast.error('오디오 변환에 실패했습니다.', { description: (e as Error).message });
-      resetZip();
-    } finally {
-      setIsCompressing(false);
-    }
-  };
 
   const handleSubmit = async () => {
     if (isGuest) {
@@ -121,7 +62,7 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
       return;
     }
 
-    if (!form.zipName || form.files.length === 0) {
+    if (!zipName || files.length === 0) {
       toast.error('악보 ZIP 파일을 업로드해주세요.');
       return;
     }
@@ -137,9 +78,9 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
         commission_id: commission.id,
       });
 
-      const failed = await uploadAllFiles(form.files, arrangement.id, uploadFile);
+      const failed = await uploadAllFiles(files, arrangement.id, uploadFile);
 
-      if (failed.length === form.files.length) {
+      if (failed.length === files.length) {
         await deleteArrangement({ id: arrangement.id }).catch(() => {});
         toast.error('모든 파일 업로드에 실패했습니다. 다시 시도해주세요.');
         return;
@@ -165,7 +106,7 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
     if (f) handleZipFile(f);
   };
 
-  const canSubmit = !isSubmitting && !isProcessing && !!form.zipName && form.files.length > 0 && (isZipTitleMatch || forceOverride);
+  const canSubmit = !isSubmitting && !isProcessing && !!zipName && files.length > 0 && (isZipTitleMatch || forceOverride);
 
   const onOpenChange = (open: boolean) => {
     if (!open) {
@@ -196,7 +137,7 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
               id="zip-input"
             />
 
-            {!form.zipName ? (
+            {!zipName ? (
               <DropZone
                 onClick={() => zipInputRef.current?.click()}
                 onDrop={handleDrop}
@@ -204,9 +145,9 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
             ) : (
               <div className='space-y-2'>
                 <ZipFileHeader
-                  name={form.zipName}
-                  size={form.zipSize}
-                  fileCount={form.files.length}
+                  name={zipName}
+                  size={zipSize}
+                  fileCount={files.length}
                   onClear={resetZip}
                   disabled={isProcessing || isSubmitting}
                 />
@@ -217,10 +158,10 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
                       <span className='text-sm'>{isCompressing ? '오디오 MP3 변환 중...' : '압축 해제 중...'}</span>
                     </div>
                 ) : (
-                  <ReadOnlyFileList files={form.files} />
+                  <ReadOnlyFileList files={files} />
                 )}
 
-                {!isProcessing && form.zipName && !isZipTitleMatch && (
+                {!isProcessing && zipName && !isZipTitleMatch && (
                   <p className='text-xs text-destructive px-1'>
                     ZIP 파일명이 곡명 또는 작곡가명과 일치하지 않습니다.{' '}
                     {!forceOverride && (
