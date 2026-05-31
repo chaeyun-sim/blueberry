@@ -19,175 +19,34 @@ import {
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
-import { overlay } from 'overlay-kit';
-import ReceiveAndSendDialog from '@/components/pages/commission/ReceiveAndSendDialog';
-import { CompleteDialog } from '@/components/pages/commission/CompleteDialog';
-import SendEmailDialog from '@/components/pages/commission/SendEmailDialog';
-import CommissionImageDialog from '@/components/pages/commission/CommissionImageDialog';
-import { CommissionStatus } from '@/constants/status-config';
-import { useMutation } from '@tanstack/react-query';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 import { commissionQueries } from '@/api/commission/queries';
-import { commissionMutations } from '@/api/commission/mutations';
-import { commissionKeys } from '@/api/commission/queryKeys';
 import { scoreQueries } from '@/api/score/queries';
-import DeleteCommissionDialog from '@/components/pages/commission/DeleteCommissionDialog';
 import NotFound from './NotFound';
-import { queryClient } from '@/utils/query-client';
 import { COMMISSION_INFO } from '@/types/commission';
-import { toast } from 'sonner';
-import { useAuth } from '@/hooks/use-auth';
 import AppHeader from '@/components/layout/AppHeader';
 import { CommissionDetailSkeleton } from '@/components/pages/commission/CommissionDetailSkeleton';
 import { CommissionStatusProgress } from '@/components/pages/commission/CommissionStatusProgress';
-import { cleanTitle } from '@/utils/commission-utils';
 import { COMMISSION_STATUS_TRANSLATE } from '@/constants/translate';
-
-const toastMessages: Partial<Record<CommissionStatus, string>> = {
-	working: '작업을 시작합니다.',
-	complete: '작업이 완료되었습니다.',
-};
+import { useCommissionDetailActions } from '@/hooks/use-commission-detail-actions';
 
 const CommissionDetailContent = () => {
 	const { id } = useParams();
 	const navigate = useNavigate();
-	const { isGuest } = useAuth();
 
-	const { data: commission, isLoading } = useQuery(
-		commissionQueries.getCommission(id),
-	);
-	const { data: song } = useQuery(
-		scoreQueries.getSong(commission?.song_id ?? ''),
-	);
-	const { mutate: updateStatus } = useMutation(
-		commissionMutations.updateCommissionStatus(),
-	);
-	const { mutate: updateCommission } = useMutation(
-		commissionMutations.updateCommission(),
-	);
+	const { data: commission, isLoading } = useQuery(commissionQueries.getCommission(id));
+	const { data: song } = useQuery(scoreQueries.getSong(commission?.song_id ?? ''));
 
-	const markDelivered = () => {
-		if (!id) return;
-		updateCommission(
-			{ commissionId: id, input: { is_delivered: true } },
-			{
-				onSuccess: () => {
-					queryClient.invalidateQueries({ queryKey: commissionKeys.detail(id) });
-					queryClient.invalidateQueries({ queryKey: commissionKeys.list() });
-				},
-			},
-		);
-	};
-
-	const rawTitle =
-		song?.english_title ?? commission?.songs?.title ?? commission?.title ?? '';
-	const imslpQuery = [
-		cleanTitle(rawTitle),
-		commission?.songs?.composer ?? commission?.composer,
-	]
-		.filter(Boolean)
-		.join(' ');
-	const imslpUrl = `https://www.google.com/search?q=${encodeURIComponent(`site:imslp.org ${imslpQuery}`)}`;
-
-	const commissionStatuses = Object.keys(COMMISSION_STATUS_TRANSLATE);
-	const currentStatusIndex = commissionStatuses.findIndex(
-		(status) => status === commission?.status,
-	);
-
-	const nextStatus =
-		commission?.status === 'cancelled' || currentStatusIndex < 0
-			? null
-			: currentStatusIndex < commissionStatuses.length - 1
-				? commissionStatuses[currentStatusIndex + 1]
-				: null;
-
-	const handleTransitionConfirm = () => {
-		if (!nextStatus) return;
-		updateStatus(
-			{
-				commissionId: id,
-				status: nextStatus as CommissionStatus,
-				prevStatus: commission.status,
-			},
-			{
-				onSuccess: () => {
-					queryClient.invalidateQueries({ queryKey: commissionKeys.detail(id) });
-					queryClient.invalidateQueries({ queryKey: commissionKeys.list() });
-					toast.success(
-						toastMessages[nextStatus as CommissionStatus] ?? '상태가 변경되었습니다.',
-					);
-				},
-				onError: (e) => {
-					toast.error('상태 변경에 실패했습니다.', { description: e.message });
-				},
-			},
-		);
-	};
-
-	const openEmailDialog = () => {
-		overlay.open(
-			(overlayProps) => (
-				<SendEmailDialog
-					{...overlayProps}
-					commissionId={id}
-					onDelivered={markDelivered}
-				/>
-			),
-			{ overlayId: 'send-email-dialog' },
-		);
-	};
-
-	const handleOpenDialog = () => {
-		if (nextStatus === 'working') {
-			overlay.open((overlayProps) => (
-				<ReceiveAndSendDialog
-					{...overlayProps}
-					commissionId={id}
-					toStatus='working'
-					onConfirm={handleTransitionConfirm}
-				/>
-			));
-		} else {
-			overlay.open((overlayProps) => (
-				<CompleteDialog
-					{...overlayProps}
-					commission={commission}
-					onConfirm={() => {
-						handleTransitionConfirm();
-						openEmailDialog();
-					}}
-				/>
-			));
-		}
-	};
-
-	const handleViewOriginalImage = () => {
-		overlay.open(
-			(overlayProps) => (
-				<CommissionImageDialog
-					{...overlayProps}
-					date={commission?.created_at}
-					imageUrl={commission?.image_url}
-				/>
-			),
-			{ overlayId: 'original-image-dialog' },
-		);
-	};
-
-	const handleDelete = () => {
-		if (isGuest) {
-			toast.error('게스트 모드에서는 의뢰를 삭제할 수 없습니다.');
-			return;
-		}
-
-		overlay.open(
-			(overlayProps) => (
-				<DeleteCommissionDialog {...overlayProps} commissionId={id} />
-			),
-			{ overlayId: 'delete-commission-dialog' },
-		);
-	};
+	const {
+		imslpUrl,
+		currentStatusIndex,
+		nextStatus,
+		handleOpenDialog,
+		openEmailDialog,
+		handleViewOriginalImage,
+		handleDelete,
+	} = useCommissionDetailActions(id!, commission!, song);
 
 	if (!id) return <Navigate to='/commissions' replace />;
 
@@ -236,10 +95,7 @@ const CommissionDetailContent = () => {
 								<MoreVertical className='h-4 w-4' />
 							</Button>
 						</DropdownMenuTrigger>
-						<DropdownMenuContent
-							align='end'
-							className='mr-3 p-1.5 shadow-none min-w-fit'
-						>
+						<DropdownMenuContent align='end' className='mr-3 p-1.5 shadow-none min-w-fit'>
 							<DropdownMenuItem
 								onClick={() => navigate(`/commissions/${id}/edit`)}
 								className='gap-2.5 cursor-pointer px-3 py-1 rounded-lg focus:bg-muted'
@@ -260,18 +116,14 @@ const CommissionDetailContent = () => {
 				</AppHeader.Right>
 			</AppHeader>
 
-			<PageHeader
-				title={song?.title ?? commission.songs?.title ?? commission.title ?? ''}
-			/>
+			<PageHeader title={song?.title ?? commission.songs?.title ?? commission.title ?? ''} />
 
-			{/* Status Progress */}
 			<CommissionStatusProgress
 				status={commission.status}
 				currentStatusIndex={currentStatusIndex}
 			/>
 
 			<div className='mb-6'>
-				{/* Commission Info */}
 				<Card className='border-border/50'>
 					<CardContent className='p-5'>
 						<div className='flex items-center justify-between mb-4'>
@@ -286,17 +138,9 @@ const CommissionDetailContent = () => {
 						<dl className='space-y-3'>
 							{Object.keys(COMMISSION_INFO).map((key) => {
 								const value = () => {
-									if (key === 'version') {
-										return commission.version ? `${commission.version} ver.` : '-';
-									}
-									if (key === 'created_at') {
-										return commission.created_at
-											? dayjs(commission.created_at).format('YYYY-MM-DD HH:mm')
-											: '-';
-									}
-									if (key === 'composer') {
-										return commission.songs?.composer ?? commission.composer ?? '-';
-									}
+									if (key === 'version') return commission.version ? `${commission.version} ver.` : '-';
+									if (key === 'created_at') return commission.created_at ? dayjs(commission.created_at).format('YYYY-MM-DD HH:mm') : '-';
+									if (key === 'composer') return commission.songs?.composer ?? commission.composer ?? '-';
 									return commission[key] ?? '-';
 								};
 								return (
@@ -321,7 +165,6 @@ const CommissionDetailContent = () => {
 				</Card>
 			</div>
 
-			{/* Linked Scores */}
 			<Card className='border-border/50'>
 				<CardContent className='p-5'>
 					<a
