@@ -47,3 +47,25 @@ export const getCommissionsForDate = (
 	commissions
 		.filter((c) => dayjs(c.deadline).format('YYYY-MM-DD') === dateStr)
 		.sort((a, b) => (STATUS_PRIORITY[a.status] ?? 99) - (STATUS_PRIORITY[b.status] ?? 99));
+
+export type CalendarCell = { day: number; currentMonth: boolean };
+
+export function buildCalendarCells(year: number, month: number): CalendarCell[][] {
+	const firstDay = dayjs().year(year).month(month).date(1).day();
+	const daysInMonth = dayjs().year(year).month(month).daysInMonth();
+	const prevMonthDays = dayjs().year(year).month(month - 1).daysInMonth();
+
+	const cells: CalendarCell[] = [];
+	for (let i = firstDay - 1; i >= 0; i--)
+		cells.push({ day: prevMonthDays - i, currentMonth: false });
+	for (let d = 1; d <= daysInMonth; d++)
+		cells.push({ day: d, currentMonth: true });
+	const remaining = 7 - (cells.length % 7);
+	if (remaining < 7)
+		for (let i = 1; i <= remaining; i++)
+			cells.push({ day: i, currentMonth: false });
+
+	const weeks: CalendarCell[][] = [];
+	for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7));
+	return weeks;
+}

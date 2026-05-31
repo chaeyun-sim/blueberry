@@ -14,7 +14,7 @@ import { Commission } from '@/types/commission';
 import { useMutation } from '@tanstack/react-query';
 import { scoreMutations } from '@/api/score/mutations';
 import { scoreKeys } from '@/api/score/queryKeys';
-import { findSongByTitle } from '@/api/score';
+import { findOrCreateSong, uploadAllFiles } from '@/api/score/helpers';
 import { queryClient } from '@/utils/query-client';
 import { toast } from 'sonner';
 import { FileEntry } from '@/types/form';
@@ -27,34 +27,6 @@ import ZipFileHeader from './ZipFileHeader';
 import ReadOnlyFileList from './ReadOnlyFileList';
 import { useAuth } from '@/hooks/use-auth';
 import { Input } from '@/components/ui/input';
-
-async function findOrCreateSong(
-  title: string,
-  composer: string,
-  createSong: (params: { title: string; composer: string }) => Promise<{ id: string }>,
-): Promise<string> {
-  const existing = await findSongByTitle(title, composer);
-  if (existing) return existing.id;
-  const newSong = await createSong({ title, composer });
-  return newSong.id;
-}
-
-async function uploadAllFiles(
-  files: FileEntry[],
-  arrangementId: string,
-  uploadFile: (params: { arrangementId: string; file: File; label: string; fileType: string }) => Promise<unknown>,
-): Promise<string[]> {
-  const failed: string[] = [];
-  for (const entry of files) {
-    try {
-      await uploadFile({ arrangementId, file: entry.file, label: entry.label, fileType: entry.fileType });
-    } catch (e) {
-      toast.error('파일 업로드에 실패했습니다.', { description: (e as Error).message });
-      failed.push(entry.label);
-    }
-  }
-  return failed;
-}
 
 interface CompleteDialogForm {
   zipName: string | null;

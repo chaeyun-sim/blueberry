@@ -22,6 +22,7 @@ import { toast } from 'sonner';
 import AppHeader from '@/components/layout/AppHeader';
 import { Input } from '@/components/ui/input';
 import Button from '@/components/ui/button';
+import { usePasswordChangeForm } from '@/hooks/use-password-change-form';
 
 export default function Settings() {
 	const { session, isGuest } = useAuth();
@@ -32,48 +33,9 @@ export default function Settings() {
 	);
 	const [pushLoading, setPushLoading] = useState(false);
 
-	const [pwOpen, setPwOpen] = useState(false);
-	const [pwLoading, setPwLoading] = useState(false);
-	const [pwForm, setPwForm] = useState({ current: '', next: '', confirm: '' });
-	const [showPw, setShowPw] = useState({
-		current: false,
-		next: false,
-		confirm: false,
-	});
-
-	const handlePasswordChange = async (e: React.FormEvent) => {
-		e.preventDefault();
-		if (pwForm.next !== pwForm.confirm) {
-			toast.error('새 비밀번호가 일치하지 않아요');
-			return;
-		}
-		if (pwForm.next.length < 6) {
-			toast.error('비밀번호는 6자 이상이어야 해요');
-			return;
-		}
-		setPwLoading(true);
-		try {
-			const { error: verifyError } = await supabase.auth.signInWithPassword({
-				email: session!.user.email!,
-				password: pwForm.current,
-			});
-			if (verifyError) {
-				toast.error('현재 비밀번호가 올바르지 않아요');
-				return;
-			}
-			const { error } = await supabase.auth.updateUser({ password: pwForm.next });
-			if (error) throw error;
-			toast.success('비밀번호가 변경됐어요');
-			setPwForm({ current: '', next: '', confirm: '' });
-			setPwOpen(false);
-		} catch (e) {
-			toast.error('비밀번호 변경에 실패했어요', {
-				description: e instanceof Error ? e.message : String(e),
-			});
-		} finally {
-			setPwLoading(false);
-		}
-	};
+	const {
+		pwOpen, setPwOpen, pwLoading, pwForm, setPwForm, showPw, setShowPw, handleSubmit: handlePasswordChange,
+	} = usePasswordChangeForm(session);
 
 	const handlePushToggle = async (checked: boolean) => {
 		if (isGuest || !session?.access_token) {
