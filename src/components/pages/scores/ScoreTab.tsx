@@ -29,13 +29,10 @@ import { scoreMutations } from '@/api/score/mutations';
 import { scoreKeys } from '@/api/score/queryKeys';
 import { useMutation } from '@tanstack/react-query';
 import { queryClient } from '@/utils/query-client';
-import dayjs from 'dayjs';
-import type { Song } from '@/types/score';
+import { useScoreNavigation } from '@/hooks/use-score-navigation';
 
 function ScoreTab() {
 	const [search, setSearch] = useState('');
-	const [openComposer, setOpenComposer] = useState<string | null>(null);
-	const [openSongId, setOpenSongId] = useState<string | null>(null);
 	const navigate = useNavigate();
 
 	const {
@@ -53,6 +50,20 @@ function ScoreTab() {
 		onError: (e: Error) =>
 			toast.error('악보 삭제에 실패했습니다.', { description: e.message }),
 	});
+
+	const {
+		openComposer,
+		setOpenComposer,
+		openSongId,
+		setOpenSongId,
+		openSong,
+		filteredComposers,
+		composerSongs,
+		filteredArrangements,
+		breadcrumb,
+		handleNavigate,
+		placeholder,
+	} = useScoreNavigation(songs, search);
 
 	if (isLoading && !songs.length) {
 		return (
@@ -85,73 +96,13 @@ function ScoreTab() {
 		);
 	}
 
-	const composerGroups = songs.reduce<Record<string, Song[]>>((acc, song) => {
-		const key = song.composer || '(미상)';
-		if (!acc[key]) acc[key] = [];
-		acc[key].push(song);
-		return acc;
-	}, {});
-
-	const filteredComposers = Object.entries(composerGroups).filter(
-		([composer, composerSongs]) =>
-			!search ||
-			composer.toLowerCase().includes(search.toLowerCase()) ||
-			composerSongs.some((s) =>
-				s.title.toLowerCase().includes(search.toLowerCase()),
-			),
-	);
-
-	const composerSongs = openComposer
-		? (composerGroups[openComposer] ?? []).filter(
-				(s) => !search || s.title.toLowerCase().includes(search.toLowerCase()),
-			)
-		: [];
-
-	const openSong = openSongId
-		? (songs.find((s) => s.id === openSongId) ?? null)
-		: null;
-
-	const filteredArrangements = openSong
-		? openSong.arrangements.filter(
-				(arr) =>
-					!search || arr.arrangement.toLowerCase().includes(search.toLowerCase()),
-			)
-		: [];
-
-	const breadcrumb: { label: string; id: string | null }[] = [
-		{ label: '전체 악보', id: null },
-	];
-
-	if (openComposer)
-		breadcrumb.push({
-			label: openComposer,
-			id: 'COMPOSER',
-		});
-
-	if (openSong) breadcrumb.push({ label: openSong.title, id: openSong.id });
-
-	const handleNavigate = (id: string | null) => {
-		if (id === null) {
-			setOpenComposer(null);
-			setOpenSongId(null);
-		} else if (id === 'COMPOSER') {
-			setOpenSongId(null);
-		}
-		setSearch('');
-	};
-
-	const placeholder = () => {
-		if (openSong) return '편성명 검색...';
-		if (openComposer) return '곡명 검색...';
-		return '작곡가 또는 곡명 검색...';
-	};
 
 	return (
 		<div className='space-y-4'>
 			<div className='relative max-w-sm'>
 				<Search className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none' />
 				<Input
-					placeholder={placeholder()}
+					placeholder={placeholder}
 					value={search}
 					onChange={(e) => setSearch(e.target.value)}
 					className='pl-9 pr-9'
@@ -168,7 +119,7 @@ function ScoreTab() {
 				)}
 			</div>
 
-			<Breadcrumb path={breadcrumb} onNavigate={handleNavigate} />
+			<Breadcrumb path={breadcrumb} onNavigate={(id) => handleNavigate(id, () => setSearch(''))} />
 
 			<Card className='border-border/50'>
 				<CardContent className='p-2 md:p-5'>

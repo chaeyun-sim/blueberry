@@ -6,7 +6,7 @@ import { buildInstrumentList } from '@/utils/build-instrument-list';
 import { parseInstrumentsFromZipName } from '@/utils/parse-instruments-from-zipName';
 import { MAX_ZIP_SIZE } from '@/constants/file-size';
 import { FileEntry } from '@/types/form';
-import { extractZipEntries, ZipExtractionError } from '@/utils/extract-zip-entries';
+import { extractZipInWorker } from '@/utils/extract-zip-in-worker';
 import DropZone from '../commission/Dropzone';
 import FileEntryList from './FileEntryList';
 import ZipFileHeader from '../commission/ZipFileHeader';
@@ -54,13 +54,13 @@ export function ZipUploadCard({
     setIsExtracting(true);
     try {
       const buffer = await file.arrayBuffer();
-      const entries = await extractZipEntries(buffer);
-      const parsed = parseInstrumentsFromZipName(file.name);
+      const entries = await extractZipInWorker(buffer);
+      const parsed  = parseInstrumentsFromZipName(file.name);
 
       onUpload({
-        zipName: file.name,
-        zipSize: file.size,
-        files: entries,
+        zipName:     file.name,
+        zipSize:     file.size,
+        files:       entries,
         instruments: parsed.length > 0 ? buildInstrumentList(parsed) : [],
       });
 
@@ -68,10 +68,7 @@ export function ZipUploadCard({
         toast.info('악기 정보를 자동으로 인식하지 못했습니다. 직접 입력해주세요.');
       }
     } catch (e) {
-      const message = e instanceof ZipExtractionError
-        ? e.message
-        : 'ZIP 파일을 읽을 수 없습니다.';
-      toast.error(message, e instanceof ZipExtractionError ? undefined : { description: (e as Error).message });
+      toast.error((e as Error).message ?? 'ZIP 파일을 읽을 수 없습니다.');
     } finally {
       setIsExtracting(false);
       if (zipInputRef.current) zipInputRef.current.value = '';

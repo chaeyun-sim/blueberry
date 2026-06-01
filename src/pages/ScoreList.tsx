@@ -4,26 +4,13 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import Button from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-	PlusCircle,
-	Search,
-	FileMusic,
-	Music,
-	AlertCircle,
-} from 'lucide-react';
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from '@/components/ui/table';
+import { PlusCircle, Search, Music, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import Breadcrumb from '@/components/pages/scores/BreadCrumb';
 import FolderRow from '@/components/pages/scores/FolderRow';
 import DeleteSongDialog from '@/components/pages/scores/DeleteSongDialog';
+import { ScoreArrangementTable } from '@/components/pages/scores/ScoreArrangementTable';
 import { overlay } from 'overlay-kit';
 import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 import { scoreQueries } from '@/api/score/queries';
@@ -31,7 +18,6 @@ import { scoreMutations } from '@/api/score/mutations';
 import { scoreKeys } from '@/api/score/queryKeys';
 import { useMutation } from '@tanstack/react-query';
 import { queryClient } from '@/utils/query-client';
-import dayjs from 'dayjs';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/use-auth';
 
@@ -194,47 +180,10 @@ const ScoreList = () => {
 								animate={{ opacity: 1 }}
 								exit={{ opacity: 0 }}
 							>
-								<Table>
-									<TableHeader>
-										<TableRow>
-											<TableHead className='text-xs uppercase tracking-wider text-left'>
-												편성명
-											</TableHead>
-											<TableHead className='text-xs uppercase tracking-wider text-right'>
-												등록일
-											</TableHead>
-										</TableRow>
-									</TableHeader>
-									<TableBody>
-										{openFolder.arrangements.map((arr) => (
-											<TableRow
-												key={arr.id}
-												role='button'
-												tabIndex={0}
-												className='cursor-pointer hover:bg-muted/50'
-												onClick={() =>
-													navigate(`/scores/${openFolder.id}/arrangements/${arr.id}`)
-												}
-												onKeyDown={(e) => {
-													if (e.key === 'Enter' || e.key === ' ') {
-														e.preventDefault();
-														navigate(`/scores/${openFolder.id}/arrangements/${arr.id}`);
-													}
-												}}
-											>
-												<TableCell className='font-medium flex items-center gap-2'>
-													<FileMusic className='h-4 w-4 text-muted-foreground/60 shrink-0' />
-													{arr.arrangement.split(',').length >= 10
-														? 'Orchestra'
-														: arr.arrangement}
-												</TableCell>
-												<TableCell className='text-right text-muted-foreground'>
-													{dayjs(arr.created_at).format('YYYY-MM-DD')}
-												</TableCell>
-											</TableRow>
-										))}
-									</TableBody>
-								</Table>
+								<ScoreArrangementTable
+									songId={openFolder.id}
+									arrangements={openFolder.arrangements}
+								/>
 							</motion.div>
 						)}
 					</AnimatePresence>

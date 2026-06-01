@@ -88,3 +88,88 @@ export type RevenueConcentrationItem = {
   cumulativeShare: number;
   songShare: number;
 };
+
+// ─── RPC Response Row Types ───────────────────────────────────────────────────
+// Raw shapes returned by Supabase RPC functions, used for type-safe mapping.
+
+export type RpcSalesSummaryRow = {
+  totalRevenue: number;
+  totalCount: number;
+  thisYearRevenue: number;
+  thisYearCount: number;
+  lastYearRevenue: number;
+  lastYearCount: number;
+  thisMonthCount: number;
+  lastMonthRevenue: number;
+  lastMonthCount: number;
+  prevPrevRevenue: number;
+  prevPrevCount: number;
+};
+
+export type RpcMonthlySaleRow = {
+  month_num: number;
+  revenue: number;
+  count: number;
+  prev_revenue: number;
+  prev_count: number;
+};
+
+export type RpcMonthlyCategoryRow = {
+  month_num: number;
+  CLASSIC: number;
+  POP: number;
+  'K-POP': number;
+  OST: number;
+  ANI: number;
+  ETC: number;
+};
+
+export type RpcCategoryDistributionRow = {
+  name: string;
+  revenue: number;
+  count: number;
+};
+
+export type RpcTopSongRow = {
+  song_title: string;
+  category: string;
+  sales: number;
+  revenue: number;
+};
+
+export type RpcTopArrangementRow = {
+  arrangement: string;
+  sales: number;
+  revenue: number;
+};
+
+export type RpcTopSongMonthlySaleRow = {
+  month_num: number;
+  song_title: string;
+  count: number;
+  song_rank: number;
+};
+
+export type RpcSeasonalPatternRow = {
+  month_num: number;
+  avg_revenue: number;
+  avg_count: number;
+  years: number;
+  top_songs: { title: string; avgCount: number }[];
+};
+
+export type RpcTrendingSongRow = {
+  title: string;
+  recent_sales: number;
+  prev_sales: number;
+  growth: number;
+};
+
+export type RpcRevenueConcentrationRow = {
+  rank: number;
+  title: string;
+  revenue: number;
+  revenue_share: number;
+  cumulative_share: number;
+  song_share: number;
+};

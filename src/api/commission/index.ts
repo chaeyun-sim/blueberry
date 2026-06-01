@@ -122,15 +122,39 @@ export async function uploadCommissionImage(commissionId: string, file: File): P
   return publicUrl
 }
 
+/**
+ * Thrown when `updateCommissionStatus` detects that the commission's status
+ * was already changed by another session (PGRST116 / optimistic concurrency).
+ * Callers can `instanceof`-check this to skip retries.
+ */
+export class ConcurrencyConflictError extends Error {
+  constructor() {
+    super('다른 기기에서 이미 상태가 변경되었습니다. 페이지를 새로고침해주세요.');
+    this.name = 'ConcurrencyConflictError';
+  }
+}
+
+// @MX:ANCHOR: [AUTO] Status transition entry point — called from CommissionDetail and CommissionEdit.
+// @MX:REASON: Optimistic concurrency guard: prevStatus must match the DB row's current status or
+//             PGRST116 is returned (0 rows updated). Any caller change to this signature must be
+//             reflected in both CommissionDetail.tsx and CommissionEdit.tsx.
 // 의뢰 상태 변경
-export async function updateCommissionStatus(id: string, status: CommissionStatus) {
+export async function updateCommissionStatus(
+  id: string,
+  status: CommissionStatus,
+  prevStatus: CommissionStatus,
+) {
   const { data, error } = await supabase
     .from(COMMISSIONS)
     .update({ status })
     .eq('id', id)
+    .eq('status', prevStatus)
     .select()
     .single()
 
-  if (error) throw error
+  if (error) {
+    if (error.code === 'PGRST116') throw new ConcurrencyConflictError();
+    throw error
+  }
   return data as Commission
 }

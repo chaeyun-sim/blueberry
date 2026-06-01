@@ -1,7 +1,5 @@
 import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
-
-type SortKey = 'category' | 'product' | 'amount';
-type SortDir = 'asc' | 'desc';
+import { SortKey, SortDir } from '@/hooks/use-sales-table-data';
 
 function SortIcon({ col, sortKey, sortDir }: { col: SortKey; sortKey: SortKey; sortDir: SortDir }) {
   if (sortKey !== col) return <ArrowUpDown className='h-3 w-3 ml-1 opacity-40' />;

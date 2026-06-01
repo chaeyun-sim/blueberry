@@ -2,6 +2,7 @@ import React, { ReactNode, ErrorInfo } from 'react';
 import { AlertCircle } from 'lucide-react';
 import Button from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { queryClient } from '@/utils/query-client';
 
 interface Props {
   children: ReactNode;
@@ -47,6 +48,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
   };
 
   handleReload = () => {
+    queryClient.clear();
     window.location.reload();
   };
 

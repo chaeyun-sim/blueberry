@@ -1,12 +1,5 @@
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { MOBILE_BREAKPOINT } from '@/constants/breakpoints';
-import {
-	ChevronDown,
-	ChevronRight,
-	FileSpreadsheet,
-	Layers,
-	Monitor,
-} from 'lucide-react';
+import { FileSpreadsheet, Layers, Monitor } from 'lucide-react';
 import {
 	Select,
 	SelectTrigger,
@@ -16,17 +9,16 @@ import {
 } from '@/components/ui/select';
 import Button from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { formatCurrency } from '@/utils/format-currency';
-import { Fragment, useMemo, useState } from 'react';
+import { Fragment, useState } from 'react';
 import { statsQueries } from '@/api/stats/queries';
 import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 import { splitProduct } from '@/utils/split-product';
 import SortIcon from './SortIcon';
+import { useSalesTableData } from '@/hooks/use-sales-table-data';
+import { SalesTableRow } from './SalesTableRow';
+import { SalesCategoryGroupHeader } from './SalesCategoryGroupHeader';
 
-type SortKey = 'category' | 'product' | 'amount';
-type SortDir = 'asc' | 'desc';
-
-// 컬럼 flex 비율 — 헤더·바디에서 공유
+// 컬럼 flex 비율 — 헤더에서 공유
 const COL = {
 	idx: 'w-8 shrink-0',
 	cat: 'flex-[0.8] min-w-0',
@@ -35,10 +27,7 @@ const COL = {
 	amount: 'flex-[1.2] min-w-0',
 } as const;
 
-const HEAD_BASE =
-	'text-xs uppercase text-muted-foreground select-none px-3 py-2.5';
-const ROW_BASE =
-	'flex items-center border-b border-border/40 last:border-0 hover:bg-muted/30 transition-colors';
+const HEAD_BASE = 'text-xs uppercase text-muted-foreground select-none px-3 py-2.5';
 
 function SalesAll() {
 	const { data: yearRange, isFetched: yearRangeFetched } = useQuery(
@@ -58,72 +47,21 @@ function SalesAll() {
 		enabled: year !== undefined,
 	});
 
-	const [sortKey, setSortKey] = useState<SortKey>('category');
-	const [sortDir, setSortDir] = useState<SortDir>('asc');
-	const [filterCategory, setFilterCategory] = useState('ALL');
-	const [groupByCategory, setGroupByCategory] = useState(true);
-	const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(new Set());
-
-	const toggleGroup = (category: string) => {
-		setCollapsedGroups((prev) => {
-			const next = new Set(prev);
-			if (next.has(category)) next.delete(category);
-			else next.add(category);
-			return next;
-		});
-	};
-
-	const categories = useMemo(
-		() => [
-			'ALL',
-			...Array.from(new Set(originData.map((r) => r.category).filter(Boolean))),
-		],
-		[originData],
-	);
-
-	const toggleSort = (key: SortKey) => {
-		if (sortKey === key) {
-			setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
-		} else {
-			setSortKey(key);
-			setSortDir('asc');
-		}
-	};
-
-	const sortedData = useMemo(() => {
-		let data = [...originData];
-		if (filterCategory !== 'ALL') {
-			data = data.filter((r) => r.category === filterCategory);
-		}
-		data.sort((a, b) => {
-			if (groupByCategory && sortKey !== 'category') {
-				const catCmp = a.category.localeCompare(b.category, 'ko');
-				if (catCmp !== 0) return catCmp;
-			}
-			const aVal = a[sortKey];
-			const bVal = b[sortKey];
-			const cmp =
-				typeof aVal === 'number'
-					? aVal - (bVal as number)
-					: String(aVal).localeCompare(String(bVal), 'ko');
-			return sortDir === 'asc' ? cmp : -cmp;
-		});
-		return data;
-	}, [sortKey, sortDir, filterCategory, groupByCategory, originData]);
-
-	const isMobile =
-		typeof window !== 'undefined' && window.innerWidth < MOBILE_BREAKPOINT;
-	const displayData = isMobile ? sortedData.slice(0, 6) : sortedData;
-
-	const groupedData = useMemo(() => {
-		if (!groupByCategory) return null;
-		const groups: Record<string, typeof originData> = {};
-		displayData.forEach((row) => {
-			if (!groups[row.category]) groups[row.category] = [];
-			groups[row.category].push(row);
-		});
-		return groups;
-	}, [displayData, groupByCategory]);
+	const {
+		sortKey,
+		sortDir,
+		filterCategory,
+		setFilterCategory,
+		groupByCategory,
+		setGroupByCategory,
+		collapsedGroups,
+		toggleGroup,
+		toggleSort,
+		categories,
+		sortedData,
+		displayData,
+		groupedData,
+	} = useSalesTableData(originData);
 
 	return (
 		<Card className='border-border/50'>
@@ -258,66 +196,24 @@ function SalesAll() {
 						{groupByCategory && groupedData
 							? Object.entries(groupedData).map(([category, rows]) => (
 									<Fragment key={`group-${category}`}>
-										{/* Group header */}
-										<button
-											type='button'
-											className='w-full flex items-center justify-between px-4 py-2 bg-muted/40 hover:bg-muted/60 cursor-pointer select-none border-b border-border/40'
-											onClick={() => filterCategory === 'ALL' && toggleGroup(category)}
-										>
-											<div className='inline-flex items-center gap-2'>
-												{filterCategory === 'ALL' &&
-													(collapsedGroups.has(category) ? (
-														<ChevronRight className='h-4 w-4 text-muted-foreground' />
-													) : (
-														<ChevronDown className='h-4 w-4 text-muted-foreground' />
-													))}
-												<span className='px-2 py-0.5 rounded-full text-xs bg-foreground text-background font-bold font-display'>
-													{category}
-												</span>
-											</div>
-											<span className='text-muted-foreground text-xs'>
-												{rows.length}건
-											</span>
-										</button>
-										{/* Group rows */}
+										<SalesCategoryGroupHeader
+											category={category}
+											rowCount={rows.length}
+											collapsed={collapsedGroups.has(category)}
+											collapsible={filterCategory === 'ALL'}
+											onToggle={() => toggleGroup(category)}
+										/>
 										{!collapsedGroups.has(category) &&
 											rows.map((row, i) => {
 												const { song, arrangement } = splitProduct(row.product);
 												return (
-													<div key={row.id} className={ROW_BASE}>
-														<div
-															className={cn(
-																COL.idx,
-																'px-3 py-2.5 text-xs text-muted-foreground',
-															)}
-														>
-															{i + 1}
-														</div>
-														<div
-															className={cn(
-																COL.song,
-																'px-3 py-2.5 font-medium text-sm truncate',
-															)}
-														>
-															{song}
-														</div>
-														<div
-															className={cn(
-																COL.arrangement,
-																'px-3 py-2.5 text-sm text-muted-foreground truncate',
-															)}
-														>
-															{arrangement}
-														</div>
-														<div
-															className={cn(
-																COL.amount,
-																'px-3 py-2.5 text-right tabular-nums text-sm',
-															)}
-														>
-															{formatCurrency(row.amount)}
-														</div>
-													</div>
+													<SalesTableRow
+														key={row.id}
+														idx={i + 1}
+														song={song}
+														arrangement={arrangement}
+														amount={row.amount}
+													/>
 												);
 											})}
 									</Fragment>
@@ -325,39 +221,15 @@ function SalesAll() {
 							: displayData.map((row, i) => {
 									const { song, arrangement } = splitProduct(row.product);
 									return (
-										<div key={row.id} className={ROW_BASE}>
-											<div
-												className={cn(COL.idx, 'px-3 py-2.5 text-xs text-muted-foreground')}
-											>
-												{i + 1}
-											</div>
-											<div className={cn(COL.cat, 'px-3 py-2.5')}>
-												<span className='px-2 py-0.5 rounded-full text-xs bg-secondary text-secondary-foreground'>
-													{row.category}
-												</span>
-											</div>
-											<div
-												className={cn(COL.song, 'px-3 py-2.5 font-medium text-sm truncate')}
-											>
-												{song}
-											</div>
-											<div
-												className={cn(
-													COL.arrangement,
-													'px-3 py-2.5 text-sm text-muted-foreground truncate',
-												)}
-											>
-												{arrangement}
-											</div>
-											<div
-												className={cn(
-													COL.amount,
-													'px-3 py-2.5 text-right tabular-nums text-sm',
-												)}
-											>
-												{formatCurrency(row.amount)}
-											</div>
-										</div>
+										<SalesTableRow
+											key={row.id}
+											idx={i + 1}
+											song={song}
+											arrangement={arrangement}
+											amount={row.amount}
+											category={row.category}
+											showCategory
+										/>
 									);
 								})}
 					</div>
