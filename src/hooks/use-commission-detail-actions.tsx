@@ -29,7 +29,7 @@ interface Song {
 
 export function useCommissionDetailActions(
 	id: string,
-	commission: Commission,
+	commission: Commission | undefined,
 	song?: Song | null,
 ) {
 	const { isGuest } = useAuth();
@@ -37,15 +37,15 @@ export function useCommissionDetailActions(
 	const { mutate: updateStatus } = useMutation(commissionMutations.updateCommissionStatus());
 	const { mutate: updateCommission } = useMutation(commissionMutations.updateCommission());
 
-	const rawTitle = song?.english_title ?? commission.songs?.title ?? commission.title ?? '';
-	const imslpQuery = [cleanTitle(rawTitle), commission.songs?.composer ?? commission.composer]
+	const rawTitle = song?.english_title ?? commission?.songs?.title ?? commission?.title ?? '';
+	const imslpQuery = [cleanTitle(rawTitle), commission?.songs?.composer ?? commission?.composer]
 		.filter(Boolean)
 		.join(' ');
 	const imslpUrl = `https://www.google.com/search?q=${encodeURIComponent(`site:imslp.org ${imslpQuery}`)}`;
 
-	const currentStatusIndex = commissionStatuses.findIndex((s) => s === commission.status);
+	const currentStatusIndex = commissionStatuses.findIndex((s) => s === commission?.status);
 	const nextStatus =
-		commission.status === 'cancelled' || currentStatusIndex < 0
+		!commission || commission.status === 'cancelled' || currentStatusIndex < 0
 			? null
 			: currentStatusIndex < commissionStatuses.length - 1
 				? commissionStatuses[currentStatusIndex + 1]
@@ -64,7 +64,7 @@ export function useCommissionDetailActions(
 	};
 
 	const handleTransitionConfirm = () => {
-		if (!nextStatus) return;
+		if (!nextStatus || !commission) return;
 		updateStatus(
 			{ commissionId: id, status: nextStatus as CommissionStatus, prevStatus: commission.status },
 			{
@@ -90,6 +90,7 @@ export function useCommissionDetailActions(
 	};
 
 	const handleOpenDialog = () => {
+		if (!commission) return;
 		if (nextStatus === 'working') {
 			overlay.open((overlayProps) => (
 				<ReceiveAndSendDialog
@@ -114,6 +115,7 @@ export function useCommissionDetailActions(
 	};
 
 	const handleViewOriginalImage = () => {
+		if (!commission) return;
 		overlay.open(
 			(overlayProps) => (
 				<CommissionImageDialog

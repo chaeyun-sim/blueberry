@@ -46,7 +46,7 @@ const CommissionDetailContent = () => {
 		openEmailDialog,
 		handleViewOriginalImage,
 		handleDelete,
-	} = useCommissionDetailActions(id!, commission!, song);
+	} = useCommissionDetailActions(id!, commission, song);
 
 	if (!id) return <Navigate to='/commissions' replace />;
 
