@@ -44,7 +44,7 @@ export function AppLayout({ children, bottomBar, className }: AppLayoutProps) {
 					{/* Mobile: fixed above BottomNav */}
 					{bottomBar && (
 						<div
-							className='fixed left-0 right-0 z-[51] md:hidden'
+							className='fixed left-0 right-0 z-[40] md:hidden'
 							style={{ bottom: 'calc(4rem + env(safe-area-inset-bottom) + 0.75rem)' }}
 						>
 							{bottomBar}
