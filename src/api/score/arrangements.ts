@@ -57,11 +57,12 @@ export async function uploadArrangementFile(arrangementId: string, file: File, l
   if (file.size > MAX_FILE_SIZE) throw new Error(`파일 크기가 50MB를 초과합니다: ${file.name}`);
 
   const safeName = label.replace(/[,\s]+/g, '_').replace(/[^a-zA-Z0-9._-]/g, '_');
-  const path = `${arrangementId}/${safeName}.${ext}`;
+  const uuid = crypto.randomUUID();
+  const path = `${arrangementId}/${uuid}_${safeName}.${ext}`;
 
   const { error: uploadError } = await supabase.storage
     .from(ARRANGEMENT_FILES_BUCKET)
-    .upload(path, file, { upsert: true });
+    .upload(path, file, { upsert: false });
 
   if (uploadError) throw uploadError;
 
