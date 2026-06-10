@@ -32,7 +32,7 @@ export function DiscoverWidget({ commissions, isLoading }: Props) {
   const navigate = useNavigate();
 
   const received = commissions
-    .filter((c) => c.status === 'received')
+    .filter((c) => c.status === 'received' && dayjs(c.deadline).diff(dayjs(), 'day') >= 0)
     .sort((a, b) => dayjs(a.deadline).valueOf() - dayjs(b.deadline).valueOf());
 
   return (
@@ -88,7 +88,7 @@ export function DiscoverWidget({ commissions, isLoading }: Props) {
                   </p>
                 </div>
                 <p className={`text-[10px] font-semibold mt-3 ${urgent ? 'text-destructive' : style.text}`}>
-                  D-{daysLeft} 마감
+                  {daysLeft === 0 ? '오늘 마감' : `D-${daysLeft} 마감`}
                 </p>
               </button>
             );
