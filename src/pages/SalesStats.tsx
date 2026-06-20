@@ -27,7 +27,6 @@ import { statsQueries } from '@/api/stats/queries';
 import { ExcelRow } from '@/types/excel';
 import { getNetAmount } from '@/utils/getNetAmount';
 import { toast } from 'sonner';
-import { useAuth } from '@/hooks/use-auth';
 import { cn } from '@/lib/utils';
 
 const InsightsTab = () => (
@@ -67,7 +66,6 @@ const tabItems = [
 }[];
 
 const SalesStatsContent = () => {
-	const { isGuest } = useAuth();
 	const [uploadOpen, setUploadOpen] = useState(false);
 	const [activeTab, setActiveTab] = useState('all');
 
@@ -76,10 +74,6 @@ const SalesStatsContent = () => {
 
 	const handleExcelUpload = useCallback(
 		(data: ExcelRow[], name: string) => {
-			if (isGuest) {
-				toast.error('게스트 모드에서는 매출 데이터를 저장할 수 없습니다.');
-				return;
-			}
 			saveRows(
 				{ rows: data, name },
 				{
@@ -94,7 +88,7 @@ const SalesStatsContent = () => {
 				},
 			);
 		},
-		[saveRows, isGuest],
+		[saveRows],
 	);
 
 	const ActiveComponent =

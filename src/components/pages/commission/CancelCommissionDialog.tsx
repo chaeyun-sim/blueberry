@@ -16,7 +16,7 @@ import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { OverlayProps } from '@/types/overlay';
 
-interface CancelCommissionDialogProps extends OverlayProps {
+interface CancelCommissionDialogProps extends Partial<OverlayProps> {
 	commissionId: string;
 	prevStatus: CommissionStatus;
 }

@@ -8,7 +8,6 @@ import { formatDate } from '@/utils/format-date';
 import { Search, X } from 'lucide-react';
 import { useState, useMemo, useEffect } from 'react';
 import dayjs from 'dayjs';
-import { useAuth } from '@/hooks/use-auth';
 
 interface SidePanelProps {
   selectedRec: MusicRecommendation | null;
@@ -17,7 +16,6 @@ interface SidePanelProps {
 }
 
 function SidePanel({ selectedRec, workedSongs, setSelectedRec }: SidePanelProps) {
-  const { isGuest } = useAuth();
   const [query, setQuery] = useState('');
 
   const mockRecentRecs = useMemo(
@@ -25,15 +23,11 @@ function SidePanel({ selectedRec, workedSongs, setSelectedRec }: SidePanelProps)
     [],
   );
 
-  const { data: apiAllRecs = [] } = useQuery({ ...recommendationQueries.list(), enabled: !isGuest });
-  const { data: apiRecentRecs = [] } = useQuery({ ...recommendationQueries.recent(5), enabled: !isGuest });
+  const { data: apiAllRecs = [] } = useQuery({ ...recommendationQueries.list()});
+  const { data: apiRecentRecs = [] } = useQuery({ ...recommendationQueries.recent(5) });
 
-  const allRecs = isGuest ? recommendationPool : apiAllRecs;
-  const recentRecs = isGuest ? mockRecentRecs : apiRecentRecs;
-
-  useEffect(() => {
-    if (isGuest) setQuery('');
-  }, [isGuest]);
+  const allRecs = apiAllRecs
+  const recentRecs = apiRecentRecs
 
   const searchResults = query.trim()
     ? allRecs.filter((r) => {
@@ -58,10 +52,9 @@ function SidePanel({ selectedRec, workedSongs, setSelectedRec }: SidePanelProps)
         <Search className='absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none' />
         <input
           type='text'
-          placeholder={isGuest ? '로그인 후 검색할 수 있어요' : '곡명 또는 작곡가 검색'}
+          placeholder={'곡명 또는 작곡가 검색'}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          disabled={isGuest}
           className='w-full pl-8 pr-8 py-2 text-sm rounded-md border border-border/50 bg-background focus:outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50'
           aria-label='곡명 또는 작곡가 검색'
         />

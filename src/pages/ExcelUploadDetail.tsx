@@ -22,14 +22,12 @@ import { queryClient } from '@/utils/query-client';
 import { formatCurrency } from '@/utils/format-currency';
 import { splitProduct } from '@/utils/split-product';
 import { toast } from 'sonner';
-import { useAuth } from '@/hooks/use-auth';
 import AppHeader from '@/components/layout/AppHeader';
 import { SongSummaryDialog } from '@/components/pages/uploads/SongSummaryDialog';
 
 export default function ExcelUploadDetail() {
 	const { uploadId } = useParams<{ uploadId: string }>();
 	const navigate = useNavigate();
-	const { isGuest } = useAuth();
 	const [summaryOpen, setSummaryOpen] = useState(false);
 
 	const {
@@ -51,10 +49,6 @@ export default function ExcelUploadDetail() {
 	);
 
 	const handleDelete = () => {
-		if (isGuest) {
-			toast.error('게스트 모드에서는 업로드를 삭제할 수 없습니다.');
-			return;
-		}
 		if (!upload) return;
 		if (
 			!confirm(

@@ -12,7 +12,7 @@ import logoImg from '@/assets/logo.webp';
 
 export default function Register() {
 	const navigate = useNavigate();
-	const { session, loading: authLoading, isGuest } = useAuth();
+	const { session, loading: authLoading } = useAuth();
 
 	const [form, setForm] = useState({ email: '', password: '', confirm: '' });
 	const [showPassword, setShowPassword] = useState(false);
@@ -21,7 +21,7 @@ export default function Register() {
 	const [done, setDone] = useState(false);
 
 	if (authLoading) return null;
-	if (session || isGuest) return <Navigate to='/' replace />;
+	if (session) return <Navigate to='/' replace />;
 
 	const handleRegister = async (e: React.FormEvent) => {
 		e.preventDefault();

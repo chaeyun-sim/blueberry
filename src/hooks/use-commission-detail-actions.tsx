@@ -8,7 +8,6 @@ import { COMMISSION_STATUS_TRANSLATE } from '@/constants/translate';
 import { Commission } from '@/types/commission';
 import { cleanTitle } from '@/utils/commission-utils';
 import { toast } from 'sonner';
-import { useAuth } from '@/hooks/use-auth';
 import ReceiveAndSendDialog from '@/components/pages/commission/ReceiveAndSendDialog';
 import { CompleteDialog } from '@/components/pages/commission/CompleteDialog';
 import SendEmailDialog from '@/components/pages/commission/SendEmailDialog';
@@ -32,8 +31,6 @@ export function useCommissionDetailActions(
 	commission: Commission | undefined,
 	song?: Song | null,
 ) {
-	const { isGuest } = useAuth();
-
 	const { mutate: updateStatus } = useMutation(commissionMutations.updateCommissionStatus());
 	const { mutate: updateCommission } = useMutation(commissionMutations.updateCommission());
 
@@ -129,10 +126,6 @@ export function useCommissionDetailActions(
 	};
 
 	const handleDelete = () => {
-		if (isGuest) {
-			toast.error('게스트 모드에서는 의뢰를 삭제할 수 없습니다.');
-			return;
-		}
 		overlay.open(
 			(overlayProps) => (
 				<DeleteCommissionDialog {...overlayProps} commissionId={id} />

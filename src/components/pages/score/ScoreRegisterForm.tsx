@@ -4,7 +4,6 @@ import { useMutation } from '@tanstack/react-query';
 import { useSongField } from '@/hooks/use-song-field';
 import { findSongByTitle } from '@/api/score';
 import { toast } from 'sonner';
-import { useAuth } from '@/hooks/use-auth';
 import { scoreMutations } from '@/api/score/mutations';
 import { queryClient } from '@/utils/query-client';
 import { scoreKeys } from '@/api/score/queryKeys';
@@ -29,7 +28,6 @@ function ScoreRegisterForm({
   setIsSubmitting,
   clearZip,
 }: ScoreRegisterFormProps) {
-  const { isGuest } = useAuth();
   const { mutateAsync: createSong } = useMutation(scoreMutations.createSong());
   const { mutateAsync: createArrangement } = useMutation(scoreMutations.createArrangement());
   const { mutateAsync: uploadFile } = useMutation(scoreMutations.uploadArrangementFile());
@@ -44,7 +42,6 @@ function ScoreRegisterForm({
   );
 
   const validate = (): boolean => {
-    if (isGuest) { toast.error('게스트 모드에서는 악보를 등록할 수 없습니다.'); return false; }
     if (!form.songTitle.trim()) { toast.error('곡명을 입력해주세요.'); return false; }
     if (form.instruments.length === 0) { toast.error('악기 편성을 입력해주세요.'); return false; }
     if (form.files.length === 0) { toast.error('악보 파일이 없습니다. ZIP 파일을 먼저 업로드해주세요.'); return false; }

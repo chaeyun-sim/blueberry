@@ -9,13 +9,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import Button from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import Label from '@/components/ui/label';
 import { Image, Mail, CheckCircle, Loader2 } from 'lucide-react';
 import { OverlayProps } from '@/types/overlay';
-import { supabase } from '@/lib/supabase';
-import { toast } from 'sonner';
-import { useAuth } from '@/hooks/use-auth';
 
 interface TransitionConfig {
   title: string;
@@ -46,8 +41,6 @@ function ReceiveAndSendDialog({
   toStatus,
   onConfirm,
 }: ReceiveAndSendDialogProps) {
-  const { isGuest } = useAuth();
-
   const [isSending, setIsSending] = useState(false);
   const [toEmail, setToEmail] = useState('');
   const [progress, setProgress] = useState(0);
@@ -91,51 +84,8 @@ function ReceiveAndSendDialog({
   const Icon = config.icon;
 
   const handleConfirm = () => {
-    if (isGuest) {
-      toast.error('게스트 모드에서는 상태를 변경할 수 없습니다.');
-      return;
-    }
     onConfirm();
     close();
-  };
-
-  const handleEmailConfirm = async () => {
-    if (isGuest) {
-      toast.error('게스트 모드에서는 메일을 발송할 수 없습니다.');
-      return;
-    }
-    if (isSendingRef.current) return;
-
-    if (!commissionId) {
-      toast.error('의뢰를 찾을 수 없어 메일을 보낼 수 없어요.');
-      return;
-    }
-
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      toast.error('로그인이 필요해요.');
-      return;
-    }
-
-    isSendingRef.current = true;
-    setIsSending(true);
-    try {
-      const { error } = await supabase.functions.invoke('send-score-email', {
-        body: { commissionId, toEmail: toEmail || undefined },
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      });
-      if (error) throw error;
-
-      toast.success('메일을 발송했어요!');
-      onConfirm();
-      close();
-    } catch (e) {
-      const message = e instanceof Error ? e.message : '알 수 없는 오류';
-      toast.error('메일 발송에 실패했어요', { description: message });
-    } finally {
-      isSendingRef.current = false;
-      setIsSending(false);
-    }
   };
 
   return (

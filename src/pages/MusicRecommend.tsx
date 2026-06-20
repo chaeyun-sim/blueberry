@@ -7,22 +7,19 @@ import { useWorkedSongs } from '@/hooks/use-worked-songs';
 import { RecommendCard } from '@/components/pages/recommend/RecommendCard';
 import SidePanel from '@/components/pages/recommend/SidePanel';
 import { recommendationQueries } from '@/api/recommendation/queries';
-import { useAuth } from '@/hooks/use-auth';
 
 function MusicRecommend() {
-  const { isGuest } = useAuth();
   const { workedSongs, markAsWorked, unmarkAsWorked } = useWorkedSongs();
   const [selectedRec, setSelectedRec] = useState<MusicRecommendation | null>(null);
 
   const mockTodayRec = useMemo(() => getDailyRecommendation(), []);
   const { data: todayRec, isPending, isError } = useQuery({
     ...recommendationQueries.today(),
-    enabled: !isGuest,
   });
 
-  const rec = selectedRec ?? (isGuest ? mockTodayRec : todayRec);
+  const rec = selectedRec ?? mockTodayRec;
 
-  if (!isGuest && isPending) {
+  if (isPending) {
     return (
       <AppLayout>
         <div className='h-full overflow-auto' role="status">
@@ -33,7 +30,7 @@ function MusicRecommend() {
     );
   }
 
-  if (!isGuest && (isError || !rec)) {
+  if (isError || !rec) {
     return (
       <AppLayout>
         <div className='h-full overflow-auto'>

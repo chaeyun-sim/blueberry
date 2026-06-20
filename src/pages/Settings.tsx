@@ -25,7 +25,7 @@ import Button from '@/components/ui/button';
 import { usePasswordChangeForm } from '@/hooks/use-password-change-form';
 
 export default function Settings() {
-	const { session, isGuest } = useAuth();
+	const { session } = useAuth();
 	const navigate = useNavigate();
 
 	const { data: pushEnabled = false, refetch: refetchPush } = useQuery(
@@ -38,7 +38,7 @@ export default function Settings() {
 	} = usePasswordChangeForm(session);
 
 	const handlePushToggle = async (checked: boolean) => {
-		if (isGuest || !session?.access_token) {
+		if (!session?.access_token) {
 			toast.error('게스트 모드에서는 푸시 알림을 설정할 수 없습니다.');
 			return;
 		}
@@ -82,8 +82,6 @@ export default function Settings() {
 		await logout().catch(() => {});
 		navigate('/login');
 	};
-
-	if (isGuest) return <Navigate to='/not-found' replace />;
 
 	return (
 		<AppLayout>

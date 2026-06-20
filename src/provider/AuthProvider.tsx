@@ -7,7 +7,6 @@ import { AuthContext } from './AuthContext'
 function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
-  const [isGuest, setIsGuest] = useState(() => sessionStorage.getItem('guest_mode') === 'true')
   const queryClient = useQueryClient()
 
   useEffect(() => {
@@ -23,21 +22,8 @@ function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe()
   }, [])
 
-  const enterGuestMode = useCallback(() => {
-    sessionStorage.setItem('guest_mode', 'true')
-    setIsGuest(true)
-    queryClient.clear()
-  }, [queryClient])
-
-  const exitGuestMode = useCallback(async () => {
-    sessionStorage.removeItem('guest_mode')
-    setIsGuest(false)
-    queryClient.clear()
-    await logout().catch(() => {})
-  }, [queryClient])
-
   return (
-    <AuthContext.Provider value={{ session, loading, isGuest, enterGuestMode, exitGuestMode }}>
+    <AuthContext.Provider value={{ session, loading }}>
       {children}
     </AuthContext.Provider>
   )

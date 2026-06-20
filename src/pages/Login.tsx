@@ -17,7 +17,7 @@ interface LoginFormType {
 
 export default function Login() {
 	const navigate = useNavigate();
-	const { session, loading: authLoading, isGuest } = useAuth();
+	const { session, loading: authLoading } = useAuth();
 
 	const [form, setForm] = useState<LoginFormType>({
 		email: '',
@@ -28,7 +28,7 @@ export default function Login() {
 	const [loading, setLoading] = useState(false);
 
 	if (authLoading) return null;
-	if (session || isGuest) return <Navigate to='/' replace />;
+	if (session) return <Navigate to='/' replace />;
 
 	const handleLogin = async (e: React.FormEvent) => {
 		e.preventDefault();

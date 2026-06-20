@@ -6,9 +6,7 @@ import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { overlay } from 'overlay-kit';
 import { commissionQueries } from '@/api/commission/queries';
 import { useAppQuery as useQuery } from '@/hooks/use-app-query';
-import { useAuth } from '@/hooks/use-auth';
 import AppHeader from '@/components/layout/AppHeader';
-import { toast } from 'sonner';
 import { useCommissionEditForm } from '@/hooks/use-commission-edit-form';
 import { CancelCommissionDialog } from '@/components/pages/commission/CancelCommissionDialog';
 import { InlineEditField } from '@/components/pages/commission/InlineEditField';
@@ -19,7 +17,6 @@ const CommissionEdit = () => {
 	const navigate = useNavigate();
 	const titleEditRef = useRef<HTMLInputElement>(null);
 	const composerEditRef = useRef<HTMLInputElement>(null);
-	const { isGuest } = useAuth();
 
 	const [isTitleEditing, setIsTitleEditing] = useState(false);
 	const [isComposerEditing, setIsComposerEditing] = useState(false);
@@ -60,13 +57,7 @@ const CommissionEdit = () => {
 							수정 취소
 						</Button>
 						<Button
-							onClick={() => {
-								if (isGuest) {
-									toast.error('게스트 모드에서는 의뢰를 수정할 수 없습니다.');
-									return;
-								}
-								handleSave(id);
-							}}
+							onClick={() => handleSave(id)}
 							className='flex-1 md:flex-none md:px-6 rounded-2xl md:rounded-md py-6 md:py-2 shadow-lg md:shadow-none'
 							disabled={isSubmitting}
 						>

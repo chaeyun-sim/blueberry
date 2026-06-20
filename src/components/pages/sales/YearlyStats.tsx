@@ -18,8 +18,6 @@ import { useAuth } from '@/hooks/use-auth';
 import { categoryChartConfig } from '@/constants/status-config';
 
 function YearlyStats() {
-	const { isGuest } = useAuth();
-
 	const { data: yearRange } = useQuery(statsQueries.getSalesYearRange());
 
 	const [selectedYear, setSelectedYear] = useState<number | null>(null);
@@ -44,8 +42,8 @@ function YearlyStats() {
 		: 0;
 	const monthlySalesWithAvg = salesData.map((d) => ({
 		...d,
-		revenue: isGuest ? d.revenue : getNetAmount(d.revenue),
-		prevRevenue: isGuest ? d.prevRevenue : getNetAmount(d.prevRevenue),
+		revenue: getNetAmount(d.revenue),
+		prevRevenue: getNetAmount(d.prevRevenue),
 	}));
 
 	const growthData = salesData.map((d) => ({

@@ -9,8 +9,6 @@ import {
 } from 'recharts';
 import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 import { commissionQueries } from '@/api/commission/queries';
-import { useAuth } from '@/hooks/use-auth';
-import { demoMonthlyCategoryBreakdown } from '@/data/demo';
 
 interface TooltipProps {
   active?: boolean;
@@ -27,7 +25,6 @@ function CustomTooltip({ active, payload }: TooltipProps) {
 }
 
 function MonthlyChart() {
-  const { isGuest } = useAuth();
   const { data: monthlyData = [] } = useQuery(commissionQueries.getMonthlyCommissionCounts());
 
   const last = monthlyData[monthlyData.length - 1]?.count ?? 0;
@@ -51,8 +48,7 @@ function MonthlyChart() {
 
       {/* Chart */}
       <ResponsiveContainer width='100%' height={190}>
-        <AreaChart data={isGuest ? demoMonthlyCategoryBreakdown.map(d => ({ ...d, count: d.CLASSIC + d.POP + d['K-POP'] + d.OST + d.ANI + d.ETC }))
-          : monthlyData} margin={{ top: 8, right: 8, bottom: 0, left: -12 }}>
+        <AreaChart data={monthlyData} margin={{ top: 8, right: 8, bottom: 0, left: -12 }}>
           <defs>
             <linearGradient id='monthlyGradient' x1='0' y1='0' x2='0' y2='1'>
               <stop offset='10%'  stopColor='white' stopOpacity={0.3} />

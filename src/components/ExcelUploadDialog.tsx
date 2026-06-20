@@ -12,8 +12,6 @@ import Label from '@/components/ui/label';
 import { Upload, FileSpreadsheet, X, CheckCircle2 } from 'lucide-react';
 import { splitProduct } from '@/utils/split-product';
 import { ExcelRow } from '@/types/excel';
-import { useAuth } from '@/hooks/use-auth';
-import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useExcelFileParser } from '@/hooks/use-excel-file-parser';
 
@@ -29,7 +27,6 @@ function getDefaultUploadName(): string {
 }
 
 export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: ExcelUploadDialogProps) => {
-  const { isGuest } = useAuth();
   const { fileName, preview, error, parseFile, reset: resetParser } = useExcelFileParser();
   const [uploadName, setUploadName] = useState(getDefaultUploadName);
   const [dragOver, setDragOver] = useState(false);
@@ -59,11 +56,6 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: ExcelUploadD
   );
 
   const handleConfirm = () => {
-    if (isGuest) {
-      toast.error('게스트 모드에서는 엑셀 업로드를 할 수 없습니다.');
-      return;
-    }
-
     if (preview.length > 0 && uploadName.trim()) {
       onUpload(preview, uploadName.trim());
       reset();

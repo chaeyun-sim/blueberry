@@ -6,7 +6,6 @@ import AnalyzeImage from '@/components/pages/commission/AnalyzeImage';
 import CommissionRegisterForm from '@/components/pages/commission/CommissionRegisterForm';
 import { buildInstrumentList } from '@/utils/build-instrument-list';
 import { CommissionRegisterFormType } from '@/types/form';
-import { useAuth } from '@/hooks/use-auth';
 import AppHeader from '@/components/layout/AppHeader';
 
 function getDefaultDeadline() {
@@ -19,7 +18,6 @@ function getDefaultDeadline() {
 }
 
 const CommissionRegister = () => {
-  const { isGuest } = useAuth();
   const [searchParams] = useSearchParams();
 
   const [form, setForm] = useState<CommissionRegisterFormType>({
@@ -58,8 +56,6 @@ const CommissionRegister = () => {
       }
     })();
   }, []);
-
-  if (isGuest) return <Navigate to='/not-found' replace />;
 
   return (
     <AppLayout>

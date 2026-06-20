@@ -22,8 +22,6 @@ interface SendEmailDialogProps extends OverlayProps {
 }
 
 function SendEmailDialog({ isOpen, close, commissionId, onDelivered }: SendEmailDialogProps) {
-  const { isGuest } = useAuth();
-
   const [isSending, setIsSending] = useState(false);
   const [toEmail, setToEmail] = useState('');
   const [progress, setProgress] = useState(0);
@@ -61,10 +59,6 @@ function SendEmailDialog({ isOpen, close, commissionId, onDelivered }: SendEmail
   }, [isSending]);
 
   const handleSend = async () => {
-    if (isGuest) {
-      toast.error('게스트 모드에서는 메일을 발송할 수 없습니다.');
-      return;
-    }
     if (isSendingRef.current) return;
     if (!commissionId) {
       toast.error('의뢰를 찾을 수 없어 메일을 보낼 수 없어요.');
