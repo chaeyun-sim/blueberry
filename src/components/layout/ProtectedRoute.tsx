@@ -3,7 +3,7 @@ import { useAuth } from '@/hooks/use-auth'
 import { PropsWithChildren } from 'react';
 
 export default function ProtectedRoute({ children }: PropsWithChildren) {
-  const { session, loading, isGuest } = useAuth()
+  const { session, loading } = useAuth()
 
   if (loading) {
     return (
@@ -13,7 +13,7 @@ export default function ProtectedRoute({ children }: PropsWithChildren) {
     )
   }
 
-  if (!session && !isGuest) {
+  if (!session) {
     return <Navigate to="/login" replace />
   }
 

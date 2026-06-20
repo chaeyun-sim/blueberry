@@ -31,7 +31,6 @@ interface CompleteDialogProps extends OverlayProps {
 }
 
 export function CompleteDialog({ isOpen, close, commission, onConfirm }: CompleteDialogProps) {
-  const { isGuest } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [forceOverride, setForceOverride] = useState(false);
 
@@ -57,11 +56,6 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
   const isProcessing = isExtracting || isCompressing;
 
   const handleSubmit = async () => {
-    if (isGuest) {
-      toast.error('게스트 모드에서는 악보를 등록할 수 없습니다.');
-      return;
-    }
-
     if (!zipName || files.length === 0) {
       toast.error('악보 ZIP 파일을 업로드해주세요.');
       return;
@@ -86,7 +80,9 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
         return;
       }
       if (failed.length > 0) {
-        toast.error(`업로드 실패: ${failed.join(', ')}`, { description: '실패한 파일은 메일에 포함되지 않아요.' });
+        toast.error(`업로드 실패: ${failed.join(', ')}`, {
+          description: '실패한 파일은 메일에 포함되지 않아요.',
+        });
       }
 
       queryClient.invalidateQueries({ queryKey: scoreKeys.list() });
@@ -106,7 +102,12 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
     if (f) handleZipFile(f);
   };
 
-  const canSubmit = !isSubmitting && !isProcessing && !!zipName && files.length > 0 && (isZipTitleMatch || forceOverride);
+  const canSubmit =
+    !isSubmitting &&
+    !isProcessing &&
+    !!zipName &&
+    files.length > 0 &&
+    (isZipTitleMatch || forceOverride);
 
   const onOpenChange = (open: boolean) => {
     if (!open) {
@@ -116,33 +117,39 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={onOpenChange}
+    >
       <DialogContent className='sm:max-w-xl'>
         <DialogHeader>
           <DialogTitle className='font-display'>작업 완료</DialogTitle>
           <DialogDescription>
-            완성된 악보 ZIP 파일을 업로드하면 악보 목록에 자동 등록돼요. AIFF/WAV는 MP3로 변환 후 저장됩니다.
+            완성된 악보 ZIP 파일을 업로드하면 악보 목록에 자동 등록돼요. AIFF/WAV는 MP3로 변환 후
+            저장됩니다.
           </DialogDescription>
         </DialogHeader>
 
         <div className='space-y-4'>
           <div>
-            <Label htmlFor="zip-input" className='mb-2 block'>악보 파일 (ZIP)</Label>
+            <Label
+              htmlFor='zip-input'
+              className='mb-2 block'
+            >
+              악보 파일 (ZIP)
+            </Label>
             <Input
               ref={zipInputRef}
               type='file'
               accept='.zip'
               className='hidden'
-              onChange={e => { const f = e.target.files?.[0]; if (f) handleZipFile(f); }}
-              id="zip-input"
+              onChange={e => {
+                if (e.target.files?.[0]) handleZipFile(e.target.files?.[0]);
+              }}
+              id='zip-input'
             />
 
-            {!zipName ? (
-              <DropZone
-                onClick={() => zipInputRef.current?.click()}
-                onDrop={handleDrop}
-              />
-            ) : (
+            {zipName ? (
               <div className='space-y-2'>
                 <ZipFileHeader
                   name={zipName}
@@ -153,10 +160,12 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
                 />
 
                 {isProcessing ? (
-                    <div className='flex items-center justify-center gap-2 py-4 text-muted-foreground'>
-                      <Loader2 className='h-4 w-4 animate-spin' />
-                      <span className='text-sm'>{isCompressing ? '오디오 MP3 변환 중...' : '압축 해제 중...'}</span>
-                    </div>
+                  <div className='flex items-center justify-center gap-2 py-4 text-muted-foreground'>
+                    <Loader2 className='h-4 w-4 animate-spin' />
+                    <span className='text-sm'>
+                      {isCompressing ? '오디오 MP3 변환 중...' : '압축 해제 중...'}
+                    </span>
+                  </div>
                 ) : (
                   <ReadOnlyFileList files={files} />
                 )}
@@ -176,6 +185,11 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
                   </p>
                 )}
               </div>
+            ) : (
+              <DropZone
+                onClick={() => zipInputRef.current?.click()}
+                onDrop={handleDrop}
+              />
             )}
           </div>
 
@@ -198,14 +212,25 @@ export function CompleteDialog({ isOpen, close, commission, onConfirm }: Complet
         <div className='flex justify-end gap-2 pt-2'>
           <Button
             variant='outline'
-            onClick={() => { resetZip(); close(); }}
+            onClick={() => {
+              resetZip();
+              close();
+            }}
             disabled={isSubmitting}
           >
             취소
           </Button>
-          <Button onClick={handleSubmit} disabled={!canSubmit} className='gap-2'>
-            {isSubmitting ? <Loader2 className='h-4 w-4 animate-spin' /> : <FileCheck className='h-4 w-4' />}
-            {isSubmitting ? '등록 중...' : '작업 완료'}
+          <Button
+            onClick={handleSubmit}
+            disabled={!canSubmit}
+            className='gap-2'
+          >
+            {isSubmitting ? (
+              <Loader2 className='h-4 w-4 animate-spin' />
+            ) : (
+              <FileCheck className='h-4 w-4' />
+            )}
+            {isSubmitting ? '악보 등록 중...' : '작업 완료'}
           </Button>
         </div>
       </DialogContent>

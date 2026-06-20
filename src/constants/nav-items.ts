@@ -4,7 +4,6 @@ import {
 	ClipboardList,
 	BarChart3,
 	Archive,
-	Sparkles,
 } from 'lucide-react';
 
 export const navItems = [

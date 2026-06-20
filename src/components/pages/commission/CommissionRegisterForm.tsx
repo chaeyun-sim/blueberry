@@ -36,8 +36,6 @@ function CommissionRegisterForm({
   const navigate = useNavigate();
   const dateInputRef = useRef<HTMLInputElement>(null);
 
-  const { isGuest } = useAuth();
-
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { mutateAsync: createCommission } = useMutation(commissionMutations.createCommission());
@@ -75,11 +73,6 @@ function CommissionRegisterForm({
   };
 
   const handleSubmit = async () => {
-    if (isGuest) {
-      toast.error('게스트 모드에서는 의뢰를 등록할 수 없습니다.');
-      return;
-    }
-
     setIsSubmitting(true);
     try {
       const songId = await resolveSongId();
