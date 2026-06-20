@@ -21,6 +21,7 @@ import {
 	TrendingDown,
 	CheckCircle2,
 	Sparkles,
+	ChevronRightIcon,
 } from 'lucide-react';
 
 function getGreeting(hour: number) {
@@ -131,7 +132,7 @@ const DashboardContent = () => {
 								</p>
 							)}
 						</div>
-						<p className='text-xs text-muted-foreground mt-3 md:mt-0'>자세히 →</p>
+						<p className='text-xs text-muted-foreground mt-3 md:mt-0 flex items-center gap-1'>자세히 <ChevronRightIcon className="w-3.5 h-3.5 text-muted-foreground" /></p>
 					</div>
 
 					{/* Total completed — 모바일에서 숨김 */}
@@ -167,9 +168,7 @@ const DashboardContent = () => {
 								</span>
 							</div>
 						</div>
-						<p className='text-[10px] md:text-xs text-muted-foreground mt-2 md:mt-0'>
-							전체 보기 →
-						</p>
+						<p className='text-[10px] md:text-xs text-muted-foreground mt-2 md:mt-0 flex items-center gap-1'>전체 보기 <ChevronRightIcon className="w-3.5 h-3.5 text-muted-foreground" /></p>
 					</div>
 				</div>
 

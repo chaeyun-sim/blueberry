@@ -1,19 +1,21 @@
 import { formatFileSize } from '@/utils/format-file-size';
 import { FileArchive, X } from 'lucide-react';
 
+interface ZipFileHeaderProps {
+  name: string;
+  size: number;
+  fileCount: number;
+  onClear: () => void;
+  disabled: boolean;
+}
+
 function ZipFileHeader({
   name,
   size,
   fileCount,
   onClear,
   disabled,
-}: {
-  name: string;
-  size: number;
-  fileCount: number;
-  onClear: () => void;
-  disabled: boolean;
-}) {
+}: ZipFileHeaderProps) {
   return (
     <div className='flex items-center justify-between p-3 rounded-lg bg-primary/5 border border-primary/15'>
       <div className='flex items-center gap-3'>

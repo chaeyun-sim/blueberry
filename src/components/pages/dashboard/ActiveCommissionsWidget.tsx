@@ -1,10 +1,10 @@
 import { useMemo } from 'react';
 import { Commission } from '@/types/commission';
-import { useNavigate } from 'react-router-dom';
-import { Music2, ArrowRight } from 'lucide-react';
+import { NavigateFunction, useNavigate } from 'react-router-dom';
+import { Music2, ChevronRightIcon } from 'lucide-react';
 import dayjs from 'dayjs';
 
-interface Props {
+interface ActiveCommissionsWidgetProps {
   commissions: Commission[];
   isLoading: boolean;
 }
@@ -14,11 +14,76 @@ function DeadlinePill({ deadline }: { deadline: string }) {
   if (days < 0) return <span className='text-xs font-semibold text-destructive'>초과</span>;
   if (days === 0) return <span className='text-xs font-semibold text-destructive'>오늘</span>;
   if (days <= 3) return <span className='text-xs font-semibold text-destructive'>D-{days}</span>;
-  if (days <= 7) return <span className='text-xs font-semibold text-[hsl(var(--warning))]'>D-{days}</span>;
+  if (days <= 7) return <span className='text-xs font-semibold text-warning'>D-{days}</span>;
   return <span className='text-xs text-muted-foreground'>D-{days}</span>;
 }
 
-export function ActiveCommissionsWidget({ commissions, isLoading }: Props) {
+function MobileList({ working, isLoading, navigate }: { working: Commission[]; isLoading: boolean; navigate: NavigateFunction }) {
+  if (isLoading) {
+    return <>{[0, 1, 2].map((i) => <div key={i} className='h-14 rounded-2xl bg-muted/30 animate-pulse' />)}</>;
+  }
+  if (working.length === 0) {
+    return (
+      <div className='flex items-center justify-center py-6 text-muted-foreground'>
+        <p className='text-sm'>작업 중인 의뢰가 없어요</p>
+      </div>
+    );
+  }
+  return (
+    <>
+      {working.slice(0, 5).map((c) => (
+        <button
+          key={c.id}
+          onClick={() => navigate(`/commissions/${c.id}`)}
+          className='w-full flex items-center justify-between gap-3 px-4 py-3 rounded-2xl bg-muted/30 active:bg-muted/60 transition-colors text-left'
+        >
+          <div className='min-w-0 flex-1'>
+            <p className='text-sm font-semibold truncate'>{c.songs?.title ?? c.title}</p>
+            <p className='text-xs text-muted-foreground mt-0.5 truncate'>{c.arrangement}</p>
+          </div>
+          <DeadlinePill deadline={c.deadline} />
+        </button>
+      ))}
+    </>
+  );
+}
+
+function DesktopList({ working, isLoading, navigate }: { working: Commission[]; isLoading: boolean; navigate: NavigateFunction }) {
+  if (isLoading) {
+    return <>{[0, 1, 2].map((i) => <div key={i} className='h-[60px] rounded-2xl bg-muted/30 animate-pulse' />)}</>;
+  }
+  if (working.length === 0) {
+    return (
+      <div className='flex flex-col items-center justify-center h-full py-10 text-muted-foreground'>
+        <Music2 className='h-8 w-8 mb-2 opacity-20' />
+        <p className='text-sm'>작업 중인 의뢰가 없어요</p>
+      </div>
+    );
+  }
+  return (
+    <>
+      {working.slice(0, 5).map((c) => (
+        <button
+          key={c.id}
+          onClick={() => navigate(`/commissions/${c.id}`)}
+          className='w-full flex items-center justify-between gap-3 px-4 py-3.5 rounded-2xl bg-muted/30 hover:bg-muted/60 transition-colors text-left group'
+        >
+          <div className='min-w-0 flex-1'>
+            <p className='font-semibold text-sm truncate group-hover:text-primary transition-colors'>
+              {c.songs?.title ?? c.title}
+            </p>
+            <p className='text-[11px] text-muted-foreground mt-0.5 truncate'>{c.arrangement}</p>
+          </div>
+          <div className='shrink-0'>
+            <DeadlinePill deadline={c.deadline} />
+          </div>
+        </button>
+      ))}
+    </>
+  );
+}
+
+export function ActiveCommissionsWidget({ commissions, isLoading }: ActiveCommissionsWidgetProps) {
   const navigate = useNavigate();
   const working = useMemo(
     () =>
@@ -38,35 +103,13 @@ export function ActiveCommissionsWidget({ commissions, isLoading }: Props) {
           </p>
           <button
             onClick={() => navigate('/commissions?status=working')}
-            className='text-xs text-muted-foreground'
+            className='text-xs text-muted-foreground flex items-center gap-1'
           >
-            전체 보기 →
+            전체 보기 <ChevronRightIcon className="w-3.5 h-3.5 text-muted-foreground" />
           </button>
         </div>
         <div className='space-y-2'>
-          {isLoading ? (
-            [0, 1, 2].map((i) => (
-              <div key={i} className='h-14 rounded-2xl bg-muted/30 animate-pulse' />
-            ))
-          ) : working.length === 0 ? (
-            <div className='flex items-center justify-center py-6 text-muted-foreground'>
-              <p className='text-sm'>작업 중인 의뢰가 없어요</p>
-            </div>
-          ) : (
-            working.slice(0, 5).map((c) => (
-              <button
-                key={c.id}
-                onClick={() => navigate(`/commissions/${c.id}`)}
-                className='w-full flex items-center justify-between gap-3 px-4 py-3 rounded-2xl bg-muted/30 active:bg-muted/60 transition-colors text-left'
-              >
-                <div className='min-w-0 flex-1'>
-                  <p className='text-sm font-semibold truncate'>{c.songs?.title ?? c.title}</p>
-                  <p className='text-xs text-muted-foreground mt-0.5 truncate'>{c.arrangement}</p>
-                </div>
-                <DeadlinePill deadline={c.deadline} />
-              </button>
-            ))
-          )}
+          <MobileList working={working} isLoading={isLoading} navigate={navigate} />
         </div>
       </div>
 
@@ -87,38 +130,11 @@ export function ActiveCommissionsWidget({ commissions, isLoading }: Props) {
             className='flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors mt-1'
           >
             전체 보기
-            <ArrowRight className='h-3 w-3' />
+            <ChevronRightIcon className="w-3.5 h-3.5 text-muted-foreground" />
           </button>
         </div>
         <div className='flex-1 space-y-2'>
-          {isLoading ? (
-            [0, 1, 2].map((i) => (
-              <div key={i} className='h-[60px] rounded-2xl bg-muted/30 animate-pulse' />
-            ))
-          ) : working.length === 0 ? (
-            <div className='flex flex-col items-center justify-center h-full py-10 text-muted-foreground'>
-              <Music2 className='h-8 w-8 mb-2 opacity-20' />
-              <p className='text-sm'>작업 중인 의뢰가 없어요</p>
-            </div>
-          ) : (
-            working.slice(0, 5).map((c) => (
-              <button
-                key={c.id}
-                onClick={() => navigate(`/commissions/${c.id}`)}
-                className='w-full flex items-center justify-between gap-3 px-4 py-3.5 rounded-2xl bg-muted/30 hover:bg-muted/60 transition-colors text-left group'
-              >
-                <div className='min-w-0 flex-1'>
-                  <p className='font-semibold text-sm truncate group-hover:text-primary transition-colors'>
-                    {c.songs?.title ?? c.title}
-                  </p>
-                  <p className='text-[11px] text-muted-foreground mt-0.5 truncate'>{c.arrangement}</p>
-                </div>
-                <div className='shrink-0'>
-                  <DeadlinePill deadline={c.deadline} />
-                </div>
-              </button>
-            ))
-          )}
+          <DesktopList working={working} isLoading={isLoading} navigate={navigate} />
         </div>
       </div>
     </div>

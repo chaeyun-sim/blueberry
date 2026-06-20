@@ -1,4 +1,4 @@
-export const CATEGORIES = new Set(['CLASSIC', 'POP', 'K-POP', 'OST', 'ANI', 'ETC']);
+const CATEGORIES = new Set(['CLASSIC', 'POP', 'K-POP', 'OST', 'ANI', 'ETC']);
 
 export const getUtcYear = (iso: string) => new Date(iso).getUTCFullYear();
 

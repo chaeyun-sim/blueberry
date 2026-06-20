@@ -1,6 +1,6 @@
 import { Commission } from '@/types/commission';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Inbox } from 'lucide-react';
+import { ArrowRight, ChevronRightIcon, Inbox } from 'lucide-react';
 import dayjs from 'dayjs';
 
 interface Props {
@@ -28,6 +28,60 @@ function getStyle(category: string | null | undefined, idx: number) {
   return { ...FALLBACK_STYLES[idx % FALLBACK_STYLES.length], label: '기타' };
 }
 
+function DiscoverContent({ received, isLoading, navigate }: {
+  received: Commission[];
+  isLoading: boolean;
+  navigate: (path: string) => void;
+}) {
+  if (isLoading) {
+    return (
+      <div className='flex gap-3 overflow-hidden'>
+        {[0, 1, 2, 3].map((i) => (
+          <div key={i} className='h-24 w-44 shrink-0 rounded-2xl bg-muted/30 animate-pulse' />
+        ))}
+      </div>
+    );
+  }
+
+  if (received.length === 0) {
+    return (
+      <div className='flex flex-col items-center justify-center py-8 text-muted-foreground'>
+        <Inbox className='h-7 w-7 mb-2 opacity-20' />
+        <p className='text-sm'>대기 중인 의뢰가 없어요</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className='flex gap-3 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide'>
+      {received.map((c, i) => {
+        const daysLeft = dayjs(c.deadline).diff(dayjs(), 'day');
+        const urgent = daysLeft <= 3;
+        const style = getStyle(c.songs?.category, i);
+        return (
+          <button
+            key={c.id}
+            onClick={() => navigate(`/commissions/${c.id}`)}
+            className={`shrink-0 flex flex-col justify-between p-4 rounded-2xl w-44 cursor-pointer hover:opacity-80 transition-opacity text-left ${style.bg}`}
+          >
+            <div>
+              <span className={`text-[10px] font-semibold uppercase tracking-wider ${style.text}`}>
+                {style.label}
+              </span>
+              <p className='text-sm font-semibold mt-1.5 line-clamp-2 leading-snug'>
+                {c.songs?.title ?? c.title}
+              </p>
+            </div>
+            <p className={`text-[10px] font-semibold mt-3 ${urgent ? 'text-destructive' : style.text}`}>
+              {daysLeft === 0 ? '오늘 마감' : `D-${daysLeft} 마감`}
+            </p>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 export function DiscoverWidget({ commissions, isLoading }: Props) {
   const navigate = useNavigate();
 
@@ -52,49 +106,11 @@ export function DiscoverWidget({ commissions, isLoading }: Props) {
           className='flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors'
         >
           전체 보기
-          <ArrowRight className='h-3 w-3' />
+          <ChevronRightIcon className="w-3.5 h-3.5 text-muted-foreground" />
         </button>
       </div>
 
-      {isLoading ? (
-        <div className='flex gap-3 overflow-hidden'>
-          {[0, 1, 2, 3].map((i) => (
-            <div key={i} className='h-24 w-44 shrink-0 rounded-2xl bg-muted/30 animate-pulse' />
-          ))}
-        </div>
-      ) : received.length === 0 ? (
-        <div className='flex flex-col items-center justify-center py-8 text-muted-foreground'>
-          <Inbox className='h-7 w-7 mb-2 opacity-20' />
-          <p className='text-sm'>대기 중인 의뢰가 없어요</p>
-        </div>
-      ) : (
-        <div className='flex gap-3 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide'>
-          {received.map((c, i) => {
-            const daysLeft = dayjs(c.deadline).diff(dayjs(), 'day');
-            const urgent = daysLeft <= 3;
-            const style = getStyle(c.songs?.category, i);
-            return (
-              <button
-                key={c.id}
-                onClick={() => navigate(`/commissions/${c.id}`)}
-                className={`shrink-0 flex flex-col justify-between p-4 rounded-2xl w-44 cursor-pointer hover:opacity-80 transition-opacity text-left ${style.bg}`}
-              >
-                <div>
-                  <span className={`text-[10px] font-semibold uppercase tracking-wider ${style.text}`}>
-                    {style.label}
-                  </span>
-                  <p className='text-sm font-semibold mt-1.5 line-clamp-2 leading-snug'>
-                    {c.songs?.title ?? c.title}
-                  </p>
-                </div>
-                <p className={`text-[10px] font-semibold mt-3 ${urgent ? 'text-destructive' : style.text}`}>
-                  {daysLeft === 0 ? '오늘 마감' : `D-${daysLeft} 마감`}
-                </p>
-              </button>
-            );
-          })}
-        </div>
-      )}
+      <DiscoverContent received={received} isLoading={isLoading} navigate={navigate} />
     </div>
   );
 }

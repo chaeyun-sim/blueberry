@@ -1,10 +1,9 @@
 import { useMemo, useState } from 'react';
 import { ExcelRow } from '@/types/excel';
+import { MOBILE_BREAKPOINT } from '@/constants/breakpoints';
 
 export type SortKey = 'category' | 'product' | 'amount';
 export type SortDir = 'asc' | 'desc';
-
-const MOBILE_BREAKPOINT = 768;
 
 export function useSalesTableData(originData: ExcelRow[]) {
 	const [sortKey, setSortKey] = useState<SortKey>('category');

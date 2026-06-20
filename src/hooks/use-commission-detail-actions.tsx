@@ -92,7 +92,6 @@ export function useCommissionDetailActions(
 			overlay.open((overlayProps) => (
 				<ReceiveAndSendDialog
 					{...overlayProps}
-					commissionId={id}
 					toStatus='working'
 					onConfirm={handleTransitionConfirm}
 				/>
