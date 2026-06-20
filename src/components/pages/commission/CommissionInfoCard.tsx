@@ -75,6 +75,14 @@ export function CommissionInfoCard({ form, isSubmitting, onChange }: CommissionI
 						</div>
 					</div>
 
+					<div className='md:col-span-3'>
+						<InstrumentPicker
+							instruments={form.instruments}
+							onChange={(instruments) => onChange({ instruments })}
+							disabled={isSubmitting}
+						/>
+					</div>
+
 					<div className='space-y-2'>
 						<Label>버전</Label>
 						<Select
@@ -96,13 +104,6 @@ export function CommissionInfoCard({ form, isSubmitting, onChange }: CommissionI
 						</Select>
 					</div>
 
-					<div className='md:col-span-3'>
-						<InstrumentPicker
-							instruments={form.instruments}
-							onChange={(instruments) => onChange({ instruments })}
-							disabled={isSubmitting}
-						/>
-					</div>
 
 					<div className='space-y-2 md:col-span-3'>
 						<Label htmlFor='notes'>메모</Label>

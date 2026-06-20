@@ -10,12 +10,12 @@ const statusIcons: Record<Exclude<CommissionStatus, 'cancelled'>, LucideIcon> = 
 	complete: CheckCircle,
 };
 
-type Props = {
+interface CommissionStatusProgressProps {
 	status: CommissionStatus;
 	currentStatusIndex: number;
 };
 
-export const CommissionStatusProgress = ({ status, currentStatusIndex }: Props) => {
+export const CommissionStatusProgress = ({ status, currentStatusIndex }: CommissionStatusProgressProps) => {
 	if (status === 'cancelled') {
 		return (
 			<Card className='mb-8 border-border/50'>

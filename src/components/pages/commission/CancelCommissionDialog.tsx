@@ -14,10 +14,9 @@ import { CommissionStatus } from '@/constants/status-config';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { OverlayProps } from '@/types/overlay';
 
-interface CancelCommissionDialogProps {
-	isOpen: boolean;
-	close: () => void;
+interface CancelCommissionDialogProps extends OverlayProps {
 	commissionId: string;
 	prevStatus: CommissionStatus;
 }

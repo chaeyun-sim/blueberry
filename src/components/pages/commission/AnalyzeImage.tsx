@@ -143,7 +143,7 @@ function AnalyzeImage({
               <div className='text-center'>
                 <p className='font-medium text-sm md:text-base'>이미지를 드래그하거나 클릭하여 업로드</p>
                 <p className='text-xs md:text-base text-muted-foreground mt-1'>
-                  카카오톡 캡처 이미지를 붙여넣을 수도 있습니다
+                  캡처 이미지를 붙여넣을 수도 있습니다
                 </p>
               </div>
             </>
@@ -160,7 +160,7 @@ function AnalyzeImage({
             }}
           >
             <Sparkles className='h-4 w-4' />
-            {isAnalyzing ? 'AI 분석 중...' : 'AI로 분석하기'}
+            {isAnalyzing ? '분석 중...' : 'AI로 분석하기'}
           </Button>
         </div>
       </CardContent>
