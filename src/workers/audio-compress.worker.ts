@@ -140,7 +140,7 @@ async function getLamejs(): Promise<LameModule> {
   const code = await res.text();
   // lame.min.js sets window.lamejs; shim window → windowShim in this scope
   const windowShim: Record<string, unknown> = {};
-  // eslint-disable-next-line no-new-func
+   
   new Function('window', code)(windowShim);
   lameModule = windowShim['lamejs'] as LameModule;
   if (!lameModule) throw new Error('lamejs 로드 실패');
