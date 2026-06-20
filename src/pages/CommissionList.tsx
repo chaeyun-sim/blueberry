@@ -156,7 +156,6 @@ const CommissionListContent = () => {
 			<CommissionPagination
 				safePage={safePage}
 				totalPages={totalPages}
-				totalCount={filtered.length}
 				onPageChange={setPage}
 				getPaginationPages={getPaginationPages}
 			/>

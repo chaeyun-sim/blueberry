@@ -4,7 +4,6 @@ import { cn } from '@/lib/utils';
 interface CommissionPaginationProps {
 	safePage: number;
 	totalPages: number;
-	totalCount: number;
 	onPageChange: (updater: (p: number) => number) => void;
 	getPaginationPages: (current: number, total: number) => (number | '...')[];
 }
@@ -12,15 +11,13 @@ interface CommissionPaginationProps {
 export function CommissionPagination({
 	safePage,
 	totalPages,
-	totalCount,
 	onPageChange,
 	getPaginationPages,
 }: CommissionPaginationProps) {
 	if (totalPages <= 1) return null;
 
 	return (
-		<div className='flex items-center justify-between mt-4 px-1'>
-			<p className='text-xs text-muted-foreground'>총 {totalCount}건</p>
+		<div className='flex items-center justify-center mt-8 px-1'>
 			<div className='flex items-center gap-1'>
 				<button
 					onClick={() => onPageChange((p) => Math.max(1, p - 1))}
@@ -32,7 +29,7 @@ export function CommissionPagination({
 				</button>
 				{getPaginationPages(safePage, totalPages).map((p, i) =>
 					p === '...' ? (
-						<span key={`e-${i}`} className='px-1 text-sm text-muted-foreground'>
+						<span key={`and more ${i}`} className='px-1 text-sm text-muted-foreground'>
 							…
 						</span>
 					) : (
