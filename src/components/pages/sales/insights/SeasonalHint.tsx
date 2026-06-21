@@ -35,11 +35,7 @@ function SeasonalHint() {
 				)}
 			</CardHeader>
 			<CardContent className='space-y-4'>
-				{!hasAnyData ? (
-					<p className='text-sm text-muted-foreground py-6 text-center'>
-						데이터가 없습니다. 매출 데이터를 업로드하면 패턴을 확인할 수 있어요.
-					</p>
-				) : (
+				{hasAnyData ? (
 					<>
 						<ChartContainer config={{}} className='w-full h-[180px]'>
 							<BarChart
@@ -108,40 +104,46 @@ function SeasonalHint() {
 								))}
 							</div>
 
-							{!activeData || activeData.years === 0 ? (
+							{activeData && activeData.years > 0 ? (
+								activeData.topSongs.length > 0 ? (
+									<div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2'>
+										{activeData.topSongs.map((song, i) => (
+											<div
+												key={song.title}
+												className={cn(
+													'rounded-[14px] px-3 py-2 space-y-0.5',
+													i === 0 ? 'bg-primary/10' : 'bg-muted/40',
+												)}
+											>
+												<p className='text-xs font-mono text-muted-foreground'>{i + 1}위</p>
+												<p
+													className={cn(
+														'text-xs truncate',
+														i === 0 ? 'font-semibold' : 'font-medium',
+													)}
+												>
+													{song.title}
+												</p>
+												<p className='text-xs text-muted-foreground tabular-nums'>
+													총 {song.avgCount}건
+												</p>
+											</div>
+										))}
+									</div>
+								) : (
+									<p className='text-xs text-muted-foreground'>곡 정보 없음</p>
+								)
+							) : (
 								<p className='text-xs text-muted-foreground'>
 									이 달의 데이터가 없습니다
 								</p>
-							) : activeData.topSongs.length === 0 ? (
-								<p className='text-xs text-muted-foreground'>곡 정보 없음</p>
-							) : (
-								<div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2'>
-									{activeData.topSongs.map((song, i) => (
-										<div
-											key={song.title}
-											className={cn(
-												'rounded-[14px] px-3 py-2 space-y-0.5',
-												i === 0 ? 'bg-primary/10' : 'bg-muted/40',
-											)}
-										>
-											<p className='text-xs font-mono text-muted-foreground'>{i + 1}위</p>
-											<p
-												className={cn(
-													'text-xs truncate',
-													i === 0 ? 'font-semibold' : 'font-medium',
-												)}
-											>
-												{song.title}
-											</p>
-											<p className='text-xs text-muted-foreground tabular-nums'>
-												총 {song.avgCount}건
-											</p>
-										</div>
-									))}
-								</div>
 							)}
 						</div>
 					</>
+				) : (
+					<p className='text-sm text-muted-foreground py-6 text-center'>
+						데이터가 없습니다. 매출 데이터를 업로드하면 패턴을 확인할 수 있어요.
+					</p>
 				)}
 			</CardContent>
 		</Card>
