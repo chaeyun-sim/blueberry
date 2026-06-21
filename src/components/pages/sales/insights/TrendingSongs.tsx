@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 import { statsQueries } from '@/api/stats/queries';
@@ -36,10 +37,12 @@ function SongRow({ song, rank }: { song: TrendingSong; rank: number }) {
 function TrendingSongs() {
 	const { data: songs = [] } = useQuery(statsQueries.getTrendingSongs());
 
-	const rising = songs.filter((s) => s.growth > 0).slice(0, TOP_N);
-	const falling = songs.filter((s) => s.growth < 0).slice(-TOP_N).reverse();
+	const { rising, falling } = useMemo(() => ({
+		rising: songs.filter((s) => s.growth > 0).slice(0, TOP_N),
+		falling: songs.filter((s) => s.growth < 0).slice(-TOP_N).reverse(),
+	}), [songs]);
 
-	const isEmpty = rising.length === 0 && falling.length === 0;
+	const hasData = rising.length > 0 || falling.length > 0;
 
 	return (
 		<Card className='border-border/50'>
@@ -53,16 +56,37 @@ function TrendingSongs() {
 				</p>
 			</CardHeader>
 			<CardContent>
-				{isEmpty ? (
+				{hasData ? (
+					<div className='space-y-1'>
+						{rising.length > 0 && (
+							<div>
+								<p className='text-xs font-semibold text-green-600 dark:text-green-400 pb-0.5'>
+									상승
+								</p>
+								<div className='divide-y divide-border/40'>
+									{rising.map((song, i) => (
+										<SongRow key={song.title} song={song} rank={i + 1} />
+									))}
+								</div>
+							</div>
+						)}
+						{falling.length > 0 && (
+							<div className={rising.length > 0 ? 'pt-2' : ''}>
+								<p className='text-xs font-semibold text-destructive pb-0.5'>
+									하락
+								</p>
+								<div className='divide-y divide-border/40'>
+									{falling.map((song, i) => (
+										<SongRow key={song.title} song={song} rank={i + 1} />
+									))}
+								</div>
+							</div>
+						)}
+					</div>
+				) : (
 					<p className='text-sm text-muted-foreground py-6 text-center'>
 						비교할 데이터가 충분하지 않습니다 (최소 6개월 필요)
 					</p>
-				) : (
-					<div className='divide-y divide-border/40'>
-						{[...rising, ...falling].map((song, i) => (
-							<SongRow key={song.title} song={song} rank={i + 1} />
-						))}
-					</div>
 				)}
 			</CardContent>
 		</Card>
