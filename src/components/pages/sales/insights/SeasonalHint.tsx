@@ -8,28 +8,14 @@ import { getNetAmount } from '@/utils/getNetAmount';
 import { CalendarDays } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import dayjs from 'dayjs';
-
-const MONTH_EVENTS: Record<number, string[]> = {
-	1: ['새해', '설날'],
-	2: ['발렌타인데이', '졸업식 시즌'],
-	3: ['입학식', '화이트데이', '봄 결혼 시즌'],
-	4: ['부활절', '봄 결혼 시즌'],
-	5: ['어린이날', '어버이날', '스승의날', '결혼 성수기'],
-	6: ['결혼 성수기'],
-	7: ['여름방학'],
-	8: ['여름방학', '광복절'],
-	9: ['추석', '가을 결혼 시즌'],
-	10: ['가을 결혼 성수기', '할로윈'],
-	11: ['수능', '가을 결혼 성수기'],
-	12: ['크리스마스', '연말'],
-};
+import { MONTH_EVENTS } from '@/constants/month';
 
 function SeasonalHint() {
 	const { data: months = [] } = useQuery(statsQueries.getSeasonalPattern());
 
-	const currentMonth = dayjs().month() + 1;
 	const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
-
+	
+	const currentMonth = dayjs().month() + 1;
 	const activeMonth = selectedMonth ?? currentMonth;
 	const activeData = months.find((m) => m.monthNum === activeMonth);
 	const years = months.find((m) => m.years > 0)?.years ?? 0;
