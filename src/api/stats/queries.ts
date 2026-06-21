@@ -1,4 +1,5 @@
 import { queryOptions } from '@tanstack/react-query';
+import dayjs from 'dayjs';
 import { statsKeys } from './queryKeys';
 import {
 	getCategoryDistribution,
@@ -21,7 +22,7 @@ const PAST_YEAR_STALE = Infinity;
 const STATS_STALE = 1000 * 60 * 15; // 15분
 const STATS_RETRY = 2;
 
-const isPastYear = (year: number) => year < new Date().getFullYear();
+const isPastYear = (year: number) => year < dayjs().year();
 
 export const statsQueries = {
 	getSalesSummary: () =>

@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase'
+import dayjs from 'dayjs'
 import { CommissionStatus } from '@/constants/status-config'
 import { AnalyzeImageType, Commission, CreateCommissionInput, UpdateCommissionInput } from '@/types/commission'
 
@@ -67,7 +68,7 @@ export async function deleteCommission(id: string) {
 
 // 올해 1~12월 월별 의뢰 접수 건수 (미래 달은 0으로 반환)
 export async function getMonthlyCommissionCounts(): Promise<{ month: string; count: number }[]> {
-  const year = new Date().getFullYear()
+  const year = dayjs().year()
 
   const { data, error } = await supabase
     .from(COMMISSIONS)

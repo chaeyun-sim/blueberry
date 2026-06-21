@@ -8,6 +8,7 @@ import {
 	SelectItem,
 } from '@/components/ui/select';
 import { useState } from 'react';
+import dayjs from 'dayjs';
 import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 import { statsQueries } from '@/api/stats/queries';
 import GrowthRateChart from './charts/GrowthRateChart';
@@ -22,7 +23,7 @@ function YearlyStats() {
 
 	const [selectedYear, setSelectedYear] = useState<number | null>(null);
 
-	const year = selectedYear ?? yearRange?.max ?? new Date().getFullYear();
+	const year = selectedYear ?? yearRange?.max ?? dayjs().year();
 	const yearOptions = yearRange
 		? Array.from(
 				{ length: yearRange.max - yearRange.min + 1 },

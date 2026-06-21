@@ -13,22 +13,22 @@ export const cleanTitle = (title: string): string =>
 		.replace(/\s+/g, ' ')
 		.trim();
 
+import dayjs from 'dayjs';
+
 export type DateRange = 'all' | 'week' | 'month';
 
 export function getDateRangeBounds(range: DateRange): { from: string; to: string } | null {
 	if (range === 'all') return null;
-	const today = new Date();
-	today.setHours(0, 0, 0, 0);
+	const today = dayjs().startOf('day');
 	if (range === 'week') {
-		const mon = new Date(today);
-		mon.setDate(today.getDate() - ((today.getDay() + 6) % 7));
-		const sun = new Date(mon);
-		sun.setDate(mon.getDate() + 6);
-		return { from: mon.toISOString().slice(0, 10), to: sun.toISOString().slice(0, 10) };
+		const mon = today.subtract((today.day() + 6) % 7, 'day');
+		const sun = mon.add(6, 'day');
+		return { from: mon.format('YYYY-MM-DD'), to: sun.format('YYYY-MM-DD') };
 	}
-	const from = new Date(today.getFullYear(), today.getMonth(), 1);
-	const to = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-	return { from: from.toISOString().slice(0, 10), to: to.toISOString().slice(0, 10) };
+	return {
+		from: today.startOf('month').format('YYYY-MM-DD'),
+		to: today.endOf('month').format('YYYY-MM-DD'),
+	};
 }
 
 export function getPaginationPages(current: number, total: number): (number | '...')[] {

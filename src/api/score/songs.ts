@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { CreateSongInput, Song, UpdateSongInput } from '@/types/score';
+import dayjs from 'dayjs';
 
 const SONGS = 'songs';
 const SONGS_LIST_SELECT = '*, arrangements(*)';
@@ -106,7 +107,7 @@ export async function updateSong(id: string, input: UpdateSongInput) {
 export async function deleteSong(id: string) {
   const { error } = await supabase
     .from(SONGS)
-    .update({ deleted_at: new Date().toISOString() })
+    .update({ deleted_at: dayjs().toISOString() })
     .eq('id', id);
   if (error) throw error;
 }

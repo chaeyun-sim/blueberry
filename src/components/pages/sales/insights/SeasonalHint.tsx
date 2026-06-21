@@ -7,6 +7,7 @@ import { statsQueries } from '@/api/stats/queries';
 import { getNetAmount } from '@/utils/getNetAmount';
 import { CalendarDays } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import dayjs from 'dayjs';
 
 const MONTH_EVENTS: Record<number, string[]> = {
 	1: ['새해', '설날'],
@@ -26,7 +27,7 @@ const MONTH_EVENTS: Record<number, string[]> = {
 function SeasonalHint() {
 	const { data: months = [] } = useQuery(statsQueries.getSeasonalPattern());
 
-	const currentMonth = new Date().getMonth() + 1;
+	const currentMonth = dayjs().month() + 1;
 	const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
 
 	const activeMonth = selectedMonth ?? currentMonth;

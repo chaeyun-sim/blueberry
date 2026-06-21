@@ -1,6 +1,7 @@
 import { ALLOWED_EXTENSIONS, MAX_FILE_SIZE } from '@/constants/file-types';
 import { supabase } from '@/lib/supabase';
 import { Arrangement, ArrangementFile, CreateArrangementInput } from '@/types/score';
+import dayjs from 'dayjs';
 
 const ARRANGEMENTS = 'arrangements';
 const ARRANGEMENT_FILES_TABLE = 'arrangement_files';
@@ -28,7 +29,7 @@ export async function createArrangement(input: CreateArrangementInput) {
 export async function deleteArrangement(id: string) {
   const { error } = await supabase
     .from(ARRANGEMENTS)
-    .update({ deleted_at: new Date().toISOString() })
+    .update({ deleted_at: dayjs().toISOString() })
     .eq('id', id);
   if (error) throw error;
 }

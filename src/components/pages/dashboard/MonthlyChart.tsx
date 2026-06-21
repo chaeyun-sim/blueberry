@@ -9,6 +9,7 @@ import {
 } from 'recharts';
 import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 import { commissionQueries } from '@/api/commission/queries';
+import dayjs from 'dayjs';
 
 interface TooltipProps {
   active?: boolean;
@@ -43,7 +44,7 @@ function MonthlyChart() {
             </span>
           )}
         </div>
-        <span className='text-xs text-white/60'>{new Date().getFullYear()}년</span>
+        <span className='text-xs text-white/60'>{dayjs().year()}년</span>
       </div>
 
       {/* Chart */}

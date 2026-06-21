@@ -10,6 +10,7 @@ import {
 import { ChartConfig, ChartContainer, ChartTooltip } from '@/components/ui/chart';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { Activity } from 'lucide-react';
+import dayjs from 'dayjs';
 import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 import { statsQueries } from '@/api/stats/queries';
 import { topProductColors } from '@/constants/status-config';
@@ -24,7 +25,7 @@ export function MonthlySalesTrendCard() {
 	const { data: yearRange } = useQuery(statsQueries.getSalesYearRange());
 	const [monthlySalesYear, setMonthlySalesYear] = useState<number | null>(null);
 
-	const selectedYear = monthlySalesYear ?? yearRange?.max ?? new Date().getFullYear();
+	const selectedYear = monthlySalesYear ?? yearRange?.max ?? dayjs().year();
 	const yearOptions = yearRange
 		? Array.from({ length: yearRange.max - yearRange.min + 1 }, (_, i) => yearRange.max - i)
 		: [selectedYear];

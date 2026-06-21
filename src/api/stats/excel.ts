@@ -3,6 +3,7 @@ import { ExcelRow } from '@/types/excel';
 import { ExcelUpload } from '@/types/stats';
 import { norm, normalizeCategory, yearRange } from '@/utils/stats-helpers';
 import { splitProduct } from '@/utils/split-product';
+import dayjs from 'dayjs';
 
 const SALES = 'sales';
 const EXCEL_UPLOADS = 'excel_uploads';
@@ -51,7 +52,7 @@ function parseUploadDate(uploadName: string): string {
 	if (m1) return `${m1[1]}-${m1[2]}-01 00:00:00`;
 	const m2 = uploadName.match(/(\d{4})(\d{2})/);
 	if (m2) return `${m2[1]}-${m2[2]}-01 00:00:00`;
-	return new Date().toISOString().slice(0, 10) + ' 00:00:00';
+	return dayjs().format('YYYY-MM-DD') + ' 00:00:00';
 }
 
 export async function saveSalesRows(rows: ExcelRow[], uploadName: string): Promise<void> {

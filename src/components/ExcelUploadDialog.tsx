@@ -14,6 +14,7 @@ import { splitProduct } from '@/utils/split-product';
 import { ExcelRow } from '@/types/excel';
 import { cn } from '@/lib/utils';
 import { useExcelFileParser } from '@/hooks/use-excel-file-parser';
+import dayjs from 'dayjs';
 
 interface ExcelUploadDialogProps {
   open: boolean;
@@ -22,8 +23,7 @@ interface ExcelUploadDialogProps {
 }
 
 function getDefaultUploadName(): string {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+  return dayjs().format('YYYY-MM');
 }
 
 export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: ExcelUploadDialogProps) => {

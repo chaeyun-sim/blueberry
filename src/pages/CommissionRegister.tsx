@@ -7,14 +7,10 @@ import CommissionRegisterForm from '@/components/pages/commission/CommissionRegi
 import { buildInstrumentList } from '@/utils/build-instrument-list';
 import { CommissionRegisterFormType } from '@/types/form';
 import AppHeader from '@/components/layout/AppHeader';
+import dayjs from 'dayjs';
 
 function getDefaultDeadline() {
-  const d = new Date();
-  d.setDate(d.getDate() + 13);
-  const yyyy = d.getFullYear();
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
-  const dd = String(d.getDate()).padStart(2, '0');
-  return `${yyyy}-${mm}-${dd}`;
+  return dayjs().add(13, 'day').format('YYYY-MM-DD');
 }
 
 const CommissionRegister = () => {
