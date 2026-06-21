@@ -8,15 +8,17 @@ import dayjs from 'dayjs';
 
 function SalesForecast() {
 	const now = dayjs();
-
-	const { year, month: monthIndex, date: dayOfMonth, daysInMonth: totalDays } = now
-	const progress = dayOfMonth() / totalDays();
+	const year = now.year();
+	const monthIndex = now.month();
+	const dayOfMonth = now.date();
+	const totalDays = now.daysInMonth();
+	const progress = dayOfMonth / totalDays;
 
 	const { data: monthlySales = [] } = useQuery(
-		statsQueries.getMonthlySales(year()),
+		statsQueries.getMonthlySales(year),
 	);
 
-	const current = monthlySales[monthIndex()];
+	const current = monthlySales[monthIndex];
 	if (!current) return null;
 
 	const actualRevenue = getNetAmount(current.revenue);
@@ -36,7 +38,7 @@ function SalesForecast() {
 	const isUp = vsLastYear !== null && vsLastYear > 0;
 	const isDown = vsLastYear !== null && vsLastYear < 0;
 
-	const monthName = `${monthIndex() + 1}월`;
+	const monthName = `${monthIndex + 1}월`;
 
 	return (
 		<Card className='border-border/50'>
