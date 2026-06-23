@@ -13,8 +13,7 @@ const emptyState = (
 );
 
 export function CategoryDistributionCard() {
-	const { data: categoryDistribution } = useQuery(statsQueries.getCategoryDistribution());
-	const hasData = (categoryDistribution?.length ?? 0) > 0;
+	const { data: categoryDistribution = [] } = useQuery(statsQueries.getCategoryDistribution());
 
 	return (
 		<Card className='border-border/50 min-w-0 flex flex-col'>
@@ -26,7 +25,7 @@ export function CategoryDistributionCard() {
 				<p className='text-xs text-muted-foreground'>전체 판매 건수 기준</p>
 			</CardHeader>
 			<CardContent className='flex flex-col flex-1 justify-between gap-4'>
-				{!hasData ? (
+				{categoryDistribution.length === 0 ? (
 					emptyState
 				) : (
 					<>
@@ -43,9 +42,9 @@ export function CategoryDistributionCard() {
 									strokeWidth={2}
 									stroke='hsl(var(--background))'
 								>
-									{categoryDistribution?.map((entry, i) => (
+									{categoryDistribution.map((entry, i) => (
 										<Cell
-											key={i}
+											key={entry.name}
 											fill={categoryColors[entry.name] ?? `hsl(${i * 55} 60% 55%)`}
 										/>
 									))}
@@ -53,9 +52,9 @@ export function CategoryDistributionCard() {
 							</PieChart>
 						</ChartContainer>
 
-						<div className='border-t border-border/40 pt-[24px] pb-[16px]'>
+						<div className='border-t border-border/40 pt-6 pb-4'>
 							<div className='grid grid-cols-2 gap-2'>
-								{categoryDistribution?.map((c) => (
+								{categoryDistribution.map((c) => (
 									<div key={c.name} className='rounded-[14px] px-3 py-2 space-y-2 bg-muted/40'>
 										<div className='flex items-center gap-1.5'>
 											<span
