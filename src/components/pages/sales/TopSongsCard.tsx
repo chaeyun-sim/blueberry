@@ -8,18 +8,12 @@ import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 import { statsQueries } from '@/api/stats/queries';
 import { getNetAmount } from '@/utils/getNetAmount';
 import TopSongBar from './TopSongBar';
-
-const emptyState = (
-	<p className='text-sm text-muted-foreground py-8 text-center'>
-		데이터가 없습니다. 매출 데이터를 업로드하면 확인할 수 있어요.
-	</p>
-);
+import { EmptyState } from './EmptyState';
 
 export function TopSongsCard() {
-	const { data: topSongs } = useQuery(statsQueries.getTopSongs());
-	const hasData = (topSongs?.length ?? 0) > 0;
+	const { data: topSongs = [] } = useQuery(statsQueries.getTopSongs());
 
-	const songKeysData = [...(topSongs ?? [])].sort((a, b) => a.rank - b.rank);
+	const songKeysData = [...topSongs].sort((a, b) => a.rank - b.rank);
 	const maxSales = Math.max(...songKeysData.map((s) => s.sales), 1);
 	const salesStep = Math.ceil(maxSales / 5);
 	const salesTicks = Array.from({ length: 6 }, (_, i) => i * salesStep);
@@ -34,9 +28,7 @@ export function TopSongsCard() {
 				<p className='text-xs text-muted-foreground'>전체 기간 누적 판매 기준</p>
 			</CardHeader>
 			<CardContent className='space-y-4'>
-				{!hasData ? (
-					emptyState
-				) : (
+				<EmptyState data={topSongs}>
 					<>
 						<ChartContainer
 							config={{ sales: { label: '판매수', color: 'hsl(var(--primary))' } }}
@@ -91,7 +83,7 @@ export function TopSongsCard() {
 							</div>
 						</div>
 					</>
-				)}
+				</EmptyState>
 			</CardContent>
 		</Card>
 	);
