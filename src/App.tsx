@@ -10,7 +10,6 @@ import ProtectedRoute from '@/components/layout/ProtectedRoute';
 import { Toaster as Sonner } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import AuthProvider from '@/provider/AuthProvider';
-import ThemeProvider from '@/provider/ThemeProvider';
 import { queryClient } from './utils/query-client';
 
 function ScrollToTop() {
@@ -59,7 +58,6 @@ const App = () => (
 		<QueryClientProvider client={queryClient}>
 			<Analytics />
 			<SpeedInsights />
-			<ThemeProvider>
 				<TooltipProvider>
 					<Sonner />
 					<BrowserRouter>
@@ -97,7 +95,6 @@ const App = () => (
 						</AuthProvider>
 					</BrowserRouter>
 				</TooltipProvider>
-			</ThemeProvider>
 		</QueryClientProvider>
 	</ErrorBoundary>
 );
