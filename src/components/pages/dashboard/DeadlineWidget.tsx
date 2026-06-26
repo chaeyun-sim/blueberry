@@ -1,8 +1,10 @@
 import { useMemo } from 'react';
-import { Commission } from '@/types/commission';
 import { useNavigate } from 'react-router-dom';
+
 import dayjs from 'dayjs';
 import { CalendarClock, ChevronRightIcon } from 'lucide-react';
+
+import { Commission } from '@/features/commission/types';
 
 interface Props {
   commissions: Commission[];

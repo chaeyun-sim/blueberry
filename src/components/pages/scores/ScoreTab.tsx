@@ -1,16 +1,21 @@
 import { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import Button from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { useNavigate } from 'react-router-dom';
+
+import { useMutation } from '@tanstack/react-query';
+import { AnimatePresence,motion } from 'framer-motion';
 import {
-	Search,
+	AlertCircle,
+	ChevronRight,
 	FileMusic,
 	Music,
-	AlertCircle,
+	Search,
 	X,
-	ChevronRight,
 } from 'lucide-react';
 import { toast } from 'sonner';
+
+import Button from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import {
 	Table,
 	TableBody,
@@ -19,17 +24,13 @@ import {
 	TableHeader,
 	TableRow,
 } from '@/components/ui/table';
-import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { scoreKeys,scoreMutations, scoreQueries } from '@/features/score/api';
+import { useScoreNavigation } from '@/features/score/hooks';
+import { useAppQuery as useQuery } from '@/hooks/use-app-query';
+import { queryClient } from '@/utils/query-client';
+
 import Breadcrumb from './BreadCrumb';
 import FolderRow from './FolderRow';
-import { useAppQuery as useQuery } from '@/hooks/use-app-query';
-import { scoreQueries } from '@/api/score/queries';
-import { scoreMutations } from '@/api/score/mutations';
-import { scoreKeys } from '@/api/score/queryKeys';
-import { useMutation } from '@tanstack/react-query';
-import { queryClient } from '@/utils/query-client';
-import { useScoreNavigation } from '@/hooks/use-score-navigation';
 
 function ScoreTab() {
 	const [search, setSearch] = useState('');
@@ -53,14 +54,13 @@ function ScoreTab() {
 
 	const {
 		openComposer,
-		setOpenComposer,
-		openSongId,
-		setOpenSongId,
 		openSong,
 		filteredComposers,
 		composerSongs,
 		filteredArrangements,
 		breadcrumb,
+		selectComposer,
+		selectSong,
 		handleNavigate,
 		placeholder,
 	} = useScoreNavigation(songs, search);
@@ -124,7 +124,7 @@ function ScoreTab() {
 			<Card className='border-border/50'>
 				<CardContent className='p-2 md:p-5'>
 					<AnimatePresence mode='wait'>
-						{!openComposer ? (
+						{!openComposer && (
 							<motion.div
 								key='list-composers'
 								initial={{ opacity: 0 }}
@@ -137,10 +137,7 @@ function ScoreTab() {
 										key={composer}
 										label={composer}
 										count={composerSongs.length}
-										onClick={() => {
-											setOpenComposer(composer);
-											setSearch('');
-										}}
+										onClick={() => selectComposer(composer, () => setSearch(''))}
 									/>
 								))}
 								{filteredComposers.length === 0 && (
@@ -155,7 +152,9 @@ function ScoreTab() {
 									</div>
 								)}
 							</motion.div>
-						) : !openSong ? (
+						)}
+
+						{openComposer && !openSong && (
 							<motion.div
 								key={`list-songs-${openComposer}`}
 								initial={{ opacity: 0 }}
@@ -168,10 +167,7 @@ function ScoreTab() {
 										key={song.id}
 										label={song.title}
 										count={song.arrangements.length}
-										onClick={() => {
-											setOpenSongId(song.id);
-											setSearch('');
-										}}
+										onClick={() => selectSong(song.id, () => setSearch(''))}
 										onDelete={
 											song.arrangements.length === 0
 												? () => deleteSong({ id: song.id })
@@ -189,9 +185,11 @@ function ScoreTab() {
 									</div>
 								)}
 							</motion.div>
-						) : (
+						)}
+
+						{openSong && (
 							<motion.div
-								key={`table-files-${openSongId}`}
+								key={`table-files-${openSong.id}`}
 								initial={{ opacity: 0 }}
 								animate={{ opacity: 1 }}
 								exit={{ opacity: 0 }}

@@ -26,7 +26,14 @@ export default tseslint.config(
       ...jsxA11y.configs.recommended.rules,
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
       '@typescript-eslint/no-unused-vars': 'off',
-      'simple-import-sort/imports': 'warn',
+      'simple-import-sort/imports': ['warn', {
+        groups: [
+          ['^react'],
+          ['^@?\\w'],
+          ['^@/'],
+          ['^\\.'],
+        ],
+      }],
       'simple-import-sort/exports': 'warn',
     },
   },

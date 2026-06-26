@@ -1,8 +1,10 @@
 import { DragEvent } from 'react';
-import { Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+
+import { Plus } from 'lucide-react';
+
 import { cn } from '@/lib/utils';
-import { getChipStyle, isCalendarToday, CommissionForCalendar } from '@/utils/calendar';
+import { CommissionForCalendar,getChipStyle, isCalendarToday } from '@/utils/calendar';
 
 interface CalendarDayCellProps {
   day: number;
@@ -115,7 +117,10 @@ export function CalendarDayCell({
               onDragStart={e => onDragStart(e, c.id)}
               onDragEnd={onDragEnd}
               className={cn(
-                'w-full text-[10px] leading-none px-1.5 py-[3px] rounded-lg cursor-grab active:cursor-grabbing truncate font-medium transition-opacity hover:opacity-70 text-left shrink-0',
+                'w-full text-[10px] leading-none px-1.5 py-[3px] rounded-lg truncate font-medium transition-opacity hover:opacity-70 text-left shrink-0',
+                (c.status === 'complete' || c.status === 'cancelled')
+                  ? 'cursor-not-allowed'
+                  : 'cursor-grab active:cursor-grabbing',
                 getChipStyle(c.deadline, c.status),
                 draggingId === c.id && 'opacity-30',
               )}

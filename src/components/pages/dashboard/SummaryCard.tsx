@@ -1,7 +1,9 @@
+import { ElementType, ForwardRefExoticComponent, RefAttributes } from 'react';
+
+import { LucideProps } from 'lucide-react';
+
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { LucideProps } from 'lucide-react';
-import { ForwardRefExoticComponent, RefAttributes } from 'react';
 
 type ColorStatus = 'primary' | 'complete' | 'success' | 'warning';
 
@@ -50,7 +52,7 @@ const cardStyleMap: Record<ColorStatus, {
 };
 
 function SummaryCard({ icon, value, description, colorStatus }: SummaryCardProps) {
-  const Icon = icon as React.ElementType;
+  const Icon = icon as ElementType;
   const status = cardStyleMap[colorStatus];
 
   return (

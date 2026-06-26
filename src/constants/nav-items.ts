@@ -1,9 +1,9 @@
 import {
-	LayoutDashboard,
+	Archive,
+	BarChart3,
 	CalendarDays,
 	ClipboardList,
-	BarChart3,
-	Archive,
+	LayoutDashboard,
 } from 'lucide-react';
 
 export const navItems = [

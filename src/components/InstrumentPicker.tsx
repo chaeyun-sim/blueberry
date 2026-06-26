@@ -1,10 +1,12 @@
-import { useEffect, useId, useRef, useState } from 'react';
+import { KeyboardEvent, useEffect, useId, useRef, useState } from 'react';
+
 import { Plus, X } from 'lucide-react';
+
 import { Input } from '@/components/ui/input';
 import Label from '@/components/ui/label';
 import { ALL_INSTRUMENTS } from '@/constants/instruments';
-import { buildInstrumentList } from '@/utils/build-instrument-list';
 import useRemoveInstrument from '@/hooks/use-remove-instrument';
+import { buildInstrumentList } from '@/utils/build-instrument-list';
 
 interface InstrumentPickerProps {
   instruments: string[];
@@ -47,7 +49,7 @@ export function InstrumentPicker({
     setActiveIndex(-1);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'ArrowDown') {
       e.preventDefault();
       if (!isOpen) { setShowDropdown(true); return; }

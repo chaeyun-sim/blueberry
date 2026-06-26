@@ -1,12 +1,14 @@
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { ChartContainer, ChartTooltip } from '@/components/ui/chart';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, ReferenceLine } from 'recharts';
-import { useAppQuery as useQuery } from '@/hooks/use-app-query';
+import { useMemo } from 'react';
+
+import { PieChart } from 'lucide-react';
+import { CartesianGrid, Line, LineChart, ReferenceLine,XAxis, YAxis } from 'recharts';
+
 import { statsQueries } from '@/api/stats/queries';
+import { Card, CardContent,CardHeader, CardTitle } from '@/components/ui/card';
+import { ChartContainer, ChartTooltip } from '@/components/ui/chart';
+import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 import { formatCurrency } from '@/utils/format-currency';
 import { getNetAmount } from '@/utils/getNetAmount';
-import { PieChart } from 'lucide-react';
-import { useMemo } from 'react';
 
 function ParetoChart() {
   const { data: items = [] } = useQuery(statsQueries.getRevenueConcentration());

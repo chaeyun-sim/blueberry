@@ -1,28 +1,30 @@
-import { AppLayout } from '@/components/layout/AppLayout';
-import { useAuth } from '@/hooks/use-auth';
-import { logout } from '@/api/auth';
-import { createPushSubscription, pushQueries } from '@/hooks/use-push';
-import { supabase } from '@/lib/supabase';
-import { Switch } from '@/components/ui/switch';
+import { useState } from 'react';
+import { Navigate, useNavigate } from 'react-router-dom';
+
+import { useQuery } from '@tanstack/react-query';
 import {
 	Bell,
-	LogOut,
-	Lock,
 	ChevronDown,
 	ChevronUp,
 	Eye,
 	EyeOff,
+	Lock,
+	LogOut,
 } from 'lucide-react';
-import { Navigate, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import logoImg from '@/assets/logo.webp';
-import { PageHeader } from '@/components/layout/PageHeader';
 import { toast } from 'sonner';
+
+import { logout } from '@/api/auth';
+import logoImg from '@/assets/logo.webp';
 import AppHeader from '@/components/layout/AppHeader';
-import { Input } from '@/components/ui/input';
+import { AppLayout } from '@/components/layout/AppLayout';
+import { PageHeader } from '@/components/layout/PageHeader';
 import Button from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
 import { usePasswordChangeForm } from '@/hooks/use-password-change-form';
+import { createPushSubscription, pushQueries } from '@/hooks/use-push';
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/provider/AuthContext';
 
 export default function Settings() {
 	const { session } = useAuth();

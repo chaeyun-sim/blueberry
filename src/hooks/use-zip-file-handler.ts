@@ -1,9 +1,11 @@
-import { useState, useRef } from 'react';
+import { useRef,useState } from 'react';
+
 import { toast } from 'sonner';
+
 import { MAX_ZIP_SIZE } from '@/constants/file-size';
-import { extractZipEntries, ZipExtractionError } from '@/utils/extract-zip-entries';
-import { hasCompressibleAudio } from '@/utils/compress-audio-entries';
 import { FileEntry } from '@/types/form';
+import { hasCompressibleAudio } from '@/utils/compress-audio-entries';
+import { extractZipEntries, ZipExtractionError } from '@/utils/extract-zip-entries';
 import type { WorkerEntry } from '@/workers/audio-compress.worker';
 
 function compressWithWorker(entries: FileEntry[]): Promise<FileEntry[]> {
@@ -16,7 +18,7 @@ function compressWithWorker(entries: FileEntry[]): Promise<FileEntry[]> {
 		worker.onmessage = async (e: MessageEvent<{ ok: true; entries: WorkerEntry[] } | { ok: false; message: string }>) => {
 			worker.terminate();
 			if (!e.data.ok) {
-				reject(new Error(e.data.message));
+				reject(new Error((e.data as { ok: false; message: string }).message));
 				return;
 			}
 			const result: FileEntry[] = e.data.entries.map(w => ({

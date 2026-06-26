@@ -1,8 +1,10 @@
-import { forwardRef, type ComponentPropsWithoutRef, type ElementRef } from "react";
+import { type ComponentPropsWithoutRef, type ElementRef,forwardRef } from "react";
+
 import * as NavigationMenuPrimitive from "@radix-ui/react-navigation-menu";
 import { ChevronDown } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+
 import { navigationMenuTriggerStyle } from './navigation-menu.style';
 
 const NavigationMenu = forwardRef<
@@ -105,11 +107,11 @@ NavigationMenuIndicator.displayName = NavigationMenuPrimitive.Indicator.displayN
 
 export {
   NavigationMenu,
-  NavigationMenuList,
-  NavigationMenuItem,
   NavigationMenuContent,
-  NavigationMenuTrigger,
-  NavigationMenuLink,
   NavigationMenuIndicator,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
   NavigationMenuViewport,
 };

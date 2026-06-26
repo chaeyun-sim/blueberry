@@ -1,25 +1,19 @@
-import { useRef, useState } from 'react';
+import { Navigate, useNavigate, useParams } from 'react-router-dom';
+
+import { XCircle } from 'lucide-react';
+import { overlay } from 'overlay-kit';
+
+import AppHeader from '@/components/layout/AppHeader';
 import { AppLayout } from '@/components/layout/AppLayout';
 import Button from '@/components/ui/button';
-import { XCircle } from 'lucide-react';
-import { Navigate, useNavigate, useParams } from 'react-router-dom';
-import { overlay } from 'overlay-kit';
-import { commissionQueries } from '@/api/commission/queries';
+import { commissionQueries } from '@/features/commission/api';
+import { CancelCommissionDialog, CommissionInfoCard,InlineEditField } from '@/features/commission/components';
+import { useCommissionEditForm } from '@/features/commission/hooks';
 import { useAppQuery as useQuery } from '@/hooks/use-app-query';
-import AppHeader from '@/components/layout/AppHeader';
-import { useCommissionEditForm } from '@/hooks/use-commission-edit-form';
-import { CancelCommissionDialog } from '@/components/pages/commission/CancelCommissionDialog';
-import { InlineEditField } from '@/components/pages/commission/InlineEditField';
-import { CommissionInfoCard } from '@/components/pages/commission/CommissionInfoCard';
 
 const CommissionEdit = () => {
 	const { id } = useParams();
 	const navigate = useNavigate();
-	const titleEditRef = useRef<HTMLInputElement>(null);
-	const composerEditRef = useRef<HTMLInputElement>(null);
-
-	const [isTitleEditing, setIsTitleEditing] = useState(false);
-	const [isComposerEditing, setIsComposerEditing] = useState(false);
 
 	const { data: commission, isLoading } = useQuery(commissionQueries.getCommission(id));
 
@@ -74,17 +68,10 @@ const CommissionEdit = () => {
 			<div className='mb-6'>
 				<InlineEditField
 					value={form.title}
-					isEditing={isTitleEditing}
-					inputRef={titleEditRef}
-					onChange={(v) => setForm((prev) => ({ ...prev, title: v }))}
-					onStartEditing={() => {
-						setIsTitleEditing(true);
-						setTimeout(() => titleEditRef.current?.focus(), 0);
-					}}
-					onStopEditing={() => setIsTitleEditing(false)}
+					onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
 					placeholder='곡명을 입력하세요'
 					ariaLabel='곡명 편집'
-					inputClassName='text-2xl font-display font-bold w-full bg-transparent border-b-2 border-primary outline-none pb-0.5 tracking-tight'
+					className='text-2xl font-display font-bold w-full bg-transparent border-b-2 border-primary outline-none pb-0.5 tracking-tight'
 					buttonClassName='group flex items-center gap-2 cursor-pointer hover:opacity-70 transition-opacity text-left border-b-2 border-transparent pb-0.5'
 					displayContent={
 						<h1 className='text-2xl font-display font-bold tracking-tight'>{form.title}</h1>
@@ -98,17 +85,10 @@ const CommissionEdit = () => {
 
 				<InlineEditField
 					value={form.composer}
-					isEditing={isComposerEditing}
-					inputRef={composerEditRef}
-					onChange={(v) => setForm((prev) => ({ ...prev, composer: v }))}
-					onStartEditing={() => {
-						setIsComposerEditing(true);
-						setTimeout(() => composerEditRef.current?.focus(), 0);
-					}}
-					onStopEditing={() => setIsComposerEditing(false)}
+					onChange={(e) => setForm((prev) => ({ ...prev, composer: e.target.value }))}
 					placeholder='작곡가를 입력하세요'
 					ariaLabel='작곡가 편집'
-					inputClassName='mt-1 text-sm text-muted-foreground w-full bg-transparent border-b border-primary outline-none pb-0.5'
+					className='mt-1 text-sm text-muted-foreground w-full bg-transparent border-b border-primary outline-none pb-0.5'
 					buttonClassName='group flex items-center gap-1.5 mt-1 cursor-pointer hover:opacity-70 transition-opacity text-left border-b border-transparent pb-0.5'
 					displayContent={<p className='text-sm text-muted-foreground'>{form.composer}</p>}
 					emptyDisplay={

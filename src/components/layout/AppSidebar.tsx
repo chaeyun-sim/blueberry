@@ -1,10 +1,12 @@
-import { PlusCircle, LogIn, LogOut } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Sidebar, SidebarContent, SidebarFooter } from '@/components/ui/sidebar';
-import { cn } from '@/lib/utils';
+
+import { LogIn, LogOut,PlusCircle } from 'lucide-react';
+
 import logoImg from '@/assets/logo.webp';
-import { useAuth } from '@/hooks/use-auth';
+import { Sidebar, SidebarContent, SidebarFooter } from '@/components/ui/sidebar';
 import { navItems } from '@/constants/nav-items';
+import { cn } from '@/lib/utils';
+import { useAuth } from '@/provider/AuthContext';
 
 export function AppSidebar() {
   const location = useLocation();

@@ -1,9 +1,11 @@
-import dayjs from 'dayjs';
-import { X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+
+import dayjs from 'dayjs';
+import { AnimatePresence,motion } from 'framer-motion';
+import { X } from 'lucide-react';
+
 import { WEEK_KOR } from '@/constants/week';
-import { StatusBadge } from '@/components/pages/commission/StatusBadge';
+import { StatusBadge } from '@/features/commission/components';
 import { CommissionForCalendar } from '@/utils/calendar';
 
 interface SelectedDatePanelProps {

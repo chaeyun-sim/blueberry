@@ -1,4 +1,5 @@
-import { forwardRef, type ComponentProps, type ComponentPropsWithoutRef, type ElementRef, type HTMLAttributes } from "react";
+import { type ComponentProps, type ComponentPropsWithoutRef, type ElementRef, forwardRef, type HTMLAttributes } from "react";
+
 import { Drawer as DrawerPrimitive } from "vaul";
 
 import { cn } from "@/lib/utils";
@@ -75,13 +76,13 @@ DrawerDescription.displayName = DrawerPrimitive.Description.displayName;
 
 export {
   Drawer,
-  DrawerPortal,
-  DrawerOverlay,
-  DrawerTrigger,
   DrawerClose,
   DrawerContent,
-  DrawerHeader,
-  DrawerFooter,
-  DrawerTitle,
   DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerOverlay,
+  DrawerPortal,
+  DrawerTitle,
+  DrawerTrigger,
 };

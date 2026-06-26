@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
-import { ExcelRow } from '@/types/excel';
+
 import { MOBILE_BREAKPOINT } from '@/constants/breakpoints';
+import { ExcelRow } from '@/types/excel';
 
 export type SortKey = 'category' | 'product' | 'amount';
 export type SortDir = 'asc' | 'desc';

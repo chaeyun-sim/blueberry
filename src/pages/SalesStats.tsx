@@ -1,33 +1,35 @@
-import React, { useState, useCallback } from 'react';
-import ErrorBoundary from '@/components/ErrorBoundary';
-import { AppLayout } from '@/components/layout/AppLayout';
-import { ExcelUploadDialog } from '@/components/ExcelUploadDialog';
+import React, { ElementType,useCallback, useState } from 'react';
+
+import { useMutation } from '@tanstack/react-query';
 import {
-	Upload,
-	DollarSign,
 	BarChart3,
-	FileSpreadsheet,
 	CalendarDays,
-	List,
+	DollarSign,
+	FileSpreadsheet,
 	Lightbulb,
+	List,
+	Upload,
 } from 'lucide-react';
+import { toast } from 'sonner';
+
+import { statsMutations } from '@/api/stats/mutations';
+import { statsQueries } from '@/api/stats/queries';
+import { statsKeys } from '@/api/stats/queryKeys';
+import ErrorBoundary from '@/components/ErrorBoundary';
+import { ExcelUploadDialog } from '@/components/ExcelUploadDialog';
+import { AppLayout } from '@/components/layout/AppLayout';
+import ParetoChart from '@/components/pages/sales/insights/ParetoChart';
+import SalesForecast from '@/components/pages/sales/insights/SalesForecast';
+import SeasonalHint from '@/components/pages/sales/insights/SeasonalHint';
+import SalesAll from '@/components/pages/sales/SalesAll';
+import SalesSummaryCard from '@/components/pages/sales/SalesSummaryCard';
 import Stats from '@/components/pages/sales/Stats';
 import YearlyStats from '@/components/pages/sales/YearlyStats';
-import SalesSummaryCard from '@/components/pages/sales/SalesSummaryCard';
-import SalesAll from '@/components/pages/sales/SalesAll';
-import SeasonalHint from '@/components/pages/sales/insights/SeasonalHint';
-import SalesForecast from '@/components/pages/sales/insights/SalesForecast';
-import ParetoChart from '@/components/pages/sales/insights/ParetoChart';
-import { statsMutations } from '@/api/stats/mutations';
-import { useMutation } from '@tanstack/react-query';
 import { useAppQuery as useQuery } from '@/hooks/use-app-query';
-import { statsKeys } from '@/api/stats/queryKeys';
-import { queryClient } from '@/utils/query-client';
-import { statsQueries } from '@/api/stats/queries';
+import { cn } from '@/lib/utils';
 import { ExcelRow } from '@/types/excel';
 import { getNetAmount } from '@/utils/getNetAmount';
-import { toast } from 'sonner';
-import { cn } from '@/lib/utils';
+import { queryClient } from '@/utils/query-client';
 
 const InsightsTab = () => (
 	<div className='space-y-6'>
@@ -60,9 +62,9 @@ const tabItems = [
 	{ key: 'raw', icon: List, label: '전체 보기', component: SalesAll },
 ] satisfies {
 	key: string;
-	icon: React.ElementType;
+	icon: ElementType;
 	label: string;
-	component: React.ElementType;
+	component: ElementType;
 }[];
 
 const SalesStatsContent = () => {

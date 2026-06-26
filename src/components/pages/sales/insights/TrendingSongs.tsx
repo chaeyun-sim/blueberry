@@ -1,8 +1,10 @@
 import { useMemo } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { useAppQuery as useQuery } from '@/hooks/use-app-query';
+
+import { TrendingDown,TrendingUp } from 'lucide-react';
+
 import { statsQueries } from '@/api/stats/queries';
-import { TrendingUp, TrendingDown } from 'lucide-react';
+import { Card, CardContent,CardHeader, CardTitle } from '@/components/ui/card';
+import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 import { cn } from '@/lib/utils';
 import type { TrendingSong } from '@/types/stats';
 

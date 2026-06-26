@@ -1,6 +1,6 @@
-import { useEffect } from "react";
+import { ReactNode, useEffect } from "react";
 
-function ThemeProvider({ children }: { children: React.ReactNode }) {
+function ThemeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     document.documentElement.classList.remove("dark");
     document.documentElement.classList.add("light");

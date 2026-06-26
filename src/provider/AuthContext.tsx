@@ -1,4 +1,5 @@
-import { createContext } from 'react';
+import { createContext, useContext } from 'react';
+
 import type { Session } from '@supabase/supabase-js'
 
 interface AuthContextValue {
@@ -10,3 +11,7 @@ export const AuthContext = createContext<AuthContextValue>({
   session: null,
   loading: true,
 })
+
+export const useAuth = () => {
+  return useContext(AuthContext)
+}

@@ -1,20 +1,22 @@
-import { useState, useCallback } from 'react';
+import { ChangeEvent, DragEvent,useCallback, useState } from 'react';
+
+import dayjs from 'dayjs';
+import { CheckCircle2,FileSpreadsheet, Upload, X } from 'lucide-react';
+
+import Button from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from '@/components/ui/dialog';
-import Button from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Label from '@/components/ui/label';
-import { Upload, FileSpreadsheet, X, CheckCircle2 } from 'lucide-react';
-import { splitProduct } from '@/utils/split-product';
-import { ExcelRow } from '@/types/excel';
-import { cn } from '@/lib/utils';
 import { useExcelFileParser } from '@/hooks/use-excel-file-parser';
-import dayjs from 'dayjs';
+import { cn } from '@/lib/utils';
+import { ExcelRow } from '@/types/excel';
+import { splitProduct } from '@/utils/split-product';
 
 interface ExcelUploadDialogProps {
   open: boolean;
@@ -37,7 +39,7 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: ExcelUploadD
   }, [resetParser]);
 
   const handleDrop = useCallback(
-    (e: React.DragEvent) => {
+    (e: DragEvent<HTMLButtonElement>) => {
       e.preventDefault();
       setDragOver(false);
       const file = e.dataTransfer.files[0];
@@ -47,7 +49,7 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: ExcelUploadD
   );
 
   const handleFileInput = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
+    (e: ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (file) parseFile(file);
       e.currentTarget.value = '';

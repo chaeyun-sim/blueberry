@@ -1,8 +1,6 @@
+import { Navigate, useNavigate, useParams } from 'react-router-dom';
+
 import dayjs from 'dayjs';
-import { AppLayout } from '@/components/layout/AppLayout';
-import { PageHeader } from '@/components/layout/PageHeader';
-import { Card, CardContent } from '@/components/ui/card';
-import Button from '@/components/ui/button';
 import {
 	ChevronRight,
 	ExternalLink,
@@ -11,6 +9,13 @@ import {
 	Pencil,
 	Trash2,
 } from 'lucide-react';
+
+import ErrorBoundary from '@/components/ErrorBoundary';
+import AppHeader from '@/components/layout/AppHeader';
+import { AppLayout } from '@/components/layout/AppLayout';
+import { PageHeader } from '@/components/layout/PageHeader';
+import Button from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -18,18 +23,15 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Navigate, useNavigate, useParams } from 'react-router-dom';
-import ErrorBoundary from '@/components/ErrorBoundary';
-import { useAppQuery as useQuery } from '@/hooks/use-app-query';
-import { commissionQueries } from '@/api/commission/queries';
-import { scoreQueries } from '@/api/score/queries';
-import NotFound from './NotFound';
-import { COMMISSION_INFO } from '@/types/commission';
-import AppHeader from '@/components/layout/AppHeader';
-import { CommissionDetailSkeleton } from '@/components/pages/commission/CommissionDetailSkeleton';
-import { CommissionStatusProgress } from '@/components/pages/commission/CommissionStatusProgress';
 import { COMMISSION_STATUS_TRANSLATE } from '@/constants/translate';
-import { useCommissionDetailActions } from '@/hooks/use-commission-detail-actions';
+import { commissionQueries } from '@/features/commission/api';
+import { CommissionDetailSkeleton, CommissionStatusProgress } from '@/features/commission/components';
+import { useCommissionDetailActions } from '@/features/commission/hooks';
+import { COMMISSION_INFO } from '@/features/commission/types';
+import { scoreQueries } from '@/features/score/api';
+import { useAppQuery as useQuery } from '@/hooks/use-app-query';
+
+import NotFound from './NotFound';
 
 const CommissionDetailContent = () => {
 	const { id } = useParams();
@@ -40,12 +42,11 @@ const CommissionDetailContent = () => {
 
 	const {
 		imslpUrl,
-		currentStatusIndex,
 		nextStatus,
-		handleOpenDialog,
+		openDialog,
 		openEmailDialog,
-		handleViewOriginalImage,
-		handleDelete,
+		viewOriginalImage,
+		deleteCommission,
 	} = useCommissionDetailActions(id!, commission, song);
 
 	if (!id) return <Navigate to='/commissions' replace />;
@@ -62,7 +63,7 @@ const CommissionDetailContent = () => {
 						{commission.status !== 'cancelled' &&
 							(nextStatus ? (
 								<Button
-									onClick={handleOpenDialog}
+									onClick={openDialog}
 									className='gap-2 w-full md:w-auto rounded-2xl md:rounded-md py-6 md:py-5 shadow-lg md:shadow-none'
 								>
 									<ChevronRight className='h-4 w-4' />{' '}
@@ -105,7 +106,7 @@ const CommissionDetailContent = () => {
 							</DropdownMenuItem>
 							<DropdownMenuSeparator className='my-1.5' />
 							<DropdownMenuItem
-								onClick={handleDelete}
+								onClick={deleteCommission}
 								className='gap-2.5 cursor-pointer px-3 py-1 rounded-lg text-destructive focus:bg-destructive/10 focus:text-destructive'
 							>
 								<Trash2 className='h-4 w-4 shrink-0' />
@@ -118,10 +119,7 @@ const CommissionDetailContent = () => {
 
 			<PageHeader title={song?.title ?? commission.songs?.title ?? commission.title ?? ''} />
 
-			<CommissionStatusProgress
-				status={commission.status}
-				currentStatusIndex={currentStatusIndex}
-			/>
+			<CommissionStatusProgress status={commission.status} />
 
 			<div className='mb-6'>
 				<Card className='border-border/50'>
@@ -130,7 +128,7 @@ const CommissionDetailContent = () => {
 							<h2 className='font-display font-semibold'>의뢰 정보</h2>
 							<button
 								className='inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors'
-								onClick={handleViewOriginalImage}
+								onClick={viewOriginalImage}
 							>
 								원본 이미지 보기 <ExternalLink className='h-3 w-3' />
 							</button>

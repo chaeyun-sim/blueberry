@@ -1,9 +1,10 @@
+import dayjs from 'dayjs';
+
 import { supabase } from '@/lib/supabase';
 import { ExcelRow } from '@/types/excel';
 import { ExcelUpload } from '@/types/stats';
-import { norm, normalizeCategory, yearRange } from '@/utils/stats-helpers';
 import { splitProduct } from '@/utils/split-product';
-import dayjs from 'dayjs';
+import { norm, normalizeCategory, yearRange } from '@/utils/stats-helpers';
 
 const SALES = 'sales';
 const EXCEL_UPLOADS = 'excel_uploads';

@@ -1,4 +1,4 @@
-const CATEGORIES = new Set(['CLASSIC', 'POP', 'K-POP', 'OST', 'ANI', 'ETC']);
+import { CATEGORIES } from '@/constants/categories';
 
 export const getUtcYear = (iso: string) => new Date(iso).getUTCFullYear();
 

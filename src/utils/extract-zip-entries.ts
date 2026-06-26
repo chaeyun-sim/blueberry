@@ -1,8 +1,9 @@
 import JSZip from 'jszip';
-import { detectFileType } from '@/utils/detect-file-type';
-import { ALLOWED_EXTENSIONS } from '@/constants/file-types';
+
 import { MAX_DECOMPRESSED, MAX_FILE_COUNT } from '@/constants/file-size';
+import { ALLOWED_EXTENSIONS } from '@/constants/file-types';
 import { FileEntry } from '@/types/form';
+import { detectFileType } from '@/utils/detect-file-type';
 
 function isHiddenOrSystem(path: string, fileName: string): boolean {
   return fileName.startsWith('.') || path.startsWith('__MACOSX');

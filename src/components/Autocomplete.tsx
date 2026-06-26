@@ -1,4 +1,5 @@
-import { useState, useRef, useId } from "react";
+import { ComponentProps, KeyboardEvent,useId, useRef, useState } from "react";
+
 import { Input } from "@/components/ui/input";
 
 export interface AutocompleteProps {
@@ -6,7 +7,7 @@ export interface AutocompleteProps {
   onChange: (value: string) => void;
   placeholder?: string;
   suggestions: string[];
-  inputProps?: React.ComponentProps<typeof Input>;
+  inputProps?: ComponentProps<typeof Input>;
 }
 
 function Autocomplete({ value, onChange, placeholder = "곡 제목을 입력하세요", suggestions, inputProps }: AutocompleteProps) {
@@ -28,7 +29,7 @@ function Autocomplete({ value, onChange, placeholder = "곡 제목을 입력하�
     setActiveIndex(-1);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (!isOpen) return;
     if (e.key === 'ArrowDown') {
       e.preventDefault();

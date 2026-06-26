@@ -1,14 +1,16 @@
 import { useState } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { ChartContainer } from '@/components/ui/chart';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Cell } from 'recharts';
-import { useAppQuery as useQuery } from '@/hooks/use-app-query';
-import { statsQueries } from '@/api/stats/queries';
-import { getNetAmount } from '@/utils/getNetAmount';
-import { CalendarDays } from 'lucide-react';
-import { cn } from '@/lib/utils';
+
 import dayjs from 'dayjs';
+import { CalendarDays } from 'lucide-react';
+import { Bar, BarChart, CartesianGrid, Cell,XAxis, YAxis } from 'recharts';
+
+import { statsQueries } from '@/api/stats/queries';
+import { Card, CardContent,CardHeader, CardTitle } from '@/components/ui/card';
+import { ChartContainer } from '@/components/ui/chart';
 import { MONTH_EVENTS } from '@/constants/month';
+import { useAppQuery as useQuery } from '@/hooks/use-app-query';
+import { cn } from '@/lib/utils';
+import { getNetAmount } from '@/utils/getNetAmount';
 
 function SeasonalHint() {
 	const { data: months = [] } = useQuery(statsQueries.getSeasonalPattern());

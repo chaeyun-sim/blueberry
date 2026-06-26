@@ -1,14 +1,16 @@
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { ChartContainer } from '@/components/ui/chart';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { Trophy } from 'lucide-react';
+import { Bar, BarChart, CartesianGrid,XAxis, YAxis } from 'recharts';
+
+import { statsQueries } from '@/api/stats/queries';
+import { Card, CardContent,CardHeader, CardTitle } from '@/components/ui/card';
+import { ChartContainer } from '@/components/ui/chart';
+import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 import { cn } from '@/lib/utils';
 import { formatCurrency } from '@/utils/format-currency';
-import { useAppQuery as useQuery } from '@/hooks/use-app-query';
-import { statsQueries } from '@/api/stats/queries';
 import { getNetAmount } from '@/utils/getNetAmount';
-import TopSongBar from './TopSongBar';
+
 import { EmptyState } from './EmptyState';
+import TopSongBar from './TopSongBar';
 
 export function TopSongsCard() {
 	const { data: topSongs = [] } = useQuery(statsQueries.getTopSongs());

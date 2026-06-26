@@ -1,6 +1,5 @@
-import { supabase } from '@/lib/supabase';
 import { MONTH } from '@/constants/month';
-import { getUtcYear, pctChange, yearRange, parseNumeric } from '@/utils/stats-helpers';
+import { supabase } from '@/lib/supabase';
 import {
 	CategoryDistributionItem,
 	MonthlyCategoryData,
@@ -23,6 +22,7 @@ import {
 	TopSongMonthlySalesResult,
 	TrendingSong,
 } from '@/types/stats';
+import { getUtcYear, parseNumeric,pctChange, yearRange } from '@/utils/stats-helpers';
 
 const SALES = 'sales';
 const SOLD_AT = 'sold_at';

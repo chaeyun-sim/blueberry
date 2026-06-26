@@ -1,7 +1,10 @@
-import { useEffect, useState, useCallback, type ReactNode } from 'react'
+import { type ReactNode,useCallback, useEffect, useState } from 'react'
+
 import type { Session } from '@supabase/supabase-js'
-import { getSession, onAuthStateChange, logout } from '@/api/auth'
 import { useQueryClient } from '@tanstack/react-query'
+
+import { getSession, logout,onAuthStateChange } from '@/api/auth'
+
 import { AuthContext } from './AuthContext'
 
 function AuthProvider({ children }: { children: ReactNode }) {

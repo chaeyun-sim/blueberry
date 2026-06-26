@@ -1,8 +1,10 @@
 import { useMemo } from 'react';
-import { Commission } from '@/types/commission';
 import { NavigateFunction, useNavigate } from 'react-router-dom';
-import { Music2, ChevronRightIcon } from 'lucide-react';
+
 import dayjs from 'dayjs';
+import { ChevronRightIcon,Music2 } from 'lucide-react';
+
+import { Commission } from '@/features/commission/types';
 
 interface ActiveCommissionsWidgetProps {
   commissions: Commission[];

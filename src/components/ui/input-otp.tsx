@@ -1,4 +1,5 @@
-import { forwardRef, useContext, type ComponentPropsWithoutRef, type ElementRef } from "react";
+import { type ComponentPropsWithoutRef, type ElementRef,forwardRef, useContext } from "react";
+
 import { OTPInput, OTPInputContext } from "input-otp";
 import { Dot } from "lucide-react";
 
@@ -58,4 +59,4 @@ const InputOTPSeparator = forwardRef<ElementRef<"div">, ComponentPropsWithoutRef
 );
 InputOTPSeparator.displayName = "InputOTPSeparator";
 
-export { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator };
+export { InputOTP, InputOTPGroup, InputOTPSeparator,InputOTPSlot };

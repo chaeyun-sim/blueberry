@@ -1,7 +1,9 @@
-import { Commission } from '@/types/commission';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, ChevronRightIcon, Inbox } from 'lucide-react';
+
 import dayjs from 'dayjs';
+import { ArrowRight, ChevronRightIcon, Inbox } from 'lucide-react';
+
+import { Commission } from '@/features/commission/types';
 
 interface Props {
   commissions: Commission[];

@@ -1,22 +1,23 @@
 import { queryOptions } from '@tanstack/react-query';
 import dayjs from 'dayjs';
-import { statsKeys } from './queryKeys';
+
 import {
 	getCategoryDistribution,
-	getMonthlySales,
-	getSalesSummary,
-	getTopSongs,
-	getTopArrangements,
-	getTopSongMonthlySales,
-	getMonthlyCategoryBreakdown,
-	getSalesRows,
 	getExcelUploads,
+	getMonthlyCategoryBreakdown,
+	getMonthlySales,
+	getRevenueConcentration,
+	getSalesRows,
 	getSalesRowsByUploadId,
+	getSalesSummary,
 	getSalesYearRange,
 	getSeasonalPattern,
+	getTopArrangements,
+	getTopSongMonthlySales,
+	getTopSongs,
 	getTrendingSongs,
-	getRevenueConcentration,
 } from '.';
+import { statsKeys } from './queryKeys';
 
 const PAST_YEAR_STALE = Infinity;
 const STATS_STALE = 1000 * 60 * 15; // 15분

@@ -1,6 +1,6 @@
 import { CategoryDistributionCard } from './CategoryDistributionCard';
-import { TopSongsCard } from './TopSongsCard';
 import { MonthlySalesTrendCard } from './MonthlySalesTrendCard';
+import { TopSongsCard } from './TopSongsCard';
 
 function Stats() {
 	return (

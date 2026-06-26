@@ -1,5 +1,6 @@
-import { FileMusic, FileAudio, FileText, File as FileIcon } from 'lucide-react';
 import { ElementType } from 'react';
+
+import { File as FileIcon,FileAudio, FileMusic, FileText } from 'lucide-react';
 
 export const fileTypeConfig: Record<
   string,
@@ -38,9 +39,8 @@ export const fileTypeConfig: Record<
   },
 };
 
-export const MUSICXML_EXTENSIONS = ['xml', 'musicxml', 'mxl'];
+export const MUSICXML_EXTENSIONS = ['musicxml', 'mxl'];
 export const FINALE_EXTENSIONS = ['musx'];
 export const AUDIO_EXTENSIONS = ['wav', 'aif', 'aiff', 'aifc', 'mp3', 'mid', 'midi'];
 
 export const ALLOWED_EXTENSIONS = [...MUSICXML_EXTENSIONS, ...FINALE_EXTENSIONS, ...AUDIO_EXTENSIONS, 'pdf']
-export const MAX_FILE_SIZE = 50 * 1024 * 1024 // 50MB

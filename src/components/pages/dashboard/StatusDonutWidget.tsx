@@ -1,8 +1,10 @@
 import { useMemo } from 'react';
-import { PieChart, Pie, Cell } from 'recharts';
-import { Commission } from '@/types/commission';
-import dayjs from 'dayjs';
 import { useNavigate } from 'react-router-dom';
+
+import dayjs from 'dayjs';
+import { Cell,Pie, PieChart } from 'recharts';
+
+import { Commission } from '@/features/commission/types';
 
 interface Props {
   commissions: Commission[];

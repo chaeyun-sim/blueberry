@@ -1,10 +1,10 @@
 import { useState } from 'react';
+
+import AppHeader from '@/components/layout/AppHeader';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
+import { ScoreRegisterForm,ZipUploadCard} from '@/features/score/components';
 import { FileEntry } from '@/types/form';
-import { ZipUploadCard } from '@/components/pages/score/ZipUploadCard';
-import ScoreRegisterForm from '@/components/pages/score/ScoreRegisterForm';
-import AppHeader from '@/components/layout/AppHeader';
 
 export interface ScoreRegisterFormType {
   songTitle: string;

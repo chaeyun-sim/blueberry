@@ -1,22 +1,25 @@
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { useState } from 'react';
+
+import dayjs from 'dayjs';
+
+import { statsQueries } from '@/api/stats/queries';
+import { Card, CardContent,CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartConfig } from '@/components/ui/chart';
 import {
 	Select,
-	SelectTrigger,
-	SelectValue,
 	SelectContent,
 	SelectItem,
+	SelectTrigger,
+	SelectValue,
 } from '@/components/ui/select';
-import { useState } from 'react';
-import dayjs from 'dayjs';
-import { useAppQuery as useQuery } from '@/hooks/use-app-query';
-import { statsQueries } from '@/api/stats/queries';
-import GrowthRateChart from './charts/GrowthRateChart';
-import CategoryGrowthRateChart from './charts/CategoryGrowthRateChart';
-import MonthlyGrowthRateChart from './charts/MonthlyGrowthRateChart';
-import { getNetAmount } from '@/utils/getNetAmount';
-import { useAuth } from '@/hooks/use-auth';
 import { categoryChartConfig } from '@/constants/status-config';
+import { useAppQuery as useQuery } from '@/hooks/use-app-query';
+import { getNetAmount } from '@/utils/getNetAmount';
+
+import CategoryGrowthRateChart from './charts/CategoryGrowthRateChart';
+import GrowthRateChart from './charts/GrowthRateChart';
+import MonthlyGrowthRateChart from './charts/MonthlyGrowthRateChart';
+import { EmptyState } from './EmptyState';
 
 function YearlyStats() {
 	const { data: yearRange } = useQuery(statsQueries.getSalesYearRange());
@@ -75,14 +78,6 @@ function YearlyStats() {
 		activeCategories.map((k) => [k, categoryChartConfig[k]]),
 	);
 
-	const hasData = salesData.length > 0;
-
-	const emptyState = (
-		<p className='text-sm text-muted-foreground py-8 text-center'>
-			데이터가 없습니다. 매출 데이터를 업로드하면 확인할 수 있어요.
-		</p>
-	);
-
 	return (
 		<div className='space-y-6'>
 			<Card className='border-border/50 overflow-hidden'>
@@ -118,9 +113,7 @@ function YearlyStats() {
 					</div>
 				</CardHeader>
 				<CardContent className='space-y-6'>
-					{!hasData ? (
-						emptyState
-					) : (
+					<EmptyState data={salesData}>
 						<>
 							<MonthlyGrowthRateChart data={monthlySalesWithAvg} avgCount={avgCount} />
 							<div className='border-t border-border/40 pt-4'>
@@ -149,7 +142,7 @@ function YearlyStats() {
 								/>
 							</div>
 						</>
-					)}
+					</EmptyState>
 				</CardContent>
 			</Card>
 
@@ -160,11 +153,9 @@ function YearlyStats() {
 					</CardTitle>
 				</CardHeader>
 				<CardContent>
-					{!hasData ? (
-						emptyState
-					) : (
+					<EmptyState data={salesData}>
 						<GrowthRateChart data={growthData} offset={zeroOffset} />
-					)}
+					</EmptyState>
 				</CardContent>
 			</Card>
 		</div>

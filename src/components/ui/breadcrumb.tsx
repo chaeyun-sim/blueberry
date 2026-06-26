@@ -1,4 +1,5 @@
-import { forwardRef, type ComponentProps, type ComponentPropsWithoutRef, type ReactNode } from "react";
+import { type ComponentProps, type ComponentPropsWithoutRef, forwardRef, type ReactNode } from "react";
+
 import { Slot } from "@radix-ui/react-slot";
 import { ChevronRight, MoreHorizontal } from "lucide-react";
 
@@ -81,10 +82,10 @@ BreadcrumbEllipsis.displayName = "BreadcrumbElipssis";
 
 export {
   Breadcrumb,
-  BreadcrumbList,
+  BreadcrumbEllipsis,
   BreadcrumbItem,
   BreadcrumbLink,
+  BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-  BreadcrumbEllipsis,
 };

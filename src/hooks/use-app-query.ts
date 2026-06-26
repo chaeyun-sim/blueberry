@@ -1,9 +1,9 @@
 import {
+  type DefaultError,
+  type QueryKey,
   useQuery,
   type UseQueryOptions,
   type UseQueryResult,
-  type QueryKey,
-  type DefaultError,
 } from '@tanstack/react-query'
 
 export function useAppQuery<

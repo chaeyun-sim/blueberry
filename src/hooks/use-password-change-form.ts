@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { FormEvent, useState } from 'react';
+
 import { Session } from '@supabase/supabase-js';
 import { toast } from 'sonner';
+
 import { supabase } from '@/lib/supabase';
 
 type PwFormField = 'current' | 'next' | 'confirm';
@@ -16,7 +18,7 @@ export function usePasswordChangeForm(session: Session | null) {
 	const [pwForm, setPwForm] = useState<PwForm>(EMPTY_FORM);
 	const [showPw, setShowPw] = useState<ShowPw>(HIDDEN_PW);
 
-	const handleSubmit = async (e: React.FormEvent) => {
+	const handleSubmit = async (e: FormEvent) => {
 		e.preventDefault();
 		if (pwForm.next !== pwForm.confirm) {
 			toast.error('새 비밀번호가 일치하지 않아요');

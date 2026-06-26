@@ -1,28 +1,30 @@
 import { useMemo } from 'react';
-import { AppLayout } from '@/components/layout/AppLayout';
 import { useNavigate } from 'react-router-dom';
-import { useAppQuery as useQuery } from '@/hooks/use-app-query';
-import { commissionQueries } from '@/api/commission/queries';
-import { scoreQueries } from '@/api/score/queries';
+
+import {
+	CheckCircle2,
+	ChevronRightIcon,
+	Plus,
+	Sparkles,
+	TrendingDown,
+	TrendingUp,
+} from 'lucide-react';
+
 import { statsQueries } from '@/api/stats/queries';
-import { getNetAmount } from '@/utils/getNetAmount';
 import ErrorBoundary from '@/components/ErrorBoundary';
-import RollingNumber from '@/components/pages/dashboard/RollingNumber';
+import { AppLayout } from '@/components/layout/AppLayout';
 import { ActiveCommissionsWidget } from '@/components/pages/dashboard/ActiveCommissionsWidget';
 import { DeadlineWidget } from '@/components/pages/dashboard/DeadlineWidget';
-import { StatusDonutWidget } from '@/components/pages/dashboard/StatusDonutWidget';
 import { DiscoverWidget } from '@/components/pages/dashboard/DiscoverWidget';
 import MonthlyChart from '@/components/pages/dashboard/MonthlyChart';
-import useLiveClock from '@/hooks/use-live-clock';
+import RollingNumber from '@/components/pages/dashboard/RollingNumber';
+import { StatusDonutWidget } from '@/components/pages/dashboard/StatusDonutWidget';
 import { WEEK_KOR } from '@/constants/week';
-import {
-	Plus,
-	TrendingUp,
-	TrendingDown,
-	CheckCircle2,
-	Sparkles,
-	ChevronRightIcon,
-} from 'lucide-react';
+import { commissionQueries } from '@/features/commission/api';
+import { scoreQueries } from '@/features/score/api';
+import { useAppQuery as useQuery } from '@/hooks/use-app-query';
+import useLiveClock from '@/hooks/use-live-clock';
+import { getNetAmount } from '@/utils/getNetAmount';
 
 function getGreeting(hour: number) {
 	if (hour < 6) return 'Good Night';

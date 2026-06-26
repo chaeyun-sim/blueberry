@@ -1,19 +1,22 @@
 import { useState } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+
+import dayjs from 'dayjs';
+import { Activity } from 'lucide-react';
+import { CartesianGrid,Line, LineChart, XAxis, YAxis } from 'recharts';
+
+import { statsQueries } from '@/api/stats/queries';
+import { Card, CardContent,CardHeader, CardTitle } from '@/components/ui/card';
+import { ChartConfig, ChartContainer, ChartTooltip } from '@/components/ui/chart';
 import {
   Select,
-  SelectTrigger,
-  SelectValue,
   SelectContent,
   SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
-import { ChartConfig, ChartContainer, ChartTooltip } from '@/components/ui/chart';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid } from 'recharts';
-import { Activity } from 'lucide-react';
-import dayjs from 'dayjs';
-import { useAppQuery as useQuery } from '@/hooks/use-app-query';
-import { statsQueries } from '@/api/stats/queries';
 import { topProductColors } from '@/constants/status-config';
+import { useAppQuery as useQuery } from '@/hooks/use-app-query';
+
 import { EmptyState } from './EmptyState';
 
 export function MonthlySalesTrendCard() {

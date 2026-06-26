@@ -1,5 +1,7 @@
-import React, { ReactNode, ErrorInfo } from 'react';
+import { Component,ErrorInfo, ReactNode } from 'react';
+
 import { AlertCircle } from 'lucide-react';
+
 import Button from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { queryClient } from '@/utils/query-client';
@@ -17,7 +19,7 @@ interface State {
   errorId: string;
 }
 
-export class ErrorBoundary extends React.Component<Props, State> {
+export class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {

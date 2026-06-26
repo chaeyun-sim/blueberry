@@ -1,6 +1,7 @@
 import { useId } from 'react';
-import Label from '../ui/label';
+
 import Autocomplete, { AutocompleteProps } from '../Autocomplete';
+import Label from '../ui/label';
 
 function RegisterFormSongTitle({ value, onChange, suggestions, inputProps }: AutocompleteProps) {
   const inputId = useId();

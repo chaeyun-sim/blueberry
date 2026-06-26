@@ -1,13 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useEffect,useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+
+import dayjs from 'dayjs';
+
+import AppHeader from '@/components/layout/AppHeader';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
-import { Navigate, useSearchParams } from 'react-router-dom';
-import AnalyzeImage from '@/components/pages/commission/AnalyzeImage';
-import CommissionRegisterForm from '@/components/pages/commission/CommissionRegisterForm';
-import { buildInstrumentList } from '@/utils/build-instrument-list';
+import { AnalyzeImage, CommissionRegisterForm } from '@/features/commission/components';
 import { CommissionRegisterFormType } from '@/types/form';
-import AppHeader from '@/components/layout/AppHeader';
-import dayjs from 'dayjs';
+import { buildInstrumentList } from '@/utils/build-instrument-list';
 
 function getDefaultDeadline() {
   return dayjs().add(13, 'day').format('YYYY-MM-DD');

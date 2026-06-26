@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import {
   Area,
   AreaChart,
@@ -7,9 +8,9 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+
+import { commissionQueries } from '@/features/commission/api';
 import { useAppQuery as useQuery } from '@/hooks/use-app-query';
-import { commissionQueries } from '@/api/commission/queries';
-import dayjs from 'dayjs';
 
 interface TooltipProps {
   active?: boolean;
