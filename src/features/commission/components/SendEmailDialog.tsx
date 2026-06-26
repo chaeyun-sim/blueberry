@@ -1,4 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
+import { Loader2,Mail } from 'lucide-react';
+import { useEffect, useRef,useState } from 'react';
+import { toast } from 'sonner';
+
+import Button from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -7,13 +11,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import Button from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Label from '@/components/ui/label';
-import { Mail, Loader2 } from 'lucide-react';
-import { OverlayProps } from '@/types/overlay';
 import { supabase } from '@/lib/supabase';
-import { toast } from 'sonner';
+import { OverlayProps } from '@/types/overlay';
 
 interface SendEmailDialogProps extends OverlayProps {
   commissionId: string | undefined;

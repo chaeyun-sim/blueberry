@@ -1,21 +1,22 @@
+import { useMutation } from '@tanstack/react-query';
+import { Music, Trash2 } from 'lucide-react';
+import { overlay } from 'overlay-kit';
+import { Navigate,useParams } from 'react-router-dom';
+import { toast } from 'sonner';
+
+import AppHeader from '@/components/layout/AppHeader';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
-import { Card, CardContent } from '@/components/ui/card';
 import Button from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Music, Trash2 } from 'lucide-react';
-import { useParams, Navigate } from 'react-router-dom';
-import { useAppQuery as useQuery } from '@/hooks/use-app-query';
-import { scoreQueries, scoreMutations, scoreKeys } from '@/features/score/api';
 import { fileTypeConfig } from '@/constants/file-types';
 import { INSTRUMENT_ABBREVIATIONS } from '@/constants/instruments';
-import { overlay } from 'overlay-kit';
+import { scoreKeys,scoreMutations, scoreQueries } from '@/features/score/api';
 import { DeleteArrangementDialog } from '@/features/score/components';
-import AppHeader from '@/components/layout/AppHeader';
-import { useMutation } from '@tanstack/react-query';
-import { queryClient } from '@/utils/query-client';
-import { toast } from 'sonner';
 import type { ArrangementFile } from '@/features/score/types';
+import { useAppQuery as useQuery } from '@/hooks/use-app-query';
+import { queryClient } from '@/utils/query-client';
 
 const getFileDisplayLabel = (file: ArrangementFile): string => {
   if (file.file_type === 'audio') return '오디오';
