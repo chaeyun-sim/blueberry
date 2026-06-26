@@ -1,8 +1,7 @@
-import { Navigate,useParams } from 'react-router-dom';
-
 import { useMutation } from '@tanstack/react-query';
 import { Music, Trash2 } from 'lucide-react';
 import { overlay } from 'overlay-kit';
+import { Navigate,useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 
 import AppHeader from '@/components/layout/AppHeader';

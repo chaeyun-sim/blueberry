@@ -1,7 +1,6 @@
-import { type ComponentPropsWithoutRef, type ElementRef,forwardRef } from "react";
-
 import * as TogglePrimitive from "@radix-ui/react-toggle";
 import { type VariantProps } from "class-variance-authority";
+import { type ComponentPropsWithoutRef, type ElementRef,forwardRef } from "react";
 
 import { cn } from "@/lib/utils";
 

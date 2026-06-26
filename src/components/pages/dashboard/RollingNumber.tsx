@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react';
-
 import { animate, useMotionValue } from 'framer-motion';
+import { useEffect, useState } from 'react';
 
 interface RollingNumberProps {
 	prefix?: string;

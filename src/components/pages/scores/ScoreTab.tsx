@@ -1,6 +1,3 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-
 import { useMutation } from '@tanstack/react-query';
 import { AnimatePresence,motion } from 'framer-motion';
 import {
@@ -11,6 +8,8 @@ import {
 	Search,
 	X,
 } from 'lucide-react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
 import Button from '@/components/ui/button';

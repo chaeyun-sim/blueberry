@@ -1,5 +1,3 @@
-import { Navigate, useNavigate, useParams } from 'react-router-dom';
-
 import dayjs from 'dayjs';
 import {
 	ChevronRight,
@@ -9,6 +7,7 @@ import {
 	Pencil,
 	Trash2,
 } from 'lucide-react';
+import { Navigate, useNavigate, useParams } from 'react-router-dom';
 
 import ErrorBoundary from '@/components/ErrorBoundary';
 import AppHeader from '@/components/layout/AppHeader';

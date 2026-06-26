@@ -1,6 +1,5 @@
-import { useMemo } from 'react';
-
 import { TrendingDown,TrendingUp } from 'lucide-react';
+import { useMemo } from 'react';
 
 import { statsQueries } from '@/api/stats/queries';
 import { Card, CardContent,CardHeader, CardTitle } from '@/components/ui/card';

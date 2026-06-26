@@ -1,6 +1,5 @@
-import { useEffect, useRef,useState } from 'react';
-
 import { Loader2,Mail } from 'lucide-react';
+import { useEffect, useRef,useState } from 'react';
 import { toast } from 'sonner';
 
 import Button from '@/components/ui/button';

@@ -1,6 +1,5 @@
-import { ChangeEvent, DragEvent, useRef, useState } from 'react';
-
 import { ImageIcon, Sparkles,X } from 'lucide-react';
+import { ChangeEvent, DragEvent, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import exampleImg from '@/assets/example-commission.png';

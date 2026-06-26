@@ -1,6 +1,3 @@
-import { useState } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
-
 import { useQuery } from '@tanstack/react-query';
 import {
 	Bell,
@@ -11,6 +8,8 @@ import {
 	Lock,
 	LogOut,
 } from 'lucide-react';
+import { useState } from 'react';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
 import { logout } from '@/api/auth';

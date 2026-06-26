@@ -1,6 +1,5 @@
-import { Fragment, useState } from 'react';
-
 import { FileSpreadsheet, Layers, Monitor } from 'lucide-react';
+import { Fragment, useState } from 'react';
 
 import { statsQueries } from '@/api/stats/queries';
 import Button from '@/components/ui/button';

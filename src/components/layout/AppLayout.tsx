@@ -1,7 +1,6 @@
+import { AnimatePresence, motion } from 'framer-motion';
 import { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
-
-import { AnimatePresence, motion } from 'framer-motion';
 
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';

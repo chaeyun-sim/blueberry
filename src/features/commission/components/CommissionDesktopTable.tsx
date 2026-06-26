@@ -1,6 +1,5 @@
-import { ReactNode } from 'react';
-
 import { ChevronDown, ChevronsUpDown, ChevronUp, MailCheck } from 'lucide-react';
+import { ReactNode } from 'react';
 
 import { cn } from '@/lib/utils';
 import { abbreviateInstrument } from '@/utils/instrument';

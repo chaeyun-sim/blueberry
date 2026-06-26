@@ -1,5 +1,3 @@
-import React, { ElementType,useCallback, useState } from 'react';
-
 import { useMutation } from '@tanstack/react-query';
 import {
 	BarChart3,
@@ -10,6 +8,7 @@ import {
 	List,
 	Upload,
 } from 'lucide-react';
+import React, { ElementType,useCallback, useState } from 'react';
 import { toast } from 'sonner';
 
 import { statsMutations } from '@/api/stats/mutations';

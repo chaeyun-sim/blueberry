@@ -1,7 +1,6 @@
-import { Navigate, useNavigate, useParams } from 'react-router-dom';
-
 import { XCircle } from 'lucide-react';
 import { overlay } from 'overlay-kit';
+import { Navigate, useNavigate, useParams } from 'react-router-dom';
 
 import AppHeader from '@/components/layout/AppHeader';
 import { AppLayout } from '@/components/layout/AppLayout';

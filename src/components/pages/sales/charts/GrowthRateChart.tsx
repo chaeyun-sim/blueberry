@@ -1,5 +1,4 @@
 import { SVGAttributes } from 'react';
-
 import { Area, AreaChart, CartesianGrid,ReferenceLine, XAxis, YAxis } from 'recharts';
 import { CategoricalChartProps } from 'recharts/types/chart/generateCategoricalChart';
 

@@ -1,6 +1,3 @@
-import { useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-
 import {
 	CheckCircle2,
 	ChevronRightIcon,
@@ -9,6 +6,8 @@ import {
 	TrendingDown,
 	TrendingUp,
 } from 'lucide-react';
+import { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { statsQueries } from '@/api/stats/queries';
 import ErrorBoundary from '@/components/ErrorBoundary';

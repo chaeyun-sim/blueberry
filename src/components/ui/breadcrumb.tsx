@@ -1,7 +1,6 @@
-import { type ComponentProps, type ComponentPropsWithoutRef, forwardRef, type ReactNode } from "react";
-
 import { Slot } from "@radix-ui/react-slot";
 import { ChevronRight, MoreHorizontal } from "lucide-react";
+import { type ComponentProps, type ComponentPropsWithoutRef, forwardRef, type ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 

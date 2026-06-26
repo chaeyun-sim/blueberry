@@ -1,6 +1,5 @@
-import { InputHTMLAttributes, ReactNode, useRef, useState } from 'react';
-
 import { Pencil } from 'lucide-react';
+import { InputHTMLAttributes, ReactNode, useRef, useState } from 'react';
 
 interface InlineEditFieldProps extends InputHTMLAttributes<HTMLInputElement> {
 	ariaLabel: string;

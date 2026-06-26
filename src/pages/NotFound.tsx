@@ -1,6 +1,5 @@
-import { useNavigate } from 'react-router-dom';
-
 import { ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 import sobbingImg from '@/assets/sobbing.webp';
 import Button from '@/components/ui/button';

@@ -1,6 +1,5 @@
-import { useRef } from 'react';
-
 import { Calendar } from 'lucide-react';
+import { useRef } from 'react';
 
 import { InstrumentPicker } from '@/components/InstrumentPicker';
 import { Card, CardContent } from '@/components/ui/card';
