@@ -1,7 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { Dispatch, SetStateAction } from 'react';
 import { toast } from 'sonner';
-
 import { InstrumentPicker } from '@/components/InstrumentPicker';
 import RegisterFormComposer from '@/components/register-form-items/RegisterFormComposer';
 import RegisterFormLayout from '@/components/register-form-items/RegisterFormLayout';

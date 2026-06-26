@@ -5,14 +5,12 @@ import { OverlayProvider } from 'overlay-kit';
 import { lazy, Suspense, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { BrowserRouter, Outlet, Route, Routes } from 'react-router-dom';
-
 import ErrorBoundary from '@/components/ErrorBoundary';
 import ProtectedRoute from '@/components/layout/ProtectedRoute';
 import { Toaster as Sonner } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import AuthProvider from '@/provider/AuthProvider';
 import ThemeProvider from '@/provider/ThemeProvider';
-
 import { queryClient } from './utils/query-client';
 
 function ScrollToTop() {

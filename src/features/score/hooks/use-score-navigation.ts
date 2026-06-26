@@ -1,5 +1,4 @@
 import { useState } from 'react';
-
 import type { Song } from '../types';
 
 export function useScoreNavigation(songs: Song[], search: string) {

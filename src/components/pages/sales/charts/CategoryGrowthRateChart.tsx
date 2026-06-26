@@ -1,5 +1,4 @@
 import { Bar, BarChart, CartesianGrid,XAxis, YAxis } from 'recharts';
-
 import { ChartConfig, ChartContainer, ChartTooltip } from "@/components/ui/chart";
 import { CATEGORIES } from '@/constants/categories';
 import { MonthlyCategoryData } from '@/types/stats';

@@ -1,5 +1,4 @@
 import { FileArchive, X } from 'lucide-react';
-
 import { formatFileSize } from '@/utils/format-file-size';
 
 interface ZipFileHeaderProps {

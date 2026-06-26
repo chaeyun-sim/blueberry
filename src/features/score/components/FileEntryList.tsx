@@ -1,5 +1,4 @@
 import { X } from 'lucide-react';
-
 import { fileTypeConfig } from '@/constants/file-types';
 import { FileEntry } from '@/types/form';
 import { formatFileSize } from '@/utils/format-file-size';

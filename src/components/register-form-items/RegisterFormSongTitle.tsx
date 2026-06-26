@@ -1,5 +1,4 @@
 import { useId } from 'react';
-
 import Autocomplete, { AutocompleteProps } from '../Autocomplete';
 import Label from '../ui/label';
 

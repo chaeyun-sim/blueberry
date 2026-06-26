@@ -1,9 +1,7 @@
 import type { Session } from '@supabase/supabase-js'
 import { useQueryClient } from '@tanstack/react-query'
 import { type ReactNode,useCallback, useEffect, useState } from 'react'
-
 import { getSession, logout,onAuthStateChange } from '@/api/auth'
-
 import { AuthContext } from './AuthContext'
 
 function AuthProvider({ children }: { children: ReactNode }) {

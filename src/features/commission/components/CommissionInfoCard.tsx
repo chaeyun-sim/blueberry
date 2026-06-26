@@ -1,6 +1,5 @@
 import { Calendar } from 'lucide-react';
 import { useRef } from 'react';
-
 import { InstrumentPicker } from '@/components/InstrumentPicker';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -16,7 +15,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { CommissionStatus } from '@/constants/status-config';
 import { COMMISSION_STATUS_TRANSLATE } from '@/constants/translate';
 import { EditFormType } from '@/types/form';
-
 import { DifficultyLevelType } from '../types';
 
 interface CommissionInfoCardProps {

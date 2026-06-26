@@ -1,5 +1,4 @@
 import { queryOptions, skipToken } from '@tanstack/react-query'
-
 import { getArrangement, getSong, getSongs, getSongsSummary } from '.'
 import { scoreKeys } from './queryKeys'
 

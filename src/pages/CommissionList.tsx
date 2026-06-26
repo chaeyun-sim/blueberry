@@ -1,6 +1,5 @@
 import { AlertCircle, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { AppLayout } from '@/components/layout/AppLayout';
 import Button from '@/components/ui/button';

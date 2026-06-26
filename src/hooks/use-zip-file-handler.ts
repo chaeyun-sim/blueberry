@@ -1,6 +1,5 @@
 import { useRef,useState } from 'react';
 import { toast } from 'sonner';
-
 import { MAX_ZIP_SIZE } from '@/constants/file-size';
 import { FileEntry } from '@/types/form';
 import { hasCompressibleAudio } from '@/utils/compress-audio-entries';

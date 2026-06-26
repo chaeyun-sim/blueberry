@@ -1,5 +1,4 @@
 import { CommissionStatus } from '@/constants/status-config';
-
 import { DifficultyLevelType } from './commission';
 
 export interface CommissionRegisterFormType {

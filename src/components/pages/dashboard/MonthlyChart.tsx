@@ -8,7 +8,6 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-
 import { commissionQueries } from '@/features/commission/api';
 import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 

@@ -1,12 +1,10 @@
 import { Layers } from 'lucide-react';
 import { Cell,Pie, PieChart } from 'recharts';
-
 import { statsQueries } from '@/api/stats/queries';
 import { Card, CardContent,CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer } from '@/components/ui/chart';
 import { categoryColors } from '@/constants/status-config';
 import { useAppQuery as useQuery } from '@/hooks/use-app-query';
-
 import { EmptyState } from './EmptyState';
 
 export function CategoryDistributionCard() {

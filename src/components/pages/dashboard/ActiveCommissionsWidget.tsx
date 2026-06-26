@@ -2,7 +2,6 @@ import dayjs from 'dayjs';
 import { ChevronRightIcon,Music2 } from 'lucide-react';
 import { useMemo } from 'react';
 import { NavigateFunction, useNavigate } from 'react-router-dom';
-
 import { Commission } from '@/features/commission/types';
 
 interface ActiveCommissionsWidgetProps {

@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-
 import { MOBILE_BREAKPOINT } from '@/constants/breakpoints';
 
 export function useIsMobile() {

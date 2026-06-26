@@ -1,5 +1,4 @@
 import JSZip from 'jszip';
-
 import { MAX_DECOMPRESSED, MAX_FILE_COUNT } from '@/constants/file-size';
 import { ALLOWED_EXTENSIONS } from '@/constants/file-types';
 import { FileEntry } from '@/types/form';

@@ -1,6 +1,5 @@
 import { Bar, BarChart, CartesianGrid,XAxis, YAxis } from 'recharts';
 import { CategoricalChartProps } from 'recharts/types/chart/generateCategoricalChart';
-
 import { ChartConfig, ChartContainer, ChartTooltip } from '@/components/ui/chart';
 import { formatCurrency } from '@/utils/format-currency';
 

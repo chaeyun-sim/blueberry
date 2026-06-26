@@ -1,5 +1,4 @@
 import * as XLSX from 'xlsx';
-
 import { CATEGORIES, Category } from '@/constants/categories';
 import { ExcelRow } from '@/types/excel';
 

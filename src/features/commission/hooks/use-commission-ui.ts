@@ -1,8 +1,6 @@
 import { useEffect,useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-
 import { CommissionStatus } from '@/constants/status-config';
-
 import { DateRange } from '../utils/commission-utils';
 
 export const tabs: { label: string; value: CommissionStatus }[] = [

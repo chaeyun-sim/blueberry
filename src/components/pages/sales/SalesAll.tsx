@@ -1,6 +1,5 @@
 import { FileSpreadsheet, Layers, Monitor } from 'lucide-react';
 import { Fragment, useState } from 'react';
-
 import { statsQueries } from '@/api/stats/queries';
 import Button from '@/components/ui/button';
 import { Card, CardContent,CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,7 +14,6 @@ import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 import { useSalesTableData } from '@/hooks/use-sales-table-data';
 import { cn } from '@/lib/utils';
 import { splitProduct } from '@/utils/split-product';
-
 import { SalesCategoryGroupHeader } from './SalesCategoryGroupHeader';
 import { SalesTableRow } from './SalesTableRow';
 import SortIcon from './SortIcon';

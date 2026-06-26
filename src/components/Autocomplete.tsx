@@ -1,5 +1,4 @@
 import { ComponentProps, KeyboardEvent,useId, useRef, useState } from "react";
-
 import { Input } from "@/components/ui/input";
 
 export interface AutocompleteProps {

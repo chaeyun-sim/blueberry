@@ -3,7 +3,6 @@ import { Music, Trash2 } from 'lucide-react';
 import { overlay } from 'overlay-kit';
 import { Navigate,useParams } from 'react-router-dom';
 import { toast } from 'sonner';
-
 import AppHeader from '@/components/layout/AppHeader';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/layout/PageHeader';

@@ -1,8 +1,6 @@
 import { type VariantProps } from "class-variance-authority";
 import { type HTMLAttributes } from "react";
-
 import { cn } from "@/lib/utils";
-
 import { badgeVariants } from './badge.style';
 
 export interface BadgeProps extends HTMLAttributes<HTMLDivElement>, VariantProps<typeof badgeVariants> {}

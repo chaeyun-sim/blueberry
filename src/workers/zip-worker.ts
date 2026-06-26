@@ -9,7 +9,6 @@
  */
 
 import JSZip from 'jszip';
-
 import { MAX_DECOMPRESSED, MAX_FILE_COUNT } from '@/constants/file-size';
 
 // ─── Inlined constants (avoid importing React-dependent modules) ──────────────

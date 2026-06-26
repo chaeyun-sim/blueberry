@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion';
 import { ChevronRight, Folder, FolderOpen, Trash2 } from 'lucide-react';
-
 import Button from '@/components/ui/button';
 
 interface FolderRowProps {

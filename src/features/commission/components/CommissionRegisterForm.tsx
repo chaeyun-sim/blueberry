@@ -3,7 +3,6 @@ import { Calendar } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-
 import { InstrumentPicker } from '@/components/InstrumentPicker';
 import RegisterFormComposer from '@/components/register-form-items/RegisterFormComposer';
 import RegisterFormLayout from '@/components/register-form-items/RegisterFormLayout';
@@ -17,7 +16,6 @@ import { findSongByTitle } from '@/features/score/api';
 import { useSongField } from '@/features/score/hooks';
 import { CommissionRegisterFormType } from '@/types/form';
 import { queryClient } from '@/utils/query-client';
-
 import { DifficultyLevelType } from '../types';
 
 interface CommissionRegisterFormProps {

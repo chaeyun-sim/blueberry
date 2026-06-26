@@ -1,5 +1,4 @@
 import { queryOptions } from '@tanstack/react-query';
-
 import { getCommission, getCommissions, getMonthlyCommissionCounts } from './api';
 import { commissionKeys } from './queryKeys';
 

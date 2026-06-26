@@ -1,5 +1,4 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-
 import { navItems } from '@/constants/nav-items';
 import { cn } from '@/lib/utils';
 

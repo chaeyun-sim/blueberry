@@ -1,7 +1,6 @@
 import dayjs from 'dayjs';
 import { ArrowRight, ChevronRightIcon, Inbox } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-
 import { Commission } from '@/features/commission/types';
 
 interface Props {

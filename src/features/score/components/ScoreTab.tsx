@@ -11,7 +11,6 @@ import {
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-
 import Button from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -27,7 +26,6 @@ import { scoreKeys,scoreMutations, scoreQueries } from '@/features/score/api';
 import { useScoreNavigation } from '@/features/score/hooks';
 import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 import { queryClient } from '@/utils/query-client';
-
 import Breadcrumb from './BreadCrumb';
 import FolderRow from './FolderRow';
 

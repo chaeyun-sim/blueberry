@@ -1,6 +1,5 @@
 import dayjs from 'dayjs';
 import { useState } from 'react';
-
 import { statsQueries } from '@/api/stats/queries';
 import { Card, CardContent,CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartConfig } from '@/components/ui/chart';
@@ -14,7 +13,6 @@ import {
 import { categoryChartConfig } from '@/constants/status-config';
 import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 import { getNetAmount } from '@/utils/getNetAmount';
-
 import CategoryGrowthRateChart from './charts/CategoryGrowthRateChart';
 import GrowthRateChart from './charts/GrowthRateChart';
 import MonthlyGrowthRateChart from './charts/MonthlyGrowthRateChart';

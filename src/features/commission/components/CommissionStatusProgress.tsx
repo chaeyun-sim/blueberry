@@ -1,5 +1,4 @@
 import { CheckCircle, LucideIcon, Music2, Package2, XCircle } from 'lucide-react';
-
 import { Card, CardContent } from '@/components/ui/card';
 import { CommissionStatus } from '@/constants/status-config';
 import { COMMISSION_STATUS_TRANSLATE } from '@/constants/translate';

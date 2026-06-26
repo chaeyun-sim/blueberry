@@ -1,6 +1,5 @@
 import { LucideProps } from 'lucide-react';
 import { ElementType, ForwardRefExoticComponent, RefAttributes } from 'react';
-
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 

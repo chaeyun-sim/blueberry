@@ -2,7 +2,6 @@ import dayjs from 'dayjs';
 import { Activity } from 'lucide-react';
 import { useState } from 'react';
 import { CartesianGrid,Line, LineChart, XAxis, YAxis } from 'recharts';
-
 import { statsQueries } from '@/api/stats/queries';
 import { Card, CardContent,CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartConfig, ChartContainer, ChartTooltip } from '@/components/ui/chart';
@@ -15,7 +14,6 @@ import {
 } from '@/components/ui/select';
 import { topProductColors } from '@/constants/status-config';
 import { useAppQuery as useQuery } from '@/hooks/use-app-query';
-
 import { EmptyState } from './EmptyState';
 
 export function MonthlySalesTrendCard() {

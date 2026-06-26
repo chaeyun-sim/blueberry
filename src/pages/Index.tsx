@@ -8,7 +8,6 @@ import {
 } from 'lucide-react';
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-
 import { statsQueries } from '@/api/stats/queries';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { AppLayout } from '@/components/layout/AppLayout';

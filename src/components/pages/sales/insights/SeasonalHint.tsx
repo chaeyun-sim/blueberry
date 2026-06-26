@@ -2,7 +2,6 @@ import dayjs from 'dayjs';
 import { CalendarDays } from 'lucide-react';
 import { useState } from 'react';
 import { Bar, BarChart, CartesianGrid, Cell,XAxis, YAxis } from 'recharts';
-
 import { statsQueries } from '@/api/stats/queries';
 import { Card, CardContent,CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer } from '@/components/ui/chart';

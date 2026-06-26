@@ -1,5 +1,4 @@
 import { ArrowDown,ArrowUp, ArrowUpDown } from 'lucide-react';
-
 import { SortDir,SortKey } from '@/hooks/use-sales-table-data';
 
 interface SortIconProps {

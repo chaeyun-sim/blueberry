@@ -2,7 +2,6 @@ import dayjs from 'dayjs';
 import { CalendarClock, ChevronRightIcon } from 'lucide-react';
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-
 import { Commission } from '@/features/commission/types';
 
 interface Props {

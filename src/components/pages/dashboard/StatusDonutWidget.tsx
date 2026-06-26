@@ -2,7 +2,6 @@ import dayjs from 'dayjs';
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Cell,Pie, PieChart } from 'recharts';
-
 import { Commission } from '@/features/commission/types';
 
 interface Props {

@@ -2,7 +2,6 @@ import dayjs from 'dayjs';
 import { motion } from 'framer-motion';
 import { ChevronRight, FileSpreadsheet } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-
 import { ExcelUpload } from '@/types/stats';
 
 function UploadFolderRow(upload: ExcelUpload) {

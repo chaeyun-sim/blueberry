@@ -1,7 +1,6 @@
 import { Session } from '@supabase/supabase-js';
 import { FormEvent, useState } from 'react';
 import { toast } from 'sonner';
-
 import { supabase } from '@/lib/supabase';
 
 type PwFormField = 'current' | 'next' | 'confirm';

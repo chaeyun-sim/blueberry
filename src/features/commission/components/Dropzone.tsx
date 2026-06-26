@@ -1,6 +1,5 @@
 import { FileArchive } from 'lucide-react';
 import { DragEventHandler } from 'react';
-
 import { cn } from '@/lib/utils';
 
 interface DropZoneProps {

@@ -1,8 +1,6 @@
 import { type VariantProps } from "class-variance-authority";
 import { forwardRef, HTMLAttributes } from 'react';
-
 import { cn } from "@/lib/utils";
-
 import { alertVariants } from './alert.style';
 
 const Alert = forwardRef<

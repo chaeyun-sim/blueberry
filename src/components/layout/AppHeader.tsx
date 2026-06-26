@@ -1,7 +1,6 @@
 import { ArrowLeft } from 'lucide-react';
 import { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-
 import Button from '../ui/button';
 
 function AppHeader({ children }: { children: ReactNode }) {

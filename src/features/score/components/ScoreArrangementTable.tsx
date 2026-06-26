@@ -1,7 +1,6 @@
 import dayjs from 'dayjs';
 import { FileMusic } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-
 import {
 	Table,
 	TableBody,
@@ -10,7 +9,6 @@ import {
 	TableHeader,
 	TableRow,
 } from '@/components/ui/table';
-
 import { Arrangement } from '../types';
 
 interface ScoreArrangementTableProps {

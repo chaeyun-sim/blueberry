@@ -1,6 +1,5 @@
 import { LogIn, LogOut,PlusCircle } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
-
 import logoImg from '@/assets/logo.webp';
 import { Sidebar, SidebarContent, SidebarFooter } from '@/components/ui/sidebar';
 import { navItems } from '@/constants/nav-items';

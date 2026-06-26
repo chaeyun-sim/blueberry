@@ -11,7 +11,6 @@ import {
 import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-
 import { logout } from '@/api/auth';
 import logoImg from '@/assets/logo.webp';
 import AppHeader from '@/components/layout/AppHeader';

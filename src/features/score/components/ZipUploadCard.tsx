@@ -1,7 +1,6 @@
 import { Loader2 } from 'lucide-react';
 import { DragEvent,useRef, useState } from 'react';
 import { toast } from 'sonner';
-
 import { Card, CardContent } from '@/components/ui/card';
 import { MAX_ZIP_SIZE } from '@/constants/file-size';
 import { DropZone, ZipFileHeader } from '@/features/commission/components';
@@ -9,7 +8,6 @@ import { FileEntry } from '@/types/form';
 import { buildInstrumentList } from '@/utils/build-instrument-list';
 import { extractZipInWorker } from '@/utils/extract-zip-in-worker';
 import { parseInstrumentsFromZipName } from '@/utils/parse-instruments-from-zipName';
-
 import { FileEntryList } from './FileEntryList';
 import { FileTypeSummary } from './FileTypeSummary';
 

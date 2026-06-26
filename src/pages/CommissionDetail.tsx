@@ -8,7 +8,6 @@ import {
 	Trash2,
 } from 'lucide-react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
-
 import ErrorBoundary from '@/components/ErrorBoundary';
 import AppHeader from '@/components/layout/AppHeader';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -29,7 +28,6 @@ import { useCommissionDetailActions } from '@/features/commission/hooks';
 import { COMMISSION_INFO } from '@/features/commission/types';
 import { scoreQueries } from '@/features/score/api';
 import { useAppQuery as useQuery } from '@/hooks/use-app-query';
-
 import NotFound from './NotFound';
 
 const CommissionDetailContent = () => {

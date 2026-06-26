@@ -1,7 +1,6 @@
 import { SVGAttributes } from 'react';
 import { Area, AreaChart, CartesianGrid,ReferenceLine, XAxis, YAxis } from 'recharts';
 import { CategoricalChartProps } from 'recharts/types/chart/generateCategoricalChart';
-
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 
 interface GrowthRateChartProps {

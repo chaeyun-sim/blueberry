@@ -1,6 +1,5 @@
 import { Trophy } from 'lucide-react';
 import { Bar, BarChart, CartesianGrid,XAxis, YAxis } from 'recharts';
-
 import { statsQueries } from '@/api/stats/queries';
 import { Card, CardContent,CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer } from '@/components/ui/chart';
@@ -8,7 +7,6 @@ import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 import { cn } from '@/lib/utils';
 import { formatCurrency } from '@/utils/format-currency';
 import { getNetAmount } from '@/utils/getNetAmount';
-
 import { EmptyState } from './EmptyState';
 import TopSongBar from './TopSongBar';
 
