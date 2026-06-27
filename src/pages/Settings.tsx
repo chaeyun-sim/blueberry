@@ -8,7 +8,7 @@ import {
 	Lock,
 	LogOut,
 } from 'lucide-react';
-import { useState } from 'react';
+import { ChangeEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { logout } from '@/api/auth';
@@ -22,7 +22,9 @@ import { Switch } from '@/components/ui/switch';
 import { usePasswordChangeForm } from '@/hooks/use-password-change-form';
 import { createPushSubscription, pushQueries } from '@/hooks/use-push';
 import { supabase } from '@/lib/supabase';
+import { cn } from '@/lib/utils';
 import { useAuth } from '@/provider/AuthContext';
+import { listUploadedTemplates, TEMPLATE_SLOTS, uploadTemplate } from '@/utils/mxl-template';
 
 export default function Settings() {
 	const { session } = useAuth();
@@ -36,6 +38,30 @@ export default function Settings() {
 	const {
 		pwOpen, setPwOpen, pwLoading, pwForm, setPwForm, showPw, setShowPw, handleSubmit: handlePasswordChange,
 	} = usePasswordChangeForm(session);
+
+	const [uploadingKey, setUploadingKey] = useState<string | null>(null);
+	const { data: uploadedTemplates, refetch: refetchTemplates } = useQuery({
+		queryKey: ['template-list'],
+		queryFn: listUploadedTemplates,
+	});
+
+	const handleTemplateUpload = async (key: string, e: ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0];
+		if (!file) return;
+		setUploadingKey(key);
+		try {
+			await uploadTemplate(key, file);
+			await refetchTemplates();
+			toast.success('템플릿 업로드 완료');
+		} catch (err) {
+			toast.error('업로드에 실패했어요', {
+				description: err instanceof Error ? err.message : undefined,
+			});
+		} finally {
+			setUploadingKey(null);
+			e.target.value = '';
+		}
+	};
 
 	const handlePushToggle = async (checked: boolean) => {
 		if (!session?.access_token) {
@@ -82,6 +108,8 @@ export default function Settings() {
 		await logout().catch(() => {});
 		navigate('/login');
 	};
+
+	const uploadedCount = uploadedTemplates?.size ?? 0;
 
 	return (
 		<AppLayout>
@@ -189,6 +217,59 @@ export default function Settings() {
 								disabled={pushLoading}
 								aria-label='마감일 푸시 알림 토글'
 							/>
+						</div>
+					</section>
+
+					{/* Finale 템플릿 */}
+					<section className='rounded-xl border border-border bg-card p-4'>
+						<div className='flex items-center justify-between mb-3'>
+							<p className='text-xs text-muted-foreground font-medium'>Finale 템플릿</p>
+							<p className='text-xs text-muted-foreground'>
+								{uploadedCount} / {TEMPLATE_SLOTS.length} 업로드됨
+							</p>
+						</div>
+						<div className='space-y-0.5'>
+							{TEMPLATE_SLOTS.map((slot) => {
+								const isUploaded = uploadedTemplates?.has(slot.key) ?? false;
+								const isUploading = uploadingKey === slot.key;
+								return (
+									<div
+										key={slot.key}
+										className='flex items-center justify-between py-1.5'
+									>
+										<div className='flex items-center gap-2'>
+											<span
+												className={cn(
+													'w-1.5 h-1.5 rounded-full shrink-0',
+													isUploaded ? 'bg-green-500' : 'bg-muted-foreground/30',
+												)}
+											/>
+											<span className='text-sm'>{slot.label}</span>
+										</div>
+										<label className='cursor-pointer shrink-0'>
+											<input
+												type='file'
+												accept='.mxl'
+												className='hidden'
+												onChange={(e) => handleTemplateUpload(slot.key, e)}
+												disabled={isUploading}
+											/>
+											<span
+												className={cn(
+													'text-xs font-medium transition-opacity',
+													isUploading
+														? 'text-muted-foreground'
+														: isUploaded
+															? 'text-muted-foreground hover:text-primary'
+															: 'text-primary hover:opacity-70',
+												)}
+											>
+												{isUploading ? '업로드 중...' : isUploaded ? '교체' : '업로드'}
+											</span>
+										</label>
+									</div>
+								);
+							})}
 						</div>
 					</section>
 
