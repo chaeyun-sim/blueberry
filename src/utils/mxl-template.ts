@@ -139,9 +139,11 @@ export async function analyzeMusicMeta(workTitle: string, composer: string, move
   const client = new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
 
   const content = movementTitle
-    ? `Identify this specific piece: movement = "${movementTitle}", from collection = "${workTitle}", composer = ${composer}.
+    ? `Collection: "${workTitle}" by ${composer}. Movement: "${movementTitle}".
+What is the original-language title of ONLY the movement "${movementTitle}"?
+canonicalTitle = movement title ONLY (e.g. "Volière"). NEVER prefix with collection name (WRONG: "Le Carnaval des animaux - Volière").
 Return ONLY valid JSON:
-{"keyFifths": <-7 to 7>, "keyMode": "major" or "minor", "timeBeats": <numerator>, "timeBeatType": <denominator>, "canonicalTitle": "<the original title of this SPECIFIC MOVEMENT in its original language, e.g. Voliere>", "collectionTitle": "<original title of the collection/suite in its original language>"}
+{"keyFifths": <-7 to 7>, "keyMode": "major" or "minor", "timeBeats": <numerator>, "timeBeatType": <denominator>, "canonicalTitle": "<movement title only>", "collectionTitle": "<collection title in its original language>"}
 keyFifths: 0=C/Am, -1=F/Dm, -2=Bb/Gm, -3=Eb/Cm, -4=Ab/Fm, -5=Db/Bbm, 1=G/Em, 2=D/Bm, 3=A/F#m, 4=E/C#m, 5=B/G#m`
     : `Identify this piece: "${workTitle}" by ${composer}.
 Return ONLY valid JSON:
@@ -178,7 +180,7 @@ export async function translateToEnglish(text: string): Promise<string> {
 function replaceTag(xml: string, tag: string, value: string): string {
   const v = escapeXml(value);
   xml = xml.replace(new RegExp(`<${tag}[^>]*\\s*/>`, 'g'), `<${tag}>${v}</${tag}>`);
-  xml = xml.replace(new RegExp(`<${tag}[^>]*>[^<]*<\\/${tag}>`, 'g'), `<${tag}>${v}</${tag}>`);
+  xml = xml.replace(new RegExp(`<${tag}[^>]*>[\\s\\S]*?<\\/${tag}>`, 'g'), `<${tag}>${v}</${tag}>`);
   return xml;
 }
 
@@ -209,6 +211,31 @@ function patchMusicXML(xml: string, params: TemplateParams, instruments: Instrum
     if (newText === null) return block;
     return block.replace(/(<credit-words[^>]*>)[^<]*(<\/credit-words>)/, `$1${escapeXml(newText)}$2`);
   });
+
+  // credit-type 없는 중앙정렬 credit block도 폰트크기 순으로 패치 (largest=title, second=subtitle)
+  {
+    const untypedCenter = [...result.matchAll(/<credit\b[^>]*>[\s\S]*?<\/credit>/g)]
+      .map(m => m[0])
+      .filter(b => !b.includes('<credit-type>') && b.includes('justify="center"'))
+      .map(b => ({ block: b, fontSize: parseFloat(b.match(/font-size="([^"]+)"/)?.[1] ?? '0') }))
+      .filter(b => b.fontSize > 0)
+      .sort((a, b) => b.fontSize - a.fontSize);
+
+    if (untypedCenter[0]) {
+      const patched = untypedCenter[0].block.replace(
+        /(<credit-words[^>]*>)[^<]*(<\/credit-words>)/,
+        `$1${escapeXml(params.title)}$2`,
+      );
+      result = result.replace(untypedCenter[0].block, patched);
+    }
+    if (params.subtitle && untypedCenter[1] && untypedCenter[1].fontSize < untypedCenter[0].fontSize) {
+      const patched = untypedCenter[1].block.replace(
+        /(<credit-words[^>]*>)[^<]*(<\/credit-words>)/,
+        `$1${escapeXml(params.subtitle)}$2`,
+      );
+      result = result.replace(untypedCenter[1].block, patched);
+    }
+  }
 
   // 템플릿에 subtitle credit 블록이 없으면 title 아래에 새로 주입
   if (params.subtitle && !result.includes('<credit-type>subtitle</credit-type>')) {

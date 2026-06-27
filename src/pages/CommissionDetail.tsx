@@ -65,12 +65,32 @@ const CommissionDetailContent = () => {
       // AI가 원어 정식 명칭(canonicalTitle) + 조성/박자 한 번에 분석
       const meta = await analyzeMusicMeta(workTitle, composer, movementTitle || undefined);
 
-      // 악보 메인 제목 = 특정 곡의 원어 정식 명칭 (예: Volière)
-      // 서브타이틀 = 모음곡명. linked song이 있으면 workTitle, 없으면 AI가 감지한 collectionTitle
-      const mxlTitle = meta.canonicalTitle || movementTitle || workTitle;
-      const mxlSubtitle = movementTitle
+      // 메인 제목 = 모음곡/컬렉션명, 서브타이틀 = 특정 악장 원어 명칭
+      // Case 1 (linked song 있음): title=workTitle(컬렉션), subtitle=canonicalTitle(악장)
+      // Case 2 (없음): title=AI collectionTitle(컬렉션), subtitle=canonicalTitle(악장)
+      const mxlTitle = movementTitle
         ? workTitle
-        : (meta.collectionTitle ?? undefined);
+        : (meta.collectionTitle || meta.canonicalTitle || workTitle);
+
+      // AI가 "컬렉션명 - 악장명" 형태로 반환한 경우 컬렉션 prefix 제거
+      const collectionRef = movementTitle ? workTitle : (meta.collectionTitle ?? '');
+      const strippedCanonical = (meta.canonicalTitle ?? '')
+        .replace(new RegExp(`^${collectionRef.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*[-–—:]\\s*`, 'i'), '')
+        .trim();
+      // canonical이 컬렉션명과 동일하면 AI가 잘못 반환 → movementTitle 폴백
+      const canonicalForSub = strippedCanonical && strippedCanonical !== collectionRef
+        ? strippedCanonical
+        : '';
+
+      const rawSubtitle = movementTitle
+        ? (canonicalForSub || movementTitle)
+        : (meta.collectionTitle
+            ? (canonicalForSub || meta.canonicalTitle || workTitle)
+            : undefined);
+      const hasMovementContext = !!(movementTitle || meta.collectionTitle);
+      const mxlSubtitle = rawSubtitle && rawSubtitle !== mxlTitle
+        ? rawSubtitle
+        : (hasMovementContext ? 'Untitled' : undefined);
 
       await downloadFilledTemplate({
         title: mxlTitle,
