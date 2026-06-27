@@ -21,4 +21,4 @@ export const parseNumeric = (v: unknown) => parseFloat(String(v));
 
 // Coerce unrecognised or null categories to the catch-all bucket.
 export const normalizeCategory = (cat: string | null | undefined) =>
-	cat && CATEGORIES.has(cat) ? cat : 'ETC';
+	cat && (CATEGORIES as readonly string[]).includes(cat) ? cat : 'ETC';
