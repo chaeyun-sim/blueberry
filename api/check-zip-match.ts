@@ -2,7 +2,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 const client = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY ?? process.env.VITE_ANTHROPIC_API_KEY,
+  apiKey: process.env.ANTHROPIC_API_KEY 
 });
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
