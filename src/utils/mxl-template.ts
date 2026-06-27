@@ -127,24 +127,28 @@ export interface MusicAnalysis {
   keyMode: 'major' | 'minor';
   timeBeats: number;
   timeBeatType: number;
+  // 해당 곡의 원어 정식 명칭 (예: "Volière", "Clair de lune")
+  canonicalTitle: string;
 }
 
-export async function analyzeMusicMeta(title: string, composer: string, subtitle?: string): Promise<MusicAnalysis> {
-  const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY as string | undefined;
-  if (!apiKey) throw new Error('VITE_ANTHROPIC_API_KEY 환경변수가 없어요. .env 파일에 추가해주세요.');
+export async function analyzeMusicMeta(workTitle: string, composer: string, movementTitle?: string): Promise<MusicAnalysis> {
+  const apiKey = import.meta.env.ANTHROPIC_API_KEY as string | undefined;
+  if (!apiKey) throw new Error('ANTHROPIC_API_KEY 환경변수가 없어요. .env 파일에 추가해주세요.');
   const client = new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
 
-  const piece = subtitle ? `"${subtitle}" from "${title}"` : `"${title}"`;
+  const content = movementTitle
+    ? `Identify this specific piece: movement = "${movementTitle}", from collection = "${workTitle}", composer = ${composer}.
+Return ONLY valid JSON:
+{"keyFifths": <-7 to 7>, "keyMode": "major" or "minor", "timeBeats": <numerator>, "timeBeatType": <denominator>, "canonicalTitle": "<the original title of this SPECIFIC MOVEMENT in its original language, e.g. Voliere not The Large Aviary>"}
+keyFifths: 0=C/Am, -1=F/Dm, -2=Bb/Gm, -3=Eb/Cm, -4=Ab/Fm, -5=Db/Bbm, 1=G/Em, 2=D/Bm, 3=A/F#m, 4=E/C#m, 5=B/G#m`
+    : `Identify this piece: "${workTitle}" by ${composer}.
+Return ONLY valid JSON:
+{"keyFifths": <-7 to 7>, "keyMode": "major" or "minor", "timeBeats": <numerator>, "timeBeatType": <denominator>, "canonicalTitle": "<original title in its original language>"}`;
+
   const msg = await client.messages.create({
     model: 'claude-haiku-4-5-20251001',
-    max_tokens: 100,
-    messages: [{
-      role: 'user',
-      content: `What is the key signature and time signature of ${piece} by ${composer}?
-Return ONLY valid JSON, no explanation:
-{"keyFifths": <-7 to 7>, "keyMode": "major" or "minor", "timeBeats": <numerator>, "timeBeatType": <denominator>}
-keyFifths: negative=flats (F=-1,Bb=-2,Eb=-3...), positive=sharps (G=1,D=2,A=3...), 0=C major/A minor`,
-    }],
+    max_tokens: 150,
+    messages: [{ role: 'user', content }],
   });
   const first = msg.content[0];
   if (first.type !== 'text') throw new Error('AI 응답 파싱 실패');
@@ -154,8 +158,8 @@ keyFifths: negative=flats (F=-1,Bb=-2,Eb=-3...), positive=sharps (G=1,D=2,A=3...
 }
 
 export async function translateToEnglish(text: string): Promise<string> {
-  const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY as string | undefined;
-  if (!apiKey) throw new Error('VITE_ANTHROPIC_API_KEY 환경변수가 없어요. .env 파일에 추가해주세요.');
+  const apiKey = import.meta.env.ANTHROPIC_API_KEY as string | undefined;
+  if (!apiKey) throw new Error('ANTHROPIC_API_KEY 환경변수가 없어요. .env 파일에 추가해주세요.');
   const client = new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
   const msg = await client.messages.create({
     model: 'claude-haiku-4-5-20251001',

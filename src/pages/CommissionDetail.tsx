@@ -3,6 +3,7 @@ import {
   ChevronRight,
   Download,
   ExternalLink,
+  Loader2,
   Mail,
   MoreVertical,
   Pencil,
@@ -10,6 +11,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
+import { toast } from 'sonner';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import AppHeader from '@/components/layout/AppHeader';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -28,18 +30,18 @@ import { commissionQueries } from '@/features/commission/api';
 import {
   CommissionDetailSkeleton,
   CommissionStatusProgress,
-  TemplateDownloadDialog,
 } from '@/features/commission/components';
 import { useCommissionDetailActions } from '@/features/commission/hooks';
 import { COMMISSION_INFO } from '@/features/commission/types';
 import { scoreQueries } from '@/features/score/api';
 import { useAppQuery as useQuery } from '@/hooks/use-app-query';
+import { analyzeMusicMeta, downloadFilledTemplate } from '@/utils/mxl-template';
 import NotFound from './NotFound';
 
 const CommissionDetailContent = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
+  const [templateLoading, setTemplateLoading] = useState(false);
 
   const { data: commission, isLoading } = useQuery(commissionQueries.getCommission(id));
   const { data: song } = useQuery(scoreQueries.getSong(commission?.song_id ?? ''));
@@ -47,12 +49,45 @@ const CommissionDetailContent = () => {
   const { imslpUrl, nextStatus, openDialog, openEmailDialog, viewOriginalImage, deleteCommission } =
     useCommissionDetailActions(id!, commission, song);
 
-  const linkedSong = song ?? commission?.songs;
-  const dialogTitle = linkedSong
-    ? (linkedSong.title ?? '')
-    : (commission?.title ?? '');
-  const dialogSubtitle = linkedSong ? (commission?.title ?? '') : '';
-  const dialogComposer = linkedSong?.composer ?? commission?.composer ?? '';
+  const handleTemplateDownload = async () => {
+    if (!commission) return;
+    setTemplateLoading(true);
+    try {
+      const linked = song ?? commission.songs;
+      // 모음곡: workTitle=컬렉션명, movementTitle=특정 곡(commission.title)
+      // 단독 곡: workTitle=commission.title
+      const workTitle = linked
+        ? (linked.english_title ?? linked.title ?? '')
+        : (commission.title ?? '');
+      const movementTitle = linked ? (commission.title ?? '') : '';
+      const composer = linked?.composer ?? commission.composer ?? '';
+
+      // AI가 원어 정식 명칭(canonicalTitle) + 조성/박자 한 번에 분석
+      const meta = await analyzeMusicMeta(workTitle, composer, movementTitle || undefined);
+
+      // 악보 메인 제목 = 특정 곡의 원어 정식 명칭 (예: Volière)
+      // 서브타이틀 = 모음곡명 (예: The Carnival of the Animals)
+      const mxlTitle = meta.canonicalTitle || movementTitle || workTitle;
+      const mxlSubtitle = movementTitle ? workTitle : undefined;
+
+      await downloadFilledTemplate({
+        title: mxlTitle,
+        subtitle: mxlSubtitle || undefined,
+        composer,
+        arrangement: commission.arrangement ?? '',
+        keyFifths: meta.keyFifths,
+        keyMode: meta.keyMode,
+        timeBeats: meta.timeBeats,
+        timeBeatType: meta.timeBeatType,
+      });
+    } catch (err) {
+      toast.error('템플릿 다운로드 실패', {
+        description: err instanceof Error ? err.message : undefined,
+      });
+    } finally {
+      setTemplateLoading(false);
+    }
+  };
 
   if (!id)
     return (
@@ -199,25 +234,19 @@ const CommissionDetailContent = () => {
         <CardContent className='p-5 space-y-3'>
           <button
             type='button'
-            onClick={() => setTemplateDialogOpen(true)}
-            className='flex items-center justify-between w-full rounded-md hover:bg-muted/50 transition-colors'
+            onClick={handleTemplateDownload}
+            disabled={templateLoading}
+            className='flex items-center justify-between w-full rounded-md hover:bg-muted/50 transition-colors disabled:opacity-50'
           >
             <p className='text-sm font-medium'>템플릿 다운받기</p>
-            <Download className='h-4 w-4 text-muted-foreground shrink-0' />
+            {templateLoading ? (
+              <Loader2 className='h-4 w-4 text-muted-foreground animate-spin' />
+            ) : (
+              <Download className='h-4 w-4 text-muted-foreground shrink-0' />
+            )}
           </button>
         </CardContent>
       </Card>
-
-      {commission && (
-        <TemplateDownloadDialog
-          open={templateDialogOpen}
-          onOpenChange={setTemplateDialogOpen}
-          defaultTitle={dialogTitle}
-          defaultSubtitle={dialogSubtitle}
-          defaultComposer={dialogComposer}
-          arrangement={commission.arrangement ?? ''}
-        />
-      )}
     </AppLayout>
   );
 };
