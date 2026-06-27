@@ -1,4 +1,4 @@
-export const CATEGORIES = new Set(['CLASSIC', 'POP', 'K-POP', 'OST', 'ANI', 'ETC']);
+import { CATEGORIES } from '@/constants/categories';
 
 export const getUtcYear = (iso: string) => new Date(iso).getUTCFullYear();
 
@@ -21,4 +21,4 @@ export const parseNumeric = (v: unknown) => parseFloat(String(v));
 
 // Coerce unrecognised or null categories to the catch-all bucket.
 export const normalizeCategory = (cat: string | null | undefined) =>
-	cat && CATEGORIES.has(cat) ? cat : 'ETC';
+	cat && (CATEGORIES as readonly string[]).includes(cat) ? cat : 'ETC';

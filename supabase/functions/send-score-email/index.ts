@@ -59,7 +59,7 @@ Deno.serve(async (req) => {
 	}
 
 	try {
-		const { commissionId, toEmail } = await req.json();
+		const { commissionId, toEmail, subject, emailBody } = await req.json();
 
 		if (!commissionId) {
 			return new Response(JSON.stringify({ error: 'commissionId가 필요해요' }), {
@@ -173,8 +173,8 @@ Deno.serve(async (req) => {
 		await transporter.sendMail({
 			from: `"${Deno.env.get('SENDER_NAME') ?? '심채윤'}" <${NAVER_EMAIL}>`,
 			to: toEmail || NAVER_EMAIL,
-			subject: `[신청곡] ${songTitle}`,
-			text: `안녕하세요, 심채윤입니다!\n${songTitle} 신청곡 보내드립니다.\n이상 있으면 알려주세요!\n감사합니다. :)`,
+			subject: subject || `[신청곡] ${songTitle}`,
+			text: emailBody || `안녕하세요!\n${songTitle} 신청곡 보내드립니다.\n이상 있으면 알려주세요!\n감사합니다. :)`,
 			attachments: [
 				{
 					filename: `${songTitle}.zip`,

@@ -1,30 +1,25 @@
+import { useMutation } from '@tanstack/react-query';
+import { AnimatePresence,motion } from 'framer-motion';
+import { AlertCircle,Music, PlusCircle, Search } from 'lucide-react';
+import { overlay } from 'overlay-kit';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
-import { Card, CardContent } from '@/components/ui/card';
-import Button from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { PlusCircle, Search, Music, AlertCircle } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
 import Breadcrumb from '@/components/pages/scores/BreadCrumb';
-import FolderRow from '@/components/pages/scores/FolderRow';
 import DeleteSongDialog from '@/components/pages/scores/DeleteSongDialog';
+import FolderRow from '@/components/pages/scores/FolderRow';
 import { ScoreArrangementTable } from '@/components/pages/scores/ScoreArrangementTable';
-import { overlay } from 'overlay-kit';
+import Button from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { scoreKeys,scoreMutations, scoreQueries } from '@/features/score/api';
 import { useAppQuery as useQuery } from '@/hooks/use-app-query';
-import { scoreQueries } from '@/api/score/queries';
-import { scoreMutations } from '@/api/score/mutations';
-import { scoreKeys } from '@/api/score/queryKeys';
-import { useMutation } from '@tanstack/react-query';
 import { queryClient } from '@/utils/query-client';
-import { toast } from 'sonner';
-import { useAuth } from '@/hooks/use-auth';
 
 const ScoreList = () => {
 	const navigate = useNavigate();
-	const { isGuest } = useAuth();
-
 	const [search, setSearch] = useState('');
 	const [openFolderId, setOpenFolderId] = useState<string | null>(null);
 
@@ -151,11 +146,6 @@ const ScoreList = () => {
 										count={song.arrangements.length}
 										onClick={() => setOpenFolderId(song.id)}
 										onDelete={() => {
-											if (isGuest) {
-												toast.error('게스트 모드에서는 악보를 삭제할 수 없습니다.');
-												return;
-											}
-
 											if (song.arrangements.length > 0) {
 												overlay.open((overlayProps) => (
 													<DeleteSongDialog

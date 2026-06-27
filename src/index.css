@@ -40,7 +40,7 @@ button:not(:disabled),
     --muted: 250 8% 93%;
     --muted-foreground: 250 12% 44%;
 
-    --accent: 192 100% 42%;           /* 네온 아이스 블루 — 유리 블루베리 */
+    --accent: 250 8% 91%;
     --accent-foreground: 252 55% 8%;
 
     --destructive: 0 70% 42%;
@@ -100,8 +100,8 @@ button:not(:disabled),
     --muted: 248 30% 14%;
     --muted-foreground: 248 12% 54%;
 
-    --accent: 192 100% 55%;           /* 네온 아이스 블루 다크모드 */
-    --accent-foreground: 248 50% 5%;
+    --accent: 248 28% 16%;
+    --accent-foreground: 248 12% 92%;
 
     --destructive: 0 65% 62%;
     --destructive-foreground: 0 0% 99%;

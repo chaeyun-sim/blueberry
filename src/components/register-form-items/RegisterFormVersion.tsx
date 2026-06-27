@@ -5,7 +5,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { DifficultyLevelType } from '@/types/commission';
+import { DifficultyLevelType } from '@/features/commission/types';
 import Label from '../ui/label';
 
 interface RegisterFormVersionProps {

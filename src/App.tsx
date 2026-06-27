@@ -1,17 +1,16 @@
-import { lazy, Suspense, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
-import { Toaster as Sonner } from '@/components/ui/sonner';
-import { TooltipProvider } from '@/components/ui/tooltip';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
-import ThemeProvider from '@/provider/ThemeProvider';
-import AuthProvider from '@/provider/AuthProvider';
-import { OverlayProvider } from 'overlay-kit';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
-import { queryClient } from './utils/query-client';
+import { OverlayProvider } from 'overlay-kit';
+import { lazy, Suspense, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
+import { BrowserRouter, Outlet, Route, Routes } from 'react-router-dom';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import ProtectedRoute from '@/components/layout/ProtectedRoute';
+import { Toaster as Sonner } from '@/components/ui/sonner';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import AuthProvider from '@/provider/AuthProvider';
+import { queryClient } from './utils/query-client';
 
 function ScrollToTop() {
 	const { pathname } = useLocation();
@@ -59,7 +58,6 @@ const App = () => (
 		<QueryClientProvider client={queryClient}>
 			<Analytics />
 			<SpeedInsights />
-			<ThemeProvider>
 				<TooltipProvider>
 					<Sonner />
 					<BrowserRouter>
@@ -97,7 +95,6 @@ const App = () => (
 						</AuthProvider>
 					</BrowserRouter>
 				</TooltipProvider>
-			</ThemeProvider>
 		</QueryClientProvider>
 	</ErrorBoundary>
 );

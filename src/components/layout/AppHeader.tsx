@@ -1,8 +1,9 @@
 import { ArrowLeft } from 'lucide-react';
-import Button from '../ui/button';
+import { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Button from '../ui/button';
 
-function AppHeader({ children }: { children: React.ReactNode }) {
+function AppHeader({ children }: { children: ReactNode }) {
   return <div className='mb-6 flex items-center justify-between'>{children}</div>;
 };
 
@@ -20,7 +21,7 @@ const BackButton = () => {
   );
 };
 
-const Right = ({ children }: { children: React.ReactNode }) => {
+const Right = ({ children }: { children: ReactNode }) => {
 	return (
 		<div className='flex items-center gap-2'>
 			{children}

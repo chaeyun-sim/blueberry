@@ -1,22 +1,21 @@
+import { Bar, BarChart, CartesianGrid,XAxis, YAxis } from 'recharts';
 import { ChartConfig, ChartContainer, ChartTooltip } from "@/components/ui/chart";
+import { CATEGORIES } from '@/constants/categories';
 import { MonthlyCategoryData } from '@/types/stats';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 
 interface CategoryGrowthRateChartProps {
 	data: MonthlyCategoryData[];
 	config: ChartConfig;
 }
 
-const CATS = ['CLASSIC', 'OST', 'ANI', 'ETC', 'POP', 'K-POP'] as const;
-
 function CategoryGrowthRateChart({ data, config }: CategoryGrowthRateChartProps) {
   const normalizedData = data.map(d => {
-    const total = CATS.reduce((s, cat) => s + ((d as Record<string, unknown>)[cat] as number ?? 0), 0);
-    if (total === 0) return { month: d.month, ...Object.fromEntries(CATS.map(c => [c, 0])) };
+    const total = CATEGORIES.reduce((s, cat) => s + ((d as Record<string, unknown>)[cat] as number ?? 0), 0);
+    if (total === 0) return { month: d.month, ...Object.fromEntries(CATEGORIES.map(c => [c, 0])) };
     return {
       month: d.month,
       ...Object.fromEntries(
-        CATS.map(cat => [cat, parseFloat((((d as Record<string, unknown>)[cat] as number ?? 0) / total * 100).toFixed(1))])
+        CATEGORIES.map(cat => [cat, parseFloat((((d as Record<string, unknown>)[cat] as number ?? 0) / total * 100).toFixed(1))])
       ),
     };
   });
@@ -53,7 +52,7 @@ function CategoryGrowthRateChart({ data, config }: CategoryGrowthRateChartProps)
           content={({ active, payload }) => {
             if (!active || !payload?.length) return null;
             const d = payload[0].payload;
-            const activeCats = CATS.filter(cat => config[cat] && d[cat] > 0);
+            const activeCats = CATEGORIES.filter(cat => config[cat] && d[cat] > 0);
             return (
               <div className='rounded-lg border border-border bg-background px-3 py-2 text-xs shadow-md space-y-1'>
                 <p className='font-semibold text-sm mb-1'>{d.month}</p>
@@ -78,7 +77,7 @@ function CategoryGrowthRateChart({ data, config }: CategoryGrowthRateChartProps)
             );
           }}
         />
-        {CATS.filter(cat => config[cat]).map((cat, i, arr) => (
+        {CATEGORIES.filter(cat => config[cat]).map((cat, i, arr) => (
           <Bar
             key={cat}
             dataKey={cat}

@@ -1,21 +1,20 @@
-import { useState, useCallback } from 'react';
+import dayjs from 'dayjs';
+import { CheckCircle2,FileSpreadsheet, Upload, X } from 'lucide-react';
+import { ChangeEvent, DragEvent,useCallback, useState } from 'react';
+import Button from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from '@/components/ui/dialog';
-import Button from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Label from '@/components/ui/label';
-import { Upload, FileSpreadsheet, X, CheckCircle2 } from 'lucide-react';
-import { splitProduct } from '@/utils/split-product';
-import { ExcelRow } from '@/types/excel';
-import { useAuth } from '@/hooks/use-auth';
-import { toast } from 'sonner';
-import { cn } from '@/lib/utils';
 import { useExcelFileParser } from '@/hooks/use-excel-file-parser';
+import { cn } from '@/lib/utils';
+import { ExcelRow } from '@/types/excel';
+import { splitProduct } from '@/utils/split-product';
 
 interface ExcelUploadDialogProps {
   open: boolean;
@@ -24,12 +23,10 @@ interface ExcelUploadDialogProps {
 }
 
 function getDefaultUploadName(): string {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+  return dayjs().format('YYYY-MM');
 }
 
 export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: ExcelUploadDialogProps) => {
-  const { isGuest } = useAuth();
   const { fileName, preview, error, parseFile, reset: resetParser } = useExcelFileParser();
   const [uploadName, setUploadName] = useState(getDefaultUploadName);
   const [dragOver, setDragOver] = useState(false);
@@ -40,7 +37,7 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: ExcelUploadD
   }, [resetParser]);
 
   const handleDrop = useCallback(
-    (e: React.DragEvent) => {
+    (e: DragEvent<HTMLButtonElement>) => {
       e.preventDefault();
       setDragOver(false);
       const file = e.dataTransfer.files[0];
@@ -50,7 +47,7 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: ExcelUploadD
   );
 
   const handleFileInput = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
+    (e: ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (file) parseFile(file);
       e.currentTarget.value = '';
@@ -59,11 +56,6 @@ export const ExcelUploadDialog = ({ open, onOpenChange, onUpload }: ExcelUploadD
   );
 
   const handleConfirm = () => {
-    if (isGuest) {
-      toast.error('게스트 모드에서는 엑셀 업로드를 할 수 없습니다.');
-      return;
-    }
-
     if (preview.length > 0 && uploadName.trim()) {
       onUpload(preview, uploadName.trim());
       reset();

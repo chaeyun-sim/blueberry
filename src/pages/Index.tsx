@@ -1,27 +1,28 @@
+import {
+	CheckCircle2,
+	ChevronRightIcon,
+	Plus,
+	Sparkles,
+	TrendingDown,
+	TrendingUp,
+} from 'lucide-react';
 import { useMemo } from 'react';
-import { AppLayout } from '@/components/layout/AppLayout';
 import { useNavigate } from 'react-router-dom';
-import { useAppQuery as useQuery } from '@/hooks/use-app-query';
-import { commissionQueries } from '@/api/commission/queries';
-import { scoreQueries } from '@/api/score/queries';
 import { statsQueries } from '@/api/stats/queries';
-import { getNetAmount } from '@/utils/getNetAmount';
 import ErrorBoundary from '@/components/ErrorBoundary';
-import RollingNumber from '@/components/pages/dashboard/RollingNumber';
+import { AppLayout } from '@/components/layout/AppLayout';
 import { ActiveCommissionsWidget } from '@/components/pages/dashboard/ActiveCommissionsWidget';
 import { DeadlineWidget } from '@/components/pages/dashboard/DeadlineWidget';
-import { StatusDonutWidget } from '@/components/pages/dashboard/StatusDonutWidget';
 import { DiscoverWidget } from '@/components/pages/dashboard/DiscoverWidget';
 import MonthlyChart from '@/components/pages/dashboard/MonthlyChart';
-import useLiveClock from '@/hooks/use-live-clock';
+import RollingNumber from '@/components/pages/dashboard/RollingNumber';
+import { StatusDonutWidget } from '@/components/pages/dashboard/StatusDonutWidget';
 import { WEEK_KOR } from '@/constants/week';
-import {
-	Plus,
-	TrendingUp,
-	TrendingDown,
-	CheckCircle2,
-	Sparkles,
-} from 'lucide-react';
+import { commissionQueries } from '@/features/commission/api';
+import { scoreQueries } from '@/features/score/api';
+import { useAppQuery as useQuery } from '@/hooks/use-app-query';
+import useLiveClock from '@/hooks/use-live-clock';
+import { getNetAmount } from '@/utils/getNetAmount';
 
 function getGreeting(hour: number) {
 	if (hour < 6) return 'Good Night';
@@ -131,7 +132,7 @@ const DashboardContent = () => {
 								</p>
 							)}
 						</div>
-						<p className='text-xs text-muted-foreground mt-3 md:mt-0'>자세히 →</p>
+						<p className='text-xs text-muted-foreground mt-3 md:mt-0 flex items-center gap-1'>자세히 <ChevronRightIcon className="w-3.5 h-3.5 text-muted-foreground" /></p>
 					</div>
 
 					{/* Total completed — 모바일에서 숨김 */}
@@ -167,9 +168,7 @@ const DashboardContent = () => {
 								</span>
 							</div>
 						</div>
-						<p className='text-[10px] md:text-xs text-muted-foreground mt-2 md:mt-0'>
-							전체 보기 →
-						</p>
+						<p className='text-[10px] md:text-xs text-muted-foreground mt-2 md:mt-0 flex items-center gap-1'>전체 보기 <ChevronRightIcon className="w-3.5 h-3.5 text-muted-foreground" /></p>
 					</div>
 				</div>
 

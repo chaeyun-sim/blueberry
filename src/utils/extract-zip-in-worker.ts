@@ -3,8 +3,8 @@
 //             duplicating potentially large ZIP data. Import.meta.url binds the correct module
 //             URL even after Vite bundling.
 
-import { WorkerFile } from '@/workers/zip-worker';
 import { FileEntry } from '@/types/form';
+import { WorkerFile } from '@/workers/zip-worker';
 
 /**
  * Extracts a ZIP file in a dedicated Web Worker and returns FileEntry[].

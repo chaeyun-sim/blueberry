@@ -1,25 +1,18 @@
-import { useState, useEffect } from 'react';
+import dayjs from 'dayjs';
+import { useEffect,useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import AppHeader from '@/components/layout/AppHeader';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
-import { Navigate, useSearchParams } from 'react-router-dom';
-import AnalyzeImage from '@/components/pages/commission/AnalyzeImage';
-import CommissionRegisterForm from '@/components/pages/commission/CommissionRegisterForm';
-import { buildInstrumentList } from '@/utils/build-instrument-list';
+import { AnalyzeImage, CommissionRegisterForm } from '@/features/commission/components';
 import { CommissionRegisterFormType } from '@/types/form';
-import { useAuth } from '@/hooks/use-auth';
-import AppHeader from '@/components/layout/AppHeader';
+import { buildInstrumentList } from '@/utils/build-instrument-list';
 
 function getDefaultDeadline() {
-  const d = new Date();
-  d.setDate(d.getDate() + 13);
-  const yyyy = d.getFullYear();
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
-  const dd = String(d.getDate()).padStart(2, '0');
-  return `${yyyy}-${mm}-${dd}`;
+  return dayjs().add(13, 'day').format('YYYY-MM-DD');
 }
 
 const CommissionRegister = () => {
-  const { isGuest } = useAuth();
   const [searchParams] = useSearchParams();
 
   const [form, setForm] = useState<CommissionRegisterFormType>({
@@ -31,6 +24,7 @@ const CommissionRegister = () => {
     deadline: searchParams.get('deadline') ?? getDefaultDeadline(),
     notes: '',
     imageFile: null,
+    categoryId: null,
   });
 
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -58,8 +52,6 @@ const CommissionRegister = () => {
       }
     })();
   }, []);
-
-  if (isGuest) return <Navigate to='/not-found' replace />;
 
   return (
     <AppLayout>

@@ -1,9 +1,52 @@
-import { useState, useRef } from 'react';
+import { useRef,useState } from 'react';
 import { toast } from 'sonner';
 import { MAX_ZIP_SIZE } from '@/constants/file-size';
-import { extractZipEntries, ZipExtractionError } from '@/utils/extract-zip-entries';
-import { hasCompressibleAudio, compressAudioEntries } from '@/utils/compress-audio-entries';
 import { FileEntry } from '@/types/form';
+import { hasCompressibleAudio } from '@/utils/compress-audio-entries';
+import { extractZipEntries, ZipExtractionError } from '@/utils/extract-zip-entries';
+import type { WorkerEntry } from '@/workers/audio-compress.worker';
+
+function compressWithWorker(entries: FileEntry[]): Promise<FileEntry[]> {
+	return new Promise((resolve, reject) => {
+		const worker = new Worker(
+			new URL('../workers/audio-compress.worker.ts', import.meta.url),
+			{ type: 'module' },
+		);
+
+		worker.onmessage = async (e: MessageEvent<{ ok: true; entries: WorkerEntry[] } | { ok: false; message: string }>) => {
+			worker.terminate();
+			if (!e.data.ok) {
+				reject(new Error((e.data as { ok: false; message: string }).message));
+				return;
+			}
+			const result: FileEntry[] = e.data.entries.map(w => ({
+				file: new File([w.buffer], w.name, { type: w.fileType === 'audio' ? 'audio/mpeg' : '' }),
+				label: w.label,
+				fileType: w.fileType,
+			}));
+			resolve(result);
+		};
+
+		worker.onerror = (err) => {
+			worker.terminate();
+			reject(new Error(err.message));
+		};
+
+		const workerEntries: WorkerEntry[] = entries.map(e => ({
+			buffer: new ArrayBuffer(0),
+			name: e.file.name,
+			label: e.label,
+			fileType: e.fileType,
+		}));
+
+		// 파일을 ArrayBuffer로 변환 후 전송 (zero-copy transfer)
+		Promise.all(entries.map(e => e.file.arrayBuffer())).then(buffers => {
+			buffers.forEach((buf, i) => { workerEntries[i].buffer = buf; });
+			const transferList = workerEntries.map(w => w.buffer);
+			worker.postMessage({ entries: workerEntries }, { transfer: transferList });
+		}).catch(reject);
+	});
+}
 
 interface ZipState {
 	zipName: string | null;
@@ -62,8 +105,8 @@ export function useZipFileHandler() {
 
 		setIsCompressing(true);
 		try {
-			const res = await compressAudioEntries(rawEntries);
-			setState((prev) => ({ ...prev, files: res as FileEntry[] }));
+			const res = await compressWithWorker(rawEntries);
+			setState((prev) => ({ ...prev, files: res }));
 		} catch (e) {
 			toast.error('오디오 변환에 실패했습니다.', { description: (e as Error).message });
 			reset();

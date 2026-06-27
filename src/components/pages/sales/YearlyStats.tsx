@@ -1,30 +1,29 @@
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import dayjs from 'dayjs';
+import { useState } from 'react';
+import { statsQueries } from '@/api/stats/queries';
+import { Card, CardContent,CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartConfig } from '@/components/ui/chart';
 import {
 	Select,
-	SelectTrigger,
-	SelectValue,
 	SelectContent,
 	SelectItem,
+	SelectTrigger,
+	SelectValue,
 } from '@/components/ui/select';
-import { useState } from 'react';
-import { useAppQuery as useQuery } from '@/hooks/use-app-query';
-import { statsQueries } from '@/api/stats/queries';
-import GrowthRateChart from './charts/GrowthRateChart';
-import CategoryGrowthRateChart from './charts/CategoryGrowthRateChart';
-import MonthlyGrowthRateChart from './charts/MonthlyGrowthRateChart';
-import { getNetAmount } from '@/utils/getNetAmount';
-import { useAuth } from '@/hooks/use-auth';
 import { categoryChartConfig } from '@/constants/status-config';
+import { useAppQuery as useQuery } from '@/hooks/use-app-query';
+import { getNetAmount } from '@/utils/getNetAmount';
+import CategoryGrowthRateChart from './charts/CategoryGrowthRateChart';
+import GrowthRateChart from './charts/GrowthRateChart';
+import MonthlyGrowthRateChart from './charts/MonthlyGrowthRateChart';
+import { EmptyState } from './EmptyState';
 
 function YearlyStats() {
-	const { isGuest } = useAuth();
-
 	const { data: yearRange } = useQuery(statsQueries.getSalesYearRange());
 
 	const [selectedYear, setSelectedYear] = useState<number | null>(null);
 
-	const year = selectedYear ?? yearRange?.max ?? new Date().getFullYear();
+	const year = selectedYear ?? yearRange?.max ?? dayjs().year();
 	const yearOptions = yearRange
 		? Array.from(
 				{ length: yearRange.max - yearRange.min + 1 },
@@ -44,8 +43,8 @@ function YearlyStats() {
 		: 0;
 	const monthlySalesWithAvg = salesData.map((d) => ({
 		...d,
-		revenue: isGuest ? d.revenue : getNetAmount(d.revenue),
-		prevRevenue: isGuest ? d.prevRevenue : getNetAmount(d.prevRevenue),
+		revenue: getNetAmount(d.revenue),
+		prevRevenue: getNetAmount(d.prevRevenue),
 	}));
 
 	const growthData = salesData.map((d) => ({
@@ -74,14 +73,6 @@ function YearlyStats() {
 
 	const activeCategoryConfig: ChartConfig = Object.fromEntries(
 		activeCategories.map((k) => [k, categoryChartConfig[k]]),
-	);
-
-	const hasData = salesData.length > 0;
-
-	const emptyState = (
-		<p className='text-sm text-muted-foreground py-8 text-center'>
-			데이터가 없습니다. 매출 데이터를 업로드하면 확인할 수 있어요.
-		</p>
 	);
 
 	return (
@@ -119,9 +110,7 @@ function YearlyStats() {
 					</div>
 				</CardHeader>
 				<CardContent className='space-y-6'>
-					{!hasData ? (
-						emptyState
-					) : (
+					<EmptyState data={salesData}>
 						<>
 							<MonthlyGrowthRateChart data={monthlySalesWithAvg} avgCount={avgCount} />
 							<div className='border-t border-border/40 pt-4'>
@@ -150,7 +139,7 @@ function YearlyStats() {
 								/>
 							</div>
 						</>
-					)}
+					</EmptyState>
 				</CardContent>
 			</Card>
 
@@ -161,11 +150,9 @@ function YearlyStats() {
 					</CardTitle>
 				</CardHeader>
 				<CardContent>
-					{!hasData ? (
-						emptyState
-					) : (
+					<EmptyState data={salesData}>
 						<GrowthRateChart data={growthData} offset={zeroOffset} />
-					)}
+					</EmptyState>
 				</CardContent>
 			</Card>
 		</div>

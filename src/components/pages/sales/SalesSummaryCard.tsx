@@ -1,7 +1,7 @@
-import { cn } from '@/lib/utils';
-import { formatCurrency } from '@/utils/format-currency';
 import { LucideProps, TrendingDown, TrendingUp } from 'lucide-react';
 import { ForwardRefExoticComponent, RefAttributes } from 'react';
+import { cn } from '@/lib/utils';
+import { formatCurrency } from '@/utils/format-currency';
 
 interface SalesSummaryCardProps {
   icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>;

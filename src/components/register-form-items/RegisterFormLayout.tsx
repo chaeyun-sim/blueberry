@@ -1,5 +1,5 @@
-import { Card, CardContent } from '@/components/ui/card';
 import { PropsWithChildren } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import Button from '../ui/button';
 
 interface RegisterFormLayoutProps {

@@ -1,14 +1,14 @@
-import { useState } from 'react';
-import { useNavigate, Navigate, Link } from 'react-router-dom';
-import { Input } from '@/components/ui/input';
-import Button from '@/components/ui/button';
-import Label from '@/components/ui/label';
-import { Card, CardContent } from '@/components/ui/card';
-import { Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Loader2,Lock, Mail } from 'lucide-react';
+import { FormEvent, useState } from 'react';
+import { Link,Navigate, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { login } from '@/api/auth';
-import { useAuth } from '@/hooks/use-auth';
 import logoImg from '@/assets/logo.webp';
+import Button from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import Label from '@/components/ui/label';
+import { useAuth } from '@/provider/AuthContext';
 
 interface LoginFormType {
 	email: string;
@@ -17,7 +17,7 @@ interface LoginFormType {
 
 export default function Login() {
 	const navigate = useNavigate();
-	const { session, loading: authLoading, isGuest } = useAuth();
+	const { session, loading: authLoading } = useAuth();
 
 	const [form, setForm] = useState<LoginFormType>({
 		email: '',
@@ -28,9 +28,9 @@ export default function Login() {
 	const [loading, setLoading] = useState(false);
 
 	if (authLoading) return null;
-	if (session || isGuest) return <Navigate to='/' replace />;
+	if (session) return <Navigate to='/' replace />;
 
-	const handleLogin = async (e: React.FormEvent) => {
+	const handleLogin = async (e: FormEvent) => {
 		e.preventDefault();
 
 		if (!form.email || !form.password) {

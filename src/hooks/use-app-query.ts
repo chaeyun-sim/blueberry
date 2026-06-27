@@ -1,12 +1,10 @@
 import {
+  type DefaultError,
+  type QueryKey,
   useQuery,
   type UseQueryOptions,
   type UseQueryResult,
-  type QueryKey,
-  type DefaultError,
 } from '@tanstack/react-query'
-import { useAuth } from '@/hooks/use-auth'
-import { getDemoData } from '@/data/demo'
 
 export function useAppQuery<
   TQueryFnData = unknown,
@@ -16,14 +14,7 @@ export function useAppQuery<
 >(
   options: UseQueryOptions<TQueryFnData, TError, TData, TQueryKey>,
 ): UseQueryResult<TData, TError> {
-  const { isGuest } = useAuth()
-
-   
   return useQuery({
     ...options,
-    ...(isGuest && {
-      queryFn: () => getDemoData(options.queryKey!) as TQueryFnData,
-      staleTime: Infinity,
-    }),
   } satisfies UseQueryOptions<TQueryFnData, TError, TData, TQueryKey>) as UseQueryResult<TData, TError>
 }

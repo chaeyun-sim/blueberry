@@ -1,34 +1,21 @@
-import { useState } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { ChartContainer } from '@/components/ui/chart';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Cell } from 'recharts';
-import { useAppQuery as useQuery } from '@/hooks/use-app-query';
-import { statsQueries } from '@/api/stats/queries';
-import { getNetAmount } from '@/utils/getNetAmount';
+import dayjs from 'dayjs';
 import { CalendarDays } from 'lucide-react';
+import { useState } from 'react';
+import { Bar, BarChart, CartesianGrid, Cell,XAxis, YAxis } from 'recharts';
+import { statsQueries } from '@/api/stats/queries';
+import { Card, CardContent,CardHeader, CardTitle } from '@/components/ui/card';
+import { ChartContainer } from '@/components/ui/chart';
+import { MONTH_EVENTS } from '@/constants/month';
+import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 import { cn } from '@/lib/utils';
-
-const MONTH_EVENTS: Record<number, string[]> = {
-	1: ['새해', '설날'],
-	2: ['발렌타인데이', '졸업식 시즌'],
-	3: ['입학식', '화이트데이', '봄 결혼 시즌'],
-	4: ['부활절', '봄 결혼 시즌'],
-	5: ['어린이날', '어버이날', '스승의날', '결혼 성수기'],
-	6: ['결혼 성수기'],
-	7: ['여름방학'],
-	8: ['여름방학', '광복절'],
-	9: ['추석', '가을 결혼 시즌'],
-	10: ['가을 결혼 성수기', '할로윈'],
-	11: ['수능', '가을 결혼 성수기'],
-	12: ['크리스마스', '연말'],
-};
+import { getNetAmount } from '@/utils/getNetAmount';
 
 function SeasonalHint() {
 	const { data: months = [] } = useQuery(statsQueries.getSeasonalPattern());
 
-	const currentMonth = new Date().getMonth() + 1;
 	const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
-
+	
+	const currentMonth = dayjs().month() + 1;
 	const activeMonth = selectedMonth ?? currentMonth;
 	const activeData = months.find((m) => m.monthNum === activeMonth);
 	const years = months.find((m) => m.years > 0)?.years ?? 0;
@@ -48,11 +35,7 @@ function SeasonalHint() {
 				)}
 			</CardHeader>
 			<CardContent className='space-y-4'>
-				{!hasAnyData ? (
-					<p className='text-sm text-muted-foreground py-6 text-center'>
-						데이터가 없습니다. 매출 데이터를 업로드하면 패턴을 확인할 수 있어요.
-					</p>
-				) : (
+				{hasAnyData ? (
 					<>
 						<ChartContainer config={{}} className='w-full h-[180px]'>
 							<BarChart
@@ -121,40 +104,46 @@ function SeasonalHint() {
 								))}
 							</div>
 
-							{!activeData || activeData.years === 0 ? (
+							{activeData && activeData.years > 0 ? (
+								activeData.topSongs.length > 0 ? (
+									<div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2'>
+										{activeData.topSongs.map((song, i) => (
+											<div
+												key={song.title}
+												className={cn(
+													'rounded-[14px] px-3 py-2 space-y-0.5',
+													i === 0 ? 'bg-primary/10' : 'bg-muted/40',
+												)}
+											>
+												<p className='text-xs font-mono text-muted-foreground'>{i + 1}위</p>
+												<p
+													className={cn(
+														'text-xs truncate',
+														i === 0 ? 'font-semibold' : 'font-medium',
+													)}
+												>
+													{song.title}
+												</p>
+												<p className='text-xs text-muted-foreground tabular-nums'>
+													총 {song.avgCount}건
+												</p>
+											</div>
+										))}
+									</div>
+								) : (
+									<p className='text-xs text-muted-foreground'>곡 정보 없음</p>
+								)
+							) : (
 								<p className='text-xs text-muted-foreground'>
 									이 달의 데이터가 없습니다
 								</p>
-							) : activeData.topSongs.length === 0 ? (
-								<p className='text-xs text-muted-foreground'>곡 정보 없음</p>
-							) : (
-								<div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2'>
-									{activeData.topSongs.map((song, i) => (
-										<div
-											key={song.title}
-											className={cn(
-												'rounded-[14px] px-3 py-2 space-y-0.5',
-												i === 0 ? 'bg-primary/10' : 'bg-muted/40',
-											)}
-										>
-											<p className='text-xs font-mono text-muted-foreground'>{i + 1}위</p>
-											<p
-												className={cn(
-													'text-xs truncate',
-													i === 0 ? 'font-semibold' : 'font-medium',
-												)}
-											>
-												{song.title}
-											</p>
-											<p className='text-xs text-muted-foreground tabular-nums'>
-												총 {song.avgCount}건
-											</p>
-										</div>
-									))}
-								</div>
 							)}
 						</div>
 					</>
+				) : (
+					<p className='text-sm text-muted-foreground py-6 text-center'>
+						데이터가 없습니다. 매출 데이터를 업로드하면 패턴을 확인할 수 있어요.
+					</p>
 				)}
 			</CardContent>
 		</Card>

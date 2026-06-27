@@ -1,16 +1,17 @@
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { useAppQuery as useQuery } from '@/hooks/use-app-query';
+import dayjs from 'dayjs';
+import { CalendarClock,Minus, TrendingDown, TrendingUp } from 'lucide-react';
 import { statsQueries } from '@/api/stats/queries';
-import { TrendingUp, TrendingDown, Minus, CalendarClock } from 'lucide-react';
-import { getNetAmount } from '@/utils/getNetAmount';
+import { Card, CardContent,CardHeader, CardTitle } from '@/components/ui/card';
+import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 import { cn } from '@/lib/utils';
+import { getNetAmount } from '@/utils/getNetAmount';
 
 function SalesForecast() {
-	const now = new Date();
-	const year = now.getFullYear();
-	const monthIndex = now.getMonth();
-	const dayOfMonth = now.getDate();
-	const totalDays = new Date(year, monthIndex + 1, 0).getDate();
+	const now = dayjs();
+	const year = now.year();
+	const monthIndex = now.month();
+	const dayOfMonth = now.date();
+	const totalDays = now.daysInMonth();
 	const progress = dayOfMonth / totalDays;
 
 	const { data: monthlySales = [] } = useQuery(

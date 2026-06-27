@@ -1,5 +1,5 @@
 import { CommissionStatus } from '@/constants/status-config';
-import { DifficultyLevelType } from './commission';
+import { DifficultyLevelType } from '@/features/commission/types';
 
 export interface CommissionRegisterFormType {
   imagePreview: string | null;
@@ -10,6 +10,7 @@ export interface CommissionRegisterFormType {
   deadline: string;
   notes?: string;
   imageFile: File | null;
+  categoryId: string | null;
 }
 
 export interface FileEntry {
@@ -26,4 +27,5 @@ export interface EditFormType {
   deadline: string;
   notes: string;
   status: CommissionStatus;
+  categoryId: string | null;
 }

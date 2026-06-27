@@ -1,8 +1,8 @@
-import { useMemo } from 'react';
-import { Commission } from '@/types/commission';
-import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
-import { CalendarClock } from 'lucide-react';
+import { CalendarClock, ChevronRightIcon } from 'lucide-react';
+import { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Commission } from '@/features/commission/types';
 
 interface Props {
   commissions: Commission[];
@@ -40,9 +40,9 @@ export function DeadlineWidget({ commissions }: Props) {
           </p>
           <button
             onClick={() => navigate('/commissions')}
-            className='text-xs text-muted-foreground'
+            className='text-xs text-muted-foreground flex items-center gap-1'
           >
-            전체 보기 →
+            전체 보기 <ChevronRightIcon className="w-3.5 h-3.5 text-muted-foreground" />
           </button>
         </div>
         <div className='space-y-2'>

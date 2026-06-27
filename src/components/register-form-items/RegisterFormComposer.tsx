@@ -1,6 +1,6 @@
 import { useId } from 'react';
-import Label from '@/components/ui/label';
 import Autocomplete, { AutocompleteProps } from '@/components/Autocomplete';
+import Label from '@/components/ui/label';
 
 function RegisterFormComposer({ value, onChange, suggestions, inputProps }: AutocompleteProps) {
   const inputId = useId();

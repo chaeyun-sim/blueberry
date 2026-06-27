@@ -1,9 +1,9 @@
-import { Navigate } from 'react-router-dom'
-import { useAuth } from '@/hooks/use-auth'
 import { PropsWithChildren } from 'react';
+import { Navigate } from 'react-router-dom'
+import { useAuth } from '@/provider/AuthContext';
 
 export default function ProtectedRoute({ children }: PropsWithChildren) {
-  const { session, loading, isGuest } = useAuth()
+  const { session, loading } = useAuth()
 
   if (loading) {
     return (
@@ -13,7 +13,7 @@ export default function ProtectedRoute({ children }: PropsWithChildren) {
     )
   }
 
-  if (!session && !isGuest) {
+  if (!session) {
     return <Navigate to="/login" replace />
   }
 

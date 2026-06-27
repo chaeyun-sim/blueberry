@@ -1,10 +1,17 @@
+import { useMutation } from '@tanstack/react-query';
+import { FileSpreadsheet, ScrollText,Trash2 } from 'lucide-react';
 import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate,useParams } from 'react-router-dom';
+import { toast } from 'sonner';
+import { statsMutations } from '@/api/stats/mutations';
+import { statsQueries } from '@/api/stats/queries';
+import { statsKeys } from '@/api/stats/queryKeys';
+import AppHeader from '@/components/layout/AppHeader';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { PageHeader } from '@/components/layout/PageHeader';
+import { SongSummaryDialog } from '@/components/pages/uploads/SongSummaryDialog';
 import Button from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { FileSpreadsheet, Trash2, ScrollText } from 'lucide-react';
 import {
 	Table,
 	TableBody,
@@ -14,22 +21,13 @@ import {
 	TableRow,
 } from '@/components/ui/table';
 import { useAppQuery as useQuery } from '@/hooks/use-app-query';
-import { statsQueries } from '@/api/stats/queries';
-import { statsMutations } from '@/api/stats/mutations';
-import { statsKeys } from '@/api/stats/queryKeys';
-import { useMutation } from '@tanstack/react-query';
-import { queryClient } from '@/utils/query-client';
 import { formatCurrency } from '@/utils/format-currency';
+import { queryClient } from '@/utils/query-client';
 import { splitProduct } from '@/utils/split-product';
-import { toast } from 'sonner';
-import { useAuth } from '@/hooks/use-auth';
-import AppHeader from '@/components/layout/AppHeader';
-import { SongSummaryDialog } from '@/components/pages/uploads/SongSummaryDialog';
 
 export default function ExcelUploadDetail() {
 	const { uploadId } = useParams<{ uploadId: string }>();
 	const navigate = useNavigate();
-	const { isGuest } = useAuth();
 	const [summaryOpen, setSummaryOpen] = useState(false);
 
 	const {
@@ -51,10 +49,6 @@ export default function ExcelUploadDetail() {
 	);
 
 	const handleDelete = () => {
-		if (isGuest) {
-			toast.error('게스트 모드에서는 업로드를 삭제할 수 없습니다.');
-			return;
-		}
 		if (!upload) return;
 		if (
 			!confirm(

@@ -1,7 +1,8 @@
 import * as XLSX from 'xlsx';
+import { CATEGORIES, Category } from '@/constants/categories';
 import { ExcelRow } from '@/types/excel';
 
-const KNOWN_CATS = new Set(['CLASSIC', 'POP', 'K-POP', 'OST', 'ANI', 'ETC']);
+const KNOWN_CATS = new Set(CATEGORIES);
 
 function findCol(headers: string[], aliases: string[]): string | null {
   const normalized = aliases.map((a) => a.toLowerCase().replace(/[\s_]+/g, ''));
@@ -31,7 +32,7 @@ function detectColsByContent(sheet: XLSX.WorkSheet): {
   for (let c = 0; c < colCount; c++) {
     const vals = sample.map((r) => String(r[c] ?? '')).filter((v) => v !== '' && v !== 'null');
     if (vals.length === 0) continue;
-    const catScore = vals.filter((v) => KNOWN_CATS.has(v)).length;
+    const catScore = vals.filter((v) => KNOWN_CATS.has(v as Category)).length;
     const numScore = vals.filter((v) => !isNaN(Number(v.replace(/,/g, '')))).length;
     const prodScore = vals.filter((v) => /\s*-/.test(v) && v.length > 5).length;
 

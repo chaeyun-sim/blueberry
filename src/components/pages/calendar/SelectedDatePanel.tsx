@@ -1,9 +1,9 @@
 import dayjs from 'dayjs';
+import { AnimatePresence,motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
 import { WEEK_KOR } from '@/constants/week';
-import { StatusBadge } from '@/components/pages/commission/StatusBadge';
+import { StatusBadge } from '@/features/commission/components';
 import { CommissionForCalendar } from '@/utils/calendar';
 
 interface SelectedDatePanelProps {
@@ -28,13 +28,10 @@ export function SelectedDatePanel({ selectedDate, commissions, onClose }: Select
 					<div className='bg-card rounded-3xl border shadow-sm p-6'>
 						<div className='flex items-center justify-between mb-4'>
 							<div>
-								<p className='text-[11px] font-semibold text-muted-foreground uppercase tracking-widest'>
-									선택된 날짜
-								</p>
 								<h3 className='text-xl font-display font-bold mt-0.5'>
 									{dayjs(selectedDate).format('M월 D일')}
 									<span className='text-base text-muted-foreground font-normal ml-2'>
-										({WEEK_KOR[dayjs(selectedDate).day()]}) · {commissions.length}건
+										{WEEK_KOR[dayjs(selectedDate).day()]}요일 · {commissions.length}건
 									</span>
 								</h3>
 							</div>
@@ -49,7 +46,7 @@ export function SelectedDatePanel({ selectedDate, commissions, onClose }: Select
 
 						{commissions.length === 0 ? (
 							<p className='text-sm text-muted-foreground text-center py-6'>
-								이 날 의뢰가 없어요.
+								의뢰가 없습니다.
 							</p>
 						) : (
 							<div className='space-y-2'>

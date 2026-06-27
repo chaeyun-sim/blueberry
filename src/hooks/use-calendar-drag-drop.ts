@@ -1,11 +1,10 @@
-import { useState, DragEvent } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import dayjs from 'dayjs';
+import { DragEvent,useState } from 'react';
 import { toast } from 'sonner';
-import { commissionMutations } from '@/api/commission/mutations';
-import { commissionKeys } from '@/api/commission/queryKeys';
-import { queryClient } from '@/utils/query-client';
+import { commissionKeys,commissionMutations } from '@/features/commission/api';
 import { CommissionForCalendar } from '@/utils/calendar';
+import { queryClient } from '@/utils/query-client';
 
 export function useCalendarDragDrop(commissions: CommissionForCalendar[]) {
 	const [draggingId, setDraggingId] = useState<string | null>(null);
@@ -14,6 +13,11 @@ export function useCalendarDragDrop(commissions: CommissionForCalendar[]) {
 	const { mutate: updateDeadline } = useMutation(commissionMutations.updateCommission());
 
 	const handleDragStart = (e: DragEvent<HTMLButtonElement>, id: string) => {
+		const commission = commissions.find((c) => c.id === id);
+		if (commission?.status === 'complete' || commission?.status === 'cancelled') {
+			e.preventDefault();
+			return;
+		}
 		e.dataTransfer.effectAllowed = 'move';
 		setDraggingId(id);
 	};

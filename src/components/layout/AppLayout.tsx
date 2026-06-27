@@ -1,13 +1,14 @@
+import { AnimatePresence, motion } from 'framer-motion';
+import { ReactNode } from 'react';
+import { useLocation } from 'react-router-dom';
 import { SidebarProvider } from '@/components/ui/sidebar';
+import { cn } from '@/lib/utils';
 import { AppSidebar } from './AppSidebar';
 import { BottomNav } from './BottomNav';
-import { AnimatePresence, motion } from 'framer-motion';
-import { useLocation } from 'react-router-dom';
-import { cn } from '@/lib/utils';
 
 interface AppLayoutProps {
-	children: React.ReactNode;
-	bottomBar?: React.ReactNode;
+	children: ReactNode;
+	bottomBar?: ReactNode;
 	className?: string;
 }
 

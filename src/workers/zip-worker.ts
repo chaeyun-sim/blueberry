@@ -9,15 +9,13 @@
  */
 
 import JSZip from 'jszip';
+import { MAX_DECOMPRESSED, MAX_FILE_COUNT } from '@/constants/file-size';
 
 // ─── Inlined constants (avoid importing React-dependent modules) ──────────────
 const MUSICXML_EXTENSIONS = ['xml', 'musicxml', 'mxl'];
 const FINALE_EXTENSIONS   = ['musx'];
 const AUDIO_EXTENSIONS    = ['wav', 'aif', 'aiff', 'aifc', 'mp3', 'mid', 'midi'];
 const ALLOWED_EXTENSIONS  = [...MUSICXML_EXTENSIONS, ...FINALE_EXTENSIONS, ...AUDIO_EXTENSIONS, 'pdf'];
-
-const MAX_DECOMPRESSED = 500 * 1024 * 1024; // 500 MB
-const MAX_FILE_COUNT   = 100;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function getExtension(fileName: string): string {
@@ -33,14 +31,15 @@ function isHiddenOrSystem(path: string, fileName: string): boolean {
 }
 
 function detectFileType(fileName: string): string {
-  const ext = getExtension(fileName);
-  if (MUSICXML_EXTENSIONS.includes(ext)) return 'musicxml';
-  if (FINALE_EXTENSIONS.includes(ext))   return 'finale';
-  if (ext === 'pdf')                      return 'pdf';
-  if (AUDIO_EXTENSIONS.includes(ext))    return 'audio';
+  const ext  = getExtension(fileName);
   const base = stripExtension(fileName);
-  if (base.includes(' - '))              return 'part';
-  return 'score';
+  const isPart = base.includes(' - ');
+
+  if (MUSICXML_EXTENSIONS.includes(ext)) return 'musicxml';
+  if (ext === 'pdf')                      return isPart ? 'part' : 'score';
+  if (AUDIO_EXTENSIONS.includes(ext))    return 'audio';
+  if (FINALE_EXTENSIONS.includes(ext))   return isPart ? 'part' : 'finale';
+  return isPart ? 'part' : 'score';
 }
 
 // ─── Types ───────────────────────────────────────────────────────────────────
