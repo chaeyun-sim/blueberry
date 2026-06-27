@@ -18,4 +18,5 @@ export * from './ReadOnlyFileList';
 export * from './ReceiveAndSendDialog';
 export * from './SendEmailDialog';
 export * from './StatusBadge';
+export * from './TemplateDownloadDialog';
 export * from './ZipFileHeader';
