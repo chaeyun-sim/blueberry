@@ -51,11 +51,6 @@ export function CategoryManageDialog({ open, onOpenChange }: CategoryManageDialo
 				</DialogHeader>
 
 				<div className='space-y-2 pt-1'>
-					{categories.length === 0 && (
-						<p className='text-sm text-muted-foreground text-center py-3'>
-							아직 카테고리가 없어요.
-						</p>
-					)}
 
 					{categories.map((cat) => (
 						<div key={cat.id} className='flex items-center gap-2'>
@@ -113,14 +108,15 @@ export function CategoryManageDialog({ open, onOpenChange }: CategoryManageDialo
 						</div>
 					))}
 
-					<div className='flex items-center gap-2 pt-2 border-t border-border/50'>
+					<div className='flex items-center gap-2 pt-2'>
 						<Input
 							value={newCatName}
 							onChange={(e) => setNewCatName(e.target.value)}
 							placeholder='새 카테고리 이름...'
 							className='h-8 text-sm flex-1'
 							onKeyDown={(e) => {
-								if (e.key === 'Enter' && newCatName.trim()) {
+								if (e.key === 'Enter' && !e.nativeEvent.isComposing && newCatName.trim() && !isCreating) {
+									e.preventDefault();
 									createCategory({ name: newCatName.trim() });
 								}
 							}}
