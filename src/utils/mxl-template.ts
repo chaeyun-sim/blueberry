@@ -129,6 +129,8 @@ export interface MusicAnalysis {
   timeBeatType: number;
   // 해당 곡의 원어 정식 명칭 (예: "Volière", "Clair de lune")
   canonicalTitle: string;
+  // 모음곡/콜렉션 제목 (예: "Le Carnaval des animaux") — 있는 경우만
+  collectionTitle?: string;
 }
 
 export async function analyzeMusicMeta(workTitle: string, composer: string, movementTitle?: string): Promise<MusicAnalysis> {
@@ -139,15 +141,15 @@ export async function analyzeMusicMeta(workTitle: string, composer: string, move
   const content = movementTitle
     ? `Identify this specific piece: movement = "${movementTitle}", from collection = "${workTitle}", composer = ${composer}.
 Return ONLY valid JSON:
-{"keyFifths": <-7 to 7>, "keyMode": "major" or "minor", "timeBeats": <numerator>, "timeBeatType": <denominator>, "canonicalTitle": "<the original title of this SPECIFIC MOVEMENT in its original language, e.g. Voliere not The Large Aviary>"}
+{"keyFifths": <-7 to 7>, "keyMode": "major" or "minor", "timeBeats": <numerator>, "timeBeatType": <denominator>, "canonicalTitle": "<the original title of this SPECIFIC MOVEMENT in its original language, e.g. Voliere>", "collectionTitle": "<original title of the collection/suite in its original language>"}
 keyFifths: 0=C/Am, -1=F/Dm, -2=Bb/Gm, -3=Eb/Cm, -4=Ab/Fm, -5=Db/Bbm, 1=G/Em, 2=D/Bm, 3=A/F#m, 4=E/C#m, 5=B/G#m`
     : `Identify this piece: "${workTitle}" by ${composer}.
 Return ONLY valid JSON:
-{"keyFifths": <-7 to 7>, "keyMode": "major" or "minor", "timeBeats": <numerator>, "timeBeatType": <denominator>, "canonicalTitle": "<original title in its original language>"}`;
+{"keyFifths": <-7 to 7>, "keyMode": "major" or "minor", "timeBeats": <numerator>, "timeBeatType": <denominator>, "canonicalTitle": "<original title in its original language>", "collectionTitle": "<collection/suite title if this piece belongs to one, otherwise null>"}`;
 
   const msg = await client.messages.create({
     model: 'claude-haiku-4-5-20251001',
-    max_tokens: 150,
+    max_tokens: 200,
     messages: [{ role: 'user', content }],
   });
   const first = msg.content[0];
@@ -207,6 +209,25 @@ function patchMusicXML(xml: string, params: TemplateParams, instruments: Instrum
     if (newText === null) return block;
     return block.replace(/(<credit-words[^>]*>)[^<]*(<\/credit-words>)/, `$1${escapeXml(newText)}$2`);
   });
+
+  // 템플릿에 subtitle credit 블록이 없으면 title 아래에 새로 주입
+  if (params.subtitle && !result.includes('<credit-type>subtitle</credit-type>')) {
+    const titleCreditMatch = result.match(/<credit\b[^>]*>[\s\S]*?<credit-type>title<\/credit-type>[\s\S]*?<\/credit>/);
+    if (titleCreditMatch) {
+      const titleWordsMatch = titleCreditMatch[0].match(/<credit-words([^>]*)>/);
+      if (titleWordsMatch) {
+        const attrs = titleWordsMatch[1];
+        const xMatch = attrs.match(/default-x="([^"]+)"/);
+        const yMatch = attrs.match(/default-y="([^"]+)"/);
+        const fontSizeMatch = attrs.match(/font-size="([^"]+)"/);
+        const x = xMatch?.[1] ?? '595';
+        const y = yMatch ? String(parseFloat(yMatch[1]) - 60) : '1330';
+        const fontSize = fontSizeMatch ? String(Math.round(parseFloat(fontSizeMatch[1]) * 0.65)) : '14';
+        const subtitleBlock = `\n<credit page="1">\n  <credit-type>subtitle</credit-type>\n  <credit-words default-x="${x}" default-y="${y}" justify="center" valign="top" font-size="${fontSize}">${escapeXml(params.subtitle)}</credit-words>\n</credit>`;
+        result = result.replace(titleCreditMatch[0], titleCreditMatch[0] + subtitleBlock);
+      }
+    }
+  }
 
   if (params.keyFifths !== undefined && params.keyMode) {
     const newKey = `<key><fifths>${params.keyFifths}</fifths><mode>${params.keyMode}</mode></key>`;

@@ -57,7 +57,7 @@ const CommissionDetailContent = () => {
       // 모음곡: workTitle=컬렉션명, movementTitle=특정 곡(commission.title)
       // 단독 곡: workTitle=commission.title
       const workTitle = linked
-        ? (linked.english_title ?? linked.title ?? '')
+        ? (linked.title ?? '')
         : (commission.title ?? '');
       const movementTitle = linked ? (commission.title ?? '') : '';
       const composer = linked?.composer ?? commission.composer ?? '';
@@ -66,9 +66,11 @@ const CommissionDetailContent = () => {
       const meta = await analyzeMusicMeta(workTitle, composer, movementTitle || undefined);
 
       // 악보 메인 제목 = 특정 곡의 원어 정식 명칭 (예: Volière)
-      // 서브타이틀 = 모음곡명 (예: The Carnival of the Animals)
+      // 서브타이틀 = 모음곡명. linked song이 있으면 workTitle, 없으면 AI가 감지한 collectionTitle
       const mxlTitle = meta.canonicalTitle || movementTitle || workTitle;
-      const mxlSubtitle = movementTitle ? workTitle : undefined;
+      const mxlSubtitle = movementTitle
+        ? workTitle
+        : (meta.collectionTitle ?? undefined);
 
       await downloadFilledTemplate({
         title: mxlTitle,
