@@ -1,5 +1,5 @@
-import { Loader2,Mail } from 'lucide-react';
-import { useEffect, useRef,useState } from 'react';
+import { Loader2, Mail, X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import Button from '@/components/ui/button';
 import {
@@ -12,27 +12,59 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import Label from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/lib/supabase';
 import { OverlayProps } from '@/types/overlay';
 
+const RECENT_EMAILS_KEY = 'recent-email-recipients';
+const MAX_RECENT = 5;
+
+const getRecentEmails = (): string[] => {
+  try {
+    return JSON.parse(localStorage.getItem(RECENT_EMAILS_KEY) ?? '[]');
+  } catch {
+    return [];
+  }
+};
+
+const saveRecentEmail = (email: string) => {
+  if (!email) return;
+  const recent = getRecentEmails().filter(e => e !== email);
+  recent.unshift(email);
+  localStorage.setItem(RECENT_EMAILS_KEY, JSON.stringify(recent.slice(0, MAX_RECENT)));
+};
+
 interface SendEmailDialogProps extends OverlayProps {
   commissionId: string | undefined;
+  songTitle?: string;
   onDelivered?: () => void;
 }
 
-export function SendEmailDialog({ isOpen, close, commissionId, onDelivered }: SendEmailDialogProps) {
+export function SendEmailDialog({ isOpen, close, commissionId, songTitle = '', onDelivered }: SendEmailDialogProps) {
+  const defaultSubject = `[신청곡] ${songTitle}`;
+  const defaultBody = `안녕하세요!\n${songTitle} 신청곡 보내드립니다.\n이상 있으면 알려주세요!\n감사합니다. :)`;
+
   const [isSending, setIsSending] = useState(false);
   const [toEmail, setToEmail] = useState('');
+  const [subject, setSubject] = useState(defaultSubject);
+  const [body, setBody] = useState(defaultBody);
   const [progress, setProgress] = useState(0);
-
-  useEffect(() => {
-    if (isOpen) setToEmail('');
-  }, [isOpen]);
+  const [recentEmails, setRecentEmails] = useState<string[]>([]);
 
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const wasSendingRef = useRef(false);
   const isSendingRef = useRef(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setToEmail('');
+      setSubject(defaultSubject);
+      setBody(defaultBody);
+      setRecentEmails(getRecentEmails());
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   useEffect(() => {
     if (isSending) {
@@ -78,10 +110,16 @@ export function SendEmailDialog({ isOpen, close, commissionId, onDelivered }: Se
     setIsSending(true);
     try {
       const { error } = await supabase.functions.invoke('send-score-email', {
-        body: { commissionId, toEmail: toEmail || undefined },
+        body: {
+          commissionId,
+          toEmail: toEmail || undefined,
+          subject: subject || defaultSubject,
+          emailBody: body || defaultBody,
+        },
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
       if (error) throw error;
+      saveRecentEmail(toEmail);
       toast.success('메일을 발송했어요!');
       onDelivered?.();
       close();
@@ -107,16 +145,59 @@ export function SendEmailDialog({ isOpen, close, commissionId, onDelivered }: Se
         </DialogHeader>
 
         {!isSending && (
-          <div className='space-y-1.5'>
-            <Label htmlFor='recipient-email'>수신자 이메일</Label>
-            <Input
-              id='recipient-email'
-              type='email'
-              placeholder='example@email.com'
-              value={toEmail}
-              onChange={e => setToEmail(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleSend()}
-            />
+          <div className='space-y-3'>
+            <div className='space-y-1.5'>
+              <Label htmlFor='recipient-email'>수신자 이메일</Label>
+              <Input
+                id='recipient-email'
+                type='email'
+                placeholder='example@email.com'
+                value={toEmail}
+                onChange={e => setToEmail(e.target.value)}
+              />
+              {recentEmails.length > 0 && (
+                <div className='flex flex-wrap gap-1.5 pt-0.5'>
+                  {recentEmails.map(email => (
+                    <button
+                      key={email}
+                      type='button'
+                      onClick={() => setToEmail(email)}
+                      className='flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-muted hover:bg-muted/80 text-muted-foreground transition-colors'
+                    >
+                      {email}
+                      <X
+                        className='h-2.5 w-2.5 hover:text-destructive'
+                        onClick={e => {
+                          e.stopPropagation();
+                          const updated = recentEmails.filter(r => r !== email);
+                          setRecentEmails(updated);
+                          localStorage.setItem(RECENT_EMAILS_KEY, JSON.stringify(updated));
+                        }}
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className='space-y-1.5'>
+              <Label htmlFor='email-subject'>제목</Label>
+              <Input
+                id='email-subject'
+                value={subject}
+                onChange={e => setSubject(e.target.value)}
+                placeholder='이메일 제목'
+              />
+            </div>
+            <div className='space-y-1.5'>
+              <Label htmlFor='email-body'>내용</Label>
+              <Textarea
+                id='email-body'
+                value={body}
+                onChange={e => setBody(e.target.value)}
+                rows={5}
+                className='resize-none text-sm'
+              />
+            </div>
           </div>
         )}
 

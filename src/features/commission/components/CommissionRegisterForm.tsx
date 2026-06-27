@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { Calendar } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -10,8 +10,15 @@ import RegisterFormSongTitle from '@/components/register-form-items/RegisterForm
 import RegisterFormVersion from '@/components/register-form-items/RegisterFormVersion';
 import { Input } from '@/components/ui/input';
 import Label from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { commissionKeys,commissionMutations } from '@/features/commission/api';
+import { commissionKeys, commissionMutations, commissionQueries } from '@/features/commission/api';
 import { findSongByTitle } from '@/features/score/api';
 import { useSongField } from '@/features/score/hooks';
 import { CommissionRegisterFormType } from '@/types/form';
@@ -40,6 +47,7 @@ export function CommissionRegisterForm({
   const { mutateAsync: uploadCommissionImage } = useMutation(
     commissionMutations.uploadCommissionImage(),
   );
+  const { data: categories = [] } = useQuery(commissionQueries.getCategories());
 
   const { songSuggestions, composerSuggestions, handleSongSelect } = useSongField(
     (songTitle, composer) =>
@@ -80,6 +88,7 @@ export function CommissionRegisterForm({
         deadline: form.deadline,
         notes: form.notes,
         version: form.version as DifficultyLevelType,
+        category_id: form.categoryId ?? undefined,
       });
 
       await uploadImage(res?.id);
@@ -149,7 +158,30 @@ export function CommissionRegisterForm({
           </button>
         </div>
       </div>
-      
+
+      {categories.length > 0 && (
+        <div className='space-y-2'>
+          <Label>카테고리</Label>
+          <Select
+            value={form.categoryId ?? 'none'}
+            onValueChange={(value) => setForm({ ...form, categoryId: value === 'none' ? null : value })}
+            disabled={isAnalyzing || isSubmitting}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder='카테고리 선택 (선택사항)' />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value='none'>-</SelectItem>
+              {categories.map((cat) => (
+                <SelectItem key={cat.id} value={cat.id}>
+                  {cat.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
       <div className='space-y-2'>
         <Label htmlFor='notes'>메모</Label>
         <Textarea

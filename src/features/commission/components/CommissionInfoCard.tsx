@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query';
 import { Calendar } from 'lucide-react';
 import { useRef } from 'react';
 import { InstrumentPicker } from '@/components/InstrumentPicker';
@@ -14,6 +15,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { CommissionStatus } from '@/constants/status-config';
 import { COMMISSION_STATUS_TRANSLATE } from '@/constants/translate';
+import { commissionQueries } from '@/features/commission/api';
 import { EditFormType } from '@/types/form';
 import { DifficultyLevelType } from '../types';
 
@@ -25,6 +27,7 @@ interface CommissionInfoCardProps {
 
 export function CommissionInfoCard({ form, isSubmitting, onChange }: CommissionInfoCardProps) {
 	const dateInputRef = useRef<HTMLInputElement>(null);
+	const { data: categories = [] } = useQuery(commissionQueries.getCategories());
 
 	return (
 		<Card className='border-border/50 mb-6'>
@@ -75,14 +78,6 @@ export function CommissionInfoCard({ form, isSubmitting, onChange }: CommissionI
 						</div>
 					</div>
 
-					<div className='md:col-span-3'>
-						<InstrumentPicker
-							instruments={form.instruments}
-							onChange={(instruments) => onChange({ instruments })}
-							disabled={isSubmitting}
-						/>
-					</div>
-
 					<div className='space-y-2'>
 						<Label>버전</Label>
 						<Select
@@ -104,6 +99,36 @@ export function CommissionInfoCard({ form, isSubmitting, onChange }: CommissionI
 						</Select>
 					</div>
 
+					<div className='space-y-2'>
+						<Label>카테고리</Label>
+						<Select
+							value={form.categoryId ?? 'none'}
+							onValueChange={(value) =>
+								onChange({ categoryId: value === 'none' ? null : value })
+							}
+							disabled={isSubmitting}
+						>
+							<SelectTrigger>
+								<SelectValue placeholder='카테고리 선택 (선택사항)' />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value='none'>-</SelectItem>
+								{categories.map((cat) => (
+									<SelectItem key={cat.id} value={cat.id}>
+										{cat.name}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+					</div>
+
+					<div className='md:col-span-3'>
+						<InstrumentPicker
+							instruments={form.instruments}
+							onChange={(instruments) => onChange({ instruments })}
+							disabled={isSubmitting}
+						/>
+					</div>
 
 					<div className='space-y-2 md:col-span-3'>
 						<Label htmlFor='notes'>메모</Label>

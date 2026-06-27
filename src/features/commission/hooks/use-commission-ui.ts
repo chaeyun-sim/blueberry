@@ -20,12 +20,13 @@ export function useCommissionUI() {
 	const [search, setSearch] = useState('');
 	const [sortDir, setSortDir] = useState<'asc' | 'desc' | null>(null);
 	const [dateRange, setDateRange] = useState<DateRange>('all');
+	const [categoryId, setCategoryId] = useState<string | null>(null);
 	const [page, setPage] = useState(1);
 
-	useEffect(() => { setPage(1); }, [filter, search, dateRange, sortDir]);
+	useEffect(() => { setPage(1); }, [filter, search, dateRange, sortDir, categoryId]);
 
 	const toggleSort = () => setSortDir((d) => (d === null ? 'asc' : d === 'asc' ? 'desc' : null));
 	const setFilter = (status: CommissionStatus) => setSearchParams({ status });
 
-	return { filter, setFilter, search, setSearch, sortDir, toggleSort, dateRange, setDateRange, page, setPage };
+	return { filter, setFilter, search, setSearch, sortDir, toggleSort, dateRange, setDateRange, categoryId, setCategoryId, page, setPage };
 }

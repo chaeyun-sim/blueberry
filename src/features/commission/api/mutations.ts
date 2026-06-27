@@ -1,7 +1,17 @@
 import { mutationOptions } from '@tanstack/react-query';
 import { CommissionStatus } from '@/constants/status-config';
-import { Commission, CreateCommissionInput, UpdateCommissionInput } from '../types';
-import { ConcurrencyConflictError, createCommission, deleteCommission, updateCommission, updateCommissionStatus, uploadCommissionImage } from './api';
+import { Commission, CommissionCategory, CreateCommissionInput, UpdateCommissionInput } from '../types';
+import {
+  ConcurrencyConflictError,
+  createCategory,
+  createCommission,
+  deleteCategory,
+  deleteCommission,
+  updateCategory,
+  updateCommission,
+  updateCommissionStatus,
+  uploadCommissionImage,
+} from './api';
 
 export const commissionMutations = {
   createCommission: () =>
@@ -45,5 +55,18 @@ export const commissionMutations = {
       // Retry once for transient network errors.
       retry: (failureCount, error) =>
         !(error instanceof ConcurrencyConflictError) && failureCount < 1,
+    }),
+  createCategory: () =>
+    mutationOptions({
+      mutationFn: ({ name }: { name: string }): Promise<CommissionCategory> => createCategory(name),
+    }),
+  updateCategory: () =>
+    mutationOptions({
+      mutationFn: ({ id, name }: { id: string; name: string }): Promise<CommissionCategory> =>
+        updateCategory(id, name),
+    }),
+  deleteCategory: () =>
+    mutationOptions({
+      mutationFn: ({ id }: { id: string }): Promise<void> => deleteCategory(id),
     }),
 };

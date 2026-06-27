@@ -1,12 +1,13 @@
 import dayjs from 'dayjs'
 import { CommissionStatus } from '@/constants/status-config'
 import { supabase } from '@/lib/supabase'
-import { AnalyzeImageType, Commission, CreateCommissionInput, UpdateCommissionInput } from '../types'
+import { AnalyzeImageType, Commission, CommissionCategory, CreateCommissionInput, UpdateCommissionInput } from '../types'
 
 const COMMISSIONS = 'commissions'
-const COMMISSION_LIST_SELECT = '*, songs(title, composer)'
-const COMMISSION_DETAIL_SELECT = '*, songs(title, composer)'
+const COMMISSION_LIST_SELECT = '*, songs(title, composer), commission_categories(id, name)'
+const COMMISSION_DETAIL_SELECT = '*, songs(title, composer), commission_categories(id, name)'
 const COMMISSION_IMAGES = 'commission-images'
+const CATEGORIES = 'commission_categories'
 
 // 의뢰 목록 조회
 export async function getCommissions() {
@@ -158,4 +159,50 @@ export async function updateCommissionStatus(
     throw error
   }
   return data as Commission
+}
+
+// 카테고리 목록 조회
+export async function getCategories(): Promise<CommissionCategory[]> {
+  const { data, error } = await supabase
+    .from(CATEGORIES)
+    .select('*')
+    .order('created_at', { ascending: true })
+
+  if (error) throw error
+  return data as CommissionCategory[]
+}
+
+// 카테고리 추가
+export async function createCategory(name: string): Promise<CommissionCategory> {
+  const { data, error } = await supabase
+    .from(CATEGORIES)
+    .insert({ name })
+    .select()
+    .single()
+
+  if (error) throw error
+  return data as CommissionCategory
+}
+
+// 카테고리 수정
+export async function updateCategory(id: string, name: string): Promise<CommissionCategory> {
+  const { data, error } = await supabase
+    .from(CATEGORIES)
+    .update({ name })
+    .eq('id', id)
+    .select()
+    .single()
+
+  if (error) throw error
+  return data as CommissionCategory
+}
+
+// 카테고리 삭제
+export async function deleteCategory(id: string): Promise<void> {
+  const { error } = await supabase
+    .from(CATEGORIES)
+    .delete()
+    .eq('id', id)
+
+  if (error) throw error
 }

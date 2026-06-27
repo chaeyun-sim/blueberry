@@ -1,5 +1,6 @@
 export * from './AnalyzeImage';
 export * from './CancelCommissionDialog';
+export * from './CategoryManageDialog';
 export * from './CommissionDesktopTable';
 export * from './CommissionDetailSkeleton';
 export * from './CommissionFilterBar';

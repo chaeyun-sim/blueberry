@@ -1,8 +1,10 @@
+import { useQuery } from '@tanstack/react-query';
 import { AlertCircle, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { AppLayout } from '@/components/layout/AppLayout';
 import Button from '@/components/ui/button';
+import { commissionQueries } from '@/features/commission/api';
 import { CommissionDesktopTable, CommissionFilterBar, CommissionListSkeleton, CommissionPagination, StatusBadge } from '@/features/commission/components';
 import { useCommissionData,useCommissionUI } from '@/features/commission/hooks';
 import { getPaginationPages } from '@/features/commission/utils';
@@ -18,6 +20,8 @@ const CommissionListContent = () => {
     toggleSort,
     dateRange,
     setDateRange,
+    categoryId,
+    setCategoryId,
     page,
     setPage,
   } = useCommissionUI();
@@ -28,7 +32,10 @@ const CommissionListContent = () => {
       sortDir,
       dateRange,
       page,
+      categoryId,
     });
+
+  const { data: categories = [] } = useQuery(commissionQueries.getCategories());
 
   if (commissionsQuery.isLoading) return <CommissionListSkeleton />;
 
@@ -106,9 +113,12 @@ const CommissionListContent = () => {
         counts={counts}
         dateRange={dateRange}
         search={search}
+        categories={categories}
+        categoryId={categoryId}
         onStatusChange={setFilter}
         onDateRangeChange={setDateRange}
         onSearchChange={setSearch}
+        onCategoryChange={setCategoryId}
       />
 
       {/* ── Mobile: 카드 뷰 ─────────────────────────── */}
@@ -129,6 +139,11 @@ const CommissionListContent = () => {
                       .filter(Boolean)
                       .join(' · ')}
                   </p>
+                  {item.commission_categories && (
+                    <span className='inline-block mt-1 text-[10px] px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground'>
+                      {item.commission_categories.name}
+                    </span>
+                  )}
                 </div>
                 <div className='flex items-center gap-2 shrink-0'>
                   <StatusBadge status={item.status} />

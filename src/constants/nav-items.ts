@@ -11,5 +11,5 @@ export const navItems = [
 	{ title: '캘린더', url: '/calendar', icon: CalendarDays },
 	{ title: '의뢰 목록', url: '/commissions', icon: ClipboardList },
 	{ title: '매출 통계', url: '/stats', icon: BarChart3 },
-	{ title: '파일 관리', url: '/files', icon: Archive },
+	{ title: '관리', url: '/files', icon: Archive },
 ];

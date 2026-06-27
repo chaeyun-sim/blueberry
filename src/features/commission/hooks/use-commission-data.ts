@@ -11,9 +11,10 @@ interface CommissionDataFilters {
 	sortDir: 'asc' | 'desc' | null;
 	dateRange: DateRange;
 	page: number;
+	categoryId: string | null;
 }
 
-export function useCommissionData({ filter, search, sortDir, dateRange, page }: CommissionDataFilters) {
+export function useCommissionData({ filter, search, sortDir, dateRange, page, categoryId }: CommissionDataFilters) {
 	const deferredSearch = useDeferredValue(search);
 
 	const commissionsQuery = useQuery(commissionQueries.getCommissions());
@@ -38,6 +39,7 @@ export function useCommissionData({ filter, search, sortDir, dateRange, page }: 
 		return commissions
 			.filter((c) => {
 				if (c.status !== filter) return false;
+				if (categoryId && c.category_id !== categoryId) return false;
 				if (dateRangeBounds && (c.deadline < dateRangeBounds.from || c.deadline > dateRangeBounds.to)) return false;
 				if (deferredSearch) {
 					const q = deferredSearch.toLowerCase();
@@ -53,7 +55,7 @@ export function useCommissionData({ filter, search, sortDir, dateRange, page }: 
 				const cmp = a.deadline < b.deadline ? -1 : a.deadline > b.deadline ? 1 : 0;
 				return sortDir === 'asc' ? cmp : -cmp;
 			});
-	}, [commissions, filter, deferredSearch, dateRange, sortDir]);
+	}, [commissions, filter, deferredSearch, dateRange, sortDir, categoryId]);
 
 	const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
 	const safePage = Math.min(page, totalPages);

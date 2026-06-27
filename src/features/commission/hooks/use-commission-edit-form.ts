@@ -18,6 +18,7 @@ export function useCommissionEditForm(commission: Commission | undefined) {
 		deadline: '',
 		notes: '',
 		status: null,
+		categoryId: null,
 	});
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -33,6 +34,7 @@ export function useCommissionEditForm(commission: Commission | undefined) {
 			deadline: commission.deadline ?? '',
 			notes: commission.notes ?? '',
 			status: commission.status,
+			categoryId: commission.category_id ?? null,
 		});
 	}, [commission]);
 
@@ -41,9 +43,10 @@ export function useCommissionEditForm(commission: Commission | undefined) {
 		updateCommission(
 			{
 				commissionId: id,
-				input: (({ instruments, ...rest }) => ({
+				input: (({ instruments, categoryId, ...rest }) => ({
 					...rest,
 					arrangement: instruments.join(', '),
+					category_id: categoryId,
 				}))(form),
 			},
 			{

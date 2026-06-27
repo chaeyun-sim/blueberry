@@ -24,6 +24,7 @@ const CommissionRegister = () => {
     deadline: searchParams.get('deadline') ?? getDefaultDeadline(),
     notes: '',
     imageFile: null,
+    categoryId: null,
   });
 
   const [isAnalyzing, setIsAnalyzing] = useState(false);

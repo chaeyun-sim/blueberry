@@ -1,5 +1,5 @@
 import { queryOptions } from '@tanstack/react-query';
-import { getCommission, getCommissions, getMonthlyCommissionCounts } from './api';
+import { getCategories, getCommission, getCommissions, getMonthlyCommissionCounts } from './api';
 import { commissionKeys } from './queryKeys';
 
 export const commissionQueries = {
@@ -19,4 +19,8 @@ export const commissionQueries = {
     queryFn: getMonthlyCommissionCounts,
     retry: 3,
   }),
-}
+  getCategories: () => queryOptions({
+    queryKey: commissionKeys.categories(),
+    queryFn: getCategories,
+  }),
+};

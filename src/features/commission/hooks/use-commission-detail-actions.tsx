@@ -74,9 +74,10 @@ export function useCommissionDetailActions(
 	};
 
 	const openEmailDialog = () => {
+		const songTitle = commission?.songs?.title ?? commission?.title ?? '';
 		overlay.open(
 			(overlayProps) => (
-				<SendEmailDialog {...overlayProps} commissionId={id} onDelivered={markDelivered} />
+				<SendEmailDialog {...overlayProps} commissionId={id} songTitle={songTitle} onDelivered={markDelivered} />
 			),
 			{ overlayId: 'send-email-dialog' },
 		);
