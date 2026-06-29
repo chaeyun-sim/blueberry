@@ -50,7 +50,7 @@ export function CommissionFilterBar({
 	return (
 		<>
 		<CategoryManageDialog open={manageOpen} onOpenChange={setManageOpen} />
-		<div className='flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4'>
+		<div className='flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-4'>
 			<div className='flex items-center gap-2 flex-wrap'>
 				<div className='flex items-center gap-1 bg-card border rounded-2xl shadow-sm p-1'>
 					{tabs.map((tab) => (

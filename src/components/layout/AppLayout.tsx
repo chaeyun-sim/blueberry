@@ -17,10 +17,10 @@ export function AppLayout({ children, bottomBar, className }: AppLayoutProps) {
 
 	return (
 		<SidebarProvider defaultOpen={true}>
-			<div className={cn('min-h-screen flex w-full', className)}>
+			<div className={cn('h-screen flex w-full overflow-hidden', className)}>
 				<AppSidebar />
 				<div className='flex-1 flex flex-col min-w-0'>
-					<main className='flex-1 overflow-y-auto md:h-screen md:overflow-hidden'>
+					<main className='flex-1 overflow-y-auto md:overflow-hidden'>
 						<AnimatePresence mode='wait' initial={false}>
 							<motion.div
 								key={location.pathname}
