@@ -158,7 +158,7 @@ async function encodeToMp3(buffer: ArrayBuffer, fileName: string, lame: LameModu
 
   const samples   = toInt16Samples(buffer, info);
   const encoder   = new lame.Mp3Encoder(channels, sampleRate, kbps);
-  const chunks: Uint8Array[] = [];
+  const chunks: Uint8Array<ArrayBuffer>[] = [];
   const blockSize = 1152;
 
   if (channels === 1) {

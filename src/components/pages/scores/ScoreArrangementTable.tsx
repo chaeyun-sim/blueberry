@@ -9,7 +9,7 @@ import {
 	TableHeader,
 	TableRow,
 } from '@/components/ui/table';
-import { Arrangement } from '@/types/score';
+import { Arrangement } from '@/features/score/types';
 
 interface ScoreArrangementTableProps {
 	songId: string;

@@ -24,7 +24,8 @@ export function extractZipInWorker(buffer: ArrayBuffer): Promise<FileEntry[]> {
     >) => {
       worker.terminate();
       const data = e.data;
-      if (!data.ok) {
+      // strictNullChecks off에서는 truthy 체크로 union이 안 좁혀져 명시적 비교 사용
+      if (data.ok === false) {
         reject(new Error(data.message));
         return;
       }
