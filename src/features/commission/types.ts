@@ -59,6 +59,7 @@ export type UpdateCommissionInput = {
 };
 
 export const COMMISSION_INFO = {
+  category: '카테고리',
   composer: '작곡가',
   arrangement: '편성',
   version: '버전',

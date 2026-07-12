@@ -227,6 +227,8 @@ const CommissionDetailContent = () => {
 						<dl className='space-y-3'>
 							{Object.keys(COMMISSION_INFO).map((key) => {
 								const value = () => {
+									if (key === 'category')
+										return commission.commission_categories?.name ?? '-';
 									if (key === 'version')
 										return commission.version ? `${commission.version} ver.` : '-';
 									if (key === 'created_at')
