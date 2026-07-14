@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { ArrowRight, ChevronRightIcon, Inbox } from 'lucide-react';
+import { ChevronRightIcon, Inbox } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Commission } from '@/features/commission/types';
 
@@ -37,7 +37,7 @@ function DiscoverContent({ received, isLoading, navigate }: {
     return (
       <div className='flex gap-3 overflow-hidden'>
         {[0, 1, 2, 3].map((i) => (
-          <div key={i} className='h-24 w-44 shrink-0 rounded-2xl bg-muted/30 animate-pulse' />
+          <div key={i} className='h-24 w-44 shrink-0 animate-pulse rounded-2xl bg-muted/30' />
         ))}
       </div>
     );
@@ -45,15 +45,15 @@ function DiscoverContent({ received, isLoading, navigate }: {
 
   if (received.length === 0) {
     return (
-      <div className='flex flex-col items-center justify-center py-8 text-muted-foreground'>
-        <Inbox className='h-7 w-7 mb-2 opacity-20' />
+      <div className='flex h-full flex-col items-center justify-center py-8 text-muted-foreground'>
+        <Inbox className='mb-2 h-7 w-7 opacity-20' />
         <p className='text-sm'>대기 중인 의뢰가 없어요</p>
       </div>
     );
   }
 
   return (
-    <div className='flex gap-3 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide'>
+    <div className='-mx-1 flex gap-3 overflow-x-auto px-1 pb-1 scrollbar-hide'>
       {received.map((c, i) => {
         const daysLeft = dayjs(c.deadline).diff(dayjs(), 'day');
         const urgent = daysLeft <= 3;
@@ -62,17 +62,17 @@ function DiscoverContent({ received, isLoading, navigate }: {
           <button
             key={c.id}
             onClick={() => navigate(`/commissions/${c.id}`)}
-            className={`shrink-0 flex flex-col justify-between p-4 rounded-2xl w-44 cursor-pointer hover:opacity-80 transition-opacity text-left ${style.bg}`}
+            className={`flex w-44 shrink-0 cursor-pointer flex-col justify-between rounded-2xl p-4 text-left transition-opacity hover:opacity-80 active:scale-[0.99] ${style.bg}`}
           >
             <div>
               <span className={`text-[10px] font-semibold uppercase tracking-wider ${style.text}`}>
                 {style.label}
               </span>
-              <p className='text-sm font-semibold mt-1.5 line-clamp-2 leading-snug'>
+              <p className='mt-1.5 line-clamp-2 text-sm font-semibold leading-snug'>
                 {c.songs?.title ?? c.title}
               </p>
             </div>
-            <p className={`text-[10px] font-semibold mt-3 ${urgent ? 'text-destructive' : style.text}`}>
+            <p className={`mt-3 text-[10px] font-semibold ${urgent ? 'text-destructive' : style.text}`}>
               {daysLeft === 0 ? '오늘 마감' : `D-${daysLeft} 마감`}
             </p>
           </button>
@@ -90,27 +90,28 @@ export function DiscoverWidget({ commissions, isLoading }: Props) {
     .sort((a, b) => dayjs(a.deadline).valueOf() - dayjs(b.deadline).valueOf());
 
   return (
-    <div className='bg-card rounded-3xl p-6 border shadow-sm'>
-      <div className='flex items-center justify-between mb-5'>
-        <div>
-          <p className='text-[11px] font-semibold text-muted-foreground uppercase tracking-widest'>
-            대기 중
+    <section className='flex h-full flex-col rounded-3xl border bg-card p-5 shadow-sm md:p-6'>
+      <div className='mb-4 flex items-center justify-between'>
+        <div className='flex items-center gap-2'>
+          <p className='text-[11px] font-semibold uppercase tracking-widest text-muted-foreground'>
+            대기 큐
           </p>
-          <p className='text-4xl font-display font-bold mt-1 tabular-nums'>
+          <span className='rounded-full bg-muted px-2 py-0.5 text-[11px] font-bold tabular-nums'>
             {isLoading ? '—' : received.length}
-            <span className='text-lg text-muted-foreground font-normal ml-1'>건</span>
-          </p>
+          </span>
         </div>
         <button
           onClick={() => navigate('/commissions?status=received')}
-          className='flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors'
+          className='flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground'
         >
           전체 보기
-          <ChevronRightIcon className="w-3.5 h-3.5 text-muted-foreground" />
+          <ChevronRightIcon className='h-3.5 w-3.5' />
         </button>
       </div>
 
-      <DiscoverContent received={received} isLoading={isLoading} navigate={navigate} />
-    </div>
+      <div className='flex-1'>
+        <DiscoverContent received={received} isLoading={isLoading} navigate={navigate} />
+      </div>
+    </section>
   );
 }

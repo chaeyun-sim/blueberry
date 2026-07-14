@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
-import { ChevronRightIcon,Music2 } from 'lucide-react';
+import { ChevronRightIcon, Music2 } from 'lucide-react';
 import { useMemo } from 'react';
-import { NavigateFunction, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Commission } from '@/features/commission/types';
 
 interface ActiveCommissionsWidgetProps {
@@ -15,75 +15,13 @@ function DeadlinePill({ deadline }: { deadline: string }) {
   if (days === 0) return <span className='text-xs font-semibold text-destructive'>오늘</span>;
   if (days <= 3) return <span className='text-xs font-semibold text-destructive'>D-{days}</span>;
   if (days <= 7) return <span className='text-xs font-semibold text-warning'>D-{days}</span>;
-  return <span className='text-xs text-muted-foreground'>D-{days}</span>;
+  return <span className='text-xs tabular-nums text-muted-foreground'>D-{days}</span>;
 }
 
-function MobileList({ working, isLoading, navigate }: { working: Commission[]; isLoading: boolean; navigate: NavigateFunction }) {
-  if (isLoading) {
-    return <>{[0, 1, 2].map((i) => <div key={i} className='h-14 rounded-2xl bg-muted/30 animate-pulse' />)}</>;
-  }
-  if (working.length === 0) {
-    return (
-      <div className='flex items-center justify-center py-6 text-muted-foreground'>
-        <p className='text-sm'>작업 중인 의뢰가 없어요</p>
-      </div>
-    );
-  }
-  return (
-    <>
-      {working.slice(0, 5).map((c) => (
-        <button
-          key={c.id}
-          onClick={() => navigate(`/commissions/${c.id}`)}
-          className='w-full flex items-center justify-between gap-3 px-4 py-3 rounded-2xl bg-muted/30 active:bg-muted/60 transition-colors text-left'
-        >
-          <div className='min-w-0 flex-1'>
-            <p className='text-sm font-semibold truncate'>{c.songs?.title ?? c.title}</p>
-            <p className='text-xs text-muted-foreground mt-0.5 truncate'>{c.arrangement}</p>
-          </div>
-          <DeadlinePill deadline={c.deadline} />
-        </button>
-      ))}
-    </>
-  );
-}
-
-function DesktopList({ working, isLoading, navigate }: { working: Commission[]; isLoading: boolean; navigate: NavigateFunction }) {
-  if (isLoading) {
-    return <>{[0, 1, 2].map((i) => <div key={i} className='h-[60px] rounded-2xl bg-muted/30 animate-pulse' />)}</>;
-  }
-  if (working.length === 0) {
-    return (
-      <div className='flex flex-col items-center justify-center h-full py-10 text-muted-foreground'>
-        <Music2 className='h-8 w-8 mb-2 opacity-20' />
-        <p className='text-sm'>작업 중인 의뢰가 없어요</p>
-      </div>
-    );
-  }
-  return (
-    <>
-      {working.slice(0, 5).map((c) => (
-        <button
-          key={c.id}
-          onClick={() => navigate(`/commissions/${c.id}`)}
-          className='w-full flex items-center justify-between gap-3 px-4 py-3.5 rounded-2xl bg-muted/30 hover:bg-muted/60 transition-colors text-left group'
-        >
-          <div className='min-w-0 flex-1'>
-            <p className='font-semibold text-sm truncate group-hover:text-primary transition-colors'>
-              {c.songs?.title ?? c.title}
-            </p>
-            <p className='text-[11px] text-muted-foreground mt-0.5 truncate'>{c.arrangement}</p>
-          </div>
-          <div className='shrink-0'>
-            <DeadlinePill deadline={c.deadline} />
-          </div>
-        </button>
-      ))}
-    </>
-  );
-}
-
-export function ActiveCommissionsWidget({ commissions, isLoading }: ActiveCommissionsWidgetProps) {
+export function ActiveCommissionsWidget({
+  commissions,
+  isLoading,
+}: ActiveCommissionsWidgetProps) {
   const navigate = useNavigate();
   const working = useMemo(
     () =>
@@ -94,49 +32,55 @@ export function ActiveCommissionsWidget({ commissions, isLoading }: ActiveCommis
   );
 
   return (
-    <div className='bg-card rounded-2xl md:rounded-3xl p-4 md:p-6 h-full border shadow-sm flex flex-col'>
-      {/* ── Mobile (md 미만) ────────────────────────── */}
-      <div className='md:hidden flex flex-col'>
-        <div className='flex items-center justify-between mb-3'>
-          <p className='text-xs font-semibold text-muted-foreground uppercase tracking-widest'>
+    <section className='flex h-full flex-col rounded-3xl border bg-card p-5 shadow-sm md:p-6'>
+      <div className='mb-4 flex items-center justify-between'>
+        <div className='flex items-center gap-2'>
+          <p className='text-[11px] font-semibold uppercase tracking-widest text-muted-foreground'>
             지금 작업 중
           </p>
-          <button
-            onClick={() => navigate('/commissions?status=working')}
-            className='text-xs text-muted-foreground flex items-center gap-1'
-          >
-            전체 보기 <ChevronRightIcon className="w-3.5 h-3.5 text-muted-foreground" />
-          </button>
+          <span className='rounded-full bg-muted px-2 py-0.5 text-[11px] font-bold tabular-nums'>
+            {isLoading ? '—' : working.length}
+          </span>
         </div>
-        <div className='space-y-2'>
-          <MobileList working={working} isLoading={isLoading} navigate={navigate} />
-        </div>
+        <button
+          onClick={() => navigate('/commissions?status=working')}
+          className='flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground'
+        >
+          전체 보기
+          <ChevronRightIcon className='h-3.5 w-3.5' />
+        </button>
       </div>
 
-      {/* ── Desktop full (md 이상) ────────────────────── */}
-      <div className='hidden md:flex flex-col flex-1'>
-        <div className='flex items-start justify-between mb-5'>
-          <div>
-            <p className='text-[11px] font-semibold text-muted-foreground uppercase tracking-widest'>
-              지금 작업 중
-            </p>
-            <p className='text-4xl font-display font-bold mt-1 tabular-nums'>
-              {isLoading ? '—' : working.length}
-              <span className='text-lg text-muted-foreground font-normal ml-1'>건</span>
-            </p>
+      <div className='flex-1 space-y-2'>
+        {isLoading ? (
+          [0, 1, 2].map((i) => (
+            <div key={i} className='h-14 animate-pulse rounded-2xl bg-muted/30' />
+          ))
+        ) : working.length === 0 ? (
+          <div className='flex h-full flex-col items-center justify-center py-8 text-muted-foreground'>
+            <Music2 className='mb-2 h-7 w-7 opacity-20' />
+            <p className='text-sm'>작업 중인 의뢰가 없어요</p>
           </div>
-          <button
-            onClick={() => navigate('/commissions?status=working')}
-            className='flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors mt-1'
-          >
-            전체 보기
-            <ChevronRightIcon className="w-3.5 h-3.5 text-muted-foreground" />
-          </button>
-        </div>
-        <div className='flex-1 space-y-2'>
-          <DesktopList working={working} isLoading={isLoading} navigate={navigate} />
-        </div>
+        ) : (
+          working.slice(0, 5).map((c) => (
+            <button
+              key={c.id}
+              onClick={() => navigate(`/commissions/${c.id}`)}
+              className='group flex w-full items-center justify-between gap-3 rounded-2xl bg-muted/30 px-4 py-3 text-left transition-colors hover:bg-muted/60 active:bg-muted/60'
+            >
+              <div className='min-w-0 flex-1'>
+                <p className='truncate text-sm font-semibold transition-colors group-hover:text-primary'>
+                  {c.songs?.title ?? c.title}
+                </p>
+                <p className='mt-0.5 truncate text-xs text-muted-foreground'>{c.arrangement}</p>
+              </div>
+              <div className='shrink-0'>
+                <DeadlinePill deadline={c.deadline} />
+              </div>
+            </button>
+          ))
+        )}
       </div>
-    </div>
+    </section>
   );
 }

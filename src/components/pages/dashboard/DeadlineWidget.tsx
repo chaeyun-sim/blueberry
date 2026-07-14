@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { CalendarClock, ChevronRightIcon } from 'lucide-react';
+import { ArrowUpRight, CalendarClock } from 'lucide-react';
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Commission } from '@/features/commission/types';
@@ -8,12 +8,14 @@ interface Props {
   commissions: Commission[];
 }
 
-function urgencyLabel(days: number) {
-  if (days < 0) return { label: '초과', text: 'text-destructive font-bold' };
-  if (days === 0) return { label: '오늘', text: 'text-destructive font-bold' };
-  if (days <= 3) return { label: `D-${days}`, text: 'text-destructive font-semibold' };
-  if (days <= 7) return { label: `D-${days}`, text: 'text-[hsl(var(--warning))] font-semibold' };
-  return { label: `D-${days}`, text: 'text-muted-foreground' };
+// 다크 히어로 배경 위에서 쓰는 D-day 칩 스타일
+function urgencyChip(days: number) {
+  if (days < 0)
+    return { label: `+${Math.abs(days)}일 초과`, chip: 'bg-[hsl(0_75%_58%)] text-white' };
+  if (days === 0) return { label: '오늘 마감', chip: 'bg-[hsl(0_75%_58%)] text-white' };
+  if (days <= 3) return { label: `D-${days}`, chip: 'bg-[hsl(0_72%_58%)] text-white' };
+  if (days <= 7) return { label: `D-${days}`, chip: 'bg-[hsl(35_90%_48%)] text-white' };
+  return { label: `D-${days}`, chip: 'bg-white/15 text-white/80' };
 }
 
 export function DeadlineWidget({ commissions }: Props) {
@@ -26,91 +28,104 @@ export function DeadlineWidget({ commissions }: Props) {
         .map((c) => ({ ...c, daysLeft: dayjs(c.deadline).diff(dayjs(), 'day') }))
         .filter((c) => c.daysLeft <= 7)
         .sort((a, b) => a.daysLeft - b.daysLeft)
-        .slice(0, 5),
+        .slice(0, 8),
     [commissions],
   );
 
   return (
-    <div className='bg-card rounded-2xl md:rounded-3xl p-4 md:p-6 h-full border shadow-sm flex flex-col'>
-      {/* ── Mobile (md 미만) ────────────────────────── */}
-      <div className='md:hidden flex flex-col'>
-        <div className='flex items-center justify-between mb-3'>
-          <p className='text-xs font-semibold text-muted-foreground uppercase tracking-widest'>
-            마감 임박
+    <section
+      className='relative overflow-hidden rounded-3xl p-5 md:p-7 text-white shadow-sm'
+      style={{
+        background:
+          'radial-gradient(120% 160% at 85% -20%, hsl(252 62% 34%) 0%, hsl(252 55% 22%) 45%, hsl(252 52% 14%) 100%)',
+      }}
+    >
+      {/* 장식용 광원 — 다크 히어로의 밋밋함 방지 */}
+      <div
+        className='pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full opacity-30'
+        style={{ background: 'radial-gradient(circle, hsl(192 100% 62% / 0.5), transparent 70%)' }}
+      />
+
+      <div className='relative flex items-start justify-between'>
+        <div>
+          <p className='text-[11px] font-semibold uppercase tracking-widest text-white/50'>
+            마감 임박 · 7일 이내
           </p>
-          <button
-            onClick={() => navigate('/commissions')}
-            className='text-xs text-muted-foreground flex items-center gap-1'
-          >
-            전체 보기 <ChevronRightIcon className="w-3.5 h-3.5 text-muted-foreground" />
-          </button>
+          <p className='mt-1 font-display text-4xl font-bold tabular-nums md:text-5xl'>
+            {upcoming.length}
+            <span className='ml-1.5 text-lg font-normal text-white/50'>건</span>
+          </p>
         </div>
-        <div className='space-y-2'>
-          {upcoming.length === 0 ? (
-            <div className='flex items-center justify-center py-6 text-muted-foreground'>
-              <p className='text-sm'>7일 내 마감 없어요 🎉</p>
-            </div>
-          ) : (
-            upcoming.slice(0, 5).map((c) => {
-              const { label, text } = urgencyLabel(c.daysLeft);
-              return (
-                <button
-                  key={c.id}
-                  onClick={() => navigate(`/commissions/${c.id}`)}
-                  className='w-full flex items-center justify-between gap-3 px-4 py-3 rounded-2xl bg-muted/30 active:bg-muted/60 transition-colors text-left'
-                >
-                  <div className='min-w-0 flex-1'>
-                    <p className='text-sm font-semibold truncate'>{c.songs?.title ?? c.title}</p>
-                    <p className='text-xs text-muted-foreground mt-0.5 truncate'>{c.arrangement}</p>
-                  </div>
-                  <span className={`text-sm shrink-0 ${text}`}>{label}</span>
-                </button>
-              );
-            })
-          )}
-        </div>
+        <button
+          onClick={() => navigate('/calendar')}
+          className='flex items-center gap-1 rounded-full bg-white/10 px-3.5 py-2 text-xs font-semibold text-white/90 transition-colors hover:bg-white/20 active:scale-[0.98]'
+        >
+          캘린더
+          <ArrowUpRight className='h-3.5 w-3.5' />
+        </button>
       </div>
 
-      {/* ── Desktop full (md 이상) ────────────────────── */}
-      <div className='hidden md:flex flex-col flex-1'>
-        <div className='mb-5'>
-          <p className='text-[11px] font-semibold text-muted-foreground uppercase tracking-widest'>
-            마감 임박
-          </p>
-          <p className='text-4xl font-display font-bold mt-1 tabular-nums'>
-            {upcoming.length}
-            <span className='text-lg text-muted-foreground font-normal ml-1'>건</span>
-          </p>
+      {upcoming.length === 0 ? (
+        <div className='relative mt-5 flex items-center gap-3 rounded-2xl bg-white/[0.07] px-4 py-5 md:px-5'>
+          <CalendarClock className='h-5 w-5 shrink-0 text-white/40' />
+          <div>
+            <p className='text-sm font-semibold'>여유 있어요</p>
+            <p className='mt-0.5 text-xs text-white/50'>7일 내 마감 예정인 의뢰가 없습니다</p>
+          </div>
         </div>
-        <div className='flex-1 space-y-3'>
-          {upcoming.length === 0 ? (
-            <div className='flex flex-col items-center justify-center h-full py-8 text-muted-foreground'>
-              <CalendarClock className='h-7 w-7 mb-2 opacity-20' />
-              <p className='text-sm text-center'>여유 있어요</p>
-              <p className='text-[11px] text-muted-foreground/60 mt-0.5'>7일 내 마감 없음</p>
-            </div>
-          ) : (
-            upcoming.map((c) => {
-              const { label, text } = urgencyLabel(c.daysLeft);
+      ) : (
+        <>
+          {/* 모바일: 세로 리스트 */}
+          <div className='relative mt-4 space-y-2 md:hidden'>
+            {upcoming.slice(0, 4).map((c) => {
+              const { label, chip } = urgencyChip(c.daysLeft);
               return (
                 <button
                   key={c.id}
                   onClick={() => navigate(`/commissions/${c.id}`)}
-                  className='w-full flex items-center justify-between gap-3 px-4 py-3.5 rounded-2xl bg-muted/30 hover:bg-muted/60 transition-colors text-left group'
+                  className='flex w-full items-center justify-between gap-3 rounded-2xl bg-white/[0.08] px-4 py-3 text-left transition-colors active:bg-white/[0.16]'
                 >
                   <div className='min-w-0 flex-1'>
-                    <p className='font-semibold text-sm truncate group-hover:text-primary transition-colors'>
-                      {c.songs?.title ?? c.title}
-                    </p>
-                    <p className='text-[11px] text-muted-foreground mt-0.5 truncate'>{c.arrangement}</p>
+                    <p className='truncate text-sm font-semibold'>{c.songs?.title ?? c.title}</p>
+                    <p className='mt-0.5 truncate text-xs text-white/50'>{c.arrangement}</p>
                   </div>
-                  <span className={`text-xs shrink-0 ${text}`}>{label}</span>
+                  <span
+                    className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold tabular-nums ${chip}`}
+                  >
+                    {label}
+                  </span>
                 </button>
               );
-            })
-          )}
-        </div>
-      </div>
-    </div>
+            })}
+          </div>
+
+          {/* 데스크톱: 가로 스크롤 카드 */}
+          <div className='relative mt-5 hidden gap-3 overflow-x-auto pb-1 scrollbar-hide md:flex'>
+            {upcoming.map((c) => {
+              const { label, chip } = urgencyChip(c.daysLeft);
+              return (
+                <button
+                  key={c.id}
+                  onClick={() => navigate(`/commissions/${c.id}`)}
+                  className='group flex w-52 shrink-0 flex-col justify-between rounded-2xl bg-white/[0.08] p-4 text-left transition-colors hover:bg-white/[0.15] active:scale-[0.99]'
+                >
+                  <div className='min-w-0'>
+                    <span
+                      className={`inline-block rounded-full px-2.5 py-1 text-[11px] font-bold tabular-nums ${chip}`}
+                    >
+                      {label}
+                    </span>
+                    <p className='mt-2.5 line-clamp-2 text-sm font-semibold leading-snug'>
+                      {c.songs?.title ?? c.title}
+                    </p>
+                  </div>
+                  <p className='mt-2 truncate text-xs text-white/50'>{c.arrangement}</p>
+                </button>
+              );
+            })}
+          </div>
+        </>
+      )}
+    </section>
   );
 }
