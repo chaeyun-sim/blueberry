@@ -1,9 +1,8 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
-import { SidebarProvider } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
-import { AppSidebar } from './AppSidebar';
+import { AppTopNav } from './AppTopNav';
 import { BottomNav } from './BottomNav';
 
 interface AppLayoutProps {
@@ -16,44 +15,42 @@ export function AppLayout({ children, bottomBar, className }: AppLayoutProps) {
 	const location = useLocation();
 
 	return (
-		<SidebarProvider defaultOpen={true}>
-			<div className={cn('h-screen flex w-full overflow-hidden', className)}>
-				<AppSidebar />
-				<div className='flex-1 flex flex-col min-w-0'>
-					<main className='flex-1 overflow-y-auto md:overflow-hidden'>
-						<AnimatePresence mode='wait' initial={false}>
-							<motion.div
-								key={location.pathname}
-								initial={{ opacity: 0, y: 6 }}
-								animate={{ opacity: 1, y: 0 }}
-								exit={{ opacity: 0, y: -6 }}
-								transition={{ duration: 0.18, ease: 'easeOut' }}
-								className='p-6 md:h-full md:overflow-auto'
-								style={{
-									paddingTop: 'max(1.5rem, env(safe-area-inset-top))',
-									paddingBottom: bottomBar
-										? 'max(8rem, calc(env(safe-area-inset-bottom) + 8rem))'
-										: 'max(calc(4rem + env(safe-area-inset-bottom) + 0.5rem), 1.5rem)',
-								}}
-							>
-								{children}
-							</motion.div>
-						</AnimatePresence>
-					</main>
-					{/* Desktop: sticky at bottom */}
-					<div className='hidden md:block sticky bottom-0'>{bottomBar}</div>
-					{/* Mobile: fixed above BottomNav */}
-					{bottomBar && (
-						<div
-							className='fixed left-0 right-0 z-[40] md:hidden'
-							style={{ bottom: 'calc(4rem + env(safe-area-inset-bottom) + 0.75rem)' }}
+		<div className={cn('h-screen flex flex-col w-full overflow-hidden', className)}>
+			<AppTopNav />
+			<div className='flex-1 flex flex-col min-w-0 min-h-0'>
+				<main className='flex-1 overflow-y-auto md:overflow-hidden'>
+					<AnimatePresence mode='wait' initial={false}>
+						<motion.div
+							key={location.pathname}
+							initial={{ opacity: 0, y: 6 }}
+							animate={{ opacity: 1, y: 0 }}
+							exit={{ opacity: 0, y: -6 }}
+							transition={{ duration: 0.18, ease: 'easeOut' }}
+							className='p-6 md:h-full md:overflow-auto'
+							style={{
+								paddingTop: 'max(1.5rem, env(safe-area-inset-top))',
+								paddingBottom: bottomBar
+									? 'max(8rem, calc(env(safe-area-inset-bottom) + 8rem))'
+									: 'max(calc(4rem + env(safe-area-inset-bottom) + 0.5rem), 1.5rem)',
+							}}
 						>
-							{bottomBar}
-						</div>
-					)}
-				</div>
+							{children}
+						</motion.div>
+					</AnimatePresence>
+				</main>
+				{/* Desktop: sticky at bottom */}
+				<div className='hidden md:block sticky bottom-0'>{bottomBar}</div>
+				{/* Mobile: fixed above BottomNav */}
+				{bottomBar && (
+					<div
+						className='fixed left-0 right-0 z-[40] md:hidden'
+						style={{ bottom: 'calc(4rem + env(safe-area-inset-bottom) + 0.75rem)' }}
+					>
+						{bottomBar}
+					</div>
+				)}
 			</div>
 			<BottomNav />
-		</SidebarProvider>
+		</div>
 	);
 }
