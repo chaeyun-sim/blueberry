@@ -51,6 +51,10 @@ export function useCommissionData({ filter, search, sortDir, dateRange, page, ca
 				return true;
 			})
 			.sort((a, b) => {
+				// 완료 탭에서는 이메일 미발송(is_delivered=false) 건을 항상 위로
+				if (filter === 'complete' && a.is_delivered !== b.is_delivered) {
+					return a.is_delivered ? 1 : -1;
+				}
 				if (!sortDir) return 0;
 				const cmp = a.deadline < b.deadline ? -1 : a.deadline > b.deadline ? 1 : 0;
 				return sortDir === 'asc' ? cmp : -cmp;
