@@ -40,7 +40,7 @@ interface SendEmailDialogProps extends OverlayProps {
   onDelivered?: () => void;
 }
 
-export function SendEmailDialog({ isOpen, close, commissionId, songTitle = '', onDelivered }: SendEmailDialogProps) {
+export function SendEmailDialog({ isOpen, close, unmount, commissionId, songTitle = '', onDelivered }: SendEmailDialogProps) {
   const defaultSubject = `[신청곡] ${songTitle}`;
   const defaultBody = `안녕하세요!\n${songTitle} 신청곡 보내드립니다.\n이상 있으면 알려주세요!\n감사합니다. :)`;
 
@@ -93,6 +93,13 @@ export function SendEmailDialog({ isOpen, close, commissionId, songTitle = '', o
     };
   }, [isSending]);
 
+  // 닫을 때 항상 언마운트해 입력 state를 파기 — 같은 overlayId로 재사용될 때
+  // 이전 의뢰의 수신자/제목/내용이 남는 버그 방지 (300ms는 닫힘 애니메이션 대기)
+  const closeAndUnmount = () => {
+    close();
+    setTimeout(unmount, 300);
+  };
+
   const handleSend = async () => {
     if (isSendingRef.current) return;
     if (!commissionId) {
@@ -122,7 +129,7 @@ export function SendEmailDialog({ isOpen, close, commissionId, songTitle = '', o
       saveRecentEmail(toEmail);
       toast.success('메일을 발송했어요!');
       onDelivered?.();
-      close();
+      closeAndUnmount();
     } catch (e) {
       const message = e instanceof Error ? e.message : '알 수 없는 오류';
       toast.error('메일 발송에 실패했어요', { description: message });
@@ -133,8 +140,13 @@ export function SendEmailDialog({ isOpen, close, commissionId, songTitle = '', o
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={open => !open && close()}>
-      <DialogContent className='sm:max-w-md'>
+    <Dialog open={isOpen} onOpenChange={open => !open && !isSendingRef.current && closeAndUnmount()}>
+      <DialogContent
+        className='sm:max-w-md'
+        hideClose={isSending}
+        onEscapeKeyDown={e => isSendingRef.current && e.preventDefault()}
+        onInteractOutside={e => isSendingRef.current && e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle className='flex items-center gap-2 font-display'>
             <Mail className='h-4 w-4' /> 이메일 발송
@@ -216,7 +228,7 @@ export function SendEmailDialog({ isOpen, close, commissionId, songTitle = '', o
         )}
 
         <DialogFooter className='gap-2'>
-          <Button variant='outline' onClick={close} disabled={isSending}>
+          <Button variant='outline' onClick={closeAndUnmount} disabled={isSending}>
             나중에
           </Button>
           <Button
