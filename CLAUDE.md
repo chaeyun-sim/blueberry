@@ -10,11 +10,11 @@
 
 ### 핵심 도메인
 
-| 도메인 | 설명 |
-|--------|------|
-| 의뢰(Commission) | 편곡 의뢰 등록·상태 관리·마감 추적 |
-| 악보 카탈로그(Song/Arrangement) | 곡·편성·첨부 파일 계층 관리 |
-| 매출 통계(Stats) | Excel 판매 보고서 업로드 → 차트 자동 생성 |
+| 도메인                          | 설명                                      |
+| ------------------------------- | ----------------------------------------- |
+| 의뢰(Commission)                | 편곡 의뢰 등록·상태 관리·마감 추적        |
+| 악보 카탈로그(Song/Arrangement) | 곡·편성·첨부 파일 계층 관리               |
+| 매출 통계(Stats)                | Excel 판매 보고서 업로드 → 차트 자동 생성 |
 
 ### 의뢰 상태
 
@@ -50,6 +50,64 @@ src/
 - 아키텍처: @docs/architecture.md
 - DB 스키마: @docs/db-schema.md
 - 사용자 흐름: @docs/userflow.md
+- 프론트엔드 가이드라인: @docs/frontend-guideline.md
+
+### 개발 검증 워크플로우 [HARD]
+
+사용자는 한 번 지시하면 결과를 직접 재확인할 필요가 없어야 한다. 구현 → 검증 → 자가 수정 → 재검증 루프 전체를 Claude가 책임지고, 증거와 함께 보고한다.
+
+모든 코드 작성·수정은 @docs/frontend-guideline.md 의 3단계 워크플로우(사전 분석 → 자가 검증 → 최종 출력)를 건너뛰지 않고 수행한다.
+
+**기능 단위 사이클** — 여러 기능을 몰아서 구현한 뒤 마지막에 한꺼번에 테스트하지 않는다. 기능 1개 구현 → 검증 → 다음 기능:
+
+```
+[ 기획(Plan) ] → [ 디자인(Design) ] → [ 개발(기능 1) → 검증 루프 ] → [ 개발(기능 2) → 검증 루프 ] → … → [ 최종 종합 검증 ]
+```
+
+1. **기획(Plan)** — 코드를 만지기 전에 의도와 범위를 명확히 한다. 요청이 모호하면 AskUserQuestion으로 먼저 질문한다. 작업을 기능 단위로 분해한다.
+2. **디자인(Design)** — 기존 디자인 언어(웜 뉴트럴 팔레트 `#F8F6F2`/`#F2EFE9`, 잉크 `#1C1917`, Pretendard/Hahmlet, 라운드 카드)와 웹 접근성 기준을 따른다. 새 UI는 구현 전에 방향을 제안한다.
+3. **개발(Implement)** — 한 번에 기능 1개. 파일은 수정 전 반드시 읽는다.
+4. **검증 루프(Verification Loop)** — 각 기능 완료 직후 즉시 실행한다. 마지막에 몰아서 하지 않는다.
+
+**기능별 검증 체크 (모두 필수)**
+
+1. **타입** — `npx tsc --noEmit -p tsconfig.app.json` 0 errors
+2. **시각** — `npm run dev`로 로컬 서버를 띄우고 변경 사항이 실제 렌더링되는지(레이아웃·색·텍스트, 모바일/데스크톱 반응형) 브라우저에서 확인
+3. **인터랙션** — 보기만 하지 말고 변경된 동작을 실제로 실행(클릭·입력·스크롤)하여 기대한 상태 변화(내비게이션·토글·목록 갱신)를 확인
+4. **회귀** — 변경 화면의 내비게이션 경로상 인접 화면들이 여전히 정상 렌더링·동작하는지 확인
+
+**회귀 검증 게이트** — 코드 변경 후 아래 4개를 모두 실행하고, 하나라도 실패해 수정이 생기면 처음부터 재실행한다. 커밋 전 전체 통과 필수.
+
+1. `npx tsc --noEmit -p tsconfig.app.json` (타입)
+2. `npm run lint` 또는 변경 파일 대상 eslint (린트)
+3. `npm run test` (회귀 테스트)
+4. `npm run build:dev` (빌드)
+
+**CI/CD** — `.github/workflows/ci.yml`이 push/PR에서 동일 게이트를 강제한다. CI 우회(`--no-verify`, 게이트 생략) 금지.
+
+**셀프 픽스 루프 (자동 — 사용자에게 묻지 않음)**
+
+- 체크가 하나라도 실패하면: 원인 진단 → 수정 → 모든 체크를 처음부터 재실행
+- 기능당 최대 5회 반복하며, 중간 실패는 사용자에게 보고하지 않는다
+- 5회 실패 시에만 중단하고 실패 내용·시도한 것·추정 원인을 보고한 뒤 지시를 기다린다
+- 깨진 기능을 안고 다음 기능으로 넘어가지 않는다
+
+**최종 종합 검증** — 모든 기능이 개별 통과한 후, `npx tsc --noEmit`을 한 번 더 실행하고 영향받은 주요 플로우를 앱에서 끝까지 확인한다(스크린샷 증거). 이 단계를 통과하기 전에는 다기능 작업을 "완료"로 선언하지 않는다.
+
+**완료 보고 (증거 체크리스트)** — 완료 보고는 반드시 기능별 증거 표와 함께 한다. 표 없는 "완료"는 결함이다. 생략한 체크(예: 브라우저 미확인)는 통과한 것처럼 암시하지 말고 명시한다.
+
+| 기능   | tsc         | 스크린샷      | 인터랙션       | 회귀           |
+| ------ | ----------- | ------------- | -------------- | -------------- |
+| 기능 A | ✅ 0 errors | `<path>` 확인 | 탭 → 이동 확인 | 인접 화면 정상 |
+
+**Supabase 타입 동기화 [HARD]** — DB 스키마·테이블·관계를 변경하는 기능은 프론트 코드 수정 전에 반드시 타입을 먼저 동기화한다: `npx supabase gen types typescript --project-id <your-project-id> > src/types/supabase.ts`. 모든 API 페칭·뮤테이션·상태 바인딩 코드는 `src/types/`의 생성 타입을 엄격히 따른다.
+
+### Feature-Based Folder Structure & Cohesion Rule
+
+- Keep code highly cohesive within the `features/` directory by grouping domain-specific logics together.
+- Inside `src/features/[domain]/`, keep related components, state hooks, and API fetching functions in one place.
+- Do not make cross-feature imports that create tight coupling between different domains (e.g., code in `features/commission/` should not directly import from `features/stats/` unless absolutely necessary).
+- Ensure shared utilities are strictly placed under `src/utils/` or `src/components/ui/` to prevent dependency loops.
 
 ---
 
@@ -61,16 +119,11 @@ MoAI is the Strategic Orchestrator for Claude Code. All tasks must be delegated 
 
 ### HARD Rules (Mandatory)
 
-- [HARD] Language-Aware Responses: All user-facing responses MUST be in user's conversation_language
-- [HARD] Parallel Execution: Execute all independent tool calls in parallel when no dependencies exist
-- [HARD] No XML in User Responses: Never display XML tags in user-facing responses
-- [HARD] Markdown Output: Use Markdown for all user-facing communication
+- [HARD] Core Principles (language-aware responses, parallel execution, no XML in user responses, Markdown output): defined in @.claude/rules/moai/core/moai-constitution.md — not duplicated here
 - [HARD] Approach-First Development: Explain approach and get approval before writing code (See Section 7)
 - [HARD] Multi-File Decomposition: Split work when modifying 3+ files (See Section 7)
 - [HARD] Post-Implementation Review: List potential issues and suggest tests after coding (See Section 7)
 - [HARD] Reproduction-First Bug Fix: Write reproduction test before fixing bugs (See Section 7)
-
-Core principles (1-4) are defined in @.claude/rules/moai/core/moai-constitution.md. Development safeguards (5-8) are detailed in Section 7.
 
 ### Recommendations
 
@@ -163,7 +216,7 @@ reader, coder, tester, designer, validator (requires CLAUDE_CODE_EXPERIMENTAL_AG
 
 Both `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` env var AND `workflow.team.enabled: true` in `.moai/config/sections/workflow.yaml` are required.
 
-For detailed agent descriptions, see the Agent Catalog section above. For agent creation guidelines, use the builder-agent subagent or see `.claude/rules/moai/development/agent-authoring.md`.
+For agent creation guidelines, use the builder-agent subagent or see `.claude/rules/moai/development/agent-authoring.md`.
 
 ---
 
@@ -269,15 +322,6 @@ When fixing bugs:
 - Fix the bug with minimal code changes
 - Verify the reproduction test passes after the fix
 
-### Go-Specific Guidelines
-
-For Go development:
-
-- Run `go test -race ./...` for concurrency safety
-- Use table-driven tests for comprehensive coverage
-- Maintain 85%+ test coverage per package
-- Run `go vet` and `golangci-lint` before commits
-
 ---
 
 ## 8. User Interaction Architecture
@@ -328,28 +372,13 @@ MoAI-ADK uses Claude Code's official rules system at `.claude/rules/moai/`:
 
 ### Language Rules
 
-- User Responses: Always in user's conversation_language
-- Internal Agent Communication: English
-- Code Comments: Per code_comments setting (default: English)
-- Commands, Agents, Skills Instructions: Always English
+See Response Language in @.claude/rules/moai/core/moai-constitution.md and Language Policy in `.claude/rules/moai/development/coding-standards.md`.
 
 ---
 
 ## 10. Web Search Protocol
 
-For anti-hallucination policy, see .claude/rules/moai/core/moai-constitution.md
-
-### Execution Steps
-
-1. Initial Search: Use WebSearch with specific, targeted queries
-2. URL Validation: Use WebFetch to verify each URL
-3. Response Construction: Only include verified URLs with sources
-
-### Prohibited Practices
-
-- Never generate URLs not found in WebSearch results
-- Never present information as fact when uncertain
-- Never omit "Sources:" section when WebSearch was used
+Anti-hallucination and URL verification rules (verify every URL via WebFetch, never invent URLs, mark uncertainty, always include a Sources section): see URL Verification in @.claude/rules/moai/core/moai-constitution.md.
 
 ---
 
@@ -578,3 +607,4 @@ Large PDFs (>10 pages) return a lightweight reference when @-mentioned. Always s
 Version: 13.1.0 (Agent Teams Integration) Last Updated: 2026-02-10 Language: English Core Rule: MoAI is an orchestrator; direct implementation is prohibited
 
 For detailed patterns on plugins, sandboxing, headless mode, and version management, see Skill("moai-foundation-claude").
+
