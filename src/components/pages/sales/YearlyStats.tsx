@@ -17,6 +17,7 @@ import CategoryGrowthRateChart from './charts/CategoryGrowthRateChart';
 import GrowthRateChart from './charts/GrowthRateChart';
 import MonthlyGrowthRateChart from './charts/MonthlyGrowthRateChart';
 import { EmptyState } from './EmptyState';
+import SeasonalHint from './insights/SeasonalHint';
 
 function YearlyStats() {
 	const { data: yearRange } = useQuery(statsQueries.getSalesYearRange());
@@ -142,6 +143,8 @@ function YearlyStats() {
 					</EmptyState>
 				</CardContent>
 			</Card>
+
+			<SeasonalHint />
 
 			<Card className='border-border/50 overflow-hidden'>
 				<CardHeader className='pb-2'>

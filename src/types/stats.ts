@@ -89,6 +89,18 @@ export type RevenueConcentrationItem = {
   songShare: number;
 };
 
+export type YearlySongSalesItem = {
+  year: number;
+  title: string;
+  sales: number;
+};
+
+export type RpcYearlySongSalesRow = {
+  year_num: number;
+  song_title: string;
+  sales: number;
+};
+
 // ─── RPC Response Row Types ───────────────────────────────────────────────────
 // Raw shapes returned by Supabase RPC functions, used for type-safe mapping.
 

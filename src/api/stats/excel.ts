@@ -12,6 +12,8 @@ const SALES_ROW_SELECT = 'id, sold_at, amount, category, product';
 const EXCEL_UPLOADS_SELECT = 'id, name, row_count, uploaded_at';
 const SONGS = 'songs';
 const ARRANGEMENTS = 'arrangements';
+const SALES_PAGE_SIZE = 1000;
+const createSalesQuery = () => supabase.from(SALES).select(SALES_ROW_SELECT);
 
 export async function getExcelUploads(): Promise<ExcelUpload[]> {
 	const { data, error } = await supabase
@@ -29,14 +31,31 @@ export async function deleteExcelUpload(id: string): Promise<void> {
 }
 
 export async function getSalesRowsByUploadId(uploadId: string): Promise<ExcelRow[]> {
-	const { data, error } = await supabase
-		.from(SALES)
-		.select(SALES_ROW_SELECT)
-		.eq('upload_id', uploadId)
-		.order('category', { ascending: true })
-		.order('product', { ascending: true })
-		.order('amount', { ascending: false });
+	const rows: Awaited<ReturnType<typeof fetchSalesRows>> = [];
+	for (let from = 0; ; from += SALES_PAGE_SIZE) {
+		const page = await fetchSalesRows((query) =>
+			query
+				.eq('upload_id', uploadId)
+				.order('category', { ascending: true })
+				.order('product', { ascending: true })
+				.order('amount', { ascending: false })
+				.order('id', { ascending: true }),
+			from,
+		);
+		rows.push(...page);
+		if (page.length < SALES_PAGE_SIZE) break;
+	}
+	return rows;
+}
 
+async function fetchSalesRows(
+	configure: (query: ReturnType<typeof createSalesQuery>) => ReturnType<typeof createSalesQuery>,
+	from: number,
+): Promise<ExcelRow[]> {
+	const query = configure(
+		supabase.from(SALES).select(SALES_ROW_SELECT),
+	).range(from, from + SALES_PAGE_SIZE - 1);
+	const { data, error } = await query;
 	if (error) throw error;
 
 	return (data ?? []).map((row) => ({
@@ -113,22 +132,18 @@ export async function saveSalesRows(rows: ExcelRow[], uploadName: string): Promi
 }
 
 export async function getSalesRows(year?: number): Promise<ExcelRow[]> {
-	let query = supabase
-		.from(SALES)
-		.select(SALES_ROW_SELECT)
-		.order(SOLD_AT, { ascending: false });
-
-	if (year) {
-		query = query.gte(SOLD_AT, yearRange(year).gte).lt(SOLD_AT, yearRange(year).lt);
+	const rows: Awaited<ReturnType<typeof fetchSalesRows>> = [];
+	for (let from = 0; ; from += SALES_PAGE_SIZE) {
+		const page = await fetchSalesRows((query) => {
+			const filtered = year
+				? query.gte(SOLD_AT, yearRange(year).gte).lt(SOLD_AT, yearRange(year).lt)
+				: query;
+			return filtered
+				.order(SOLD_AT, { ascending: false })
+				.order('id', { ascending: true });
+		}, from);
+		rows.push(...page);
+		if (page.length < SALES_PAGE_SIZE) break;
 	}
-
-	const { data, error } = await query;
-	if (error) throw error;
-
-	return (data ?? []).map((row) => ({
-		id: row.id,
-		category: normalizeCategory(row.category),
-		product: row.product ?? '',
-		amount: row.amount,
-	}));
+	return rows;
 }

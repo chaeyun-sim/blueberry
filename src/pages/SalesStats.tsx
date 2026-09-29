@@ -16,9 +16,7 @@ import { statsKeys } from '@/api/stats/queryKeys';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { ExcelUploadDialog } from '@/components/ExcelUploadDialog';
 import { AppLayout } from '@/components/layout/AppLayout';
-import ParetoChart from '@/components/pages/sales/insights/ParetoChart';
-import SalesForecast from '@/components/pages/sales/insights/SalesForecast';
-import SeasonalHint from '@/components/pages/sales/insights/SeasonalHint';
+import AnnualSongSales from '@/components/pages/sales/insights/AnnualSongSales';
 import SalesAll from '@/components/pages/sales/SalesAll';
 import SalesSummaryCard from '@/components/pages/sales/SalesSummaryCard';
 import Stats from '@/components/pages/sales/Stats';
@@ -31,15 +29,7 @@ import { queryClient } from '@/utils/query-client';
 
 const InsightsTab = () => (
 	<div className='space-y-6'>
-		<SeasonalHint />
-		<div className='grid lg:grid-cols-2 gap-6'>
-			<div className='min-w-0'>
-				<SalesForecast />
-			</div>
-			<div className='min-w-0'>
-				<ParetoChart />
-			</div>
-		</div>
+		<AnnualSongSales />
 	</div>
 );
 

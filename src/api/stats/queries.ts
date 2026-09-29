@@ -10,6 +10,7 @@ import {
 	getSalesRowsByUploadId,
 	getSalesSummary,
 	getSalesYearRange,
+	getYearlySongSales,
 	getSeasonalPattern,
 	getTopArrangements,
 	getTopSongMonthlySales,
@@ -102,6 +103,13 @@ export const statsQueries = {
 		queryOptions({
 			queryKey: statsKeys.salesYearRange(),
 			queryFn: getSalesYearRange,
+			staleTime: STATS_STALE,
+			retry: STATS_RETRY,
+		}),
+	getYearlySongSales: () =>
+		queryOptions({
+			queryKey: statsKeys.yearlySongSales(),
+			queryFn: getYearlySongSales,
 			staleTime: STATS_STALE,
 			retry: STATS_RETRY,
 		}),

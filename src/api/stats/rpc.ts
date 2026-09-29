@@ -21,6 +21,8 @@ import {
 	TopSong,
 	TopSongMonthlySalesResult,
 	TrendingSong,
+	RpcYearlySongSalesRow,
+	YearlySongSalesItem,
 } from '@/types/stats';
 import { getUtcYear, parseNumeric,pctChange, yearRange } from '@/utils/stats-helpers';
 
@@ -215,5 +217,16 @@ export async function getRevenueConcentration(): Promise<RevenueConcentrationIte
 		revenueShare: parseNumeric(row.revenue_share),
 		cumulativeShare: parseNumeric(row.cumulative_share),
 		songShare: parseNumeric(row.song_share),
+	}));
+}
+
+export async function getYearlySongSales(): Promise<YearlySongSalesItem[]> {
+	const { data, error } = await supabase.rpc('get_yearly_song_sales');
+	if (error) throw error;
+
+	return (data ?? []).map((row: RpcYearlySongSalesRow) => ({
+		year: row.year_num,
+		title: row.song_title,
+		sales: row.sales,
 	}));
 }
