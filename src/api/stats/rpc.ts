@@ -15,13 +15,13 @@ import {
 	RpcTopSongMonthlySaleRow,
 	RpcTopSongRow,
 	RpcTrendingSongRow,
+	RpcYearlySongSalesRow,
 	SalesSummary,
 	SeasonalPatternItem,
 	TopArrangement,
 	TopSong,
 	TopSongMonthlySalesResult,
 	TrendingSong,
-	RpcYearlySongSalesRow,
 	YearlySongSalesItem,
 } from '@/types/stats';
 import { getUtcYear, parseNumeric,pctChange, yearRange } from '@/utils/stats-helpers';
@@ -225,8 +225,9 @@ export async function getYearlySongSales(): Promise<YearlySongSalesItem[]> {
 	if (error) throw error;
 
 	return (data ?? []).map((row: RpcYearlySongSalesRow) => ({
-		year: row.year_num,
+		 year: row.year_num,
 		title: row.song_title,
+		variant: row.variant ?? '',
 		sales: row.sales,
 	}));
 }

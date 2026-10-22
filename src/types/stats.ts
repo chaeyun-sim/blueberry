@@ -92,12 +92,14 @@ export type RevenueConcentrationItem = {
 export type YearlySongSalesItem = {
   year: number;
   title: string;
+  variant: string;
   sales: number;
 };
 
 export type RpcYearlySongSalesRow = {
   year_num: number;
   song_title: string;
+  variant: string;
   sales: number;
 };
 

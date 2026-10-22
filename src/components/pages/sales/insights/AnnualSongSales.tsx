@@ -5,6 +5,7 @@ import { statsQueries } from '@/api/stats/queries';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAppQuery as useQuery } from '@/hooks/use-app-query';
 import { cn } from '@/lib/utils';
+import { normalizeSalesTitle } from '@/utils/normalize-sales-title';
 import { splitProduct } from '@/utils/split-product';
 
 function AnnualSongSales() {
@@ -29,18 +30,25 @@ function AnnualSongSales() {
 			enabled: useRawFallback,
 		})),
 	});
-	const sales = useRawFallback
+	const rawSales = useRawFallback
 		? rawSalesQueries.flatMap((query, index) =>
 				(query.data ?? []).flatMap((row) => {
 					const { song } = splitProduct(row.product);
-					return song ? [{ year: years[index], title: song, sales: 1 }] : [];
+					if (!song) return [];
+					return song ? [{ year: years[index], title: song, variant: '', sales: 1 }] : [];
 				}),
 			)
 		: aggregatedSales;
-	const [sortBy, setSortBy] = useState<number | 'total'>('total');
+	// RPC가 분리해 준 버전·이조 표기를 다시 붙여 원본 상품명과 같은 기준으로 정규화한다.
+	const sales = rawSales.map((row) => ({
+		...row,
+		title: normalizeSalesTitle(row.variant ? `${row.title} ${row.variant}` : row.title),
+	}));
+
+	const [sortBy, setSortBy] = useState<number | 'total' | 'title'>('total');
 	const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
-	const toggleSort = (nextSortBy: number | 'total') => {
+	const toggleSort = (nextSortBy: number | 'total' | 'title') => {
 		if (sortBy === nextSortBy) {
 			setSortDirection((direction) => (direction === 'desc' ? 'asc' : 'desc'));
 			return;
@@ -66,6 +74,9 @@ function AnnualSongSales() {
 
 	const sortedSongs = useMemo(
 		() => [...songs].sort((a, b) => {
+			if (sortBy === 'title') {
+				return a.localeCompare(b, 'ko') * (sortDirection === 'desc' ? -1 : 1);
+			}
 			const aValue = sortBy === 'total'
 				? years.reduce((sum, year) => sum + (salesByYearAndSong.get(`${year}-${a}`) ?? 0), 0)
 				: salesByYearAndSong.get(`${sortBy}-${a}`) ?? 0;
@@ -95,8 +106,12 @@ function AnnualSongSales() {
 					<div className='overflow-x-auto rounded-lg border border-border/50'>
 						<table className='w-full min-w-[620px] text-sm'>
 							<thead className='bg-muted/30 text-xs text-muted-foreground'>
-								<tr>
-									<th className='sticky left-0 z-10 bg-muted/30 px-4 py-3 text-left font-medium'>작품</th>
+				<tr>
+									<th className='sticky left-0 z-10 bg-muted/30 px-4 py-3 text-left font-medium'>
+										<button type='button' className='inline-flex items-center gap-1 hover:text-foreground' onClick={() => toggleSort('title')}>
+											작품 <ArrowDownUp className='h-3 w-3' />
+										</button>
+									</th>
 									{years.map((year) => (
 										<th key={year} className='px-4 py-3 text-right whitespace-nowrap'>
 											<button type='button' className='inline-flex items-center gap-1 font-medium hover:text-foreground' onClick={() => toggleSort(year)}>
